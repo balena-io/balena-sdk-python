@@ -1,65 +1,66 @@
-import requests
-import json
+from helpers import _get_resource, _post_resource
+
 
 class Device(object):
 
     """Device Object"""
 
-    def __init__(self, Connection):
+    def __init__(self, Connection, uuid=None, name=None):
         self.connection = Connection
+        self.uuid = uuid
+        self.name = name
+        self.get()
 
-    def _get_resource(self, filtr=None, eq=None):
+    def get(self):
         '''
-        @params odata filter and value
-        returns body as json
-        '''
-        if filtr:
-            query = "/device?$filter=" + \
-                str(filtr) + "%20eq%20'" + str(eq) + "'"
-        else:
-            query = "/device"
-
-        url = self.connection.base_url + query
-        r = requests.get(url, headers=self.connection.headers)
-        return r.json()['d']
-
-    def get_by_uuid(self, uuid):
-        '''
-        @params device uuid
+        @params device uuid or name
         returns device object
         '''
-        return self._get_resource(filtr='uuid', eq=uuid)[0]
+        if self.uuid != None:
+        	data = {
+	            'connection': self.connection,
+	            'path': "device",
+	            'filter': "uuid",
+	            'eq': self.uuid
+	        }
 
-    def get_name(self, uuid):
+        elif self.name:
+            data = {
+	            'connection': self.connection,
+	            'path': "device",
+	            'filter': "name",
+	            'eq': self.name
+	        }
+
+	    
+	    device = _get_resource(data)[0]
+        self.uuid = device['uuid']
+        self.id = device['id']
+        return device
+
+    def get_name(self):
         '''
         @params device uuid
         returns device name
         '''
-        return self.get_by_uuid(uuid)['name']
+        return self.get()['name']
 
-    def is_online(self, uuid):
+    def is_online(self):
         '''
         @params device uuid
         returns device connection status
         '''
-        return self.get_by_uuid(uuid)['is_online']
+        return self.get()['is_online']
 
-    def get_by_name(self, name):
-        '''
-        @params device name
-        returns device object
-        '''
-        return self._get_resource(filtr='name', eq=name)[0]
+    def envar_create(self, key, value):
+        data = {
+            'connection': self.connection,
+            'path': "device_environment_variable",
+            'body': {
+                    'device': self.id,
+                    'env_var_name': key,
+                'value': value
+            }
+        }
 
-    def get_all(self):
-        """
-        returns device objects
-        """
-        return self._get_resource()
-
-    def get_all_by_application(self, app_id):
-        """
-        @parameter app_id: app_id(int)
-        returns device objects
-        """
-        return self._get_resource(filtr='application', eq=app_id)
+        return _post_resource(data)

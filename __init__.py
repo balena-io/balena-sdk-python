@@ -16,11 +16,17 @@ class Connection(object):
 	    self.headers = {'Content-type': 'application/json',
                'Authorization': 'Bearer ' + JWT}
 
-	def device(self):
-		""" Gets device resource
-		@parameter uuid: uuid of requested device.
-		returns device object
+	def device(self, uuid=None, name=None):
+		""" 
+		intiates device class
 		"""
-		return resin.Device(self)
+		return resin.Device(self, uuid=uuid, name=name)
+
+	def devices(self, app_id=None):
+		""" 
+		intiates device class
+		"""
+		return resin.Devices(self, app_id=app_id)
 		
 from resin.device import *  # noqa
+from resin.devices import *  # noqa
