@@ -1,7 +1,12 @@
 import json
 import requests
 
-
+class BaseAPI(object):
+	"""docstring for BaseApi"""
+	def __init__(self, arg):
+		super(BaseApi, self).__init__()
+		self.arg = arg
+		
 def _get_resource(data):
     '''
     returns body as json
