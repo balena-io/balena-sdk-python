@@ -1,5 +1,7 @@
-from .baseapi import BaseAPI
+import sys
 
+from .baseapi import BaseAPI
+from .resources import Message
 
 class Device(BaseAPI):
 
@@ -8,7 +10,14 @@ class Device(BaseAPI):
             'filter': 'uuid',
             'eq': uuid
         }
-        return self.request('device', 'GET', params=params)[0]
+        try:
+            return self.request('device', 'GET', params=params)[0]
+        except IndexError:
+            # found no device
+            print(Message.NO_DEVICE_FOUND.format(value=uuid,dev_att="uuid"))
+        except:
+            # unexpected exception
+            raise
 
     def get_all(self):
         return self.request('device', 'GET')
@@ -27,7 +36,7 @@ class Device(BaseAPI):
             'filter': 'name',
             'eq': name
         }
-        return self.request('device', 'GET', params=params)[0]
+        return self.request('device', 'GET', params=params)
 
     def identify(self, uuid):
         data = {

@@ -71,6 +71,7 @@ class BaseAPI(object):
                     "%20eq%20'" + str(params["eq"]) + "'"
             else:
                 query = ""
+            print query
             return query
 
     def __request(self, url, method, params, headers=None, data=None):
@@ -96,24 +97,22 @@ class BaseAPI(object):
     def request(self, url, method, params=None, data=None):
         params = params or {}
         data = data or {}
-        
+        # About response obj: https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
         response = self.__request(url, method, params, data=data)
-
+        
         if response.status_code == 201:
             return response.content
-        else:
-            try:
-                json = response.json()
-            except ValueError:
-                raise JSONDecodeError()
+        # 204: no content - 200: OK
+        if response.status_code == 204 or response.status_code == 200:
+            return
+        if not response.ok:
+            if response.status_code >= 500:
+                raise ResponseError('Server did not respond. {:d} {:s}'.format(response.status_code, response.reason))
 
-            if not response.ok:
-                if response.status_code >= 500:
-                    raise ResponseError(
-                        'Server did not respond. {:d} {:s}'.format(
-                            response.status_code, response.reason))
-
-                raise RequestError('{:d} {:s}. Message: {:s}'.format(
-                    response.status_code, response.reason, json['message']))
+            raise RequestError('{:d} {:s}. Message: {:s}'.format(response.status_code, response.reason, response._content))
+        try:
+            json = response.json()
+        except ValueError:
+            raise JSONDecodeError()   
 
         return json['d']

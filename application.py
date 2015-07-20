@@ -9,4 +9,15 @@ class Application(BaseAPI):
         return self.request('/application/' + str(app_id) + '/restart', 'POST')
 
     def get_by_id(self, app_id):
-        return self.request('application?id=' + str(app_id), 'GET')[0]
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+        try:
+            return self.request('application', 'GET', params=params)
+        except IndexError:
+            # found no application
+            print(Message.NO_APPLICATION_FOUND.format(value=app_id,dev_att="id"))
+        except:
+            # unexpected exception
+            raise
