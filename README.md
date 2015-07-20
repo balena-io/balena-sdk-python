@@ -15,7 +15,7 @@ client = Client(token=JWT)
 
 device = client.device.get(uuid)
 
-app = client.get_by_id(app_id) 
+app = client.application.get_by_id(app_id) 
 
 client.environment_variables.create(app_id, "EDITOR", "vim")
 ```
