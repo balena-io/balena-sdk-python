@@ -50,7 +50,11 @@ class BaseAPI(object):
 
     def __put(self, url, headers, data):
         self.__set_content_type(headers, 'application/json')
-        return requests.put(url, headers=headers)
+        return requests.put(url, data=json.dumps(data), headers=headers)
+
+    def __patch(self, url, headers, data):
+        self.__set_content_type(headers, 'application/json')
+        return requests.patch(url, data=json.dumps(data), headers=headers)
 
     def __delete(self, url, headers, data):
         self.__set_content_type(headers, 'application/x-www-form-urlencoded')
@@ -82,7 +86,8 @@ class BaseAPI(object):
             'post': self.__post,
             'put': self.__put,
             'delete': self.__delete,
-            'head': self.__head
+            'head': self.__head,
+            'patch': self.__patch
         }
 
         self.__set_authorization(headers)
@@ -91,7 +96,9 @@ class BaseAPI(object):
         url = urljoin(self.endpoint, url)
         params = self.format_params(params)
         url = urljoin(url, params)
-        print url
+        # FOR TESTING ONLY
+        #print url
+        #
         return request_method(url, headers=headers, data=data)
 
     def request(self, url, method, params=None, data=None):
@@ -99,11 +106,19 @@ class BaseAPI(object):
         data = data or {}
         # About response obj: https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
         response = self.__request(url, method, params, data=data)
-        
+        # FOR TESTING ONLY
+        #print response.status_code
+        #print response.reason
+        #print response.content
+        #print response.request
+        #
         if response.status_code == 201:
             return response.content
-        # 204: no content - 200: OK
-        if response.status_code == 204 or response.status_code == 200:
+        # 204: no content
+        if response.status_code == 204:
+            return
+        # 200: OK
+        if response.status_code == 200 and response.content == 'OK':
             return
         if not response.ok:
             if response.status_code >= 500:
@@ -115,4 +130,4 @@ class BaseAPI(object):
         except ValueError:
             raise JSONDecodeError()   
 
-        return json['d']
+        return json
