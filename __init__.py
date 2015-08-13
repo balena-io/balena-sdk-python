@@ -1,18 +1,16 @@
-import requests, json
-import resin
+from .base_request import BaseRequest
+from .auth import Auth
+from .token import Token
+#from .logs import Logs
+from .settings import Settings
+from .models import Models
 
-from .device import Device
-from .application import Application
-from .environment_variables import Environment_Variables
-from .config import Config
-from .key import Key
 
 class Client(object):
 
-    def __init__(self, token=None):
-        # Probably and example of bad design
-        self.application = Application(token)
-        self.device = Device(token)
-        self.environment_variables = Environment_Variables(token)
-        self.config = Config(token)
-        self.key = Key(token)
+	def __init__(self):
+		self.settings = Settings()
+		#self.logs = Logs()
+		self.auth = Auth()
+		self.models = Models()
+

@@ -4,17 +4,20 @@ class APIException(Exception):
     pass
 
 
-class JSONDecodeError(APIException):
-	pass
+class JSONDecodeError(Exception):
+	def __init__(self):
+		self.code = 'JSONDecodeError'
+		self.exit_code = 1
+		self.message = ''
 
 
-class NoTokenProvided(APIException):
+class NoTokenProvided(Exception):
     pass
 
 
-class ResponseError(APIException):
+class ResponseError(Exception):
     pass
 
 
-class RequestError(APIException):
+class RequestError(Exception):
     pass
