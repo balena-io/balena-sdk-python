@@ -2,6 +2,7 @@ import jwt
 from datetime import datetime
 
 from .settings import Settings
+from . import exceptions
 
 TOKEN_KEY = 'token'
 
@@ -14,8 +15,7 @@ class Token(object):
 		try:
 			return jwt.decode(token, verify=False)
 		except jwt.InvalidTokenError:
-			# TODO: need exception type for invalid token
-			pass
+			raise exceptions.MalformedToken(token)
 
 	def is_valid_token(self, token):
 		try:
@@ -41,16 +41,14 @@ class Token(object):
 		if self.has():
 			return self.__parse_token(self.settings.get(TOKEN_KEY))
 		else:
-			# TODO: raise exception when token doesn't exist
-			pass
+			raise exceptions.NotLoggedIn()
 
 	def get_property(self, element):
 		token_data = self.get_data()
 		if element in token_data:
 			return token_data[element]
 		else:
-			# TODO: raise exception when property doesn't exist
-			pass
+			raise exceptions.InvalidOption(element)
 
 	def get_username(self):
 		return self.get_property('username')

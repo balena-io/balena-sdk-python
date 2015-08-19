@@ -6,9 +6,17 @@ class Message(object):
 	"""
 	Message templates
 	"""
-
-	NO_DEVICE_FOUND="There is no device with {dev_att}: {value}! Please check the device {dev_att}!"
-	NO_APPLICATION_FOUND="There is no application with {app_att}: {value}! Please check the application {app_att}!"
-	DEVICE_OFFLINE="The device is offline: {uuid}"
-	UNSUPPORTED_DEVICE="Unsupported device: {value}"
-	NO_KEY_FOUND="There is no key with {key_att}: {value}! Please check the key {key_att}!"
+	
+	# Exception Error Message
+	NOT_LOGGED_IN = "You have to log in"
+	REQUEST_ERROR = "Request error: {body}"
+	KEY_NOT_FOUND = "Key not found: {key}"
+	DEVICE_NOT_FOUND = "Device not found: {device}"
+	APPLICATION_NOT_FOUND = "Application not found: {application}"
+	MALFORMED_TOKEN = "Malformed token: {token}"
+	INVALID_DEVICE_TYPE = "Invalid device type: {dev_type}"
+	INVALID_OPTION = "Invalid option: {option}"
+	MISSING_OPTION = "Missing option: {option}"
+	NON_ALLOWED_OPTION = "Non allowed option: {option}"
+	LOGIN_FAILED = "Invalid credentials"
+	DEVICE_OFFLINE = "Device is offline: {uuid}"

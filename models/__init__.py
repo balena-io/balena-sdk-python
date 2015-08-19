@@ -3,7 +3,7 @@ from .application import Application
 from .config import Config
 from .environment_variables import EnvironmentVariable
 from .key import Key
-from .os import Os
+from .device_os import DeviceOs
 
 class Models(object):
 
@@ -13,4 +13,4 @@ class Models(object):
 		self.config = Config()
 		self.environment_variables = EnvironmentVariable()
 		self.key = Key()
-		self.os = Os()
+		self.device_os = DeviceOs()
