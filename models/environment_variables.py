@@ -1,5 +1,6 @@
+import re
+
 from ..base_request import BaseRequest
-from ..resources import Message
 from .device import Device
 from ..settings import Settings
 
@@ -45,14 +46,17 @@ class DeviceEnvVariable(object):
         }
         return self.base_request.request('device_environment_variable', 'PATCH', params=params,data=data, endpoint=self.settings.get('pine_endpoint'))
 
-    def remove(self, id):
+    def remove(self, var_id):
         params = {
             'filter': 'id',
-            'eq': id
+            'eq': var_id
         }
         return self.base_request.request('device_environment_variable', 'DELETE', params=params, endpoint=self.settings.get('pine_endpoint'))
 
 class ApplicationEnvVariable(object):
+
+    SYSTEM_VARIABLE_RESERVED_NAMES = [ 'RESIN', 'USER' ]
+    OTHER_RESERVED_NAMES_START = 'RESIN_'
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -63,7 +67,7 @@ class ApplicationEnvVariable(object):
             'filter': 'application',
             'eq': app_id  
         }
-        return self.base_request.request('environment_variable', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request('environment_variable', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d']
 
     def create(self, app_id, name, value):
         data = {
@@ -91,6 +95,8 @@ class ApplicationEnvVariable(object):
         }
         return self.base_request.request('environment_variable', 'DELETE', params=params, endpoint=self.settings.get('pine_endpoint'))
 
-    # TODO
-	#def is_system_variable(self, variable):
+    def is_system_variable(self, variable):
+        if variable in self.SYSTEM_VARIABLE_RESERVED_NAMES:
+            return True
+        return variable.startswith(self.OTHER_RESERVED_NAMES_START)
 

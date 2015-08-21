@@ -1,6 +1,5 @@
 import requests
 import json
-import resin
 import urllib
 from string import Template
 
@@ -8,14 +7,8 @@ from urlparse import urljoin
 
 from .settings import Settings
 from .token  import Token
-from .resources import Message
 
-from exceptions import (
-    JSONDecodeError,
-    NoTokenProvided,
-    ResponseError,
-    RequestError
-)
+from . import exceptions
 
 
 class BaseRequest(object):
@@ -93,35 +86,30 @@ class BaseRequest(object):
     def request(self, url, method, endpoint, params=None, data=None, stream=None, auth=True):
         if auth:
             if not self.token.has():
-                # TODO: need exception if no token provided
-                pass
+                raise exceptions.NotLoggedIn()
 
             if self.util.should_update_token(self.token.get_age(),self.settings.get('token_refresh_interval')):
                 self.token.set(self.request_new_token())
-
         params = params or {}
         data = data or {}
         # About response obj: https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
         response = self.__request(url, method, params, endpoint, data=data, stream=stream, auth=auth)
-        # FOR TESTING ONLY
-        #print response.status_code
-        #print response.reason
-        #print response.content
-        #print response.url
-        #
+
+        if stream:
+            return response
+
         if response.status_code == 201:
             return response.content
         # 204: no content
         if response.status_code == 204:
             return
+
         # 200: OK
         if response.status_code == 200 and response.content == 'OK':
             return
         if not response.ok:
-            if response.status_code >= 500:
-                raise ResponseError('Server did not respond. {:d} {:s}'.format(response.status_code, response.reason))
+            raise exceptions.RequestError(response._content)
 
-            raise RequestError('{:d} {:s}. Message: {:s}'.format(response.status_code, response.reason, response._content))
         try:
             json = response.json()
         except ValueError:
@@ -134,10 +122,12 @@ class BaseRequest(object):
         self.__set_authorization(headers)
         url = urljoin(self.settings.get('api_endpoint'), 'whoami')
         response = requests.get(url, headers=headers)
+        if not response.ok:
+            raise exceptions.RequestError(response._content)
         return response.content
 
 
 class Util(object):
 
     def should_update_token(self, age, token_fresh_interval):
-        return bool(age >= token_fresh_interval)
+        return int(age) >= int(token_fresh_interval)

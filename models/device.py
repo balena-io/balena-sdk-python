@@ -1,11 +1,14 @@
 import sys
-import os
 import binascii
+import os
+from datetime import datetime
 
 from ..base_request import BaseRequest
-from ..resources import Message
 from .config import Config
 from ..settings import Settings
+from ..token import Token
+from .. import exceptions
+from .application import Application
 
 class Device(object):
 
@@ -13,6 +16,8 @@ class Device(object):
         self.base_request = BaseRequest()
         self.config = Config()
         self.settings = Settings()
+        self.token = Token()
+        self.application = Application()
 
     def get(self, uuid):
         params = {
@@ -22,11 +27,7 @@ class Device(object):
         try:
             return self.base_request.request('device', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
         except IndexError:
-            # found no device
-            print(Message.NO_DEVICE_FOUND.format(value=uuid, dev_att="uuid"))
-        except:
-            # unexpected exception
-            raise
+            raise exceptions.DeviceNotFound(uuid)
 
     def get_all(self):
         return self.base_request.request('device', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
@@ -81,7 +82,7 @@ class Device(object):
             ips.remove(device['vpn_address'])
             return ips
         else:
-            print(Message.DEVICE_OFFLINE.format(uuid=uuid))
+            raise exceptions.DeviceOffline(uuid)
 
     def remove(self, uuid):
         params = {
@@ -94,7 +95,7 @@ class Device(object):
         data = {
             'uuid': uuid
         }
-        return self.base_request.request('/blink', 'POST', data=data)
+        return self.base_request.request('/blink', 'POST', data=data, endpoint=self.settings.get('pine_endpoint'))
 
     def rename(self, uuid, new_name):
         if self.has(uuid):
@@ -107,7 +108,7 @@ class Device(object):
             }
             return self.base_request.request('device', 'PATCH', params=params, data=data, endpoint=self.settings.get('pine_endpoint'))
         else:
-            print(Message.NO_DEVICE_FOUND.format(value=uuid, dev_att="uuid"))
+            raise exceptions.DeviceNotFound(uuid)
 
 
     def note(self, uuid, note):
@@ -121,39 +122,43 @@ class Device(object):
             }
             return self.base_request.request('device', 'PATCH', params=params, data=data, endpoint=self.settings.get('pine_endpoint'))
         else:
-            print(Message.NO_DEVICE_FOUND.format(value=uuid, dev_att="uuid"))
+            raise exceptions.DeviceNotFound(uuid)
 
     def get_display_name(self, device_type_slug):
-        device_type_found = self.config.get_device_type()
-        display_name = [device['name'] for device in device_type_found
+        device_types = self.config.get_device_types()
+        display_name = [device['name'] for device in device_types
                         if device['slug'] == device_type_slug]
         if display_name:
             return display_name[0]
         else:
-            print(Message.UNSUPPORTED_DEVICE.format(value=device_type_slug))
+            raise exceptions.InvalidDeviceType(device_type_slug)
 
     def get_device_slug(self, device_type_name):
-        device_type_found = self.config.get_device_type()
-        slug_name = [device['slug'] for device in device_type_found
+        device_types = self.config.get_device_types()
+        slug_name = [device['slug'] for device in device_types
                         if device['name'] == device_type_name]
         if slug_name:
             return slug_name[0]
         else:
-            print(Message.UNSUPPORTED_DEVICE.format(value=device_type_name))
+            raise exceptions.InvalidDeviceType(device_type_name)
 
     def get_supported_device_types(self):
-        device_type_found = self.config.get_device_type()
-        supported_device = [device['name'] for device in device_type_found]
+        device_types = self.config.get_device_types()
+        supported_device = [device['name'] for device in device_types]
         return supported_device
 
     def get_manifest_by_slug(self, slug):
-        device_type_found = self.config.get_device_type()
-        manifest = [device for device in device_type_found
+        device_types = self.config.get_device_types()
+        manifest = [device for device in device_types
                         if device['slug'] == slug]
         if manifest:
             return manifest
         else:
-            print(Message.UNSUPPORTED_DEVICE.format(value=slug))
+            raise exceptions.InvalidDeviceType(slug)
+
+    def get_manifest_by_application(self, app_name):
+        application = self.application.get(app_name)
+        return self.get_manifest_by_slug(application['device_type'])
 
     def generate_uuid(self):
         # From resin-sdk
@@ -163,9 +168,22 @@ class Device(object):
         # pass the certificate validation in OpenVPN This either means that
         # the RFC counts a final NULL byte as part of the CN or that the
         # OpenVPN/OpenSSL implementation has a bug.
-        rand_string = os.urandom(31)
-        return binascii.hexlify(rand_string)
+        return binascii.hexlify(os.urandom(31))
 
-    # NOT YET IMPLEMENTED, WAITING FOR AUTH
-    #def register(self, app_name, uuid):
+    def register(self, app_name, uuid):
+        user_id = self.token.get_user_id()
+        application = self.application.get(app_name)
+        api_key = self.base_request.request('/application/{0}/generate-api-key'.format(application['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
 
+        data = {
+            'user': user_id,
+            'application': application['id'],
+            'device_type': application['device_type'],
+            'registered_at': (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds(),
+            'uuid': uuid
+        }
+
+        if api_key:
+            data['apikey'] = api_key
+
+        return self.base_request.request('device', 'POST', data=data, endpoint=self.settings.get('pine_endpoint'))

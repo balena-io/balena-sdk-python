@@ -1,14 +1,14 @@
 from ..base_request import BaseRequest
-from ..resources import Message
-from .device import Device
 from ..settings import Settings
+from .config import Config
+from .. import exceptions
 
 class Application(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.device = Device()
         self.settings = Settings()
+        self.config = Config()
 
     def get_all(self):
         return self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d'][0]
@@ -18,11 +18,10 @@ class Application(object):
             'filter': 'app_name',
             'eq': name
         }
-        app = self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
-        if app:
-            return app
-        else:
-            print(Message.NO_APPLICATION_FOUND.format(value=name, app_att="name"))
+        try:
+            return self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
+        except IndexError:
+            raise exceptions.ApplicationNotFound(name)
 
     def has(self, name):
         params = {
@@ -41,21 +40,23 @@ class Application(object):
             'filter': 'id',
             'eq': app_id
         }
-        app = self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
-        if app:
-            return app
-        else:
-            # found no application
-            print(Message.NO_APPLICATION_FOUND.format(value=app_id, app_att="id"))
+        try:
+            return self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
+        except IndexError:
+            raise exceptions.ApplicationNotFound(app_id)
 
     def create(self, name, device_type):
-        device_slug = self.device.get_device_slug(device_type)
+        device_types = self.config.get_device_types()
+        device_slug = [device['slug'] for device in device_types
+                        if device['name'] == device_type]
         if device_slug:
             data = {
                 'app_name': name,
-                'device_type': device_slug
+                'device_type': device_slug[0]
             }
             return self.base_request.request('application', 'POST', data=data, endpoint=self.settings.get('pine_endpoint'))
+        else:
+            raise exceptions.InvalidDeviceType(device_type)
 
     def remove(self, name):
         params = {
@@ -66,11 +67,9 @@ class Application(object):
 
     def restart(self, name):
         app = self.get(name)
-        if app:
-            return self.base_request.request('/application/{0}/restart'.format(app[0]['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request('/application/{0}/restart'.format(app['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
 
     def get_api_key(self, name):
         app = self.get(name)
-        if app:
-            return self.base_request.request('/application/{0}/generate-api-key'.format(app[0]['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request('/application/{0}/generate-api-key'.format(app['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
 

@@ -2,6 +2,8 @@ import ConfigParser
 import os.path as Path
 import os
 
+from . import exceptions
+
 
 HOME_DIRECTORY = Path.expanduser('~')
 CONFIG_SECTION = 'Settings'
@@ -64,8 +66,7 @@ class Settings(object):
 			self.__read_settings()
 			return self._setting[key]
 		except KeyError:
-			# TODO: need exception type for setting key not found
-			raise
+			raise exceptions.InvalidOption(key)
 
 	def get_all(self):
 		self.__read_settings()

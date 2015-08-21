@@ -1,7 +1,7 @@
 from .base_request import BaseRequest
-from .resources import Message
 from .token  import Token
 from .settings import Settings
+from . import exceptions
 
 class Auth(object):
 
@@ -11,18 +11,17 @@ class Auth(object):
 		self.token = Token()
 
 	def login(self, **credentials):
-		try:
-			self.token.set(self.authenticate(**credentials))
-		except:
-			# TODO: need exception type
-			raise
+		token = self.authenticate(**credentials)
+		if self.token.is_valid_token(token):
+			self.token.set(token)
+		else:
+			raise exceptions.LoginFailed()
 
 	def login_with_token(self, token):
 		if self.token.is_valid_token(token):
 			self.token.set(token)
 		else:
-			# TODO: need exception type for invalid token
-			raise
+			raise exceptions.MalformedToken(token)
 
 	def who_am_i(self):
 		return self.token.get_username()
@@ -34,7 +33,7 @@ class Auth(object):
 		return self.token.has()
 
 	def get_token(self):
-		return self.toket.get()
+		return self.token.get()
 
 	def get_user_id(self):
 		return self.token.get_user_id()
@@ -46,4 +45,4 @@ class Auth(object):
 		return self.token.remove()
 
 	def register(self, **credentials):
-		return self.base_request.request('user/register', 'POST', data=credentials, endpoint=self.settings.get('api_endpoint'))
+		return self.base_request.request('user/register', 'POST', data=credentials, endpoint=self.settings.get('api_endpoint'), auth=False)

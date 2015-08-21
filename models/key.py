@@ -1,9 +1,9 @@
 import json
 
 from ..base_request import BaseRequest
-from ..resources import Message
 from ..settings import Settings
 from ..token import Token
+from .. import exceptions
 
 class Key(object):
 
@@ -24,7 +24,7 @@ class Key(object):
 		if key:
 			return key
 		else:
-			print(Message.NO_KEY_FOUND.format(value=id,key_att="id"))
+			raise exceptions.KeyNotFound(id)
 
 	def remove(self, id):
 		params = {
