@@ -12,6 +12,11 @@ from . import exceptions
 
 
 class BaseRequest(object):
+    """
+    This class provides an exclusive client to make HTTP requests to Resin.io servers.
+    This is low level class and is not meant to be used by end users directly.
+    
+    """
 
     def __init__(self):
         self.settings = Settings()
@@ -52,7 +57,7 @@ class BaseRequest(object):
     def __head(self, url, headers, data=None, stream=None):
         return requests.head(url, headers=headers)
 
-    def format_params(self, params):
+    def _format_params(self, params):
         if params:
             if params.has_key('expand'):
                 query_template = Template("?$$expand=$expand($$filter=$filter%20eq%20'$eq')")
@@ -79,17 +84,40 @@ class BaseRequest(object):
 
         request_method = METHODS[method.lower()]
         url = urljoin(endpoint, url)
-        params = self.format_params(params)
+        params = self._format_params(params)
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
 
     def request(self, url, method, endpoint, params=None, data=None, stream=None, auth=True):
+        """
+        This function forms HTTP request and send to Resin.io.
+        Resin.io host is prepended automatically, therefore only relative urls should be passed.
+
+        Args:
+            url (str): relative url.
+            method (str): HTTP methods. Available methods are: GET, POST , PUT, PATCH, DELETE, HEAD.
+            endpoint (str): target resin.io host. Available endpoints are saved in settings.
+            params (Optional[dict]): parameters to generate query.
+            data (Optional[dict]): request body.
+            stream (Optional[bool]): this argument is set to True when needing to stream the response content.
+            auth  (Optional[bool]): default is True. This marks the request need to be authenticated or not.
+
+        Returns:
+            object: response object.
+                if stream arg is set to True, the whole response object is returned.
+                if JSON is returned from response, json parsed object is returned.
+                otherwise response content is returned.
+
+        Raises:
+            RequestError: if any errors occur.
+
+        """
         if auth:
             if not self.token.has():
                 raise exceptions.NotLoggedIn()
 
             if self.util.should_update_token(self.token.get_age(),self.settings.get('token_refresh_interval')):
-                self.token.set(self.request_new_token())
+                self.token.set(self._request_new_token())
         params = params or {}
         data = data or {}
         # About response obj: https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
@@ -117,7 +145,7 @@ class BaseRequest(object):
 
         return json
 
-    def request_new_token(self):
+    def _request_new_token(self):
         headers = {}
         self.__set_authorization(headers)
         url = urljoin(self.settings.get('api_endpoint'), 'whoami')
