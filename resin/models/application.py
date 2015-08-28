@@ -4,6 +4,10 @@ from .config import Config
 from .. import exceptions
 
 class Application(object):
+    """
+    This class implements application model for Resin Python SDK.
+    
+    """
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -11,9 +15,31 @@ class Application(object):
         self.config = Config()
 
     def get_all(self):
-        return self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d'][0]
+        """
+        Get all applications.
+
+        Returns:
+            list: list contains info of applications.
+
+        """
+
+        return self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
 
     def get(self, name):
+        """
+        Get a single application.
+
+        Args:
+            name (str): application name.
+
+        Returns:
+            dict: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        """
+
         params = {
             'filter': 'app_name',
             'eq': name
@@ -24,6 +50,17 @@ class Application(object):
             raise exceptions.ApplicationNotFound(name)
 
     def has(self, name):
+        """
+        Check if an application exists.
+
+        Args:
+            name (str): application name.
+
+        Returns:
+            bool: True if application exists, False otherwise.
+
+        """
+
         params = {
             'filter': 'app_name',
             'eq': name
@@ -32,10 +69,32 @@ class Application(object):
         return bool(app)
 
     def has_any(self):
+        """
+        Check if the user has any applications.
+
+        Returns:
+            bool: True if user has any applications, False otherwise.
+
+        """
+
         apps = self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
         return bool(apps)
 
     def get_by_id(self, app_id):
+        """
+        Get a single application by application id.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            dict: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        """
+
         params = {
             'filter': 'id',
             'eq': app_id
@@ -46,6 +105,21 @@ class Application(object):
             raise exceptions.ApplicationNotFound(app_id)
 
     def create(self, name, device_type):
+        """
+        Create an application.
+
+        Args:
+            name (str): application name.
+            device_type (str): device type (display form).
+
+        Returns:
+            dict: application info.
+
+        Raises:
+            InvalidDeviceType: if device type is not supported.
+
+        """
+
         device_types = self.config.get_device_types()
         device_slug = [device['slug'] for device in device_types
                         if device['name'] == device_type]
@@ -59,6 +133,14 @@ class Application(object):
             raise exceptions.InvalidDeviceType(device_type)
 
     def remove(self, name):
+        """
+        Remove application.
+
+        Args:
+            name (str): application name.
+
+        """
+
         params = {
             'filter': 'app_name',
             'eq': name
@@ -66,10 +148,35 @@ class Application(object):
         return self.base_request.request('application', 'DELETE', params=params, endpoint=self.settings.get('pine_endpoint'))            
 
     def restart(self, name):
+        """
+        Restart application.
+
+        Args:
+            name (str): application name.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        """
+
         app = self.get(name)
         return self.base_request.request('/application/{0}/restart'.format(app['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
 
     def get_api_key(self, name):
+        """
+        Get the API key for a specific application.
+
+        Args:
+            name (str): application name.
+
+        Returns:
+            str: API key.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        """
+
         app = self.get(name)
         return self.base_request.request('/application/{0}/generate-api-key'.format(app['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
 
