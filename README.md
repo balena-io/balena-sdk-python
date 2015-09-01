@@ -9,8 +9,7 @@ from resin import Client
 
 client = Client()
 
-device = client.auth.login(**credentials)
-(Example: credentials={'username': YOUR USERNAME, 'password': YOUR PASSWORD})
+device = client.auth.login(username='username', password='password')
 
 app = client.models.application.get_by_id(app_id) 
 
