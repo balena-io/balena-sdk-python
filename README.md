@@ -2,6 +2,14 @@
 A python wrapper for resin.io [work in progress]
 
 
+## Installation
+
+to install from git:
+
+```
+pip install git+https://github.com/resin-io-projects/resin-python-wrapper.git
+```
+
 ## usage 
 
 ```
@@ -9,8 +17,7 @@ from resin import Client
 
 client = Client()
 
-device = client.auth.login(**credentials)
-(Example: credentials={'username': YOUR USERNAME, 'password': YOUR PASSWORD})
+device = client.auth.login(username='username', password='password')
 
 app = client.models.application.get_by_id(app_id) 
 
