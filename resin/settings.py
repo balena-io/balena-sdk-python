@@ -12,8 +12,8 @@ CONFIG_FILENAME = 'resin.cfg'
 class Settings(object):
 
 	_setting = {
-		'pine_endpoint': 'https://api.resinstaging.io/ewa/',
-		'api_endpoint': 'https://api.resinstaging.io/',
+		'pine_endpoint': 'https://api.resin.io/ewa/',
+		'api_endpoint': 'https://api.resin.io/',
 		'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
 		# cache time : 1 week in milliseconds
 		'image_cache_time': (1 * 1000 * 60 * 60 * 24 * 7),
