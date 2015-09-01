@@ -11,7 +11,7 @@ class Application(object):
         self.config = Config()
 
     def get_all(self):
-        return self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d'][0]
+        return self.base_request.request('application', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
 
     def get(self, name):
         params = {
