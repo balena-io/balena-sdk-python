@@ -2,6 +2,14 @@
 A python wrapper for resin.io [work in progress]
 
 
+## Installation
+
+to install from git:
+
+```
+pip install git+https://github.com/resin-io-projects/resin-python-wrapper.git
+```
+
 ## usage 
 
 ```
