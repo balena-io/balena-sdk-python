@@ -29,7 +29,7 @@ class Key(object):
             endpoint=self.settings.get('pine_endpoint')
         )['d']
         if key:
-            return key
+            return key[0]
         else:
             raise exceptions.KeyNotFound(id)
 

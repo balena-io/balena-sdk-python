@@ -186,7 +186,7 @@ class Device(object):
         manifest = [device for device in device_types
                     if device['slug'] == slug]
         if manifest:
-            return manifest
+            return manifest[0]
         else:
             raise exceptions.InvalidDeviceType(slug)
 
