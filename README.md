@@ -28,7 +28,10 @@ Platforms
 
 We also support [NodeJS SDK](https://github.com/resin-io/resin-sdk).
 
+Documentation
+-------------
 
+We generate markdown documentation in [DOCUMENTATION.md](https://github.com/resin-io-projects/resin-python-wrapper/blob/master/DOCUMENTATION.md).
 
 Support
 -------
