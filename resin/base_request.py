@@ -6,13 +6,12 @@ from string import Template
 from urlparse import urljoin
 
 from .settings import Settings
-from .token  import Token
+from .token import Token
 
 from . import exceptions
 
 
 class BaseRequest(object):
-
     def __init__(self):
         self.settings = Settings()
         self.token = Token()
@@ -25,7 +24,8 @@ class BaseRequest(object):
         headers.update({'content-type': ctype})
 
     def __set_authorization(self, headers):
-        headers.update({'Authorization': 'Bearer {:s}'.format(self.token.get())})
+        headers.update(
+            {'Authorization': 'Bearer {:s}'.format(self.token.get())})
 
     def __get(self, url, headers, data=None, stream=None):
         return requests.get(url, headers=headers)
@@ -33,9 +33,10 @@ class BaseRequest(object):
     def __post(self, url, headers, data, stream=None):
         self.__set_content_type(headers, 'application/json')
         if not stream:
-            return requests.post(url,data=json.dumps(data), headers=headers)
+            return requests.post(url, data=json.dumps(data), headers=headers)
         else:
-            return requests.post(url,data=json.dumps(data), headers=headers, stream=stream)
+            return requests.post(
+                url, data=json.dumps(data), headers=headers, stream=stream)
 
     def __put(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
@@ -52,17 +53,19 @@ class BaseRequest(object):
     def __head(self, url, headers, data=None, stream=None):
         return requests.head(url, headers=headers)
 
-    def format_params(self, params):
+    def _format_params(self, params):
         if params:
-            if params.has_key('expand'):
-                query_template = Template("?$$expand=$expand($$filter=$filter%20eq%20'$eq')")
-            elif params.has_key('filter'):
+            if 'expand' in params:
+                query_template = Template(
+                    "?$$expand=$expand($$filter=$filter%20eq%20'$eq')")
+            elif 'filter' in params:
                 query_template = Template("?$$filter=$filter%20eq%20'$eq'")
             else:
-                query_template = Template("") 
+                query_template = Template("")
             return query_template.safe_substitute(params)
 
-    def __request(self, url, method, params, endpoint, headers=None, data=None, stream=None, auth=True):
+    def __request(self, url, method, params, endpoint, headers=None,
+                  data=None, stream=None, auth=True):
         headers = headers or {}
 
         METHODS = {
@@ -79,21 +82,27 @@ class BaseRequest(object):
 
         request_method = METHODS[method.lower()]
         url = urljoin(endpoint, url)
-        params = self.format_params(params)
+        params = self._format_params(params)
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
 
-    def request(self, url, method, endpoint, params=None, data=None, stream=None, auth=True):
+    def request(self, url, method, endpoint, params=None, data=None,
+                stream=None, auth=True):
         if auth:
             if not self.token.has():
                 raise exceptions.NotLoggedIn()
 
-            if self.util.should_update_token(self.token.get_age(),self.settings.get('token_refresh_interval')):
-                self.token.set(self.request_new_token())
+            if self.util.should_update_token(
+                   self.token.get_age(),
+                   self.settings.get('token_refresh_interval')
+               ):
+                self.token.set(self._request_new_token())
         params = params or {}
         data = data or {}
-        # About response obj: https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
-        response = self.__request(url, method, params, endpoint, data=data, stream=stream, auth=auth)
+        # About response obj:
+        # https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
+        response = self.__request(url, method, params, endpoint, data=data,
+                                  stream=stream, auth=auth)
 
         if stream:
             return response
@@ -113,11 +122,11 @@ class BaseRequest(object):
         try:
             json = response.json()
         except ValueError:
-            return response.content  
+            return response.content
 
         return json
 
-    def request_new_token(self):
+    def _request_new_token(self):
         headers = {}
         self.__set_authorization(headers)
         url = urljoin(self.settings.get('api_endpoint'), 'whoami')
@@ -128,6 +137,5 @@ class BaseRequest(object):
 
 
 class Util(object):
-
     def should_update_token(self, age, token_fresh_interval):
         return int(age) >= int(token_fresh_interval)

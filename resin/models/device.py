@@ -10,6 +10,7 @@ from ..token import Token
 from .. import exceptions
 from .application import Application
 
+
 class Device(object):
 
     def __init__(self):
@@ -25,32 +26,47 @@ class Device(object):
             'eq': uuid
         }
         try:
-            return self.base_request.request('device', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]
+            return self.base_request.request(
+                'device', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d'][0]
         except IndexError:
             raise exceptions.DeviceNotFound(uuid)
 
     def get_all(self):
-        return self.base_request.request('device', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
+        return self.base_request.request(
+            'device', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
 
     def get_all_by_application(self, name):
         params = {
             'filter': 'app_name',
             'eq': name
         }
-        app = self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d']
+
+        app = self.base_request.request(
+            'application', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
         if app:
             params = {
                 'filter': 'application',
                 'eq': app[0]['id']
             }
-            return self.base_request.request('device', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d']
+            return self.base_request.request(
+                'device', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
 
     def get_by_name(self, name):
         params = {
             'filter': 'name',
             'eq': name
         }
-        return self.base_request.request('device', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d']
+        return self.base_request.request(
+            'device', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
 
     def get_name(self, uuid):
         return self.get(uuid)['name']
@@ -61,16 +77,23 @@ class Device(object):
             'filter': 'id',
             'eq': app_id
         }
-        return self.base_request.request('application', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))['d'][0]['app_name']
-        
+        return self.base_request.request(
+            'application', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d'][0]['app_name']
+
     def has(self, uuid):
         params = {
             'filter': 'uuid',
             'eq': uuid
         }
-        if len(self.base_request.request('device', 'GET', params=params, endpoint=self.settings.get('pine_endpoint'))) > 0:
-            return True
-        return False 
+
+        return len(
+            self.base_request.request(
+                'device', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )
+        ) > 0
 
     def is_online(self, uuid):
         return self.get(uuid)['is_online']
@@ -89,13 +112,19 @@ class Device(object):
             'filter': 'uuid',
             'eq': uuid
         }
-        return self.base_request.request('device', 'DELETE', params=params, endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request(
+            'device', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
 
     def identify(self, uuid):
         data = {
             'uuid': uuid
         }
-        return self.base_request.request('/blink', 'POST', data=data, endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request(
+            '/blink', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
 
     def rename(self, uuid, new_name):
         if self.has(uuid):
@@ -106,10 +135,12 @@ class Device(object):
             data = {
                 'name': new_name
             }
-            return self.base_request.request('device', 'PATCH', params=params, data=data, endpoint=self.settings.get('pine_endpoint'))
+            return self.base_request.request(
+                'device', 'PATCH', params=params, data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            )
         else:
             raise exceptions.DeviceNotFound(uuid)
-
 
     def note(self, uuid, note):
         if self.has(uuid):
@@ -120,7 +151,10 @@ class Device(object):
             data = {
                 'note': note
             }
-            return self.base_request.request('device', 'PATCH', params=params, data=data, endpoint=self.settings.get('pine_endpoint'))
+            return self.base_request.request(
+                'device', 'PATCH', params=params, data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            )
         else:
             raise exceptions.DeviceNotFound(uuid)
 
@@ -136,7 +170,7 @@ class Device(object):
     def get_device_slug(self, device_type_name):
         device_types = self.config.get_device_types()
         slug_name = [device['slug'] for device in device_types
-                        if device['name'] == device_type_name]
+                     if device['name'] == device_type_name]
         if slug_name:
             return slug_name[0]
         else:
@@ -150,7 +184,7 @@ class Device(object):
     def get_manifest_by_slug(self, slug):
         device_types = self.config.get_device_types()
         manifest = [device for device in device_types
-                        if device['slug'] == slug]
+                    if device['slug'] == slug]
         if manifest:
             return manifest
         else:
@@ -173,17 +207,25 @@ class Device(object):
     def register(self, app_name, uuid):
         user_id = self.token.get_user_id()
         application = self.application.get(app_name)
-        api_key = self.base_request.request('/application/{0}/generate-api-key'.format(application['id']), 'POST', endpoint=self.settings.get('pine_endpoint'))
+        api_key = self.base_request.request(
+            '/application/{0}/generate-api-key'.format(application['id']),
+            'POST', endpoint=self.settings.get('pine_endpoint')
+        )
+
+        now = (datetime.utcnow() - datetime.utcfromtimestamp(0))
 
         data = {
             'user': user_id,
             'application': application['id'],
             'device_type': application['device_type'],
-            'registered_at': (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds(),
+            'registered_at': now.total_seconds()
             'uuid': uuid
         }
 
         if api_key:
             data['apikey'] = api_key
 
-        return self.base_request.request('device', 'POST', data=data, endpoint=self.settings.get('pine_endpoint'))
+        return self.base_request.request(
+            'device', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )

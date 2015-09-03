@@ -8,9 +8,8 @@ from .models import Models
 
 class Client(object):
 
-	def __init__(self):
-		self.settings = Settings()
-		self.logs = Logs()
-		self.auth = Auth()
-		self.models = Models()
-
+    def __init__(self):
+        self.settings = Settings()
+        self.logs = Logs()
+        self.auth = Auth()
+        self.models = Models()
