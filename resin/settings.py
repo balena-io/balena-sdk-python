@@ -5,12 +5,10 @@ import os
 from . import exceptions
 
 
-HOME_DIRECTORY = Path.expanduser('~')
-CONFIG_SECTION = 'Settings'
-CONFIG_FILENAME = 'resin.cfg'
-
-
 class Settings(object):
+    HOME_DIRECTORY = Path.expanduser('~')
+    CONFIG_SECTION = 'Settings'
+    CONFIG_FILENAME = 'resin.cfg'
 
     _setting = {
         'pine_endpoint': 'https://api.resin.io/ewa/',
@@ -28,7 +26,7 @@ class Settings(object):
     def __init__(self):
         if Path.isdir(self._setting['data_directory']):
             if Path.isfile(Path.join(self._setting['data_directory'],
-                                     CONFIG_FILENAME)):
+                                     self.CONFIG_FILENAME)):
                 self.__read_settings()
             else:
                 self.__write_settings()
@@ -38,24 +36,25 @@ class Settings(object):
 
     def __write_settings(self):
         config = ConfigParser.ConfigParser()
-        config.add_section(CONFIG_SECTION)
+        config.add_section(self.CONFIG_SECTION)
         for key in self._setting:
-            config.set(CONFIG_SECTION, key, self._setting[key])
+            config.set(self.CONFIG_SECTION, key, self._setting[key])
         if not Path.isdir(self._setting['data_directory']):
             os.makedirs(self._setting['data_directory'])
         with open(Path.join(self._setting['data_directory'],
-                  CONFIG_FILENAME), 'wb') as config_file:
+                  self.CONFIG_FILENAME), 'wb') as config_file:
             config.write(config_file)
 
     def __read_settings(self):
         config_reader = ConfigParser.ConfigParser()
         config_reader.read(Path.join(self._setting['data_directory'],
-                                     CONFIG_FILENAME))
+                                     self.CONFIG_FILENAME))
         config_data = {}
-        options = config_reader.options(CONFIG_SECTION)
+        options = config_reader.options(self.CONFIG_SECTION)
         for option in options:
             try:
-                config_data[option] = config_reader.get(CONFIG_SECTION, option)
+                config_data[option] = config_reader.get(self.CONFIG_SECTION,
+                                                        option)
             except:
                 config_data[option] = None
         self._setting = config_data
