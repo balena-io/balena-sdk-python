@@ -1,28 +1,47 @@
-# resin-python-wrapper
-A python wrapper for resin.io [work in progress]
+Resin SDK
+---------
 
+The unofficial Python [Resin.io](https://resin.io/) SDK.
 
-## Installation
+Role
+----
 
-to install from git:
+The intention of this module is to provide developers a nice API to integrate their Python applications with Resin.io.
 
+Installation
+------------
+
+Install the Resin SDK:
+
+From Source:
+```
+https://github.com/resin-io-projects/resin-python-wrapper
+```
+
+From git:
 ```
 pip install git+https://github.com/resin-io-projects/resin-python-wrapper.git
 ```
 
-## usage 
+Platforms
+---------
 
-```
-from resin import Client
+We also support [NodeJS SDK](https://github.com/resin-io/resin-sdk).
 
-client = Client()
 
-device = client.auth.login(username='username', password='password')
 
-app = client.models.application.get_by_id(app_id) 
+Support
+-------
 
-device = client.models.device.get(uuid)
-```
+If you're having any problem, please [raise an issue](https://github.com/resin-io-projects/resin-python-wrapper/issues/new) on GitHub and the Resin.io team will be happy to help.
 
-This project is work in progress so the API config is now pointing at our staging server.
-If anyone wants to pre-test, please change the `'pine_endpoint'` to `'https://api.resin.io/ewa/'` and `'api_endpoint'` to `'https://api.resin.io/'` in `settings.py`.
+Contribute
+----------
+
+- Issue Tracker: [github.com/resin-io/resin-python-wrapper/issues](https://github.com/resin-io-projects/resin-python-wrapper/issues)
+- Source Code: [github.com/resin-io/resin-python-wrapper](https://github.com/resin-io-projects/resin-python-wrapper)
+
+License
+-------
+
+The project is licensed under the MIT license.
