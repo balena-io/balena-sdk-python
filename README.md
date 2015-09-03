@@ -1,7 +1,7 @@
 Resin SDK
 ---------
 
-The unofficial Python [Resin.io](https://resin.io/) SDK.
+The official [Resin.io](https://resin.io/) SDK for Python.
 
 Role
 ----
@@ -15,12 +15,12 @@ Install the Resin SDK:
 
 From Source:
 ```
-https://github.com/resin-io-projects/resin-python-wrapper
+https://github.com/resin-io/resin-sdk-python
 ```
 
 From git:
 ```
-pip install git+https://github.com/resin-io-projects/resin-python-wrapper.git
+pip install git+https://github.com/resin-io/resin-sdk-python.git
 ```
 
 Platforms
@@ -31,18 +31,18 @@ We also support [NodeJS SDK](https://github.com/resin-io/resin-sdk).
 Documentation
 -------------
 
-We generate markdown documentation in [DOCUMENTATION.md](https://github.com/resin-io-projects/resin-python-wrapper/blob/master/DOCUMENTATION.md).
+We generate markdown documentation in [DOCUMENTATION.md](https://github.com/resin-io/resin-sdk-python/blob/master/DOCUMENTATION.md).
 
 Support
 -------
 
-If you're having any problem, please [raise an issue](https://github.com/resin-io-projects/resin-python-wrapper/issues/new) on GitHub and the Resin.io team will be happy to help.
+If you're having any problem, please [raise an issue](https://github.com/resin-io/resin-sdk-python/issues/new) on GitHub and the Resin.io team will be happy to help.
 
 Contribute
 ----------
 
-- Issue Tracker: [github.com/resin-io/resin-python-wrapper/issues](https://github.com/resin-io-projects/resin-python-wrapper/issues)
-- Source Code: [github.com/resin-io/resin-python-wrapper](https://github.com/resin-io-projects/resin-python-wrapper)
+- Issue Tracker: [github.com/resin-io/resin-sdk-python/issues](https://github.com/resin-io/resin-sdk-python/issues)
+- Source Code: [github.com/resin-io/resin-sdk-python](https://github.com/resin-io/resin-sdk-python)
 
 License
 -------
