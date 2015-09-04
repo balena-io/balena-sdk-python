@@ -27,6 +27,7 @@ SECTION_NAME = 4
 
 doctrim = inspect.cleandoc
 
+
 def unindent(lines):
     """
     Remove common indentation from string.
@@ -43,11 +44,13 @@ def unindent(lines):
     else:
         return [line[indent:] for line in lines]
 
+
 def code_block(lines, language=''):
     """
     Mark the code segment for syntax highlighting.
     """
     return ['```' + language] + lines + ['```']
+
 
 def doctest2md(lines):
     """
@@ -56,7 +59,8 @@ def doctest2md(lines):
     is_only_code = True
     lines = unindent(lines)
     for line in lines:
-        if not line.startswith('>>> ') and not line.startswith('... ') and line not in ['>>>', '...']:
+        if not line.startswith('>>> ') and not line.startswith(
+                '... ') and line not in ['>>>', '...']:
             is_only_code = False
             break
     if is_only_code:
@@ -66,22 +70,28 @@ def doctest2md(lines):
             lines.append(line[4:])
     return lines
 
+
 def doc_code_block(lines, language):
     if language == 'python':
         lines = doctest2md(lines)
     return code_block(lines, language)
 
 _reg_section = re.compile('^#+ ')
+
+
 def is_heading(line):
     return _reg_section.match(line)
+
 
 def get_heading(line):
     assert is_heading(line)
     part = line.partition(' ')
     return len(part[0]), part[2]
 
+
 def make_heading(level, title):
-    return '#'*max(level, 1) + ' ' + title
+    return '#' * max(level, 1) + ' ' + title
+
 
 def find_sections(lines):
     """
@@ -92,6 +102,7 @@ def find_sections(lines):
         if is_heading(line):
             sections.append(get_heading(line))
     return sections
+
 
 def make_toc(sections):
     """
@@ -104,8 +115,9 @@ def make_toc(sections):
         ref = sec.lower()
         ref = ref.replace(' ', '-')
         ref = ref.replace('?', '')
-        refs.append(INDENT*(ind) + "- [%s](#%s)" % (sec, ref))
+        refs.append(INDENT * (ind) + "- [%s](#%s)" % (sec, ref))
     return '\n'.join(refs)
+
 
 def _get_class_intro(lines):
     intro = []
@@ -118,11 +130,13 @@ def _get_class_intro(lines):
             intro += [line + NEW_LINE]
     return intro, contents
 
+
 def _is_class_section(line):
     line = line.strip()
     if line in SECTIONS:
         return SECTION_NAME
     return 0
+
 
 def _doc2md(lines):
     md = []
@@ -153,6 +167,7 @@ def _doc2md(lines):
         md += doc_code_block(code, language)
     return md
 
+
 def doc2md(docstr, title, type=0):
     # Type = 0 -> class, Type = 1 -> functions
     """
@@ -174,6 +189,7 @@ def doc2md(docstr, title, type=0):
     md += _doc2md(contents)
     return "\n".join(md)
 
+
 def mod2md(module, title, title_api_section, toc=True):
     """
     Generate markdown document from module, including API section.
@@ -185,21 +201,21 @@ def mod2md(module, title, title_api_section, toc=True):
 
     sections = find_sections(lines)
     if sections:
-        level = min(n for n,t in sections) - 1
+        level = min(n for n, t in sections) - 1
     else:
         level = 1
 
     api_md = []
     api_sec = []
     if title_api_section and module.__all__:
-        sections.append((level+1, title_api_section))
+        sections.append((level + 1, title_api_section))
         for name in module.__all__:
-            api_sec.append((level+2, name))
+            api_sec.append((level + 2, name))
             api_md += ['', '']
             entry = module.__dict__[name]
             if entry.__doc__:
                 md, sec = doc2md(entry.__doc__, name,
-                        min_level=level+2, more_info=True, toc=False)
+                                 min_level=level + 2, more_info=True, toc=False)
                 api_sec += sec
                 api_md += md
 
@@ -222,7 +238,7 @@ def mod2md(module, title, title_api_section, toc=True):
     md += [
         '',
         '',
-        make_heading(level+1, title_api_section),
+        make_heading(level + 1, title_api_section),
     ]
     if toc:
         md += ['']
@@ -231,27 +247,28 @@ def mod2md(module, title, title_api_section, toc=True):
 
     return "\n".join(md)
 
+
 def main(args=None):
     # parse the program arguments
     import argparse
     parser = argparse.ArgumentParser(
-            description='Convert docstrings to markdown.')
+        description='Convert docstrings to markdown.')
 
     parser.add_argument(
-            'module', help='The module containing the docstring.')
+        'module', help='The module containing the docstring.')
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-            'entry', nargs='?',
-            help='Convert only docstring of this entry in module.')
+        'entry', nargs='?',
+        help='Convert only docstring of this entry in module.')
     group.add_argument(
-            '-a', '--all', dest='all', action='store_true',
-            help='Create an API section with the contents of module.__all__.')
+        '-a', '--all', dest='all', action='store_true',
+        help='Create an API section with the contents of module.__all__.')
     parser.add_argument(
-            '-t', '--title', dest='title',
-            help='Document title (default is module name)')
+        '-t', '--title', dest='title',
+        help='Document title (default is module name)')
     parser.add_argument(
-            '--no-toc', dest='toc', action='store_false', default=True,
-            help='Do not automatically generate the TOC')
+        '--no-toc', dest='toc', action='store_false', default=True,
+        help='Do not automatically generate the TOC')
     args = parser.parse_args(args)
 
     import importlib

@@ -7,7 +7,7 @@ class Message(object):
     """
     Message templates
     """
-    
+
     # Exception Error Message
     NOT_LOGGED_IN = "You have to log in"
     REQUEST_ERROR = "Request error: {body}"

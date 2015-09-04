@@ -180,7 +180,7 @@ class Token(object):
             NotLoggedIn: if there is no user logged in.
 
         """
-        
+
         # dt will be the same as Date.now() in Javascript but converted to
         # milliseconds for consistency with js/sc sdk
         dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()

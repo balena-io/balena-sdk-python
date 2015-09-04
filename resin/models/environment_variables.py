@@ -114,6 +114,7 @@ class DeviceEnvVariable(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
+
 class ApplicationEnvVariable(object):
     """
     This class implements application environment variable model for Resin Python SDK.

@@ -230,7 +230,7 @@ class DeviceOffline(Exception):
         message (str): error message.
 
     """
-    
+
     def __init__(self, uuid):
         self.code = 'DeviceOffline'
         self.exit_code = 1

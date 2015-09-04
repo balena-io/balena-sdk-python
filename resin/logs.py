@@ -10,9 +10,9 @@ class Logs(object):
     This class implements functions that allow processing logs from device.
 
     This class is implemented using pubnub python sdk.
-    
+
     For more details about pubnub, please visit: https://www.pubnub.com/docs/python/pubnub-python-sdk
-    
+
     """
 
     def __init__(self):
@@ -106,5 +106,5 @@ class Logs(object):
             str: device channel.
 
         """
-        
+
         return 'device-{uuid}-logs'.format(uuid=uuid)

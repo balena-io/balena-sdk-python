@@ -7,7 +7,7 @@ from . import exceptions
 class Auth(object):
     """
     This class implements all authentication functions for Resin Python SDK.
-    
+
     """
 
     def __init__(self):
@@ -98,7 +98,7 @@ class Auth(object):
 
     def is_logged_in(self):
         """
-        This function checks if you're logged in 
+        This function checks if you're logged in
 
         Returns:
             bool: True if logged in, False otherwise.
@@ -115,7 +115,7 @@ class Auth(object):
             str: Auth Token.
 
         Raises:
-            InvalidOption: if not logged in and there is no token in Settings. 
+            InvalidOption: if not logged in and there is no token in Settings.
 
         """
 
@@ -176,7 +176,7 @@ class Auth(object):
             RequestError: if error occurs during registration.
 
         """
-        
+
         return self.base_request.request(
             'user/register', 'POST', data=credentials,
             endpoint=self.settings.get('api_endpoint'), auth=False
