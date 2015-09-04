@@ -4,6 +4,8 @@ import os
 
 from . import exceptions
 
+
+class Settings(object):
     """
     This class handles settings for Resin Python SDK.
 
@@ -14,7 +16,7 @@ from . import exceptions
         _setting (dict): default value to settings.
 
     """
-class Settings(object):
+
     HOME_DIRECTORY = Path.expanduser('~')
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'resin.cfg'
@@ -27,7 +29,7 @@ class Settings(object):
         'image_cache_time': (1 * 1000 * 60 * 60 * 24 * 7),
         # token refresh interval: 1 hour in milliseconds
         'token_refresh_interval': (1 * 1000 * 60 * 60)
-        }
+    }
 
     _setting['cache_directory'] = Path.join(_setting['data_directory'],
                                             'cache')
@@ -51,7 +53,7 @@ class Settings(object):
         if not Path.isdir(self._setting['data_directory']):
             os.makedirs(self._setting['data_directory'])
         with open(Path.join(self._setting['data_directory'],
-                  self.CONFIG_FILENAME), 'wb') as config_file:
+                            self.CONFIG_FILENAME), 'wb') as config_file:
             config.write(config_file)
 
     def __read_settings(self):

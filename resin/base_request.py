@@ -122,9 +122,9 @@ class BaseRequest(object):
                 raise exceptions.NotLoggedIn()
 
             if self.util.should_update_token(
-                   self.token.get_age(),
-                   self.settings.get('token_refresh_interval')
-               ):
+                self.token.get_age(),
+                self.settings.get('token_refresh_interval')
+            ):
                 self.token.set(self._request_new_token())
         params = params or {}
         data = data or {}
@@ -166,5 +166,6 @@ class BaseRequest(object):
 
 
 class Util(object):
+
     def should_update_token(self, age, token_fresh_interval):
         return int(age) >= int(token_fresh_interval)

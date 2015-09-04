@@ -112,6 +112,10 @@ class DeviceEnvVariable(object):
         return self.base_request.request(
             'device_environment_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
+        )
+
+
+class ApplicationEnvVariable(object):
     """
     This class implements application environment variable model for Resin Python SDK.
 
@@ -121,10 +125,6 @@ class DeviceEnvVariable(object):
 
     """
 
-        )
-
-
-class ApplicationEnvVariable(object):
     SYSTEM_VARIABLE_RESERVED_NAMES = ['RESIN', 'USER']
     OTHER_RESERVED_NAMES_START = 'RESIN_'
 

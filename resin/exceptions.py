@@ -3,6 +3,19 @@ from .resources import Message
 
 
 class MissingOption(Exception):
+    """
+    Exception type for missing option in settings or auth token.
+
+    Args:
+        option (str): option name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, option):
         self.code = 'MissingOption'
         self.exit_code = 1
@@ -10,6 +23,19 @@ class MissingOption(Exception):
 
 
 class InvalidOption(Exception):
+    """
+    Exception type for invalid option in settings or auth token.
+
+    Args:
+        option (str): option name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, option):
         self.code = 'InvalidOption'
         self.exit_code = 1
@@ -17,6 +43,19 @@ class InvalidOption(Exception):
 
 
 class NonAllowedOption(Exception):
+    """
+    Exception type for non allowed option in parameters for downloading device OS.
+
+    Args:
+        option (str): option name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, option):
         self.code = 'NonAllowedOption'
         self.exit_code = 1
@@ -24,6 +63,19 @@ class NonAllowedOption(Exception):
 
 
 class InvalidDeviceType(Exception):
+    """
+    Exception type for invalid device type.
+
+    Args:
+        dev_type (str): device type.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, dev_type):
         self.code = 'InvalidDeviceType'
         self.exit_code = 1
@@ -31,6 +83,19 @@ class InvalidDeviceType(Exception):
 
 
 class MalformedToken(Exception):
+    """
+    Exception type for malformed token.
+
+    Args:
+        token (str): token.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, token):
         self.code = 'MalformedToken'
         self.exit_code = 1
@@ -38,6 +103,19 @@ class MalformedToken(Exception):
 
 
 class ApplicationNotFound(Exception):
+    """
+    Exception type for application not found.
+
+    Args:
+        application (str): application detail (application name or id).
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, application):
         self.code = 'ApplicationNotFound'
         self.exit_code = 1
@@ -46,6 +124,19 @@ class ApplicationNotFound(Exception):
 
 
 class DeviceNotFound(Exception):
+    """
+    Exception type for device not found.
+
+    Args:
+        device (str): device detail (device uuid or device name).
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self):
         self.code = 'DeviceNotFound'
         self.exit_code = 1
@@ -53,6 +144,19 @@ class DeviceNotFound(Exception):
 
 
 class KeyNotFound(Exception):
+    """
+    Exception type for ssh key not found.
+
+    Args:
+        key (str): ssh key id.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, key):
         self.code = 'KeyNotFound'
         self.exit_code = 1
@@ -60,6 +164,19 @@ class KeyNotFound(Exception):
 
 
 class RequestError(Exception):
+    """
+    Exception type for request error.
+
+    Args:
+        body (str): response body.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, body):
         self.code = 'RequestError'
         self.exit_code = 1
@@ -67,6 +184,16 @@ class RequestError(Exception):
 
 
 class NotLoggedIn(Exception):
+    """
+    Exception when no user logged in.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self):
         self.code = 'NotLoggedIn'
         self.exit_code = 1
@@ -74,6 +201,16 @@ class NotLoggedIn(Exception):
 
 
 class LoginFailed(Exception):
+    """
+    Exception when login unsuccessful.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self):
         self.code = 'LoginFailed'
         self.exit_code = 1
@@ -81,6 +218,19 @@ class LoginFailed(Exception):
 
 
 class DeviceOffline(Exception):
+    """
+    Exception when a device is offline.
+
+    Args:
+        uuid (str): device uuid.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
     def __init__(self, uuid):
         self.code = 'DeviceOffline'
         self.exit_code = 1
