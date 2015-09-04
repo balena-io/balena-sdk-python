@@ -455,7 +455,7 @@ class Device(object):
             'user': user_id,
             'application': application['id'],
             'device_type': application['device_type'],
-            'registered_at': now.total_seconds()
+            'registered_at': now.total_seconds(),
             'uuid': uuid
         }
 

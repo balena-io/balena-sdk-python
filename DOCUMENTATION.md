@@ -1,10 +1,8 @@
-## <a name="resin python sdk"></a>Resin Python SDK
+## Resin Python SDK
 
 Welcome to the Resin Python SDK documentation.
-
 This document aims to describe all the functions supported by the SDK, as well as
 showing examples of their expected usage.
-
 If you feel something is missing, not clear or could be improved, please don't 
 hesitate to open an issue in GitHub, we'll be happy to help.
 
@@ -23,11 +21,10 @@ hesitate to open an issue in GitHub, we'll be happy to help.
     - [Logs](#logs)
     - [Settings](#settings)
 
-## <a name="models"></a>Models
+## Models
 
 This module implements all models for Resin Python SDK.
-        
-## <a name="application"></a>Application
+## Application
 
 This class implements application model for Resin Python SDK.
 ### Function: create(name, device_type)
@@ -115,7 +112,7 @@ Restart application.
 
 #### Raises:
     ApplicationNotFound: if application couldn't be found.
-## <a name="device"></a>Device
+## Device
 
 This class implements device model for Resin Python SDK.
 ### Function: generate_uuid()
@@ -297,7 +294,7 @@ Register a new device with a Resin.io application.
     dict: dictionary contains device info.
 ### Function: remove(uuid)
 
-Removea device.
+Remove a device.
 
 #### Args:
     uuid (str): device uuid.
@@ -311,12 +308,12 @@ Rename a device.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
-## <a name="config"></a>Config
+## Config
 
 This class implements configuration model for Resin Python SDK.
 
 #### Attributes:
-            _config (dict): caching configuration.
+    _config (dict): caching configuration.
 ### Function: get_all()
 
 Get all configuration.
@@ -335,7 +332,7 @@ Get PubNub keys from configuration.
 
 #### Returns:
     dict: including PubNub subscribe_key and publish_key.
-## <a name="deviceos"></a>DeviceOs
+## DeviceOs
 
 This class implements device os model for Resin Python SDK.
 ### Function: download(raw)
@@ -348,12 +345,12 @@ Download an OS image.
         Details about os parameters can be found in parse_params function
 
 #### Returns:
-    object: 
+    object:
         If raw is True, urllib3.HTTPResponse object is returned.
         If raw is False, original response object is returned.
 
-#### Notes: 
-        default OS image file name can be found in response headers.
+#### Notes:
+    default OS image file name can be found in response headers.
 ### Function: parse_params()
 
 Validate parameters for downloading device OS image.
@@ -362,16 +359,16 @@ Validate parameters for downloading device OS image.
     **parameters: os parameters keyword arguments.
 
 #### Returns:
-        dict: validated parameters.
+    dict: validated parameters.
 
-Raise:
+    Raise:
         MissingOption: if mandatory option are missing.
         InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
-        NonAllowedOption: if a non supported option is passed. 
-## <a name="environmentvariable"></a>EnvironmentVariable
+        NonAllowedOption: if a non supported option is passed.
+## EnvironmentVariable
 
 This class is a wrapper for device and application environment variable models.
-## <a name="applicationenvvariable"></a>ApplicationEnvVariable
+## ApplicationEnvVariable
 
 This class implements application environment variable model for Resin Python SDK.
 
@@ -420,7 +417,7 @@ Update an environment variable value for application.
 #### Args:
     var_id (str): environment variable id.
     value (str): new environment variable value.
-## <a name="deviceenvvariable"></a>DeviceEnvVariable
+## DeviceEnvVariable
 
 This class implements device environment variable model for Resin Python SDK.
 ### Function: create(uuid, name, value)
@@ -456,7 +453,7 @@ Update a device environment variable.
 #### Args:
     var_id (str): environment variable id.
     value (str): new environment variable value.
-## <a name="key"></a>Key
+## Key
 
 This class implements ssh key model for Resin Python SDK.
 ### Function: create(title, key)
@@ -489,11 +486,11 @@ Get all ssh keys.
     list: list of ssh keys.
 ### Function: remove(id)
 
-REmove a ssh key.
+Remove a ssh key.
 
 #### Args:
     id (str): key id.
-## <a name="auth"></a>Auth
+## Auth
 
 This class implements all authentication functions for Resin Python SDK.
 ### Function: authenticate()
@@ -502,105 +499,105 @@ This function authenticates provided credentials information.
 You should use Auth.login when possible, as it takes care of saving the Auth Token and username as well.
 
 #### Args:
-        **credentials: credentials keyword arguments.
-                username (str): Resin.io username.
-                password (str): Password.
+    **credentials: credentials keyword arguments.
+        username (str): Resin.io username.
+        password (str): Password.
 
 #### Returns:
-        str: Auth Token,
+    str: Auth Token,
 
 #### Raises:
-        LoginFailed: if the username or password is invalid.
+    LoginFailed: if the username or password is invalid.
 ### Function: get_email()
 
 This function retrieves current logged in user's get_email
 
 #### Returns:
-        str: user email.
+    str: user email.
 
 #### Raises:
-        InvalidOption: if not logged in.
+    InvalidOption: if not logged in.
 ### Function: get_token()
 
 This function retrieves Auth Token.
 
 #### Returns:
-        str: Auth Token.
+    str: Auth Token.
 
 #### Raises:
-        InvalidOption: if not logged in and there is no token in Settings. 
+    InvalidOption: if not logged in and there is no token in Settings. 
 ### Function: get_user_id()
 
 This function retrieves current logged in user's id.
 
 #### Returns:
-        str: user id.
+    str: user id.
 
 #### Raises:
-        InvalidOption: if not logged in.
+    InvalidOption: if not logged in.
 ### Function: is_logged_in()
 
 This function checks if you're logged in 
 
 #### Returns:
-        bool: True if logged in, False otherwise.
+    bool: True if logged in, False otherwise.
 ### Function: log_out()
 
 This function is used for logging out from Resin.io.
 
 #### Returns:
-        bool: True if successful, False otherwise.
+    bool: True if successful, False otherwise.
 ### Function: login()
 
 This function is used for logging into Resin.io using username and password.
 
 #### Args:
-        **credentials: credentials keyword arguments.
-                username (str): Resin.io username.
-                password (str): Password.
+    **credentials: credentials keyword arguments.
+        username (str): Resin.io username.
+        password (str): Password.
 
 #### Returns:
-        This functions saves Auth Token to Settings and returns nothing.
+    This functions saves Auth Token to Settings and returns nothing.
 
 #### Raises:
-        LoginFailed: if the username or password is invalid.
+    LoginFailed: if the username or password is invalid.
 ### Function: login_with_token(token)
 
 This function is used for logging into Resin.io using Auth Token.
 Auth Token can be found in Preferences section on Resin.io Dashboard.
 
 #### Args:
-        token (str): Auth Token.
+    token (str): Auth Token.
 
 #### Returns:
-        This functions saves Auth Token to Settings and returns nothing.
+    This functions saves Auth Token to Settings and returns nothing.
 
 #### Raises:
-        MalformedToken: if token is invalid.
+    MalformedToken: if token is invalid.
 ### Function: register()
 
 This function is used for registering to Resin.io.
 
 #### Args:
-        **credentials: credentials keyword arguments.
-                email (str): email to register.
-                password (str): Password.
+    **credentials: credentials keyword arguments.
+        email (str): email to register.
+        password (str): Password.
 
 #### Returns:
-        str: Auth Token for new account.
+    str: Auth Token for new account.
 
 #### Raises:
-        RequestError: if error occurs during registration.
+    RequestError: if error occurs during registration.
 ### Function: who_am_i()
 
 This function retrieves username of logged in user.
 
 #### Returns:
-        str: username.
+    str: username.
 
 #### Raises:
-        NotLoggedIn: if there is no user logged in.
-## <a name="logs"></a>Logs
+    NotLoggedIn: if there is no user logged in.
+## Logs
 
 This class implements functions that allow processing logs from device.
 
@@ -612,43 +609,43 @@ For more details about pubnub, please visit: https://www.pubnub.com/docs/python/
 This function allows fetching historical device logs.
 
 #### Args:
-        uuid (str): device uuid.
-        callback (function): this callback is called on receiving a message from the channel.
-        error (function): this callback is called on an error event.
-        For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#history
+    uuid (str): device uuid.
+    callback (function): this callback is called on receiving a message from the channel.
+    error (function): this callback is called on an error event.
+    For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#history
 
 #### Examples:
 ```python
 def callback(message):
-    print(message)
+print(message)
 ```
 
 ```python
 def error(message):
-    print('Error:'+ str(message))
+print('Error:'+ str(message))
 ```
 
-        Logs.history(uuid=uuid, callback=callback, error=error)
+    Logs.history(uuid=uuid, callback=callback, error=error)
 ### Function: subscribe()
 
 This function allows subscribing to device logs.
 Testing
 
 #### Args:
-        uuid (str): device uuid.
-        callback (function): this callback is called on receiving a message from the channel.
-        error (function): this callback is called on an error event.
-        For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#subscribe
+    uuid (str): device uuid.
+    callback (function): this callback is called on receiving a message from the channel.
+    error (function): this callback is called on an error event.
+    For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#subscribe
 
 #### Examples:
 ```python
 def callback(message, channel):
-    print(message)
+print(message)
 ```
 
 ```python
 def error(message):
-    print('Error:'+ str(message))
+print('Error:'+ str(message))
 ```
 
 ```python
@@ -659,56 +656,56 @@ Logs.subscribe(uuid=uuid, callback=callback, error=error)
 This function allows unsubscribing to device logs.
 
 #### Args:
-        uuid (str): device uuid.
-## <a name="settings"></a>Settings
+    uuid (str): device uuid.
+## Settings
 
 This class handles settings for Resin Python SDK.
 
 #### Attributes:
-        HOME_DIRECTORY (str): home directory path.
-        CONFIG_SECTION (str): section name in configuration file.
-        CONFIG_FILENAME (str): configuration file name.
-        _setting (dict): default value to settings.
+    HOME_DIRECTORY (str): home directory path.
+    CONFIG_SECTION (str): section name in configuration file.
+    CONFIG_FILENAME (str): configuration file name.
+    _setting (dict): default value to settings.
 ### Function: get(key)
 
 Get a setting value.
 
 #### Args:
-        key (str): setting.
+    key (str): setting.
 
 #### Returns:
-        str: setting value.
+    str: setting value.
 
 #### Raises:
-        InvalidOption: If getting a non-existent setting.
+    InvalidOption: If getting a non-existent setting.
 ### Function: get_all()
 
 Get all settings.
 
 #### Returns:
-        dict: all settings.
+    dict: all settings.
 ### Function: has(key)
 
 Check if a setting exists.
 
 #### Args:
-        key (str): setting.
+    key (str): setting.
 
 #### Returns:
-        bool: True if exists, False otherwise.
+    bool: True if exists, False otherwise.
 ### Function: remove(key)
 
 Remove a setting.
 
 #### Args:
-        key (str): setting.
+    key (str): setting.
 
 #### Returns:
-        bool: True if successful, False otherwise.
+    bool: True if successful, False otherwise.
 ### Function: set(key, value)
 
 Set value for a setting.
 
 #### Args:
-        key (str): setting.
-        value (str): setting value.
+    key (str): setting.
+    value (str): setting value.

@@ -4,6 +4,8 @@ import os
 
 from . import exceptions
 
+
+class Settings(object):
     """
     This class handles settings for Resin Python SDK.
 
@@ -14,7 +16,7 @@ from . import exceptions
         _setting (dict): default value to settings.
 
     """
-class Settings(object):
+    
     HOME_DIRECTORY = Path.expanduser('~')
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'resin.cfg'

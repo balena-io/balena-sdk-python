@@ -19,7 +19,6 @@ SECTIONS = [
 
 INDENT = "    "
 NEW_LINE = ""
-LINK = '<a name="{name}"></a>'
 
 # Level for each section in class
 CLASS_NAME = 2
@@ -164,7 +163,6 @@ def doc2md(docstr, title, type=0):
     intro, contents = _get_class_intro(lines)
     if type == 0:
         level = CLASS_NAME
-        title = LINK.format(name=title.lower())+title
     if type == 1:
         level = FUNCTION_NAME
         title = 'Function: {func_name}'.format(func_name=title)
