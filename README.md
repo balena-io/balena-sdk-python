@@ -33,6 +33,11 @@ Documentation
 
 We generate markdown documentation in [DOCUMENTATION.md](https://github.com/resin-io/resin-sdk-python/blob/master/DOCUMENTATION.md).
 
+To generate the documentation:
+```bash
+python docs_generators.py > DOCUMENTATION.md
+```
+
 Support
 -------
 

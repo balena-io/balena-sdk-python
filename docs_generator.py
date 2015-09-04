@@ -1,7 +1,8 @@
 import inspect
+import importlib
 
-from . import doc2md
-from .. import resin
+resin = importlib.import_module('resin', '.')
+doc2md = importlib.import_module('docs.doc2md', '.')
 
 TOC_ROOT = 0
 TOC_L1 = 1
@@ -45,7 +46,7 @@ def make_function_name(func, func_name):
 		args_list.remove('self')
 	return FUNCTION_NAME_TEMPLATE.format(f_name=func_name, f_args=', '.join(args_list))
 
-if __name__ == '__main__':
+def main():
 
 	print doc2md.doc2md(resin.__doc__, 'Resin Python SDK', type=0)
 	print_newline()
@@ -74,3 +75,7 @@ if __name__ == '__main__':
 	print_functions(resin.logs.Logs)
 	print doc2md.doc2md(resin.settings.Settings.__doc__, 'Settings', type=0)
 	print_functions(resin.settings.Settings)
+
+if __name__ == '__main__':
+	main()
+	

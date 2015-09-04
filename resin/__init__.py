@@ -6,12 +6,14 @@ If you feel something is missing, not clear or could be improved, please don't
 hesitate to open an issue in GitHub, we'll be happy to help.
 """
 
+
 from .base_request import BaseRequest
 from .auth import Auth
 from .token import Token
 from .logs import Logs
 from .settings import Settings
 from .models import Models
+
 
 class Resin(object):
 	"""
