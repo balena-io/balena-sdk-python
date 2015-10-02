@@ -532,11 +532,11 @@ class Device(object):
             raise exceptions.DeviceNotFound(uuid)
 
         params = {
-                'filter': 'uuid',
-                'eq': uuid
-            }
+            'filter': 'uuid',
+            'eq': uuid
+        }
         data = {
-                'is_web_accessible': True
+            'is_web_accessible': True
         }
 
         return self.base_request.request(

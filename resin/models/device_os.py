@@ -13,6 +13,7 @@ NETWORK_TYPES = [
     NETWORK_ETHERNET
 ]
 
+
 class DeviceOs(object):
     """
     This class implements device os model for Resin Python SDK.

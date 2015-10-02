@@ -72,11 +72,9 @@ class BaseRequest(object):
                 query_template = Template("$$filter=$filter%20eq%20'$eq'")
             else:
                 query_template = Template("")
-            #if 'apikey' in params:
             query_elements.append(query_template.safe_substitute(params))
         if query_elements:
             return '?{0}'.format('&'.join(query_elements))
-
 
     def __request(self, url, method, params, endpoint, headers=None,
                   data=None, stream=None, auth=True, api_key=None):
@@ -123,12 +121,12 @@ class BaseRequest(object):
             params = self._format_params(params, api_key=api_key)
         else:
             params = self._format_params(params, api_key=None)
-        
+
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
 
     def request(self, url, method, endpoint, params=None, data=None,
-                stream=None, auth=True, login= False):
+                stream=None, auth=True, login=False):
         api_key = self.util.get_api_key()
 
         # Some requests require logging in using credentials or Auth Token to process

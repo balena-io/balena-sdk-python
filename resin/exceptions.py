@@ -199,6 +199,7 @@ class NotLoggedIn(Exception):
         self.exit_code = 1
         self.message = Message.NOT_LOGGED_IN
 
+
 class Unauthorized(Exception):
     """
     Exception when no user logged in and no Resin API Key provided.
@@ -251,6 +252,7 @@ class DeviceOffline(Exception):
         self.code = 'DeviceOffline'
         self.exit_code = 1
         self.message = Message.DEVICE_OFFLINE.format(uuid=uuid)
+
 
 class DeviceNotWebAccessible(Exception):
     """

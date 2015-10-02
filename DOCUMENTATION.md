@@ -3,7 +3,7 @@
 Welcome to the Resin Python SDK documentation.
 This document aims to describe all the functions supported by the SDK, as well as
 showing examples of their expected usage.
-If you feel something is missing, not clear or could be improved, please don't 
+If you feel something is missing, not clear or could be improved, please don't
 hesitate to open an issue in GitHub, we'll be happy to help.
 
 ## Table of Contents
@@ -29,7 +29,7 @@ This module implements all models for Resin Python SDK.
 This class implements application model for Resin Python SDK.
 ### Function: create(name, device_type)
 
-Create an application.
+Create an application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     name (str): application name.
@@ -60,7 +60,7 @@ Get all applications.
     list: list contains info of applications.
 ### Function: get_api_key(name)
 
-Get the API key for a specific application.
+Get the API key for a specific application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     name (str): application name.
@@ -99,13 +99,13 @@ Check if the user has any applications.
     bool: True if user has any applications, False otherwise.
 ### Function: remove(name)
 
-Remove application.
+Remove application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     name (str): application name.
 ### Function: restart(name)
 
-Restart application.
+Restart application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     name (str): application name.
@@ -115,6 +115,24 @@ Restart application.
 ## Device
 
 This class implements device model for Resin Python SDK.
+### Function: disable_device_url(uuid)
+
+Disable device url for a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+### Function: enable_device_url(uuid)
+
+Enable device url for a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: generate_uuid()
 
 Generate a random device UUID.
@@ -181,6 +199,15 @@ Get device slug.
 
 #### Raises:
     InvalidDeviceType: if device type name is not supported.
+### Function: get_device_url(uuid)
+
+Get a device url for a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: get_display_name(device_type_slug)
 
 Get display name for a device.
@@ -254,9 +281,18 @@ Check if a device exists.
 
 #### Returns:
     bool: True if device exists, False otherwise.
+### Function: has_device_url(uuid)
+
+Check if a device is web accessible with device urls
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: identify(uuid)
 
-Identify device.
+Identify device. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     uuid (str): device uuid.
@@ -284,7 +320,7 @@ Note a device.
     DeviceNotFound: if device couldn't be found.
 ### Function: register(app_name, uuid)
 
-Register a new device with a Resin.io application.
+Register a new device with a Resin.io application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     app_name (str): application name.
@@ -294,7 +330,7 @@ Register a new device with a Resin.io application.
     dict: dictionary contains device info.
 ### Function: remove(uuid)
 
-Remove a device.
+Remove a device. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     uuid (str): device uuid.
@@ -305,6 +341,15 @@ Rename a device.
 #### Args:
     uuid (str): device uuid.
     new_name (str): device new name.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+### Function: restart(uuid)
+
+Restart a device. This function only works if you log in using credentials or Auth Token.
+
+#### Args:
+    uuid (str): device uuid.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
@@ -326,18 +371,12 @@ Get device types configuration.
 
 #### Returns:
     list: device types information.
-### Function: get_pubnub_keys()
-
-Get PubNub keys from configuration.
-
-#### Returns:
-    dict: including PubNub subscribe_key and publish_key.
 ## DeviceOs
 
 This class implements device os model for Resin Python SDK.
 ### Function: download(raw)
 
-Download an OS image.
+Download an OS image. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     raw (bool): determining function return value.
@@ -364,7 +403,6 @@ Validate parameters for downloading device OS image.
     Raise:
         MissingOption: if mandatory option are missing.
         InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
-        NonAllowedOption: if a non supported option is passed.
 ## EnvironmentVariable
 
 This class is a wrapper for device and application environment variable models.
@@ -458,7 +496,7 @@ Update a device environment variable.
 This class implements ssh key model for Resin Python SDK.
 ### Function: create(title, key)
 
-Create a ssh key.
+Create a ssh key. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     title (str): key title.
@@ -486,7 +524,7 @@ Get all ssh keys.
     list: list of ssh keys.
 ### Function: remove(id)
 
-Remove a ssh key.
+Remove a ssh key. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     id (str): key id.
@@ -525,7 +563,7 @@ This function retrieves Auth Token.
     str: Auth Token.
 
 #### Raises:
-    InvalidOption: if not logged in and there is no token in Settings. 
+    InvalidOption: if not logged in and there is no token in Settings.
 ### Function: get_user_id()
 
 This function retrieves current logged in user's id.
@@ -537,7 +575,7 @@ This function retrieves current logged in user's id.
     InvalidOption: if not logged in.
 ### Function: is_logged_in()
 
-This function checks if you're logged in 
+This function checks if you're logged in
 
 #### Returns:
     bool: True if logged in, False otherwise.
