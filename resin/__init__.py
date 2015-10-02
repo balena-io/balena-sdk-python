@@ -6,6 +6,7 @@ If you feel something is missing, not clear or could be improved, please don't
 hesitate to open an issue in GitHub, we'll be happy to help.
 """
 
+__version__ = '1.1.0'
 
 from .base_request import BaseRequest
 from .auth import Auth

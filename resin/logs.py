@@ -22,7 +22,7 @@ class Logs(object):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not hasattr(self, 'pubnub'):
-                pubnub_key = self.config.get_pubnub_keys()
+                pubnub_key = self.config.get_all()['pubnub']
                 self.pubnub = Pubnub(
                     publish_key=pubnub_key['publish_key'],
                     subscribe_key=pubnub_key['subscribe_key']

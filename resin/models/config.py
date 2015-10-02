@@ -36,19 +36,8 @@ class Config(object):
 
         if self._config is None:
             self._config = self.base_request.request(
-                '/config', 'GET', endpoint=self.settings.get('pine_endpoint'))
+                'config', 'GET', endpoint=self.settings.get('api_endpoint'))
         return self._config
-
-    def get_pubnub_keys(self):
-        """
-        Get PubNub keys from configuration.
-
-        Returns:
-            dict: including PubNub subscribe_key and publish_key.
-
-        """
-
-        return self._get_config('pubnub')
 
     def get_device_types(self):
         """
