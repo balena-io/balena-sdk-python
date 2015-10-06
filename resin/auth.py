@@ -105,7 +105,9 @@ class Auth(object):
 
         """
 
-        return self.token.has()
+        return self.base_request.request(
+            '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
+        )
 
     def get_token(self):
         """

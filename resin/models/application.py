@@ -120,7 +120,7 @@ class Application(object):
 
     def create(self, name, device_type):
         """
-        Create an application.
+        Create an application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
@@ -144,14 +144,14 @@ class Application(object):
             }
             return self.base_request.request(
                 'application', 'POST', data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=self.settings.get('pine_endpoint'), login=True
             )
         else:
             raise exceptions.InvalidDeviceType(device_type)
 
     def remove(self, name):
         """
-        Remove application.
+        Remove application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
@@ -164,12 +164,12 @@ class Application(object):
         }
         return self.base_request.request(
             'application', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=self.settings.get('pine_endpoint'), login=True
         )
 
     def restart(self, name):
         """
-        Restart application.
+        Restart application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
@@ -181,13 +181,13 @@ class Application(object):
 
         app = self.get(name)
         return self.base_request.request(
-            '/application/{0}/restart'.format(app['id']), 'POST',
-            endpoint=self.settings.get('pine_endpoint')
+            'application/{0}/restart'.format(app['id']), 'POST',
+            endpoint=self.settings.get('api_endpoint'), login=True
         )
 
     def get_api_key(self, name):
         """
-        Get the API key for a specific application.
+        Get the API key for a specific application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
@@ -202,6 +202,6 @@ class Application(object):
 
         app = self.get(name)
         return self.base_request.request(
-            '/application/{0}/generate-api-key'.format(app['id']), 'POST',
-            endpoint=self.settings.get('pine_endpoint')
+            'application/{0}/generate-api-key'.format(app['id']), 'POST',
+            endpoint=self.settings.get('api_endpoint'), login=True
         )

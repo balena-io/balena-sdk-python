@@ -13,14 +13,6 @@ NETWORK_TYPES = [
     NETWORK_ETHERNET
 ]
 
-VALID_OPTIONS = [
-    'network',
-    'appId',
-    'wifiSsid',
-    'wifiKey',
-    'appUpdatePollInterval'
-]
-
 
 class DeviceOs(object):
     """
@@ -34,7 +26,7 @@ class DeviceOs(object):
 
     def download(self, raw=None, **data):
         """
-        Download an OS image.
+        Download an OS image. This function only works if you log in using credentials or Auth Token.
 
         Args:
             raw (bool): determining function return value.
@@ -54,7 +46,7 @@ class DeviceOs(object):
         self.params = self.parse_params(**data)
         response = self.base_request.request(
             'download', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), stream=True
+            endpoint=self.settings.get('api_endpoint'), stream=True, login=True
         )
         if raw:
             # return urllib3.HTTPResponse object
@@ -75,7 +67,6 @@ class DeviceOs(object):
             Raise:
                 MissingOption: if mandatory option are missing.
                 InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
-                NonAllowedOption: if a non supported option is passed.
 
         """
 
@@ -99,9 +90,5 @@ class DeviceOs(object):
 
             # if 'wifiKey' not in params:
             #    raise exceptions.MissingOption('wifiKey')
-
-        invalid_params = Set(params).difference(Set(VALID_OPTIONS))
-        if invalid_params:
-            raise exceptions.NonAllowedOption(list(invalid_params))
 
         return params

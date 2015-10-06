@@ -8,13 +8,15 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
+import resin
+
 setup(
     name='resin-sdk',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.0.3',
+    version=resin.__version__,
 
     description='Resin.io SDK for Python',
 

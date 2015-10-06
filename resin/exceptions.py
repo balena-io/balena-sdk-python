@@ -137,10 +137,10 @@ class DeviceNotFound(Exception):
 
     """
 
-    def __init__(self):
+    def __init__(self, uuid):
         self.code = 'DeviceNotFound'
         self.exit_code = 1
-        self.message = Message.DEVICE_NOT_FOUND.format(device=device)
+        self.message = Message.DEVICE_NOT_FOUND.format(uuid=uuid)
 
 
 class KeyNotFound(Exception):
@@ -200,6 +200,23 @@ class NotLoggedIn(Exception):
         self.message = Message.NOT_LOGGED_IN
 
 
+class Unauthorized(Exception):
+    """
+    Exception when no user logged in and no Resin API Key provided.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        self.code = 'Unauthorized'
+        self.exit_code = 1
+        self.message = Message.UNAUTHORIZED
+
+
 class LoginFailed(Exception):
     """
     Exception when login unsuccessful.
@@ -235,3 +252,23 @@ class DeviceOffline(Exception):
         self.code = 'DeviceOffline'
         self.exit_code = 1
         self.message = Message.DEVICE_OFFLINE.format(uuid=uuid)
+
+
+class DeviceNotWebAccessible(Exception):
+    """
+    Exception when a device is not web accessible.
+
+    Args:
+        uuid (str): device uuid.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, uuid):
+        self.code = 'DeviceNotWebAccessible'
+        self.exit_code = 1
+        self.message = Message.DEVICE_NOT_WEB_ACCESSIBLE.format(uuid=uuid)

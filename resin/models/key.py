@@ -60,7 +60,7 @@ class Key(object):
 
     def remove(self, id):
         """
-        Remove a ssh key.
+        Remove a ssh key. This function only works if you log in using credentials or Auth Token.
 
         Args:
             id (str): key id.
@@ -73,12 +73,12 @@ class Key(object):
         }
         return self.base_request.request(
             'user__has__public_key', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=self.settings.get('pine_endpoint'), login=True
         )
 
     def create(self, title, key):
         """
-        Create a ssh key.
+        Create a ssh key. This function only works if you log in using credentials or Auth Token.
 
         Args:
             title (str): key title.
@@ -99,6 +99,6 @@ class Key(object):
         }
         key = self.base_request.request(
             'user__has__public_key', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=self.settings.get('pine_endpoint'), login=True
         )
         return json.loads(key)['id']

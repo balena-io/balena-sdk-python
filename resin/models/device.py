@@ -225,7 +225,7 @@ class Device(object):
 
     def remove(self, uuid):
         """
-        Remove a device.
+        Remove a device. This function only works if you log in using credentials or Auth Token.
 
         Args:
             uuid (str): device uuid.
@@ -238,12 +238,12 @@ class Device(object):
         }
         return self.base_request.request(
             'device', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=self.settings.get('pine_endpoint'), login=True
         )
 
     def identify(self, uuid):
         """
-        Identify device.
+        Identify device. This function only works if you log in using credentials or Auth Token.
 
         Args:
             uuid (str): device uuid.
@@ -254,8 +254,8 @@ class Device(object):
             'uuid': uuid
         }
         return self.base_request.request(
-            '/blink', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            'blink', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint'), login=True
         )
 
     def rename(self, uuid, new_name):
@@ -431,7 +431,7 @@ class Device(object):
 
     def register(self, app_name, uuid):
         """
-        Register a new device with a Resin.io application.
+        Register a new device with a Resin.io application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             app_name (str): application name.
@@ -445,8 +445,8 @@ class Device(object):
         user_id = self.token.get_user_id()
         application = self.application.get(app_name)
         api_key = self.base_request.request(
-            '/application/{0}/generate-api-key'.format(application['id']),
-            'POST', endpoint=self.settings.get('pine_endpoint')
+            'application/{0}/generate-api-key'.format(application['id']),
+            'POST', endpoint=self.settings.get('api_endpoint'), login=True
         )
 
         now = (datetime.utcnow() - datetime.utcfromtimestamp(0))
@@ -464,5 +464,110 @@ class Device(object):
 
         return self.base_request.request(
             'device', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )
+
+    def restart(self, uuid):
+        """
+        Restart a device. This function only works if you log in using credentials or Auth Token.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device = self.get(uuid)
+        return self.base_request.request(
+            'device/{0}/restart'.format(device['id']),
+            'POST', endpoint=self.settings.get('api_endpoint'), login=True
+        )
+
+    def has_device_url(self, uuid):
+        """
+        Check if a device is web accessible with device urls
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        return self.get(uuid)['is_web_accessible']
+
+    def get_device_url(self, uuid):
+        """
+        Get a device url for a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+        if not self.has_device_url:
+            raise exceptions.DeviceNotWebAccessible(uuid)
+
+        device_url_base = self.config.get_all()['deviceUrlsBase']
+        return 'https://{uuid}.{base_url}'.format(uuid=uuid, base_url=device_url_base)
+
+    def enable_device_url(self, uuid):
+        """
+        Enable device url for a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        if not self.has(uuid):
+            raise exceptions.DeviceNotFound(uuid)
+
+        params = {
+            'filter': 'uuid',
+            'eq': uuid
+        }
+        data = {
+            'is_web_accessible': True
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def disable_device_url(self, uuid):
+        """
+        Disable device url for a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        if not self.has(uuid):
+            raise exceptions.DeviceNotFound(uuid)
+
+        params = {
+            'filter': 'uuid',
+            'eq': uuid
+        }
+        data = {
+            'is_web_accessible': False
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
