@@ -10,6 +10,7 @@ from setuptools import setup, find_packages
 import os
 import re
 
+
 def get_version(package):
     """
     Return package version as listed in `__version__` in `init.py`.
