@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.1] - 2015-10-19
+
+### Changed
+
+- Update `setup.py` parse VERSION directly from `__init__.py` instead of importing resin.
+
+
 ## [1.1.0] - 2015-10-02
 
 ### Added

@@ -14,7 +14,7 @@ from .settings import Settings
 from .models import Models
 
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 
 class Resin(object):
