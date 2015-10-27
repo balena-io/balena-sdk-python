@@ -9,6 +9,7 @@ from .config import Config
 from .environment_variables import EnvironmentVariable
 from .key import Key
 from .device_os import DeviceOs
+from .supervisor import Supervisor
 
 
 class Models(object):
@@ -20,3 +21,4 @@ class Models(object):
         self.environment_variables = EnvironmentVariable()
         self.key = Key()
         self.device_os = DeviceOs()
+        self.supervisor = Supervisor()

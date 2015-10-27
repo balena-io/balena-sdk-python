@@ -35,4 +35,3 @@ class Resin(object):
         self.auth = Auth()
         self.models = Models()
         self.twofactor_auth = TwoFactor_Auth()
-

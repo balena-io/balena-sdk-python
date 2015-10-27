@@ -10,7 +10,6 @@ class TwoFactor_Auth(object):
 
     """
 
-
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
@@ -25,11 +24,11 @@ class TwoFactor_Auth(object):
 
         """
 
-    	try:
+        try:
             self.token.get_property('twoFactorRequired')
             return True
-    	except exceptions.InvalidOption:
-    		return False
+        except exceptions.InvalidOption:
+            return False
 
     def is_passed(self):
         """
@@ -42,7 +41,7 @@ class TwoFactor_Auth(object):
 
         if not self.is_enabled():
             return True
-    	return not self.token.get_property('twoFactorRequired')
+        return not self.token.get_property('twoFactorRequired')
 
     def challenge(self, token):
         """
