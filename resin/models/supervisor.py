@@ -26,10 +26,7 @@ class Supervisor(object):
 
     # _on_device = True, if RESIN_SUPERVISOR_ADDRESS and RESIN_SUPERVISOR_API_KEY env vars are avaiable => can communicate with both supervisor API endpoints on device or Resin API endpoints.
     # _on_device = False, if RESIN_SUPERVISOR_ADDRESS and RESIN_SUPERVISOR_API_KEY env vars are not avaiable => can only communicate with Resin API endpoints.
-    if RESIN_SUPERVISOR_ADDRESS is None or RESIN_SUPERVISOR_API_KEY is None:
-        _on_device = False
-    else:
-        _on_device = True
+    _on_device = all([RESIN_SUPERVISOR_ADDRESS, RESIN_SUPERVISOR_API_KEY])
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -86,10 +83,7 @@ class Supervisor(object):
 
         """
 
-        try:
-            self._on_device = bool(endpoint)
-        except ValueError:
-            exceptions.InvalidOption('endpoint')
+        self._on_device = bool(endpoint)
 
     def ping(self, device_id=None, app_id=None):
         """
@@ -146,7 +140,7 @@ class Supervisor(object):
 
         """
 
-        self._do_command(
+        return self._do_command(
             '{0}/blink'.format(self.SUPERVISOR_API_VERSION),
             device_id=device_id,
             app_id=app_id,
@@ -175,7 +169,7 @@ class Supervisor(object):
         else:
             data = {}
 
-        self._do_command(
+        return self._do_command(
             '{0}/update'.format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_id=device_id,
@@ -200,7 +194,7 @@ class Supervisor(object):
 
         """
 
-        self._do_command(
+        return self._do_command(
             '{0}/reboot'.format(self.SUPERVISOR_API_VERSION),
             device_id=device_id,
             app_id=app_id,
@@ -224,7 +218,7 @@ class Supervisor(object):
 
         """
 
-        self._do_command(
+        return self._do_command(
             '{0}/shutdown'.format(self.SUPERVISOR_API_VERSION),
             device_id=device_id,
             app_id=app_id,
@@ -252,7 +246,7 @@ class Supervisor(object):
             'appId': app_id
         }
 
-        self._do_command(
+        return self._do_command(
             '{0}/purge'.format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_id=device_id,
@@ -281,7 +275,7 @@ class Supervisor(object):
             'appId': app_id
         }
 
-        self._do_command(
+        return self._do_command(
             '{0}/restart'.format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_id=device_id,

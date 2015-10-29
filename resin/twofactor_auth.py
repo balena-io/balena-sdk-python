@@ -1,10 +1,14 @@
+import urlparse
+
+import pyotp
+
 from .base_request import BaseRequest
 from .token import Token
 from .settings import Settings
 from . import exceptions
 
 
-class TwoFactor_Auth(object):
+class TwoFactorAuth(object):
     """
     This class implements basic 2FA functionalities for Resin Python SDK.
 
@@ -17,7 +21,7 @@ class TwoFactor_Auth(object):
 
     def is_enabled(self):
         """
-        Check if two factor authentication is enabled.
+        Check if two-factor authentication is enabled.
 
         Returns:
             bool: True if enabled. Otherwise False.
@@ -32,7 +36,7 @@ class TwoFactor_Auth(object):
 
     def is_passed(self):
         """
-        Check if two factor authentication challenge was passed.
+        Check if two-factor authentication challenge was passed.
 
         Returns:
             bool: True if enabled. Otherwise False.
@@ -43,20 +47,53 @@ class TwoFactor_Auth(object):
             return True
         return not self.token.get_property('twoFactorRequired')
 
-    def challenge(self, token):
+    def challenge(self, code):
         """
-        Challenge two factor authentication.
+        Challenge two-factor authentication.
+        If your account has two-factor authentication enabled and logging in using credentials, you need to pass two-factor authentication before being allowed to use other functions.
 
         Args:
-            token (str): two factor authentication token.
+            code (str): two-factor authentication code.
 
         """
 
         data = {
-            'code': token
+            'code': code
         }
         token = self.base_request.request(
             'auth/totp/verify', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), login=True
         )
         self.token.set(token)
+
+    def generate_code(self, secret):
+        """
+        Generate two-factor authentication code.
+
+        Args:
+            secret (str): one time password authentication secret string.
+
+        Returns:
+            str: 6 digit two-factor authentication code.
+
+        """
+
+        totp = pyotp.TOTP(secret)
+        return totp.now()
+
+    def get_otpauth_secret(self):
+        """
+        Retrieve one time password authentication secret string.
+        This function only works if you disable two-factor authentication or log in using Auth Token from dashboard.
+
+        Returns:
+            str: one time password authentication secret string.
+
+        """
+
+        otp_auth_url = self.base_request.request(
+            'auth/totp/setup', 'GET',
+            endpoint=self.settings.get('api_endpoint'), login=True
+        )
+        tmp = urlparse.parse_qs(otp_auth_url)
+        return tmp['secret'][0]
