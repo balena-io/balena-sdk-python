@@ -28,7 +28,7 @@ class BaseRequest(object):
         return b'<{:s} at {:#x}>'.format(type(self).__name__, id(self))
 
     def __set_content_type(self, headers, ctype):
-        headers.update({'content-type': ctype})
+        headers.update({'Content-Type': ctype})
 
     def __set_authorization(self, headers):
         headers.update(
@@ -126,8 +126,9 @@ class BaseRequest(object):
         return request_method(url, headers=headers, data=data, stream=stream)
 
     def request(self, url, method, endpoint, params=None, data=None,
-                stream=None, auth=True, login=False):
-        api_key = self.util.get_api_key()
+                stream=None, auth=True, login=False, api_key=None):
+        if api_key is None:
+            api_key = self.util.get_api_key()
 
         # Some requests require logging in using credentials or Auth Token to process
         if login:
@@ -164,7 +165,7 @@ class BaseRequest(object):
 
         # 200: OK
         if response.status_code == 200 and response.content == 'OK':
-            return
+            return response.content
         if not response.ok:
             raise exceptions.RequestError(response._content)
 

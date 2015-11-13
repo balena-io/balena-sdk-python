@@ -12,6 +12,7 @@ from .token import Token
 from .logs import Logs
 from .settings import Settings
 from .models import Models
+from .twofactor_auth import TwoFactorAuth
 
 
 __version__ = '1.1.1'
@@ -33,3 +34,4 @@ class Resin(object):
         self.logs = Logs()
         self.auth = Auth()
         self.models = Models()
+        self.twofactor_auth = TwoFactorAuth()
