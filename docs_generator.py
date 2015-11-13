@@ -20,9 +20,11 @@ Table_Of_Content = [
     ('DeviceEnvVariable', TOC_L3),
     ('ApplicationEnvVariable', TOC_L3),
     ('Key', TOC_L2),
+    ('Supervisor', TOC_L2),
     ('Auth', TOC_L1),
     ('Logs', TOC_L1),
     ('Settings', TOC_L1),
+    ('TwoFactorAuth', TOC_L1)
 ]
 
 FUNCTION_NAME_TEMPLATE = "{f_name}({f_args})"
@@ -83,12 +85,16 @@ def main():
     print_functions(resin.models.environment_variables.DeviceEnvVariable)
     print(doc2md.doc2md(resin.models.key.Key.__doc__, 'Key', type=0))
     print_functions(resin.models.key.Key)
+    print(doc2md.doc2md(resin.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))
+    print_functions(resin.models.supervisor.Supervisor)
     print(doc2md.doc2md(resin.auth.Auth.__doc__, 'Auth', type=0))
     print_functions(resin.auth.Auth)
     print(doc2md.doc2md(resin.logs.Logs.__doc__, 'Logs', type=0))
     print_functions(resin.logs.Logs)
     print(doc2md.doc2md(resin.settings.Settings.__doc__, 'Settings', type=0))
     print_functions(resin.settings.Settings)
+    print(doc2md.doc2md(resin.twofactor_auth.TwoFactorAuth.__doc__, 'TwoFactorAuth', type=0))
+    print_functions(resin.twofactor_auth.TwoFactorAuth)
 
 if __name__ == '__main__':
     main()
