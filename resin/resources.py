@@ -23,3 +23,4 @@ class Message(object):
     LOGIN_FAILED = "Invalid credentials"
     DEVICE_OFFLINE = "Device is offline: {uuid}"
     DEVICE_NOT_WEB_ACCESSIBLE = "Device is not web accessible: {uuid}"
+    INCOMPATIBLE_APPLICATION = "Incompatible application: {application}"
