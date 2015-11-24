@@ -51,29 +51,29 @@ def code_block(lines, language=''):
     """
     return ['```' + language] + lines + ['```']
 
-
-def doctest2md(lines):
-    """
-    Convert the given doctest to a syntax highlighted markdown segment.
-    """
-    is_only_code = True
-    lines = unindent(lines)
-    for line in lines:
-        if not line.startswith('>>> ') and not line.startswith(
-                '... ') and line not in ['>>>', '...']:
-            is_only_code = False
-            break
-    if is_only_code:
-        orig = lines
-        lines = []
-        for line in orig:
-            lines.append(line[4:])
-    return lines
+# Since we don't want to omit `>>>` in code block, the two following methods will be commented out.
+# def doctest2md(lines):
+#    """
+#    Convert the given doctest to a syntax highlighted markdown segment.
+#    """
+#    is_only_code = True
+#    lines = unindent(lines)
+#    for line in lines:
+#        if not line.startswith('>>> ') and not line.startswith(
+#                '... ') and line not in ['>>>', '...']:
+#            is_only_code = False
+#            break
+#    if is_only_code:
+#        orig = lines
+#        lines = []
+#        for line in orig:
+#            lines.append(line[4:])
+#    return lines
 
 
 def doc_code_block(lines, language):
     if language == 'python':
-        lines = doctest2md(lines)
+        lines = unindent(lines)
     return code_block(lines, language)
 
 _reg_section = re.compile('^#+ ')
@@ -158,6 +158,10 @@ def _doc2md(lines):
         elif trimmed.startswith('$ '):
             is_code = True
             language = 'bash'
+            code = [line]
+        elif trimmed.startswith('# '):
+            is_code = True
+            language = 'python'
             code = [line]
         elif level > 0:
             md += [make_heading(level, line)]

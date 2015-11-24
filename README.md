@@ -28,6 +28,17 @@ Platforms
 
 We also support [NodeJS SDK](https://github.com/resin-io/resin-sdk).
 
+Basic Usage
+-----------
+
+```python
+>>> from resin import Resin
+>>> resin = Resin()
+>>> credentials = {'username':<your email>, 'password':<your password>}
+>>> resin.auth.login(**credentials)
+...
+```
+
 Documentation
 -------------
 

@@ -32,6 +32,10 @@ class Config(object):
         Returns:
             dict: configuration information.
 
+        Examples:
+            >>> resin.models.config.get_all()
+            { all configuration details }
+
         """
 
         if self._config is None:
@@ -45,6 +49,10 @@ class Config(object):
 
         Returns:
             list: device types information.
+
+        Examples:
+            >>> resin.models.config.get_device_types()
+            [ all configuration details ]
 
         """
 

@@ -80,6 +80,10 @@ class Settings(object):
         Returns:
             bool: True if exists, False otherwise.
 
+        Examples:
+            >>> resin.settings.has('api_endpoint')
+            True
+
         """
 
         self.__read_settings()
@@ -100,6 +104,10 @@ class Settings(object):
         Raises:
             InvalidOption: If getting a non-existent setting.
 
+        Examples:
+            >>> resin.settings.get('api_endpoint')
+            'https://api.resin.io/'
+
         """
 
         try:
@@ -115,6 +123,11 @@ class Settings(object):
         Returns:
             dict: all settings.
 
+        Examples:
+            >>> resin.settings.get_all()
+            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.resin.io/', 'data_directory': '/root/.resin', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.resin/cache', 'pine_endpoint': 'https://api.resin.io/ewa/'}
+
+
         """
 
         self.__read_settings()
@@ -127,6 +140,10 @@ class Settings(object):
         Args:
             key (str): setting.
             value (str): setting value.
+
+        Examples:
+            >>> resin.settings.set(key='tmp',value='123456')
+            (Empty Return)
 
         """
 
@@ -142,6 +159,14 @@ class Settings(object):
 
         Returns:
             bool: True if successful, False otherwise.
+
+        Examples:
+            # Remove an existing key from settings
+            >>> resin.settings.remove('tmp')
+            True
+            # Remove a non-existing key from settings
+            >>> resin.settings.remove('tmp1')
+            False
 
         """
 

@@ -41,6 +41,15 @@ class DeviceOs(object):
         Notes:
             default OS image file name can be found in response headers.
 
+        Examples:
+            >>> data = {'appId':'9020', 'network':'ethernet'}
+            >>> response = resin.models.device_os.download(**data)
+            >>> type(response)
+            <class 'requests.models.Response'>
+            >>> response['headers']
+            >>> response.headers
+            {'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'content-disposition': 'attachment; filename="resin-RPI1-0.1.0-1.1.0-7588720e0262.img"', 'content-encoding': 'gzip', 'transfer-encoding': 'chunked', 'x-powered-by': 'Express', 'connection': 'keep-alive', 'access-control-allow-credentials': 'true', 'date': 'Mon, 23 Nov 2015 15:13:39 GMT', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'content-type': 'application/octet-stream', 'x-frame-options': 'DENY'}
+
         """
 
         self.params = self.parse_params(**data)
@@ -64,9 +73,9 @@ class DeviceOs(object):
         Returns:
             dict: validated parameters.
 
-            Raise:
-                MissingOption: if mandatory option are missing.
-                InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
+        Raises:
+            MissingOption: if mandatory option are missing.
+            InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
 
         """
 

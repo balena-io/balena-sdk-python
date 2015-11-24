@@ -43,12 +43,11 @@ class Logs(object):
             For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#subscribe
 
         Examples:
+            # Define callback and error.
             >>> def callback(message, channel):
-            ... print(message)
-
+            ...     print(message)
             >>> def error(message):
-            ... print('Error:'+ str(message))
-
+            ...     print('Error:'+ str(message))
             >>> Logs.subscribe(uuid=uuid, callback=callback, error=error)
 
         """
@@ -68,12 +67,11 @@ class Logs(object):
             For more details about callbacks in pubnub subscribe, visit here: https://www.pubnub.com/docs/python/api-reference#history
 
         Examples:
+            # Define callback and error.
             >>> def callback(message):
-            ... print(message)
-
+            ...     print(message)
             >>> def error(message):
-            ... print('Error:'+ str(message))
-
+            ...     print('Error:'+ str(message))
             Logs.history(uuid=uuid, callback=callback, error=error)
 
         """

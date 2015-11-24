@@ -100,6 +100,10 @@ class Supervisor(object):
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not set.
 
+        Examples:
+            >>> resin.models.supervisor.ping(device_id='122950', app_id='9020')
+            'OK'
+
         """
 
         if not self._on_device:
@@ -138,6 +142,10 @@ class Supervisor(object):
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
 
+        Examples:
+            >>> resin.models.supervisor.blink(device_id='122950', app_id='9020')
+            'OK'
+
         """
 
         return self._do_command(
@@ -159,6 +167,14 @@ class Supervisor(object):
 
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.update(device_id='122950', app_id='9020')
+            (Empty Response)
+
+            # Force an update
+            >>> resin.models.supervisor.update(device_id='122950', app_id='9020', force=True)
+            (Empty Response)
 
         """
 
@@ -192,6 +208,10 @@ class Supervisor(object):
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
 
+        Examples:
+            >>> resin.models.supervisor.reboot(device_id='122950', app_id='9020')
+            {u'Data': u'OK', u'Error': u''}
+
         """
 
         return self._do_command(
@@ -216,6 +236,10 @@ class Supervisor(object):
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
 
+        Examples:
+            >>> resin.models.supervisor.shutdown(device_id='121867', app_id='8362')
+            {u'Data': u'OK', u'Error': u''}
+
         """
 
         return self._do_command(
@@ -239,6 +263,10 @@ class Supervisor(object):
 
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.purge(device_id='122950', app_id='9020')
+            {u'Data': u'OK', u'Error': u''}
 
         """
 
@@ -268,6 +296,10 @@ class Supervisor(object):
 
         Raises:
             InvalidOption: if the endpoint is Resin API proxy endpoint and device_id or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.restart(device_id='122950', app_id='9020')
+            'OK'
 
         """
 

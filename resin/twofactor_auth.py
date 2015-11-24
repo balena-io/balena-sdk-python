@@ -26,6 +26,10 @@ class TwoFactorAuth(object):
         Returns:
             bool: True if enabled. Otherwise False.
 
+        Examples:
+            >>> resin.twofactor_auth.is_enabled()
+            False
+
         """
 
         try:
@@ -41,6 +45,10 @@ class TwoFactorAuth(object):
         Returns:
             bool: True if enabled. Otherwise False.
 
+        Examples:
+            >>> resin.twofactor_auth.is_passed()
+            True
+
         """
 
         if not self.is_enabled():
@@ -54,6 +62,17 @@ class TwoFactorAuth(object):
 
         Args:
             code (str): two-factor authentication code.
+
+        Examples:
+            # You need to enable two-factor authentication on dashboard first.
+            # Check if two-factor authentication is passed for current session.
+            >>> resin.twofactor_auth.is_passed()
+            False
+            >>> secret = resin.twofactor_auth.get_otpauth_secret()
+            >>> resin.twofactor_auth.challenge(resin.twofactor_auth.generate_code(secret))
+            # Check again if two-factor authentication is passed for current session.
+            >>> resin.twofactor_auth.is_passed()
+            True
 
         """
 
@@ -76,6 +95,11 @@ class TwoFactorAuth(object):
         Returns:
             str: 6 digit two-factor authentication code.
 
+        Examples:
+            >>> secret = resin.twofactor_auth.get_otpauth_secret()
+            >>> resin.twofactor_auth.generate_code(secret)
+            '259975'
+
         """
 
         totp = pyotp.TOTP(secret)
@@ -88,6 +112,10 @@ class TwoFactorAuth(object):
 
         Returns:
             str: one time password authentication secret string.
+
+        Examples:
+            >>> resin.twofactor_auth.get_otpauth_secret()
+            'WGURB3DIUWXTGQDBGFNGKDLV2L3LXOVN'
 
         """
 
