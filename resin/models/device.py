@@ -571,3 +571,37 @@ class Device(object):
             'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def move(self, uuid, app_name):
+        """
+        Move a device to another application.
+
+        Args:
+            uuid (str): device uuid.
+            app_name (str): application name.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+            ApplicationNotFound: if application couldn't be found.
+            IncompatibleApplication: if moving a device to an application with different device-type.
+
+        """
+
+        device = self.get(uuid)
+        application = self.application.get(app_name)
+
+        if device['device_type'] != application['device_type']:
+            raise exceptions.IncompatibleApplication(app_name)
+
+        params = {
+            'filter': 'uuid',
+            'eq': uuid
+        }
+        data = {
+            'application': application['id']
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )

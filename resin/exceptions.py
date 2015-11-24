@@ -272,3 +272,23 @@ class DeviceNotWebAccessible(Exception):
         self.code = 'DeviceNotWebAccessible'
         self.exit_code = 1
         self.message = Message.DEVICE_NOT_WEB_ACCESSIBLE.format(uuid=uuid)
+
+
+class IncompatibleApplication(Exception):
+    """
+    Exception when moving a device to an application with different device-type.
+
+    Args:
+        application (str): application name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, application):
+        self.code = 'IncompatibleApplication'
+        self.exit_code = 1
+        self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
