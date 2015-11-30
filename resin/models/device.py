@@ -37,6 +37,10 @@ class Device(object):
         Raises:
             DeviceNotFound: if device couldn't be found.
 
+        Examples:
+            >>> resin.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            {u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_seen_time': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}
+
         """
 
         params = {
@@ -58,6 +62,10 @@ class Device(object):
         Returns:
             list: list contains info of devices.
 
+        Examples:
+            >>> resin.models.device.get_all()
+            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_seen_time': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+
         """
 
         return self.base_request.request(
@@ -72,6 +80,10 @@ class Device(object):
 
         Returns:
             list: list contains info of devices.
+
+        Examples:
+            >>> resin.models.device.get_all_by_application('RPI1')
+            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_seen_time': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
 
         """
 
@@ -104,6 +116,10 @@ class Device(object):
 
         Returns:
             list: list contains info of devices.
+
+        Examples:
+            >>> resin.models.device.get_by_name('floral-mountain')
+            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_seen_time': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
 
         """
 
@@ -248,6 +264,10 @@ class Device(object):
         Args:
             uuid (str): device uuid.
 
+        Examples:
+            >>> resin.models.device.identify('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'OK'
+
         """
 
         data = {
@@ -268,6 +288,13 @@ class Device(object):
 
         Raises:
             DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.rename('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'python-sdk-test-device')
+            'OK'
+            # Check device name.
+            >>> resin.models.device.get_name('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            u'python-sdk-test-device'
 
         """
 
@@ -296,6 +323,10 @@ class Device(object):
 
         Raises:
             DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test device')
+            'OK'
 
         """
 
@@ -327,6 +358,12 @@ class Device(object):
         Raises:
             InvalidDeviceType: if device type slug is not supported.
 
+        Examples:
+            >>> resin.models.device.get_display_name('intel-edison')
+            u'Intel Edison'
+            >>> resin.models.device.get_display_name('raspberry-pi')
+            u'Raspberry Pi'
+
         """
 
         device_types = self.config.get_device_types()
@@ -349,6 +386,12 @@ class Device(object):
 
         Raises:
             InvalidDeviceType: if device type name is not supported.
+
+        Examples:
+            >>> resin.models.device.get_device_slug('Intel Edison')
+            u'intel-edison'
+            >>> resin.models.device.get_device_slug('Raspberry Pi')
+            u'raspberry-pi'
 
         """
 
@@ -418,6 +461,10 @@ class Device(object):
         Returns:
             str: a generated UUID.
 
+        Examples:
+            >>> resin.models.device.generate_uuid()
+            '19dcb86aa288c66ffbd261c7bcd46117c4c25ec655107d7302aef88b99d14c'
+
         """
 
         # From resin-sdk
@@ -438,7 +485,12 @@ class Device(object):
             uuid (str): device uuid.
 
         Returns:
-            dict: dictionary contains device info.
+            str: dictionary contains device info (can be parsed to dict).
+
+        Examples:
+            >>> device_uuid = resin.models.device.generate_uuid()
+            >>> resin.models.device.register('RPI1',device_uuid)
+            '{"id":122950,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"name":"floral-mountain","device_type":"raspberry-pi","uuid":"8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143","commit":null,"note":null,"status":null,"is_online":false,"last_seen_time":"1970-01-01T00:00:00.000Z","ip_address":null,"vpn_address":null,"public_address":"","os_version":null,"supervisor_version":null,"supervisor_release":null,"provisioning_progress":null,"provisioning_state":null,"download_progress":null,"is_web_accessible":false,"longitude":"","latitude":"","location":"","logs_channel":null,"__metadata":{"uri":"/ewa/device(122950)","type":""}}'
 
         """
 
@@ -477,6 +529,10 @@ class Device(object):
         Raises:
             DeviceNotFound: if device couldn't be found.
 
+        Examples:
+            >>> resin.models.device.restart('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'OK'
+
         """
 
         device = self.get(uuid)
@@ -495,6 +551,10 @@ class Device(object):
         Raises:
             DeviceNotFound: if device couldn't be found.
 
+        Examples:
+            >>> resin.models.device.has_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            False
+
         """
 
         return self.get(uuid)['is_web_accessible']
@@ -508,6 +568,10 @@ class Device(object):
 
         Raises:
             DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.get_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'https://8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143.resindevice.io'
 
         """
         if not self.has_device_url:
@@ -525,6 +589,17 @@ class Device(object):
 
         Raises:
             DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            # Check if device url enabled.
+            >>> resin.models.device.has_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            False
+            # Enable device url.
+            >>> resin.models.device.enable_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'OK'
+            # Check device url again.
+            >>> resin.models.device.has_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            True
 
         """
 
@@ -553,6 +628,10 @@ class Device(object):
 
         Raises:
             DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.disable_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'OK'
 
         """
 
@@ -584,6 +663,10 @@ class Device(object):
             DeviceNotFound: if device couldn't be found.
             ApplicationNotFound: if application couldn't be found.
             IncompatibleApplication: if moving a device to an application with different device-type.
+
+        Examples:
+            >>> resin.models.device.move('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'RPI1Test')
+            'OK'
 
         """
 

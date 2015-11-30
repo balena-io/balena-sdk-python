@@ -37,6 +37,10 @@ class DeviceEnvVariable(object):
         Returns:
             list: device environment variables.
 
+        Examples:
+            >>> resin.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            [{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'RESIN_DEVICE_RESTART'}]
+
         """
 
         device = self.device.get(uuid)
@@ -59,7 +63,11 @@ class DeviceEnvVariable(object):
             value (str): environment variable value.
 
         Returns:
-            dict: new device environment variable info.
+            str: new device environment variable info.
+
+        Examples:
+            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','tmp-env-var', 'test')
+            '{"id":2184,"device":{"__deferred":{"uri":"/ewa/device(122950)"},"__id":122950},"env_var_name":"tmp-env-var","value":"test","__metadata":{"uri":"/ewa/device_environment_variable(2184)","type":""}}'
 
         """
 
@@ -82,6 +90,10 @@ class DeviceEnvVariable(object):
             var_id (str): environment variable id.
             value (str): new environment variable value.
 
+        Examples:
+            >>> resin.models.environment_variables.device.update(2184, 'new value')
+            'OK'
+
         """
 
         params = {
@@ -102,6 +114,10 @@ class DeviceEnvVariable(object):
 
         Args:
             var_id (str): environment variable id.
+
+        Examples:
+            >>> resin.models.environment_variables.device.remove(2184)
+            'OK'
 
         """
 
@@ -142,6 +158,10 @@ class ApplicationEnvVariable(object):
         Returns:
             list: application environment variables.
 
+        Examples:
+            >>> resin.models.environment_variables.application.get_all(9020)
+            [{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'RESIN_RESTART'}]
+
         """
 
         params = {
@@ -163,7 +183,11 @@ class ApplicationEnvVariable(object):
             value (str): environment variable value.
 
         Returns:
-            dict: new application environment info.
+            str: new application environment info.
+
+        Examples:
+            >>> resin.models.environment_variables.application.create(9020, 'app-test-env', 'test')
+            '{"id":5652,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"name":"app-test-env","value":"test","__metadata":{"uri":"/ewa/environment_variable(5652)","type":""}}'
 
         """
 
@@ -184,6 +208,10 @@ class ApplicationEnvVariable(object):
         Args:
             var_id (str): environment variable id.
             value (str): new environment variable value.
+
+        Examples:
+            >>> resin.models.environment_variables.application.update(5652, 'new value')
+            'OK'
 
         """
 
@@ -207,6 +235,10 @@ class ApplicationEnvVariable(object):
         Args:
             var_id (str): environment variable id.
 
+        Examples:
+            >>> resin.models.environment_variables.application.remove(5652)
+            'OK'
+
         """
 
         params = {
@@ -227,6 +259,12 @@ class ApplicationEnvVariable(object):
 
         Returns:
             bool: True if system variable, False otherwise.
+
+        Examples:
+            >>> resin.models.environment_variables.application.is_system_variable('RESIN_API_KEY')
+            True
+            >>> resin.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
+            False
 
         """
 

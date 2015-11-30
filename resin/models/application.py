@@ -22,6 +22,10 @@ class Application(object):
         Returns:
             list: list contains info of applications.
 
+        Examples:
+            >>> resin.models.application.get_all()
+            [{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}, {u'app_name': u'RPI2', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9019)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi2.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi2', u'commit': None, u'id': 9019}]
+
         """
 
         return self.base_request.request(
@@ -40,6 +44,10 @@ class Application(object):
 
         Raises:
             ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >>> resin.models.application.get('RPI1')
+            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
 
         """
 
@@ -65,6 +73,10 @@ class Application(object):
         Returns:
             bool: True if application exists, False otherwise.
 
+        Examples:
+            >>> resin.models.application.has('RPI1')
+            True
+
         """
 
         params = {
@@ -83,6 +95,10 @@ class Application(object):
 
         Returns:
             bool: True if user has any applications, False otherwise.
+
+        Examples:
+            >>> resin.models.application.has_any()
+            True
 
         """
 
@@ -103,6 +119,10 @@ class Application(object):
 
         Raises:
             ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >>> resin.models.application.get_by_id(9020)
+            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
 
         """
 
@@ -132,6 +152,10 @@ class Application(object):
         Raises:
             InvalidDeviceType: if device type is not supported.
 
+        Examples:
+            >>> resin.models.application.create('Edison','Intel Edison')
+            '{"id":9021,"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"app_name":"Edison","git_repository":"g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git","commit":null,"device_type":"intel-edison","__metadata":{"uri":"/ewa/application(9021)","type":""}}'
+
         """
 
         device_types = self.config.get_device_types()
@@ -156,6 +180,10 @@ class Application(object):
         Args:
             name (str): application name.
 
+        Examples:
+            >>> resin.models.application.remove('Edison')
+            'OK'
+
         """
 
         params = {
@@ -177,6 +205,10 @@ class Application(object):
         Raises:
             ApplicationNotFound: if application couldn't be found.
 
+        Examples:
+            >>> resin.models.application.restart('RPI1')
+            'OK'
+
         """
 
         app = self.get(name)
@@ -197,6 +229,10 @@ class Application(object):
 
         Raises:
             ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >>> resin.models.application.get_api_key('RPI1')
+            u'XbKn5GhK4YieOLpX4KjQTqjqo1moRWmP'
 
         """
 
