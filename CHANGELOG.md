@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.1] - 2015-12-01
+
+### Changed
+
+- Fix bug with return value of `resin.auth.is_logged_in()`.
+
+
 ## [1.3.0] - 2015-11-26
 
 ### Added
