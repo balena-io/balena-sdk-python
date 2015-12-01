@@ -134,9 +134,13 @@ class Auth(object):
 
         """
 
-        return self.base_request.request(
-            '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
-        )
+        try:
+            self.base_request.request(
+                '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
+            )
+            return True
+        except exceptions.RequestError:
+            return False
 
     def get_token(self):
         """
