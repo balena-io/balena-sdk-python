@@ -24,3 +24,4 @@ class Message(object):
     DEVICE_OFFLINE = "Device is offline: {uuid}"
     DEVICE_NOT_WEB_ACCESSIBLE = "Device is not web accessible: {uuid}"
     INCOMPATIBLE_APPLICATION = "Incompatible application: {application}"
+    INVALID_SETTINGS = "Settings file not found or not in proper format. Rewriting default settings to: {path}"

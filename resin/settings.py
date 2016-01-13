@@ -1,8 +1,10 @@
 import ConfigParser
 import os.path as Path
 import os
+import shutil
 
 from . import exceptions
+from .resources import Message
 
 
 class Settings(object):
@@ -35,15 +37,22 @@ class Settings(object):
                                             'cache')
 
     def __init__(self):
-        if Path.isdir(self._setting['data_directory']):
-            if Path.isfile(Path.join(self._setting['data_directory'],
-                                     self.CONFIG_FILENAME)):
-                self.__read_settings()
-            else:
-                self.__write_settings()
-        else:
-            # data directory doesn't exist
+        config_file_path = Path.join(self._setting['data_directory'],
+                                     self.CONFIG_FILENAME)
+        try:
+            self.__read_settings()
+        except:
+            # Backup old settings file if it exists.
+            try:
+                if Path.isfile(config_file_path):
+                    shutil.move(config_file_path,
+                                Path.join(self._setting['data_directory'],
+                                          "{0}.{1}".format(self.CONFIG_FILENAME,
+                                                           'old')))
+            except OSError:
+                pass
             self.__write_settings()
+            print(Message.INVALID_SETTINGS.format(path=config_file_path))
 
     def __write_settings(self):
         config = ConfigParser.ConfigParser()

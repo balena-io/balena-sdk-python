@@ -233,9 +233,8 @@ class Device(object):
 
         if self.is_online(uuid):
             device = self.get(uuid)
-            ips = device['ip_address'].split()
-            ips.remove(device['vpn_address'])
-            return ips
+            return list(set(device['ip_address'].split()) -
+                        set(device['vpn_address'].split()))
         else:
             raise exceptions.DeviceOffline(uuid)
 
