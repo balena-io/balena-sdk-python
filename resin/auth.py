@@ -12,7 +12,6 @@ class Auth(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
         self.token = Token()
 
     def login(self, **credentials):
@@ -115,7 +114,7 @@ class Auth(object):
 
         return self.base_request.request(
             'login_', 'POST', data=credentials,
-            endpoint=self.settings.get('api_endpoint'), auth=False
+            endpoint=Settings.get('api_endpoint'), auth=False
         )
 
     def is_logged_in(self):
@@ -136,7 +135,7 @@ class Auth(object):
 
         try:
             self.base_request.request(
-                '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
+                '/whoami', 'GET', endpoint=Settings.get('api_endpoint')
             )
             return True
         except exceptions.RequestError:
@@ -240,5 +239,5 @@ class Auth(object):
 
         return self.base_request.request(
             'user/register', 'POST', data=credentials,
-            endpoint=self.settings.get('api_endpoint'), auth=False
+            endpoint=Settings.get('api_endpoint'), auth=False
         )

@@ -25,7 +25,6 @@ class DeviceEnvVariable(object):
     def __init__(self):
         self.base_request = BaseRequest()
         self.device = Device()
-        self.settings = Settings()
 
     def get_all(self, uuid):
         """
@@ -50,7 +49,7 @@ class DeviceEnvVariable(object):
         }
         return self.base_request.request(
             'device_environment_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
 
     def create(self, uuid, name, value):
@@ -79,7 +78,7 @@ class DeviceEnvVariable(object):
         }
         return self.base_request.request(
             'device_environment_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def update(self, var_id, value):
@@ -105,7 +104,7 @@ class DeviceEnvVariable(object):
         }
         return self.base_request.request(
             'device_environment_variable', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def remove(self, var_id):
@@ -127,7 +126,7 @@ class DeviceEnvVariable(object):
         }
         return self.base_request.request(
             'device_environment_variable', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
 
@@ -146,7 +145,6 @@ class ApplicationEnvVariable(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
 
     def get_all(self, app_id):
         """
@@ -170,7 +168,7 @@ class ApplicationEnvVariable(object):
         }
         return self.base_request.request(
             'environment_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
 
     def create(self, app_id, name, value):
@@ -198,7 +196,7 @@ class ApplicationEnvVariable(object):
         }
         return self.base_request.request(
             'environment_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def update(self, var_id, value):
@@ -225,7 +223,7 @@ class ApplicationEnvVariable(object):
         }
         return self.base_request.request(
             'environment_variable', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def remove(self, var_id):
@@ -247,7 +245,7 @@ class ApplicationEnvVariable(object):
         }
         return self.base_request.request(
             'environment_variable', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def is_system_variable(self, variable):

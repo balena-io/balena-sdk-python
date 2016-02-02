@@ -12,7 +12,6 @@ class Application(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
         self.config = Config()
 
     def get_all(self):
@@ -29,7 +28,7 @@ class Application(object):
         """
 
         return self.base_request.request(
-            'application', 'GET', endpoint=self.settings.get('pine_endpoint')
+            'application', 'GET', endpoint=Settings.get('pine_endpoint')
         )['d']
 
     def get(self, name):
@@ -58,7 +57,7 @@ class Application(object):
         try:
             return self.base_request.request(
                 'application', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )['d'][0]
         except IndexError:
             raise exceptions.ApplicationNotFound(name)
@@ -85,7 +84,7 @@ class Application(object):
         }
         app = self.base_request.request(
             'application', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
         return bool(app)
 
@@ -103,7 +102,7 @@ class Application(object):
         """
 
         apps = self.base_request.request(
-            'application', 'GET', endpoint=self.settings.get('pine_endpoint')
+            'application', 'GET', endpoint=Settings.get('pine_endpoint')
         )['d']
         return bool(apps)
 
@@ -133,7 +132,7 @@ class Application(object):
         try:
             return self.base_request.request(
                 'application', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )['d'][0]
         except IndexError:
             raise exceptions.ApplicationNotFound(app_id)
@@ -168,7 +167,7 @@ class Application(object):
             }
             return self.base_request.request(
                 'application', 'POST', data=data,
-                endpoint=self.settings.get('pine_endpoint'), login=True
+                endpoint=Settings.get('pine_endpoint'), login=True
             )
         else:
             raise exceptions.InvalidDeviceType(device_type)
@@ -192,7 +191,7 @@ class Application(object):
         }
         return self.base_request.request(
             'application', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            endpoint=Settings.get('pine_endpoint'), login=True
         )
 
     def restart(self, name):
@@ -214,7 +213,7 @@ class Application(object):
         app = self.get(name)
         return self.base_request.request(
             'application/{0}/restart'.format(app['id']), 'POST',
-            endpoint=self.settings.get('api_endpoint'), login=True
+            endpoint=Settings.get('api_endpoint'), login=True
         )
 
     def get_api_key(self, name):
@@ -239,5 +238,5 @@ class Application(object):
         app = self.get(name)
         return self.base_request.request(
             'application/{0}/generate-api-key'.format(app['id']), 'POST',
-            endpoint=self.settings.get('api_endpoint'), login=True
+            endpoint=Settings.get('api_endpoint'), login=True
         )

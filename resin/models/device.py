@@ -20,7 +20,6 @@ class Device(object):
     def __init__(self):
         self.base_request = BaseRequest()
         self.config = Config()
-        self.settings = Settings()
         self.token = Token()
         self.application = Application()
 
@@ -50,7 +49,7 @@ class Device(object):
         try:
             return self.base_request.request(
                 'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )['d'][0]
         except IndexError:
             raise exceptions.DeviceNotFound(uuid)
@@ -69,7 +68,7 @@ class Device(object):
         """
 
         return self.base_request.request(
-            'device', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
+            'device', 'GET', endpoint=Settings.get('pine_endpoint'))['d']
 
     def get_all_by_application(self, name):
         """
@@ -94,7 +93,7 @@ class Device(object):
 
         app = self.base_request.request(
             'application', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
 
         if app:
@@ -104,7 +103,7 @@ class Device(object):
             }
             return self.base_request.request(
                 'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )['d']
 
     def get_by_name(self, name):
@@ -129,7 +128,7 @@ class Device(object):
         }
         return self.base_request.request(
             'device', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
 
     def get_name(self, uuid):
@@ -171,7 +170,7 @@ class Device(object):
         }
         return self.base_request.request(
             'application', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d'][0]['app_name']
 
     def has(self, uuid):
@@ -194,7 +193,7 @@ class Device(object):
         return len(
             self.base_request.request(
                 'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )
         ) > 0
 
@@ -253,7 +252,7 @@ class Device(object):
         }
         return self.base_request.request(
             'device', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            endpoint=Settings.get('pine_endpoint'), login=True
         )
 
     def identify(self, uuid):
@@ -274,7 +273,7 @@ class Device(object):
         }
         return self.base_request.request(
             'blink', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            endpoint=Settings.get('api_endpoint'), login=True
         )
 
     def rename(self, uuid, new_name):
@@ -307,7 +306,7 @@ class Device(object):
             }
             return self.base_request.request(
                 'device', 'PATCH', params=params, data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )
         else:
             raise exceptions.DeviceNotFound(uuid)
@@ -339,7 +338,7 @@ class Device(object):
             }
             return self.base_request.request(
                 'device', 'PATCH', params=params, data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                endpoint=Settings.get('pine_endpoint')
             )
         else:
             raise exceptions.DeviceNotFound(uuid)
@@ -497,7 +496,7 @@ class Device(object):
         application = self.application.get(app_name)
         api_key = self.base_request.request(
             'application/{0}/generate-api-key'.format(application['id']),
-            'POST', endpoint=self.settings.get('api_endpoint'), login=True
+            'POST', endpoint=Settings.get('api_endpoint'), login=True
         )
 
         now = (datetime.utcnow() - datetime.utcfromtimestamp(0))
@@ -515,7 +514,7 @@ class Device(object):
 
         return self.base_request.request(
             'device', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            endpoint=Settings.get('pine_endpoint'), login=True
         )
 
     def restart(self, uuid):
@@ -537,7 +536,7 @@ class Device(object):
         device = self.get(uuid)
         return self.base_request.request(
             'device/{0}/restart'.format(device['id']),
-            'POST', endpoint=self.settings.get('api_endpoint'), login=True
+            'POST', endpoint=Settings.get('api_endpoint'), login=True
         )
 
     def has_device_url(self, uuid):
@@ -615,7 +614,7 @@ class Device(object):
 
         return self.base_request.request(
             'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def disable_device_url(self, uuid):
@@ -647,7 +646,7 @@ class Device(object):
 
         return self.base_request.request(
             'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )
 
     def move(self, uuid, app_name):
@@ -685,5 +684,5 @@ class Device(object):
 
         return self.base_request.request(
             'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )

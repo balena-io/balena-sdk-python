@@ -20,7 +20,6 @@ class BaseRequest(object):
     """
 
     def __init__(self):
-        self.settings = Settings()
         self.token = Token()
         self.util = Util()
 
@@ -144,7 +143,7 @@ class BaseRequest(object):
 
             if self.util.should_update_token(
                 self.token.get_age(),
-                self.settings.get('token_refresh_interval')
+                Settings.get('token_refresh_interval')
             ):
                 self.token.set(self._request_new_token())
         params = params or {}
@@ -179,7 +178,7 @@ class BaseRequest(object):
     def _request_new_token(self):
         headers = {}
         self.__set_authorization(headers)
-        url = urljoin(self.settings.get('api_endpoint'), 'whoami')
+        url = urljoin(Settings.get('api_endpoint'), 'whoami')
         response = requests.get(url, headers=headers)
         if not response.ok:
             raise exceptions.RequestError(response._content)

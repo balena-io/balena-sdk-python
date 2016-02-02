@@ -15,7 +15,6 @@ class Config(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
         self._config = None
 
     def _get_config(self, key):
@@ -40,7 +39,7 @@ class Config(object):
 
         if self._config is None:
             self._config = self.base_request.request(
-                'config', 'GET', endpoint=self.settings.get('api_endpoint'))
+                'config', 'GET', endpoint=Settings.get('api_endpoint'))
         return self._config
 
     def get_device_types(self):

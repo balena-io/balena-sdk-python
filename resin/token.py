@@ -13,9 +13,6 @@ class Token(object):
     This is low level class and is not meant to be used by end users directly.
     """
 
-    def __init__(self):
-        self.settings = Settings()
-
     def __parse_token(self, token):
         try:
             return jwt.decode(token, verify=False)
@@ -50,7 +47,7 @@ class Token(object):
         """
 
         if self.is_valid_token(token):
-            self.settings.set(TOKEN_KEY, token)
+            Settings.set(TOKEN_KEY, token)
 
     def get(self):
         """
@@ -64,7 +61,7 @@ class Token(object):
 
         """
 
-        return self.settings.get(TOKEN_KEY)
+        return Settings.get(TOKEN_KEY)
 
     def has(self):
         """
@@ -75,7 +72,7 @@ class Token(object):
 
         """
 
-        return self.settings.has(TOKEN_KEY)
+        return Settings.has(TOKEN_KEY)
 
     def remove(self):
         """
@@ -86,7 +83,7 @@ class Token(object):
 
         """
 
-        return self.settings.remove(TOKEN_KEY)
+        return Settings.remove(TOKEN_KEY)
 
     def get_data(self):
         """
@@ -101,7 +98,7 @@ class Token(object):
         """
 
         if self.has():
-            return self.__parse_token(self.settings.get(TOKEN_KEY))
+            return self.__parse_token(Settings.get(TOKEN_KEY))
         else:
             raise exceptions.NotLoggedIn()
 
