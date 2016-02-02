@@ -30,7 +30,6 @@ class Supervisor(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
 
     def _check_args(self, device_id, app_id):
         if device_id is None:
@@ -59,7 +58,7 @@ class Supervisor(object):
                 'supervisor/{0}'.format(endpoint),
                 'POST',
                 data=data,
-                endpoint=self.settings.get('api_endpoint'),
+                endpoint=Settings.get('api_endpoint'),
                 login=True
             )
         else:
@@ -119,7 +118,7 @@ class Supervisor(object):
                 'supervisor/ping',
                 'POST',
                 data=data,
-                endpoint=self.settings.get('api_endpoint'),
+                endpoint=Settings.get('api_endpoint'),
                 login=True
             )
         else:

@@ -16,7 +16,6 @@ class TwoFactorAuth(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
         self.token = Token()
 
     def is_enabled(self):
@@ -81,7 +80,7 @@ class TwoFactorAuth(object):
         }
         token = self.base_request.request(
             'auth/totp/verify', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            endpoint=Settings.get('api_endpoint'), login=True
         )
         self.token.set(token)
 
@@ -121,7 +120,7 @@ class TwoFactorAuth(object):
 
         otp_auth_url = self.base_request.request(
             'auth/totp/setup', 'GET',
-            endpoint=self.settings.get('api_endpoint'), login=True
+            endpoint=Settings.get('api_endpoint'), login=True
         )
         tmp = urlparse.parse_qs(otp_auth_url)
         return tmp['secret'][0]

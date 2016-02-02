@@ -22,7 +22,6 @@ class DeviceOs(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
 
     def download(self, raw=None, **data):
         """
@@ -55,7 +54,7 @@ class DeviceOs(object):
         self.params = self.parse_params(**data)
         response = self.base_request.request(
             'download', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), stream=True, login=True
+            endpoint=Settings.get('api_endpoint'), stream=True, login=True
         )
         if raw:
             # return urllib3.HTTPResponse object

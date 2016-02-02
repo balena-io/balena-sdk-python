@@ -14,7 +14,6 @@ class Key(object):
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
         self.token = Token()
 
     def get_all(self):
@@ -27,7 +26,7 @@ class Key(object):
         """
         return self.base_request.request(
             'user__has__public_key', 'GET',
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
 
     def get(self, id):
@@ -51,7 +50,7 @@ class Key(object):
         }
         key = self.base_request.request(
             'user__has__public_key', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            endpoint=Settings.get('pine_endpoint')
         )['d']
         if key:
             return key[0]
@@ -73,7 +72,7 @@ class Key(object):
         }
         return self.base_request.request(
             'user__has__public_key', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            endpoint=Settings.get('pine_endpoint'), login=True
         )
 
     def create(self, title, key):
@@ -99,6 +98,6 @@ class Key(object):
         }
         key = self.base_request.request(
             'user__has__public_key', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            endpoint=Settings.get('pine_endpoint'), login=True
         )
         return json.loads(key)['id']

@@ -23,7 +23,8 @@ class Settings(object):
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'resin.cfg'
 
-    _setting = {
+    _setting = {}
+    _default_setting = {
         'pine_endpoint': 'https://api.resin.io/ewa/',
         'api_endpoint': 'https://api.resin.io/',
         'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
@@ -33,53 +34,61 @@ class Settings(object):
         'token_refresh_interval': (1 * 1000 * 60 * 60)
     }
 
-    _setting['cache_directory'] = Path.join(_setting['data_directory'],
-                                            'cache')
+    _default_setting['cache_directory'] = Path.join(_default_setting['data_directory'],
+                                                    'cache')
 
-    def __init__(self):
-        config_file_path = Path.join(self._setting['data_directory'],
-                                     self.CONFIG_FILENAME)
+    @staticmethod
+    def __init_settings():
         try:
-            self.__read_settings()
+            config_file_path = Path.join(Settings._default_setting['data_directory'],
+                                         Settings.CONFIG_FILENAME)
+            if Settings._setting:
+                Settings.__read_settings(Path.join(Settings._setting['data_directory'],
+                                         Settings.CONFIG_FILENAME))
+            else:
+                Settings.__read_settings(config_file_path)
         except:
-            # Backup old settings file if it exists.
-            try:
-                if Path.isfile(config_file_path):
-                    shutil.move(config_file_path,
-                                Path.join(self._setting['data_directory'],
-                                          "{0}.{1}".format(self.CONFIG_FILENAME,
-                                                           'old')))
-            except OSError:
-                pass
-            self.__write_settings()
-            print(Message.INVALID_SETTINGS.format(path=config_file_path))
+                # Backup old settings file if it exists.
+                try:
+                    if Path.isfile(config_file_path):
+                        shutil.move(config_file_path,
+                                    Path.join(Settings._default_setting['data_directory'],
+                                              "{0}.{1}".format(Settings.CONFIG_FILENAME, 'old')))
+                except OSError:
+                    pass
+                Settings.__write_settings(
+                    Settings._default_setting['data_directory'],
+                    Settings._default_setting)
+                Settings._setting = Settings._default_setting
+                print(Message.INVALID_SETTINGS.format(path=config_file_path))
 
-    def __write_settings(self):
+    @staticmethod
+    def __write_settings(path, settings):
         config = ConfigParser.ConfigParser()
-        config.add_section(self.CONFIG_SECTION)
-        for key in self._setting:
-            config.set(self.CONFIG_SECTION, key, self._setting[key])
-        if not Path.isdir(self._setting['data_directory']):
-            os.makedirs(self._setting['data_directory'])
-        with open(Path.join(self._setting['data_directory'],
-                            self.CONFIG_FILENAME), 'wb') as config_file:
+        config.add_section(Settings.CONFIG_SECTION)
+        for key in settings:
+            config.set(Settings.CONFIG_SECTION, key, settings[key])
+        if not Path.isdir(path):
+            os.makedirs(path)
+        with open(Path.join(path, Settings.CONFIG_FILENAME), 'wb') as config_file:
             config.write(config_file)
 
-    def __read_settings(self):
+    @staticmethod
+    def __read_settings(path):
         config_reader = ConfigParser.ConfigParser()
-        config_reader.read(Path.join(self._setting['data_directory'],
-                                     self.CONFIG_FILENAME))
+        config_reader.read(path)
         config_data = {}
-        options = config_reader.options(self.CONFIG_SECTION)
+        options = config_reader.options(Settings.CONFIG_SECTION)
         for option in options:
             try:
-                config_data[option] = config_reader.get(self.CONFIG_SECTION,
+                config_data[option] = config_reader.get(Settings.CONFIG_SECTION,
                                                         option)
             except:
                 config_data[option] = None
-        self._setting = config_data
+        Settings._setting = config_data
 
-    def has(self, key):
+    @staticmethod
+    def has(key):
         """
         Check if a setting exists.
 
@@ -95,12 +104,13 @@ class Settings(object):
 
         """
 
-        self.__read_settings()
-        if key in self._setting:
+        Settings.__init_settings()
+        if key in Settings._setting:
             return True
         return False
 
-    def get(self, key):
+    @staticmethod
+    def get(key):
         """
         Get a setting value.
 
@@ -120,12 +130,13 @@ class Settings(object):
         """
 
         try:
-            self.__read_settings()
-            return self._setting[key]
+            Settings.__init_settings()
+            return Settings._setting[key]
         except KeyError:
             raise exceptions.InvalidOption(key)
 
-    def get_all(self):
+    @staticmethod
+    def get_all():
         """
         Get all settings.
 
@@ -139,10 +150,12 @@ class Settings(object):
 
         """
 
-        self.__read_settings()
+        Settings.__read_settings(Path.join(Settings._setting['data_directory'],
+                                           Settings.CONFIG_FILENAME))
         return self._setting
 
-    def set(self, key, value):
+    @staticmethod
+    def set(key, value):
         """
         Set value for a setting.
 
@@ -155,11 +168,12 @@ class Settings(object):
             (Empty Return)
 
         """
+        Settings.__init_settings()
+        Settings._setting[key] = str(value)
+        Settings.__write_settings(Settings._setting['data_directory'], Settings._setting)
 
-        self._setting[key] = str(value)
-        self.__write_settings()
-
-    def remove(self, key):
+    @staticmethod
+    def remove(key):
         """
         Remove a setting.
 
@@ -180,8 +194,9 @@ class Settings(object):
         """
 
         # if key is not in settings, return False
-        result = self._setting.pop(key, False)
+        Settings.__init_settings()
+        result = Settings._setting.pop(key, False)
         if result is not False:
-            self.__write_settings()
+            Settings.__write_settings(Settings._setting['data_directory'], Settings._setting)
             return True
         return False
