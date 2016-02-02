@@ -11,6 +11,18 @@ from .. import exceptions
 from .application import Application
 
 
+class DeviceStatus(object):
+    """
+    Resin device statuses.
+    """
+
+    IDLE = "Idle"
+    CONFIGURING = "Configuring"
+    UPDATING = "Updating"
+    OFFLINE = "Offline"
+    POST_PROVISIONING = "Post Provisioning"
+
+
 class Device(object):
     """
     This class implements device model for Resin Python SDK.
@@ -687,3 +699,41 @@ class Device(object):
             'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def get_status(self, uuid):
+        """
+        Get the status of a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Returns:
+            str: status of a device. List of available statuses: Idle, Configuring, Updating, Offline and Post Provisioning.
+
+        Examples:
+            >>> resin.models.device.get_status('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            'Offline'
+
+        """
+
+        device = self.get(uuid)
+        if device['provisioning_state'] == 'Post-Provisioning':
+            return DeviceStatus.POST_PROVISIONING
+
+        seen = device['last_seen_time'] and (datetime.strptime(device['last_seen_time'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
+        if not device['is_online'] and not seen:
+            return DeviceStatus.CONFIGURING
+
+        if not device['is_online']:
+            return DeviceStatus.OFFLINE
+
+        if device['download_progress'] is not None and device['status'] == 'Downloading':
+            return DeviceStatus.UPDATING
+
+        if device['download_progress'] is not None:
+            return DeviceStatus.CONFIGURING
+
+        return DeviceStatus.IDLE
