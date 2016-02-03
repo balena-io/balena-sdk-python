@@ -4,6 +4,18 @@ from ..base_request import BaseRequest
 from ..settings import Settings
 
 
+def _normalize_device_type(dev_type):
+    if dev_type['state'] == 'PREVIEW':
+        dev_type['state'] = 'ALPHA'
+        dev_type['name'] = dev_type['name'].replace('(PREVIEW)', '(ALPHA)')
+    if dev_type['state'] == 'EXPERIMENTAL':
+        dev_type['state'] = 'BETA'
+        dev_type['name'] = dev_type['name'].replace('(EXPERIMENTAL)', ('BETA'))
+    if dev_type['slug'] == 'raspberry-pi':
+        dev_type['name'] = 'Raspberry Pi (v1 or Zero)'
+    return dev_type
+
+
 class Config(object):
     """
     This class implements configuration model for Resin Python SDK.
@@ -41,6 +53,7 @@ class Config(object):
         if self._config is None:
             self._config = self.base_request.request(
                 'config', 'GET', endpoint=self.settings.get('api_endpoint'))
+            self._config['deviceTypes'] = map(_normalize_device_type, self._config['deviceTypes'])
         return self._config
 
     def get_device_types(self):
