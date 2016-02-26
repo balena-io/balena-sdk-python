@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 2016-02-26
+
+## Added
+
+- Implement resin.models.device.get_status()
+
+## Changed
+
+- Patch device types to be marked as ALPHA and BETA not PREVIEW and EXPERIMENTAL.
+- Fix error when reading settings by backing up old settings file and rewriting default settings.
+- Fix bug of device.get_local_ip_address().
+
+
 ## [1.3.1] - 2015-12-01
 
 ### Changed
