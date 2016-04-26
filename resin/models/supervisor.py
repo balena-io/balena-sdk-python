@@ -329,3 +329,29 @@ class Supervisor(object):
             app_id=app_id,
             method='POST'
         )
+
+    def enable_tcp_ping(self, app_id=None, device_uuid=None):
+        """
+        Enable TCP ping in case it has been disabled.
+        When the device's connection to the Resin VPN is down, by default the device performs a TCP ping heartbeat to check for connectivity.
+        No need to set device_uuid and app_id if command is sent to the API on device.
+
+        Args:
+            app_id (Optional[str]): application id.
+            device_uuid (Optional[str]): device uuid.
+
+        Raises:
+            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.enable_tcp_ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            (Empty response)
+
+        """
+
+        return self._do_command(
+            '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
+            device_uuid=device_uuid,
+            app_id=app_id,
+            method='POST'
+        )
