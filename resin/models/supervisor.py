@@ -391,3 +391,32 @@ class Supervisor(object):
                 '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
                 method='DELETE'
             )
+
+    def regenerate_supervisor_api_key(self, app_id=None, device_uuid=None):
+        """
+        Invalidate the current RESIN_SUPERVISOR_API_KEY and generates a new one.
+        The application will be restarted on the next update cycle to update the API key environment variable.
+        No need to set device_uuid and app_id if command is sent to the API on device.
+
+        Args:
+            app_id (Optional[str]): application id.
+            device_uuid (Optional[str]): device uuid.
+
+        Returns:
+            str: new supervisor API key.
+
+        Raises:
+            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.regenerate_supervisor_api_key(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            '480af7bb8a9cf56de8a1e295f0d50e6b3bb46676aaddbf4103aa43cb57039364'
+
+        """
+
+        return self._do_command(
+            '{0}/regenerate-api-key'.format(self.SUPERVISOR_API_VERSION),
+            device_uuid=device_uuid,
+            app_id=app_id,
+            method='POST'
+        )
