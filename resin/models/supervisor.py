@@ -427,3 +427,45 @@ class Supervisor(object):
             app_id=app_id,
             method='POST'
         )
+
+    def get_device_state(self, app_id=None, device_uuid=None):
+        """
+        Return the current device state, as reported to the Resin API and with some extra fields added to allow control over pending/locked updates.
+        This function requires supervisor v1.6 or higher.
+        No need to set device_uuid and app_id if command is sent to the API on device.
+
+        Args:
+            app_id (Optional[str]): application id.
+            device_uuid (Optional[str]): device uuid.
+
+        Returns:
+            dict: dictionary contains device state.
+
+        Raises:
+            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            {u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Resin OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
+
+        """
+
+        required_version = '1.6'
+
+        on_device_method = 'GET'
+
+        if not self._on_device:
+            return self._do_command(
+                '{0}/device'.format(self.SUPERVISOR_API_VERSION),
+                on_device_method=on_device_method,
+                device_uuid=device_uuid,
+                app_id=app_id,
+                required_version=required_version,
+                method='POST'
+            )
+        else:
+            return self._do_command(
+                '{0}/device'.format(self.SUPERVISOR_API_VERSION),
+                required_version,
+                method=on_device_method
+            )
