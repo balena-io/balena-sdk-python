@@ -532,7 +532,7 @@ class Device(object):
 
     def restart(self, uuid):
         """
-        Restart a device. This function only works if you log in using credentials or Auth Token.
+        Restart a user application container on device. This function only works if you log in using credentials or Auth Token.
 
         Args:
             uuid (str): device uuid.
