@@ -472,9 +472,9 @@ class Supervisor(object):
 
     def stop_application(self, app_id, device_uuid=None):
         """
-        Temporarily stops a user application container. Application container will not be removed after invoking this function and a reboot or supervisor restart will cause the container to start again
+        Temporarily stops a user application container. Application container will not be removed after invoking this function and a reboot or supervisor restart will cause the container to start again.
         This function requires supervisor v1.8 or higher.
-        No need to set device_uuid and app_id if command is sent to the API on device.
+        No need to set device_uuid if command is sent to the API on device.
 
         Args:
             app_id (str): application id.
@@ -500,3 +500,75 @@ class Supervisor(object):
             required_version=required_version,
             method='POST'
         )
+
+    def start_application(self, app_id, device_uuid=None):
+        """
+        Starts a user application container, usually after it has been stopped with `stop_application()`.
+        This function requires supervisor v1.8 or higher.
+        No need to set device_uuid if command is sent to the API on device.
+
+        Args:
+            app_id (str): application id.
+            device_uuid (Optional[str]): device uuid.
+
+        Returns:
+            dict: dictionary contains started application container id.
+
+        Raises:
+            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.start_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+
+        """
+
+        required_version = '1.8'
+
+        return self._do_command(
+            '{0}/apps/{1}/start'.format(self.SUPERVISOR_API_VERSION, app_id),
+            device_uuid=device_uuid,
+            app_id=app_id,
+            required_version=required_version,
+            method='POST'
+        )
+
+    def get_application_info(self, app_id, device_uuid=None):
+        """
+        Return information about the application running on the device.
+        This function requires supervisor v1.8 or higher.
+        No need to set device_uuid if command is sent to the API on device.
+
+        Args:
+            app_id (str): application id.
+            device_uuid (Optional[str]): device uuid.
+
+        Returns:
+            dict: dictionary contains application information.
+
+        Raises:
+            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+
+        Examples:
+            >>> resin.models.supervisor.get_application_info(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+
+        """
+
+        required_version = '1.8'
+
+        on_device_method = 'GET'
+
+        if not self._on_device:
+            return self._do_command(
+                '{0}/apps/{1}'.format(self.SUPERVISOR_API_VERSION, app_id),
+                on_device_method=on_device_method,
+                device_uuid=device_uuid,
+                app_id=app_id,
+                required_version=required_version,
+                method='POST'
+            )
+        else:
+            return self._do_command(
+                '{0}/apps/{1}'.format(self.SUPERVISOR_API_VERSION, app_id),
+                required_version,
+                method='GET'
+            )
