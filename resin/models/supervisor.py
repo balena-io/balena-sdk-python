@@ -1,4 +1,5 @@
 import os
+from pkg_resources import parse_version
 
 from ..base_request import BaseRequest
 from ..settings import Settings
@@ -37,31 +38,35 @@ class Supervisor(object):
 
     def _check_args(self, device_uuid, app_id):
         if device_uuid is None:
-            exceptions.MissingOption('device_uuid')
+            raise exceptions.MissingOption('device_uuid')
 
         if app_id is None:
-            exceptions.MissingOption('app_id')
+            raise exceptions.MissingOption('app_id')
 
-    def _do_command(self, endpoint, req_data={}, device_uuid=None, app_id=None, method=None):
+    def _do_command(self, endpoint, req_data={}, device_uuid=None, app_id=None,
+                    method=None, required_version=None, on_device_method=None):
         if not self._on_device:
             self._check_args(device_uuid, app_id)
 
             if (self._last_device and self._last_device['uuid'] != device_uuid) or not self._last_device:
                 self._last_device = self.device.get(device_uuid)
 
+            if required_version:
+                if not self._last_device['supervisor_version'] or (parse_version(required_version) > parse_version(self._last_device['supervisor_version'])):
+                    raise exceptions.UnsupportedFunction(required_version, self._last_device['supervisor_version'])
+
             device_id = self._last_device['id']
 
+            data = {
+                'deviceId': device_id,
+                'appId': app_id
+            }
+
             if req_data:
-                data = {
-                    'deviceId': device_id,
-                    'appId': app_id,
-                    'data': req_data
-                }
-            else:
-                data = {
-                    'deviceId': device_id,
-                    'appId': app_id
-                }
+                data['data'] = req_data
+
+            if on_device_method:
+                data['method'] = on_device_method
 
             return self.base_request.request(
                 'supervisor/{0}'.format(endpoint),
@@ -71,6 +76,11 @@ class Supervisor(object):
                 login=True
             )
         else:
+            if required_version:
+                current_version = os.environ.get('RESIN_SUPERVISOR_VERSION')
+                if not current_version or (parse_version(required_version) > parse_version(current_version)):
+                    raise exceptions.UnsupportedFunction(required_version, current_version)
+
             return self.base_request.request(
                 endpoint,
                 method,
@@ -118,7 +128,6 @@ class Supervisor(object):
             self._check_args(device_uuid, app_id)
 
             if (self._last_device and self._last_device['uuid'] != device_uuid) or not self._last_device:
-                print('Get new!')
                 self._last_device = self.device.get(device_uuid)
 
             device_id = self._last_device['id']
@@ -374,14 +383,12 @@ class Supervisor(object):
 
         """
 
-        data = {
-            'method': 'DELETE'
-        }
+        on_device_method = 'DELETE'
 
         if not self._on_device:
             return self._do_command(
                 '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
-                req_data=data,
+                on_device_method=on_device_method,
                 device_uuid=device_uuid,
                 app_id=app_id,
                 method='POST'
@@ -389,7 +396,7 @@ class Supervisor(object):
         else:
             return self._do_command(
                 '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
-                method='DELETE'
+                method=on_device_method
             )
 
     def regenerate_supervisor_api_key(self, app_id=None, device_uuid=None):

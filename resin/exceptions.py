@@ -292,3 +292,24 @@ class IncompatibleApplication(Exception):
         self.code = 'IncompatibleApplication'
         self.exit_code = 1
         self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
+
+
+class UnsupportedFunction(Exception):
+    """
+    Exception when invoking an unsupported function in a specific supervisor version.
+
+    Args:
+        required_version (str): required supervisor version.
+        current_version (str): current supervisor version.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, required_version, current_version):
+        self.code = 'UnsupportedFunction'
+        self.exit_code = 1
+        self.message = Message.SUPERVISOR_VERSION_ERROR.format(req_version=required_version, cur_version=current_version)

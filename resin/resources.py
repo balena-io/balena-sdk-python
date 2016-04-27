@@ -25,3 +25,4 @@ class Message(object):
     DEVICE_NOT_WEB_ACCESSIBLE = "Device is not web accessible: {uuid}"
     INCOMPATIBLE_APPLICATION = "Incompatible application: {application}"
     INVALID_SETTINGS = "Settings file not found or not in proper format. Rewriting default settings to: {path}"
+    SUPERVISOR_VERSION_ERROR = "Unsupported fucntion! Supervisor version v{req_version} required, current supervisor version is v{cur_version}."
