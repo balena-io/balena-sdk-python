@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.0] - 2016-04-28
+
+## Added
+
+- Implement resin.models.supervisor.enable_tcp_ping().
+- Implement resin.models.supervisor.disable_tcp_ping().
+- Implement resin.models.supervisor.regenerate_supervisor_api_key().
+- Implement resin.models.supervisor.get_device_state().
+- Implement resin.models.supervisor.stop_application().
+- Implement resin.models.supervisor.get_application_info().
+- Implement resin.models.supervisor.start_application().
+
+## Changed
+
+- Update all functions in resin.models.supervisor, Use device_uuid instead of device_id for ease of use.
+
+
 ## [1.4.0] - 2016-02-26
 
 ## Added
