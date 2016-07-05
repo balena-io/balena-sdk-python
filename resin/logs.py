@@ -3,6 +3,7 @@ from functools import wraps
 
 from .base_request import BaseRequest
 from .models.config import Config
+from .models.device import Device
 
 
 class Logs(object):
@@ -17,6 +18,7 @@ class Logs(object):
 
     def __init__(self):
         self.config = Config()
+        self.device = Device()
 
     def _init_pubnub(func):
         @wraps(func)
@@ -92,8 +94,7 @@ class Logs(object):
             channel = self.get_channel(uuid)
             self.pubnub.unsubscribe(channel=channel)
 
-    @staticmethod
-    def get_channel(uuid):
+    def get_channel(self, uuid):
         """
         This function returns pubnub channel for a specific device.
 
@@ -105,4 +106,11 @@ class Logs(object):
 
         """
 
-        return 'device-{uuid}-logs'.format(uuid=uuid)
+        if not hasattr(self, 'logs_channel'):
+            device_info = self.device.get(uuid)
+            if 'logs_channel' in device_info:
+                self.logs_channel = device_info['logs_channel']
+            else:
+                self.logs_channel = uuid
+
+        return 'device-{logs_channel}-logs'.format(logs_channel=self.logs_channel)
