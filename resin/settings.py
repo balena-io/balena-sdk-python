@@ -2,6 +2,7 @@ import ConfigParser
 import os.path as Path
 import os
 import shutil
+import sys
 
 from . import exceptions
 from .resources import Message
@@ -52,7 +53,7 @@ class Settings(object):
             except OSError:
                 pass
             self.__write_settings()
-            print(Message.INVALID_SETTINGS.format(path=config_file_path))
+            print(Message.INVALID_SETTINGS.format(path=config_file_path), file=sys.stderr)
 
     def __write_settings(self):
         config = ConfigParser.ConfigParser()
