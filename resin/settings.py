@@ -53,7 +53,7 @@ class Settings(object):
             except OSError:
                 pass
             self.__write_settings()
-            print(Message.INVALID_SETTINGS.format(path=config_file_path), file=sys.stderr)
+            sys.stderr.write(Message.INVALID_SETTINGS.format(path=config_file_path))
 
     def __write_settings(self):
         config = ConfigParser.ConfigParser()
