@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import ConfigParser
 import os.path as Path
 import os
