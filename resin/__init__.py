@@ -15,7 +15,7 @@ from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
 
-__version__ = '1.5.2'
+__version__ = '1.5.3'
 
 
 class Resin(object):

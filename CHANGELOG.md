@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.3] - 2016-09-03
+
+## Changed
+
+- Import print_function to support python3 print syntax when output error message to STDERR.
+
 ## [1.5.2] - 2016-08-30
 
 ## Changed
