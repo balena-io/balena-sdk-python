@@ -216,7 +216,7 @@ class Supervisor(object):
             method='POST'
         )
 
-    def reboot(self, device_uuid=None, app_id=None):
+    def reboot(self, device_uuid=None, app_id=None, force=False):
         """
         Reboot the device.
         No need to set device_uuid and app_id if command is sent to the API on device.
@@ -224,6 +224,7 @@ class Supervisor(object):
         Args:
             device_uuid (Optional[str]): device uuid.
             app_id (Optional[str]): application id.
+            force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Returns:
             dict: when successful, this dictionary is returned `{ 'Data': 'OK', 'Error': '' }`.
@@ -237,14 +238,22 @@ class Supervisor(object):
 
         """
 
+        if force:
+            data = {
+                'force': force
+            }
+        else:
+            data = {}
+
         return self._do_command(
             '{0}/reboot'.format(self.SUPERVISOR_API_VERSION),
+            req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
             method='POST'
         )
 
-    def shutdown(self, device_uuid=None, app_id=None):
+    def shutdown(self, device_uuid=None, app_id=None, force=False):
         """
         Shut down the device.
         No need to set device_uuid and app_id if command is sent to the API on device.
@@ -252,6 +261,7 @@ class Supervisor(object):
         Args:
             device_uuid (Optional[str]): device uuid.
             app_id (Optional[str]): application id.
+            force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Returns:
             dict: when successful, this dictionary is returned `{ 'Data': 'OK', 'Error': '' }`.
@@ -265,8 +275,16 @@ class Supervisor(object):
 
         """
 
+        if force:
+            data = {
+                'force': force
+            }
+        else:
+            data = {}
+
         return self._do_command(
             '{0}/shutdown'.format(self.SUPERVISOR_API_VERSION),
+            req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
             method='POST'
