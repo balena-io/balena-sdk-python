@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.4] - 2016-11-08
+
+## Changed
+
+- Allow passing option to force device reboot and shutdown.
+- Specify version of pubnub lib since pubnub v4 is not supported yet.
+- Remove unused import.
+
 ## [1.5.3] - 2016-09-03
 
 ## Changed
