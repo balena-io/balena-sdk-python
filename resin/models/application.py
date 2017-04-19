@@ -217,9 +217,9 @@ class Application(object):
             endpoint=self.settings.get('api_endpoint'), login=True
         )
 
-    def get_api_key(self, name):
+    def generate_api_key(self, name):
         """
-        Get the API key for a specific application. This function only works if you log in using credentials or Auth Token.
+        Generate the API key for a specific application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
@@ -231,7 +231,7 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> resin.models.application.get_api_key('RPI1')
+            >>> resin.models.application.generate_api_key('RPI1')
             u'XbKn5GhK4YieOLpX4KjQTqjqo1moRWmP'
 
         """
