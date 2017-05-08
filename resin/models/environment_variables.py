@@ -27,6 +27,16 @@ class DeviceEnvVariable(object):
         self.device = Device()
         self.settings = Settings()
 
+    def __fix_device_env_var_name_key(self, env_var):
+        """
+        Internal method to workaround the fact that applications environment variables contain a `name` property
+        while device environment variables contain an `env_var_name` property instead.
+        """
+        if env_var.has_key('env_var_name'):
+            env_var['name'] = env_var['env_var_name']
+            env_var.pop('env_var_name', None)
+        return env_var
+
     def get_all(self, uuid):
         """
         Get all device environment variables.
@@ -129,6 +139,31 @@ class DeviceEnvVariable(object):
             'device_environment_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def get_all_by_application(self, app_id):
+        """
+        Get all device environment variables for an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            list: list of device environment variables.
+
+        Examples:
+            >>> resin.models.environment_variables.device.get_all_by_application('5780')
+            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+
+        """
+
+        params = {
+            'filter': 'device/application',
+            'eq': app_id
+        }
+        env_list = self.base_request.request(
+            'device_environment_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint'))
+        return map(self.__fix_device_env_var_name_key, env_list['d'])
 
 
 class ApplicationEnvVariable(object):
