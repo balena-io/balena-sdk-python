@@ -1,4 +1,5 @@
 import re
+import json
 
 from ..base_request import BaseRequest
 from .device import Device
@@ -32,6 +33,7 @@ class DeviceEnvVariable(object):
         Internal method to workaround the fact that applications environment variables contain a `name` property
         while device environment variables contain an `env_var_name` property instead.
         """
+
         if env_var.has_key('env_var_name'):
             env_var['name'] = env_var['env_var_name']
             env_var.pop('env_var_name', None)
@@ -73,11 +75,11 @@ class DeviceEnvVariable(object):
             value (str): environment variable value.
 
         Returns:
-            str: new device environment variable info.
+            dict: new device environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','tmp-env-var', 'test')
-            '{"id":2184,"device":{"__deferred":{"uri":"/ewa/device(122950)"},"__id":122950},"env_var_name":"tmp-env-var","value":"test","__metadata":{"uri":"/ewa/device_environment_variable(2184)","type":""}}'
+            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
+            {'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 42166}
 
         """
 
@@ -87,10 +89,11 @@ class DeviceEnvVariable(object):
             'env_var_name': name,
             'value': value
         }
-        return self.base_request.request(
+        new_env_var = json.loads(self.base_request.request(
             'device_environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
-        )
+        ))
+        return self.__fix_device_env_var_name_key(new_env_var)
 
     def update(self, var_id, value):
         """
