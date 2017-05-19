@@ -313,3 +313,43 @@ class UnsupportedFunction(Exception):
         self.code = 'UnsupportedFunction'
         self.exit_code = 1
         self.message = Message.SUPERVISOR_VERSION_ERROR.format(req_version=required_version, cur_version=current_version)
+
+
+class AmbiguousApplication(Exception):
+    """
+    Exception of Resin ambiguous application.
+
+    Args:
+        application (str): application name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, application):
+        self.code = 'AmbiguousApplication'
+        self.exit_code = 1
+        self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
+
+
+class AmbiguousDevice(Exception):
+    """
+    Exception of Resin ambiguous device.
+
+    Args:
+        uuid (str): device uuid.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, uuid):
+        self.code = 'AmbiguousDevice'
+        self.exit_code = 1
+        self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)

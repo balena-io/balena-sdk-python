@@ -56,10 +56,13 @@ class Application(object):
             'eq': name
         }
         try:
-            return self.base_request.request(
+            apps = self.base_request.request(
                 'application', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint')
-            )['d'][0]
+            )['d']
+            if len(apps) > 1:
+                raise exceptions.AmbiguousApplication(name)
+            return apps[0]
         except IndexError:
             raise exceptions.ApplicationNotFound(name)
 

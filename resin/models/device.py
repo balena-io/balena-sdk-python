@@ -60,10 +60,13 @@ class Device(object):
             'eq': uuid
         }
         try:
-            return self.base_request.request(
+            devices = self.base_request.request(
                 'device', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint')
-            )['d'][0]
+            )['d']
+            if len(devices) > 1:
+                raise exceptions.AmbiguousDevice(uuid)
+            return devices[0]
         except IndexError:
             raise exceptions.DeviceNotFound(uuid)
 
