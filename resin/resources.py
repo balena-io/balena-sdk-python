@@ -28,3 +28,4 @@ class Message(object):
     SUPERVISOR_VERSION_ERROR = "Unsupported function! Supervisor version v{req_version} required, current supervisor version is v{cur_version}."
     AMBIGUOUS_APPLICATION = "Application is ambiguous: {application}"
     AMBIGUOUS_DEVICE = "Device is ambiguous: {uuid}"
+    BUILD_NOT_FOUND = "Build not found: {id}"

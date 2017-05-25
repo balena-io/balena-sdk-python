@@ -353,3 +353,23 @@ class AmbiguousDevice(Exception):
         self.code = 'AmbiguousDevice'
         self.exit_code = 1
         self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
+
+
+class BuildNotFound(Exception):
+    """
+    Exception of Resin build not found.
+
+    Args:
+        id (str): build id.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, id):
+        self.code = 'BuildNotFound'
+        self.exit_code = 1
+        self.message = Message.BUILD_NOT_FOUND.format(id=id)
