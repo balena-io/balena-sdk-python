@@ -3,7 +3,7 @@ from ..settings import Settings
 from .config import Config
 from .. import exceptions
 
-
+# TODO: support both app_id and app_name
 class Application(object):
     """
     This class implements application model for Resin Python SDK.
