@@ -796,3 +796,26 @@ class Device(object):
         """
 
         return self.set_custom_location(uuid, {'latitude': '', 'longtitude': ''})
+
+    def generate_device_key(self, uuid):
+        """
+        Generate a device key.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.generate_device_key('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
+            2UrtMWeLqYXfTznZo1xNuZQXmEE6cOZk
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        return self.base_request.request(
+            '/api-key/device/{id}/device-key'.format(id=device_id), 'POST',
+            endpoint=self.settings.get('api_endpoint')
+        )
