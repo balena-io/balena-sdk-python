@@ -5,6 +5,7 @@ from .base_request import BaseRequest
 from .models.config import Config
 from .models.device import Device
 
+
 # TODO: https://github.com/resin-io/resin-sdk/pull/277/files
 class Logs(object):
     """

@@ -3,6 +3,7 @@ from ..settings import Settings
 from .config import Config
 from .. import exceptions
 
+
 # TODO: support both app_id and app_name
 class Application(object):
     """
@@ -243,4 +244,27 @@ class Application(object):
         return self.base_request.request(
             'application/{0}/generate-api-key'.format(app['id']), 'POST',
             endpoint=self.settings.get('api_endpoint'), login=True
+        )
+
+    def get_config(self, app_id):
+        """
+        Download application config.json.
+
+        Args:
+            name (str): application name.
+
+        Returns:
+            dict: application config.json content.
+
+        Raises:
+            Request error: if user doesn't have permission to access the application.
+
+        Examples:
+            >>> resin.models.application.get_config('106640')
+            {u'applicationName': u'RPI3', u'username': u'nghiant2710', u'apiKey': u'kIaqS6ZLOoxkFzpzqSYhWtr2lj6m8KZi', u'vpnPort': 443, u'listenPort': 48484, u'pubnubSubscribeKey': u'sub-c-bbc12eba-ce4a-11e3-9782-02ee2ddab7fe', u'vpnEndpoint': u'vpn.resin.io', u'userId': 189, u'files': {u'network/network.config': u'[service_home_ethernet]\nType = ethernet\nNameservers = 8.8.8.8,8.8.4.4', u'network/settings': u'[global]\nOfflineMode=false\nTimeUpdates=manual\n\n[WiFi]\nEnable=true\nTethering=false\n\n[Wired]\nEnable=true\nTethering=false\n\n[Bluetooth]\nEnable=true\nTethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.resin.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'99eec53325d4f45dd0633abd719e3ff1', u'deltaEndpoint': u'https://delta.resin.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.resin.io'}
+        """
+
+        return self.base_request.request(
+            '/download-config?appId={id}'.format(id=app_id), 'GET',
+            endpoint=self.settings.get('api_endpoint')
         )

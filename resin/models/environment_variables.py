@@ -34,7 +34,7 @@ class DeviceEnvVariable(object):
         while device environment variables contain an `env_var_name` property instead.
         """
 
-        if env_var.has_key('env_var_name'):
+        if 'env_var_name' in env_var.keys():
             env_var['name'] = env_var['env_var_name']
             env_var.pop('env_var_name', None)
         return env_var

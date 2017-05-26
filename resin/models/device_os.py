@@ -99,5 +99,4 @@ class DeviceOs(object):
 
             # if 'wifiKey' not in params:
             #    raise exceptions.MissingOption('wifiKey')
-
         return params

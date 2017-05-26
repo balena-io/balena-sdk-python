@@ -17,6 +17,7 @@ from .twofactor_auth import TwoFactorAuth
 
 __version__ = '1.5.4'
 
+
 class Resin(object):
     """
     This class implements all functions supported by the Python SDK.
