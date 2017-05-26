@@ -43,12 +43,13 @@ class Build(object):
         else:
             raise exceptions.BuildNotFound(id)
 
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(self, app_id, include_logs=False):
         """
         Get a specific build.
 
         Args:
             app_id (str): application id.
+            include_logs (bool): True if user wants to include build logs in build info, False otherwise.
 
         Returns:
             list: list of build info.
@@ -66,15 +67,15 @@ class Build(object):
             'build', 'GET', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
-        if full_builds:
-            builds = []
-            for i in full_builds['d']:
-                builds.append({
-                    k: i[k] for k in (
-                        'id', 'created_at', 'status',
-                        'push_timestamp', 'end_timestamp',
-                        'start_timestamp', 'project_type',
-                        'commit_hash', 'message', 'log'
-                    )
-                })
-            return builds
+        builds = []
+        build_info = [
+            'id', 'created_at', 'status',
+            'push_timestamp', 'end_timestamp',
+            'start_timestamp', 'project_type',
+            'commit_hash', 'message'
+        ]
+        if build_log:
+            build_info.append('log')
+        for i in full_builds['d']:
+            builds.append({k: i[k] for k in build_info})
+        return builds

@@ -28,13 +28,13 @@ class DeviceEnvVariable(object):
         self.device = Device()
         self.settings = Settings()
 
-    def __fix_device_env_var_name_key(self, env_var):
+    def _fix_device_env_var_name_key(self, env_var):
         """
         Internal method to workaround the fact that applications environment variables contain a `name` property
         while device environment variables contain an `env_var_name` property instead.
         """
 
-        if 'env_var_name' in env_var.keys():
+        if 'env_var_name' in env_var:
             env_var['name'] = env_var['env_var_name']
             env_var.pop('env_var_name', None)
         return env_var
@@ -93,7 +93,7 @@ class DeviceEnvVariable(object):
             'device_environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
         ))
-        return self.__fix_device_env_var_name_key(new_env_var)
+        return self._fix_device_env_var_name_key(new_env_var)
 
     def update(self, var_id, value):
         """
@@ -166,7 +166,7 @@ class DeviceEnvVariable(object):
         env_list = self.base_request.request(
             'device_environment_variable', 'GET', params=params,
             endpoint=self.settings.get('pine_endpoint'))
-        return map(self.__fix_device_env_var_name_key, env_list['d'])
+        return map(self._fix_device_env_var_name_key, env_list['d'])
 
 
 class ApplicationEnvVariable(object):

@@ -211,7 +211,7 @@ class Device(object):
             self.base_request.request(
                 'device', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint')
-            )
+            )['d']
         ) > 0
 
     def is_online(self, uuid):
@@ -748,7 +748,7 @@ class Device(object):
 
         Args:
             uuid (str): device uuid.
-            location (dict): device custom location, format: { 'latitude': <latitude>, 'longitude': <longtitude> }.
+            location (dict): device custom location, format: { 'latitude': <latitude>, 'longitude': <longitude> }.
 
         Raises:
             DeviceNotFound: if device couldn't be found.
@@ -756,7 +756,7 @@ class Device(object):
         Examples:
             >>> location = {
                 'latitude': '21.032777',
-                'longtitude': '105.831586'
+                'longitude': '105.831586'
             }
             >>> resin.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
             OK
@@ -772,7 +772,7 @@ class Device(object):
         }
         data = {
             'custom_latitude': location['latitude'],
-            'custom_longitude': location['longtitude']
+            'custom_longitude': location['longitude']
         }
 
         return self.base_request.request(
@@ -795,7 +795,7 @@ class Device(object):
             OK
         """
 
-        return self.set_custom_location(uuid, {'latitude': '', 'longtitude': ''})
+        return self.set_custom_location(uuid, {'latitude': '', 'longitude': ''})
 
     def generate_device_key(self, uuid):
         """
