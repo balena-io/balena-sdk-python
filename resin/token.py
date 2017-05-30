@@ -1,5 +1,5 @@
-import jwt
 from datetime import datetime
+import jwt
 
 from .settings import Settings
 from . import exceptions

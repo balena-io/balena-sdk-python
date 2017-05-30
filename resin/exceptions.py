@@ -2,7 +2,22 @@
 from .resources import Message
 
 
-class MissingOption(Exception):
+class ResinException(Exception):
+    """
+    Exception base class for Python SDK.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+
+    """
+
+    def __init__(self):
+        self.code = self.__class__.__name__
+        self.exit_code = 1
+
+
+class MissingOption(ResinException):
     """
     Exception type for missing option in settings or auth token.
 
@@ -10,19 +25,16 @@ class MissingOption(Exception):
         option (str): option name.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, option):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(MissingOption, self).__init__()
         self.message = Message.MISSING_OPTION.format(option=option)
 
 
-class InvalidOption(Exception):
+class InvalidOption(ResinException):
     """
     Exception type for invalid option in settings or auth token.
 
@@ -30,19 +42,16 @@ class InvalidOption(Exception):
         option (str): option name.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, option):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(InvalidOption, self).__init__()
         self.message = Message.INVALID_OPTION.format(option=option)
 
 
-class NonAllowedOption(Exception):
+class NonAllowedOption(ResinException):
     """
     Exception type for non allowed option in parameters for downloading device OS.
 
@@ -50,19 +59,16 @@ class NonAllowedOption(Exception):
         option (str): option name.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, option):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
-        self.message = Message.NON_ALLOWED_OPTION(option=option)
+        super(NonAllowedOption, self).__init__()
+        self.message = Message.NON_ALLOWED_OPTION.format(option=option)
 
 
-class InvalidDeviceType(Exception):
+class InvalidDeviceType(ResinException):
     """
     Exception type for invalid device type.
 
@@ -70,19 +76,16 @@ class InvalidDeviceType(Exception):
         dev_type (str): device type.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, dev_type):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(InvalidDeviceType, self).__init__()
         self.message = Message.INVALID_DEVICE_TYPE.format(dev_type=dev_type)
 
 
-class MalformedToken(Exception):
+class MalformedToken(ResinException):
     """
     Exception type for malformed token.
 
@@ -90,19 +93,16 @@ class MalformedToken(Exception):
         token (str): token.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, token):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(MalformedToken, self).__init__()
         self.message = Message.MALFORMED_TOKEN.format(token=token)
 
 
-class ApplicationNotFound(Exception):
+class ApplicationNotFound(ResinException):
     """
     Exception type for application not found.
 
@@ -110,20 +110,17 @@ class ApplicationNotFound(Exception):
         application (str): application detail (application name or id).
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, application):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(ApplicationNotFound, self).__init__()
         self.message = Message.APPLICATION_NOT_FOUND.format(
             application=application)
 
 
-class DeviceNotFound(Exception):
+class DeviceNotFound(ResinException):
     """
     Exception type for device not found.
 
@@ -131,19 +128,16 @@ class DeviceNotFound(Exception):
         device (str): device detail (device uuid or device name).
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, uuid):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(DeviceNotFound, self).__init__()
         self.message = Message.DEVICE_NOT_FOUND.format(uuid=uuid)
 
 
-class KeyNotFound(Exception):
+class KeyNotFound(ResinException):
     """
     Exception type for ssh key not found.
 
@@ -151,19 +145,16 @@ class KeyNotFound(Exception):
         key (str): ssh key id.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, key):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(KeyNotFound, self).__init__()
         self.message = Message.KEY_NOT_FOUND.format(key=key)
 
 
-class RequestError(Exception):
+class RequestError(ResinException):
     """
     Exception type for request error.
 
@@ -171,53 +162,44 @@ class RequestError(Exception):
         body (str): response body.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, body):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(RequestError, self).__init__()
         self.message = Message.REQUEST_ERROR.format(body=body)
 
 
-class NotLoggedIn(Exception):
+class NotLoggedIn(ResinException):
     """
     Exception when no user logged in.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(NotLoggedIn, self).__init__()
         self.message = Message.NOT_LOGGED_IN
 
 
-class Unauthorized(Exception):
+class Unauthorized(ResinException):
     """
     Exception when no user logged in and no Resin API Key provided.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(Unauthorized, self).__init__()
         self.message = Message.UNAUTHORIZED
 
 
-class LoginFailed(Exception):
+class LoginFailed(ResinException):
     """
     Exception when login unsuccessful.
 
@@ -229,12 +211,11 @@ class LoginFailed(Exception):
     """
 
     def __init__(self):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(LoginFailed, self).__init__()
         self.message = Message.LOGIN_FAILED
 
 
-class DeviceOffline(Exception):
+class DeviceOffline(ResinException):
     """
     Exception when a device is offline.
 
@@ -242,19 +223,16 @@ class DeviceOffline(Exception):
         uuid (str): device uuid.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, uuid):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(DeviceOffline, self).__init__()
         self.message = Message.DEVICE_OFFLINE.format(uuid=uuid)
 
 
-class DeviceNotWebAccessible(Exception):
+class DeviceNotWebAccessible(ResinException):
     """
     Exception when a device is not web accessible.
 
@@ -262,19 +240,16 @@ class DeviceNotWebAccessible(Exception):
         uuid (str): device uuid.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, uuid):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(DeviceNotWebAccessible, self).__init__()
         self.message = Message.DEVICE_NOT_WEB_ACCESSIBLE.format(uuid=uuid)
 
 
-class IncompatibleApplication(Exception):
+class IncompatibleApplication(ResinException):
     """
     Exception when moving a device to an application with different device-type.
 
@@ -282,19 +257,16 @@ class IncompatibleApplication(Exception):
         application (str): application name.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, application):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(IncompatibleApplication, self).__init__()
         self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
 
 
-class UnsupportedFunction(Exception):
+class UnsupportedFunction(ResinException):
     """
     Exception when invoking an unsupported function in a specific supervisor version.
 
@@ -303,73 +275,61 @@ class UnsupportedFunction(Exception):
         current_version (str): current supervisor version.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, required_version, current_version):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(UnsupportedFunction, self).__init__()
         self.message = Message.SUPERVISOR_VERSION_ERROR.format(req_version=required_version, cur_version=current_version)
 
 
-class AmbiguousApplication(Exception):
+class AmbiguousApplication(ResinException):
     """
     Args:
         application (str): application name.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, application):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(AmbiguousApplication, self).__init__()
         self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
 
 
-class AmbiguousDevice(Exception):
+class AmbiguousDevice(ResinException):
     """
     Args:
         uuid (str): device uuid.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
     def __init__(self, uuid):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(AmbiguousDevice, self).__init__()
         self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
 
 
-class BuildNotFound(Exception):
+class BuildNotFound(ResinException):
     """
     Args:
-        id (str): build id.
+        build_id (str): build id.
 
     Attributes:
-        code (str): exception code.
-        exit_code (int): program exit code.
         message (str): error message.
 
     """
 
-    def __init__(self, id):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
-        self.message = Message.BUILD_NOT_FOUND.format(id=id)
+    def __init__(self, build_id):
+        super(BuildNotFound, self).__init__()
+        self.message = Message.BUILD_NOT_FOUND.format(id=build_id)
 
 
-class InvalidParameter(Exception):
+class InvalidParameter(ResinException):
     """
     Args:
         parameter (str): parameter name.
@@ -383,6 +343,5 @@ class InvalidParameter(Exception):
     """
 
     def __init__(self, parameter, value):
-        self.code = self.__class__.__name__
-        self.exit_code = 1
+        super(InvalidParameter, self).__init__()
         self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)

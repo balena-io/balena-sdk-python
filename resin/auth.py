@@ -39,7 +39,7 @@ class Auth(object):
 
         """
 
-        token = self.authenticate(**credentials)
+        token = self.authenticate(**credentials).decode("utf-8")
         if self.token.is_valid_token(token):
             self.token.set(token)
         else:

@@ -1,4 +1,7 @@
-import urlparse
+try:  # Python 3 imports
+    from urllib.parse import urlparse
+except ImportError:  # Python 2 imports
+    from urlparse import urlparse
 
 import pyotp
 
