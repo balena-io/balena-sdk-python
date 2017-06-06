@@ -74,7 +74,7 @@ class Build(object):
             'start_timestamp', 'project_type',
             'commit_hash', 'message'
         ]
-        if build_log:
+        if include_logs:
             build_info.append('log')
         for i in full_builds['d']:
             builds.append({k: i[k] for k in build_info})

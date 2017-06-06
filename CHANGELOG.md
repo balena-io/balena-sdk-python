@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.0] - 2016-11-08
+
+## Added
+
+- Implement resin.models.environment_variables.device.get_all_by_application().
+- Implement Build class (`resin.models.build.get()` and `resin.models.build.get_all_by_application()`).
+- Implement `resin.models.device.set_custom_location()` and `resin.models.device.unset_customer_location()`.
+- Implement `resin.models.device.generate_device_key()` that can generate a device specific key for use by a device.
+- Implement `resin.models.application.get_config()` for downloading an application config.json file.
+
+## Changed
+
+- Deprecated `resin.models.application.get_api_key()`.
+- Make all device env vars consistently return names as .name.
+- Ensure application and device .get handle arguments clearly.
+
 ## [1.5.4] - 2016-11-08
 
 ## Changed
