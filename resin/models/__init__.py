@@ -10,6 +10,7 @@ from .environment_variables import EnvironmentVariable
 from .key import Key
 from .device_os import DeviceOs
 from .supervisor import Supervisor
+from .build import Build
 
 
 class Models(object):
@@ -22,3 +23,4 @@ class Models(object):
         self.key = Key()
         self.device_os = DeviceOs()
         self.supervisor = Supervisor()
+        self.build = Build()

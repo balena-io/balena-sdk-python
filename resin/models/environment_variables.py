@@ -1,4 +1,5 @@
 import re
+import json
 
 from ..base_request import BaseRequest
 from .device import Device
@@ -26,6 +27,17 @@ class DeviceEnvVariable(object):
         self.base_request = BaseRequest()
         self.device = Device()
         self.settings = Settings()
+
+    def _fix_device_env_var_name_key(self, env_var):
+        """
+        Internal method to workaround the fact that applications environment variables contain a `name` property
+        while device environment variables contain an `env_var_name` property instead.
+        """
+
+        if 'env_var_name' in env_var:
+            env_var['name'] = env_var['env_var_name']
+            env_var.pop('env_var_name', None)
+        return env_var
 
     def get_all(self, uuid):
         """
@@ -63,11 +75,11 @@ class DeviceEnvVariable(object):
             value (str): environment variable value.
 
         Returns:
-            str: new device environment variable info.
+            dict: new device environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','tmp-env-var', 'test')
-            '{"id":2184,"device":{"__deferred":{"uri":"/ewa/device(122950)"},"__id":122950},"env_var_name":"tmp-env-var","value":"test","__metadata":{"uri":"/ewa/device_environment_variable(2184)","type":""}}'
+            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
+            {'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 42166}
 
         """
 
@@ -77,10 +89,11 @@ class DeviceEnvVariable(object):
             'env_var_name': name,
             'value': value
         }
-        return self.base_request.request(
+        new_env_var = json.loads(self.base_request.request(
             'device_environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
-        )
+        ))
+        return self._fix_device_env_var_name_key(new_env_var)
 
     def update(self, var_id, value):
         """
@@ -129,6 +142,31 @@ class DeviceEnvVariable(object):
             'device_environment_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def get_all_by_application(self, app_id):
+        """
+        Get all device environment variables for an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            list: list of device environment variables.
+
+        Examples:
+            >>> resin.models.environment_variables.device.get_all_by_application('5780')
+            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+
+        """
+
+        params = {
+            'filter': 'device/application',
+            'eq': app_id
+        }
+        env_list = self.base_request.request(
+            'device_environment_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint'))
+        return map(self._fix_device_env_var_name_key, env_list['d'])
 
 
 class ApplicationEnvVariable(object):

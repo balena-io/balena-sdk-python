@@ -17,7 +17,7 @@ class MissingOption(Exception):
     """
 
     def __init__(self, option):
-        self.code = 'MissingOption'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.MISSING_OPTION.format(option=option)
 
@@ -37,7 +37,7 @@ class InvalidOption(Exception):
     """
 
     def __init__(self, option):
-        self.code = 'InvalidOption'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.INVALID_OPTION.format(option=option)
 
@@ -57,7 +57,7 @@ class NonAllowedOption(Exception):
     """
 
     def __init__(self, option):
-        self.code = 'NonAllowedOption'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.NON_ALLOWED_OPTION(option=option)
 
@@ -77,7 +77,7 @@ class InvalidDeviceType(Exception):
     """
 
     def __init__(self, dev_type):
-        self.code = 'InvalidDeviceType'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.INVALID_DEVICE_TYPE.format(dev_type=dev_type)
 
@@ -97,7 +97,7 @@ class MalformedToken(Exception):
     """
 
     def __init__(self, token):
-        self.code = 'MalformedToken'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.MALFORMED_TOKEN.format(token=token)
 
@@ -117,7 +117,7 @@ class ApplicationNotFound(Exception):
     """
 
     def __init__(self, application):
-        self.code = 'ApplicationNotFound'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.APPLICATION_NOT_FOUND.format(
             application=application)
@@ -138,7 +138,7 @@ class DeviceNotFound(Exception):
     """
 
     def __init__(self, uuid):
-        self.code = 'DeviceNotFound'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.DEVICE_NOT_FOUND.format(uuid=uuid)
 
@@ -158,7 +158,7 @@ class KeyNotFound(Exception):
     """
 
     def __init__(self, key):
-        self.code = 'KeyNotFound'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.KEY_NOT_FOUND.format(key=key)
 
@@ -178,7 +178,7 @@ class RequestError(Exception):
     """
 
     def __init__(self, body):
-        self.code = 'RequestError'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.REQUEST_ERROR.format(body=body)
 
@@ -195,7 +195,7 @@ class NotLoggedIn(Exception):
     """
 
     def __init__(self):
-        self.code = 'NotLoggedIn'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.NOT_LOGGED_IN
 
@@ -212,7 +212,7 @@ class Unauthorized(Exception):
     """
 
     def __init__(self):
-        self.code = 'Unauthorized'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.UNAUTHORIZED
 
@@ -229,7 +229,7 @@ class LoginFailed(Exception):
     """
 
     def __init__(self):
-        self.code = 'LoginFailed'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.LOGIN_FAILED
 
@@ -249,7 +249,7 @@ class DeviceOffline(Exception):
     """
 
     def __init__(self, uuid):
-        self.code = 'DeviceOffline'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.DEVICE_OFFLINE.format(uuid=uuid)
 
@@ -269,7 +269,7 @@ class DeviceNotWebAccessible(Exception):
     """
 
     def __init__(self, uuid):
-        self.code = 'DeviceNotWebAccessible'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.DEVICE_NOT_WEB_ACCESSIBLE.format(uuid=uuid)
 
@@ -289,7 +289,7 @@ class IncompatibleApplication(Exception):
     """
 
     def __init__(self, application):
-        self.code = 'IncompatibleApplication'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
 
@@ -310,6 +310,60 @@ class UnsupportedFunction(Exception):
     """
 
     def __init__(self, required_version, current_version):
-        self.code = 'UnsupportedFunction'
+        self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.SUPERVISOR_VERSION_ERROR.format(req_version=required_version, cur_version=current_version)
+
+
+class AmbiguousApplication(Exception):
+    """
+    Args:
+        application (str): application name.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, application):
+        self.code = self.__class__.__name__
+        self.exit_code = 1
+        self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
+
+
+class AmbiguousDevice(Exception):
+    """
+    Args:
+        uuid (str): device uuid.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, uuid):
+        self.code = self.__class__.__name__
+        self.exit_code = 1
+        self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
+
+
+class BuildNotFound(Exception):
+    """
+    Args:
+        id (str): build id.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, id):
+        self.code = self.__class__.__name__
+        self.exit_code = 1
+        self.message = Message.BUILD_NOT_FOUND.format(id=id)

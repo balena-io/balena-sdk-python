@@ -11,6 +11,7 @@ from .. import exceptions
 from .application import Application
 
 
+# TODO: support both device uuid and device id
 class DeviceStatus(object):
     """
     Resin device statuses.
@@ -60,10 +61,13 @@ class Device(object):
             'eq': uuid
         }
         try:
-            return self.base_request.request(
+            devices = self.base_request.request(
                 'device', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint')
-            )['d'][0]
+            )['d']
+            if len(devices) > 1:
+                raise exceptions.AmbiguousDevice(uuid)
+            return devices[0]
         except IndexError:
             raise exceptions.DeviceNotFound(uuid)
 
@@ -207,7 +211,7 @@ class Device(object):
             self.base_request.request(
                 'device', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint')
-            )
+            )['d']
         ) > 0
 
     def is_online(self, uuid):
@@ -737,3 +741,81 @@ class Device(object):
             return DeviceStatus.CONFIGURING
 
         return DeviceStatus.IDLE
+
+    def set_custom_location(self, uuid, location):
+        """
+        Set a custom location for a device.
+
+        Args:
+            uuid (str): device uuid.
+            location (dict): device custom location, format: { 'latitude': <latitude>, 'longitude': <longitude> }.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> location = {
+                'latitude': '21.032777',
+                'longitude': '105.831586'
+            }
+            >>> resin.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
+            OK
+
+        """
+
+        if not self.has(uuid):
+            raise exceptions.DeviceNotFound(uuid)
+
+        params = {
+            'filter': 'uuid',
+            'eq': uuid
+        }
+        data = {
+            'custom_latitude': location['latitude'],
+            'custom_longitude': location['longitude']
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def unset_custom_location(self, uuid):
+        """
+        clear custom location for a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.unset_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
+            OK
+        """
+
+        return self.set_custom_location(uuid, {'latitude': '', 'longitude': ''})
+
+    def generate_device_key(self, uuid):
+        """
+        Generate a device key.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.generate_device_key('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
+            2UrtMWeLqYXfTznZo1xNuZQXmEE6cOZk
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        return self.base_request.request(
+            '/api-key/device/{id}/device-key'.format(id=device_id), 'POST',
+            endpoint=self.settings.get('api_endpoint')
+        )

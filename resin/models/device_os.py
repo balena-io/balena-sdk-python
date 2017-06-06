@@ -13,6 +13,7 @@ NETWORK_TYPES = [
 ]
 
 
+# TODO: https://github.com/resin-io/resin-sdk/pull/288
 class DeviceOs(object):
     """
     This class implements device os model for Resin Python SDK.
@@ -98,5 +99,4 @@ class DeviceOs(object):
 
             # if 'wifiKey' not in params:
             #    raise exceptions.MissingOption('wifiKey')
-
         return params
