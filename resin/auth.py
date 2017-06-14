@@ -139,7 +139,7 @@ class Auth(object):
                 '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
             )
             return True
-        except exceptions.RequestError:
+        except (exceptions.RequestError, exceptions.Unauthorized):
             return False
 
     def get_token(self):
