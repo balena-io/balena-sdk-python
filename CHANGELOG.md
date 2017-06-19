@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.6.1] - 2016-11-08
+## [1.6.2] - 2016-06-19
+
+## Changed
+
+- Fix issue with auth.is_logged_in() raises Unauthorized exception.
+
+
+## [1.6.1] - 2017-06-06
 
 ## Added
 
@@ -19,6 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Make all device env vars consistently return names as .name.
 - Ensure application and device .get handle arguments clearly.
 
+
 ## [1.5.4] - 2016-11-08
 
 ## Changed
@@ -27,11 +35,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Specify version of pubnub lib since pubnub v4 is not supported yet.
 - Remove unused import.
 
+
 ## [1.5.3] - 2016-09-03
 
 ## Changed
 
 - Import print_function to support python3 print syntax when output error message to STDERR.
+
 
 ## [1.5.2] - 2016-08-30
 
@@ -39,11 +49,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Output error messages to STDERR
 
+
 ## [1.5.1] - 2016-07-05
 
 ## Changed
 
 - Fix issue with PubNub logs channel. If available, use device.logs_channel for PubNub channel names.
+
 
 ## [1.5.0] - 2016-04-28
 
