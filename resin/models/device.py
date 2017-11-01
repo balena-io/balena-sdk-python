@@ -123,6 +123,30 @@ class Device(object):
                 endpoint=self.settings.get('pine_endpoint')
             )['d']
 
+    def get_all_by_application_id(self, appid):
+        """
+        Get devices by application name.
+
+        Args:
+            appid (str): application id.
+
+        Returns:
+            list: list contains info of devices.
+
+        Examples:
+            >>> resin.models.device.get_all_by_application_id(1234)
+            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_seen_time': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+
+        """
+        params = {
+            'filter': 'application',
+            'eq': appid
+        }
+        return self.base_request.request(
+            'device', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
     def get_by_name(self, name):
         """
         Get devices by device name.
@@ -659,6 +683,41 @@ class Device(object):
         }
         data = {
             'is_web_accessible': False
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_to_build(self, uuid, build):
+        """
+        Set a device to specific build id.
+
+        Args:
+            uuid (str): device uuid.
+            build (str): build id.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+            ApplicationNotFound: if application couldn't be found.
+            IncompatibleApplication: if moving a device to an application with different device-type.
+
+        Examples:
+            >> > resin.models.device.set_to_build('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', '123098')
+            'OK'
+
+        """
+
+        if not self.has(uuid):
+            raise exceptions.DeviceNotFound(uuid)
+
+        params = {
+            'filter': 'uuid',
+            'eq': uuid
+        }
+        data = {
+            'build': build
         }
 
         return self.base_request.request(
