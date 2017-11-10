@@ -227,7 +227,7 @@ class Application(object):
         Download application config.json.
 
         Args:
-            name (str): application name.
+            app_id (str): application id.
 
         Returns:
             dict: application config.json content.
@@ -248,4 +248,66 @@ class Application(object):
         return self.base_request.request(
             '/download-config', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint')
+        )
+
+    def enable_rolling_updates(self, app_id):
+        """
+        Enable Rolling update on application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >> > resin.models.application.enable_rolling_updates('106640')
+            'OK'
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+        data = {
+            'should_track_latest_release': True
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def disable_rolling_updates(self, app_id):
+        """
+        Disable Rolling update on application.
+
+        Args:
+            name (str): application id.
+
+        Returns:
+            OK/error.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >> > resin.models.application.disable_rolling_updates('106640')
+            'OK'
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+        data = {
+            'should_track_latest_release': False
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
         )
