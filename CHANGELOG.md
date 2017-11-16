@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.6.2] - 2016-06-19
+## [1.6.3] - 2017-11-17
+
+## Changed
+
+- Add additional API endpoints: `resin.models.application.enable_rolling_updates()`, `resin.models.application.disable_rolling_updates()`, `resin.models.device.get_all_by_application_id()` and `resin.models.device.set_to_build()` by [amirfuhrmann](https://github.com/amirfuhrmann)
+
+
+## [1.6.2] - 2017-06-19
 
 ## Changed
 
