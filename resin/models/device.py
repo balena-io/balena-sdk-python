@@ -115,7 +115,7 @@ class Device(object):
 
         if app:
             params = {
-                'filter': 'application',
+                'filter': 'belongs_to__application',
                 'eq': app[0]['id']
             }
             return self.base_request.request(
@@ -204,7 +204,7 @@ class Device(object):
 
         """
 
-        app_id = self.get(uuid)['application']['__id']
+        app_id = self.get(uuid)['belongs_to__application']['__id']
         params = {
             'filter': 'id',
             'eq': app_id
@@ -755,7 +755,7 @@ class Device(object):
             'eq': uuid
         }
         data = {
-            'application': application['id']
+            'belongs_to__application': application['id']
         }
 
         return self.base_request.request(

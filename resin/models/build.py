@@ -60,7 +60,7 @@ class Build(object):
         """
 
         params = {
-            'filter': 'application',
+            'filter': 'belongs_to__application',
             'eq': app_id
         }
         full_builds = self.base_request.request(

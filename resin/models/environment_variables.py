@@ -160,7 +160,7 @@ class DeviceEnvVariable(object):
         """
 
         params = {
-            'filter': 'device/application',
+            'filter': 'device/belongs_to__application',
             'eq': app_id
         }
         env_list = self.base_request.request(
