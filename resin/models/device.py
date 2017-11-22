@@ -3,6 +3,8 @@ import binascii
 import os
 from datetime import datetime
 
+from urlparse import urljoin
+
 from ..base_request import BaseRequest
 from .config import Config
 from ..settings import Settings
@@ -877,4 +879,25 @@ class Device(object):
         return self.base_request.request(
             '/api-key/device/{id}/device-key'.format(id=device_id), 'POST',
             endpoint=self.settings.get('api_endpoint')
+        )
+
+    def get_dashboard_url(self, uuid):
+        """
+        Get Resin Dashboard URL for a specific device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Examples:
+            >>> resin.models.device.get_dashboard_url('19619a6317072b65a240b451f45f855d')
+            https://dashboard.resin.io/devices/19619a6317072b65a240b451f45f855d/summary
+
+        """
+
+        if not uuid:
+            raise ValueError("Device UUID must be a non empty string")
+        dashboard_url = self.settings.get('api_endpoint').replace('api', 'dashboard')
+        return urljoin(
+            dashboard_url,
+            '/devices/{}/summary'.format(uuid)
         )
