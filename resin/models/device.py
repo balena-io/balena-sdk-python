@@ -901,3 +901,71 @@ class Device(object):
             dashboard_url,
             '/devices/{}/summary'.format(uuid)
         )
+
+    def grant_support_access(self, uuid, valid_period):
+        """
+        Grant support access to a device until a specified time.
+
+        Args:
+            uuid (str): device uuid.
+            valid_period (int): valid period in hour.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.grant_support_access('5685', 2)
+            'OK'
+
+        """
+
+        if not valid_period or int(valid_period) <= 0:
+            raise exceptions.InvalidParameter(`valid_period`, valid_period)
+
+        expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
+
+        device_id = self.get(uuid)['id']
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': expiry_timestamp
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def revoke_support_access(self, uuid):
+        """
+        Revoke support access to a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.revoke_support_access('5685')
+            'OK'
+
+        """
+
+        device_id = self.get(uuid)['id']
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': None
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )

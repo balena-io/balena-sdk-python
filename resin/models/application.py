@@ -3,6 +3,7 @@ from ..settings import Settings
 from .config import Config
 from .. import exceptions
 
+from datetime import datetime
 
 # TODO: support both app_id and app_name
 class Application(object):
@@ -343,7 +344,7 @@ class Application(object):
 
     def disable_device_urls(self, app_id):
         """
-        Disable device urls for all devices that belong to an application
+        Disable device urls for all devices that belong to an application.
 
         Args:
             app_id (str): application id.
@@ -367,5 +368,71 @@ class Application(object):
 
         return self.base_request.request(
             'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def grant_support_access(self, app_id, valid_period):
+        """
+        Grant support access to an application until a specified time.
+
+        Args:
+            app_id (str): application id.
+            valid_period (int): valid period in hour.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.grant_support_access('5685', 2)
+            'OK'
+
+        """
+
+        if not valid_period or int(valid_period) <= 0:
+            raise exceptions.InvalidParameter(`valid_period`, valid_period)
+
+        expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': expiry_timestamp
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def revoke_support_access(self, app_id):
+        """
+        Revoke support access to an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.revoke_support_access('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': None
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )

@@ -367,3 +367,22 @@ class BuildNotFound(Exception):
         self.code = self.__class__.__name__
         self.exit_code = 1
         self.message = Message.BUILD_NOT_FOUND.format(id=id)
+
+
+class InvalidParameter(Exception):
+    """
+    Args:
+        parameter (str): parameter name.
+        value (str): provided value.
+
+    Attributes:
+        code (str): exception code.
+        exit_code (int): program exit code.
+        message (str): error message.
+
+    """
+
+    def __init__(self, parameter, value):
+        self.code = self.__class__.__name__
+        self.exit_code = 1
+        self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)
