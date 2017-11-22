@@ -311,3 +311,61 @@ class Application(object):
             'application', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def enable_device_urls(self, app_id):
+        """
+        Enable device urls for all devices that belong to an application
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.enable_device_urls('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'belongs_to__application',
+            'eq': app_id
+        }
+        data = {
+            'is_web_accessible': True
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def disable_device_urls(self, app_id):
+        """
+        Disable device urls for all devices that belong to an application
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.disable_device_urls('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'belongs_to__application',
+            'eq': app_id
+        }
+        data = {
+            'is_web_accessible': False
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
