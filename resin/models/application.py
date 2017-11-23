@@ -5,6 +5,7 @@ from .. import exceptions
 
 from datetime import datetime
 
+
 # TODO: support both app_id and app_name
 class Application(object):
     """
@@ -389,7 +390,7 @@ class Application(object):
         """
 
         if not valid_period or int(valid_period) <= 0:
-            raise exceptions.InvalidParameter(`valid_period`, valid_period)
+            raise exceptions.InvalidParameter('valid_period', valid_period)
 
         expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
 

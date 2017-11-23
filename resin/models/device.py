@@ -517,12 +517,12 @@ class Device(object):
         # OpenVPN/OpenSSL implementation has a bug.
         return binascii.hexlify(os.urandom(31))
 
-    def register(self, app_name, uuid):
+    def register(self, app_id, uuid):
         """
         Register a new device with a Resin.io application. This function only works if you log in using credentials or Auth Token.
 
         Args:
-            app_name (str): application name.
+            app_id (str): application id.
             uuid (str): device uuid.
 
         Returns:
@@ -536,28 +536,19 @@ class Device(object):
         """
 
         user_id = self.token.get_user_id()
-        application = self.application.get(app_name)
-        api_key = self.base_request.request(
-            'application/{0}/generate-api-key'.format(application['id']),
-            'POST', endpoint=self.settings.get('api_endpoint'), login=True
-        )
-
-        now = (datetime.utcnow() - datetime.utcfromtimestamp(0))
-
+        application = self.application.get_by_id(app_id)
+        api_key = self.application.generate_provisioning_key(app_id)
         data = {
             'user': user_id,
-            'application': application['id'],
+            'application': app_id,
             'device_type': application['device_type'],
-            'registered_at': now.total_seconds(),
-            'uuid': uuid
+            'uuid': uuid,
+            'apikey': api_key
         }
 
-        if api_key:
-            data['apikey'] = api_key
-
         return self.base_request.request(
-            'device', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            'device/register', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint'), login=True
         )
 
     def restart(self, uuid):
@@ -920,7 +911,7 @@ class Device(object):
         """
 
         if not valid_period or int(valid_period) <= 0:
-            raise exceptions.InvalidParameter(`valid_period`, valid_period)
+            raise exceptions.InvalidParameter('valid_period', valid_period)
 
         expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
 

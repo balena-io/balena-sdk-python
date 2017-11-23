@@ -10,6 +10,7 @@ from .. import exceptions
 def _is_valid_env_var_name(env_var_name):
     return re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$', env_var_name)
 
+
 class EnvironmentVariable(object):
     """
     This class is a wrapper for device and application environment variable models.
