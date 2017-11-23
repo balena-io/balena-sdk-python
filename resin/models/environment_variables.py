@@ -4,7 +4,11 @@ import json
 from ..base_request import BaseRequest
 from .device import Device
 from ..settings import Settings
+from .. import exceptions
 
+
+def _is_valid_env_var_name(env_var_name):
+    return re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$', env_var_name)
 
 class EnvironmentVariable(object):
     """
@@ -65,13 +69,13 @@ class DeviceEnvVariable(object):
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
-    def create(self, uuid, name, value):
+    def create(self, uuid, env_var_name, value):
         """
         Create a device environment variable.
 
         Args:
             uuid (str): device uuid.
-            name (str): environment variable name.
+            env_var_name (str): environment variable name.
             value (str): environment variable value.
 
         Returns:
@@ -83,10 +87,12 @@ class DeviceEnvVariable(object):
 
         """
 
+        if not _is_valid_env_var_name(env_var_name):
+            raise exceptions.InvalidParameter('env_var_name', env_var_name)
         device = self.device.get(uuid)
         data = {
             'device': device['id'],
-            'env_var_name': name,
+            'env_var_name': env_var_name,
             'value': value
         }
         new_env_var = json.loads(self.base_request.request(
@@ -211,13 +217,13 @@ class ApplicationEnvVariable(object):
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
-    def create(self, app_id, name, value):
+    def create(self, app_id, env_var_name, value):
         """
         Create an environment variable for application.
 
         Args:
             app_id (str): application id.
-            name (str): environment variable name.
+            env_var_name (str): environment variable name.
             value (str): environment variable value.
 
         Returns:
@@ -229,8 +235,10 @@ class ApplicationEnvVariable(object):
 
         """
 
+        if not _is_valid_env_var_name(env_var_name):
+            raise exceptions.InvalidParameter('env_var_name', env_var_name)
         data = {
-            'name': name,
+            'name': env_var_name,
             'value': value,
             'application': app_id
         }
