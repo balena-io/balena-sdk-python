@@ -436,3 +436,28 @@ class Application(object):
             'application', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def generate_provisioning_key(self, app_id):
+        """
+        Generate a device provisioning key for a specific application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            str: device provisioning key.
+
+        Examples:
+            >> > resin.models.application.generate_provisioning_key('5685')
+            'GThZJps91PoJCdzfYqF7glHXzBDGrkr9'
+
+        """
+
+        # Make sure user has access to the app_id
+        self.get_by_id(app_id)
+
+        return self.base_request.request(
+            '/api-key/application/{}/provisioning'.format(app_id),
+            'POST',
+            endpoint=self.settings.get('api_endpoint')
+        )
