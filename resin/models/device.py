@@ -893,27 +893,25 @@ class Device(object):
             '/devices/{}/summary'.format(uuid)
         )
 
-    def grant_support_access(self, uuid, valid_period):
+    def grant_support_access(self, uuid, expiry_timestamp):
         """
         Grant support access to a device until a specified time.
 
         Args:
             uuid (str): device uuid.
-            valid_period (int): valid period in hour.
+            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
 
         Returns:
             OK.
 
         Examples:
-            >> > resin.models.device.grant_support_access('5685', 2)
+            >> > resin.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
             'OK'
 
         """
 
-        if not valid_period or int(valid_period) <= 0:
-            raise exceptions.InvalidParameter('valid_period', valid_period)
-
-        expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
+        if not expiry_timestamp or expiry_timestamp <= int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000):
+            raise exceptions.InvalidParameter('expiry_timestamp', expiry_timestamp)
 
         device_id = self.get(uuid)['id']
         params = {
@@ -941,7 +939,7 @@ class Device(object):
             OK.
 
         Examples:
-            >> > resin.models.device.revoke_support_access('5685')
+            >> > resin.models.device.revoke_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
             'OK'
 
         """

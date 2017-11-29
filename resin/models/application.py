@@ -372,27 +372,25 @@ class Application(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
-    def grant_support_access(self, app_id, valid_period):
+    def grant_support_access(self, app_id, expiry_timestamp):
         """
         Grant support access to an application until a specified time.
 
         Args:
             app_id (str): application id.
-            valid_period (int): valid period in hour.
+            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
 
         Returns:
             OK/error.
 
         Examples:
-            >> > resin.models.application.grant_support_access('5685', 2)
+            >> > resin.models.application.grant_support_access('5685', 1511974999000)
             'OK'
 
         """
 
-        if not valid_period or int(valid_period) <= 0:
-            raise exceptions.InvalidParameter('valid_period', valid_period)
-
-        expiry_timestamp = ((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() + int(valid_period) * 3600) * 1000
+        if not expiry_timestamp or expiry_timestamp <= int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000):
+            raise exceptions.InvalidParameter('expiry_timestamp', expiry_timestamp)
 
         params = {
             'filter': 'id',
