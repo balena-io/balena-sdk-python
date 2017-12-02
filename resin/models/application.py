@@ -3,6 +3,8 @@ from ..settings import Settings
 from .config import Config
 from .. import exceptions
 
+from datetime import datetime
+
 
 # TODO: support both app_id and app_name
 class Application(object):
@@ -310,4 +312,151 @@ class Application(object):
         return self.base_request.request(
             'application', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def enable_device_urls(self, app_id):
+        """
+        Enable device urls for all devices that belong to an application
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.enable_device_urls('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'belongs_to__application',
+            'eq': app_id
+        }
+        data = {
+            'is_web_accessible': True
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def disable_device_urls(self, app_id):
+        """
+        Disable device urls for all devices that belong to an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.disable_device_urls('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'belongs_to__application',
+            'eq': app_id
+        }
+        data = {
+            'is_web_accessible': False
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def grant_support_access(self, app_id, expiry_timestamp):
+        """
+        Grant support access to an application until a specified time.
+
+        Args:
+            app_id (str): application id.
+            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.grant_support_access('5685', 1511974999000)
+            'OK'
+
+        """
+
+        if not expiry_timestamp or expiry_timestamp <= int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000):
+            raise exceptions.InvalidParameter('expiry_timestamp', expiry_timestamp)
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': expiry_timestamp
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def revoke_support_access(self, app_id):
+        """
+        Revoke support access to an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.revoke_support_access('5685')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': None
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def generate_provisioning_key(self, app_id):
+        """
+        Generate a device provisioning key for a specific application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            str: device provisioning key.
+
+        Examples:
+            >> > resin.models.application.generate_provisioning_key('5685')
+            'GThZJps91PoJCdzfYqF7glHXzBDGrkr9'
+
+        """
+
+        # Make sure user has access to the app_id
+        self.get_by_id(app_id)
+
+        return self.base_request.request(
+            '/api-key/application/{}/provisioning'.format(app_id),
+            'POST',
+            endpoint=self.settings.get('api_endpoint')
         )

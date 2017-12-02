@@ -25,10 +25,14 @@ class Settings(object):
     HOME_DIRECTORY = Path.expanduser('~')
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'resin.cfg'
+    DEFAULT_SETTING_KEYS = set(['pine_endpoint', 'api_endpoint', 'api_version',
+                                'data_directory', 'image_cache_time',
+                                'token_refresh_interval', 'cache_directory'])
 
     _setting = {
-        'pine_endpoint': 'https://api.resin.io/ewa/',
+        'pine_endpoint': 'https://api.resin.io/v3/',
         'api_endpoint': 'https://api.resin.io/',
+        'api_version': 'v3',
         'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
         # cache time : 1 week in milliseconds
         'image_cache_time': (1 * 1000 * 60 * 60 * 24 * 7),
@@ -44,6 +48,8 @@ class Settings(object):
                                      self.CONFIG_FILENAME)
         try:
             self.__read_settings()
+            if not self.DEFAULT_SETTING_KEYS.issubset(set(self._setting)):
+                raise
         except:
             # Backup old settings file if it exists.
             try:
@@ -54,10 +60,20 @@ class Settings(object):
                                                            'old')))
             except OSError:
                 pass
-            self.__write_settings()
+            self.__write_settings(default=True)
             print(Message.INVALID_SETTINGS.format(path=config_file_path), file=sys.stderr)
 
-    def __write_settings(self):
+    def __write_settings(self, default=None):
+        """
+        Write settings to file.
+
+        Args:
+            default (Optional[bool]): write default settings.
+
+        """
+
+        if default:
+            self._setting = Settings._setting
         config = ConfigParser.ConfigParser()
         config.add_section(self.CONFIG_SECTION)
         for key in self._setting:

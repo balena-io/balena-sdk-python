@@ -29,3 +29,4 @@ class Message(object):
     AMBIGUOUS_APPLICATION = "Application is ambiguous: {application}"
     AMBIGUOUS_DEVICE = "Device is ambiguous: {uuid}"
     BUILD_NOT_FOUND = "Build not found: {id}"
+    INVALID_PARAMETER = "Invalid parameter: {value} is not a valid value for parameter `{parameter}`"

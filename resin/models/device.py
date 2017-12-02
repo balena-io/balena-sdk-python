@@ -3,6 +3,8 @@ import binascii
 import os
 from datetime import datetime
 
+from urlparse import urljoin
+
 from ..base_request import BaseRequest
 from .config import Config
 from ..settings import Settings
@@ -115,7 +117,7 @@ class Device(object):
 
         if app:
             params = {
-                'filter': 'application',
+                'filter': 'belongs_to__application',
                 'eq': app[0]['id']
             }
             return self.base_request.request(
@@ -204,7 +206,7 @@ class Device(object):
 
         """
 
-        app_id = self.get(uuid)['application']['__id']
+        app_id = self.get(uuid)['belongs_to__application']['__id']
         params = {
             'filter': 'id',
             'eq': app_id
@@ -515,12 +517,12 @@ class Device(object):
         # OpenVPN/OpenSSL implementation has a bug.
         return binascii.hexlify(os.urandom(31))
 
-    def register(self, app_name, uuid):
+    def register(self, app_id, uuid):
         """
         Register a new device with a Resin.io application. This function only works if you log in using credentials or Auth Token.
 
         Args:
-            app_name (str): application name.
+            app_id (str): application id.
             uuid (str): device uuid.
 
         Returns:
@@ -534,28 +536,19 @@ class Device(object):
         """
 
         user_id = self.token.get_user_id()
-        application = self.application.get(app_name)
-        api_key = self.base_request.request(
-            'application/{0}/generate-api-key'.format(application['id']),
-            'POST', endpoint=self.settings.get('api_endpoint'), login=True
-        )
-
-        now = (datetime.utcnow() - datetime.utcfromtimestamp(0))
-
+        application = self.application.get_by_id(app_id)
+        api_key = self.application.generate_provisioning_key(app_id)
         data = {
             'user': user_id,
-            'application': application['id'],
+            'application': app_id,
             'device_type': application['device_type'],
-            'registered_at': now.total_seconds(),
-            'uuid': uuid
+            'uuid': uuid,
+            'apikey': api_key
         }
 
-        if api_key:
-            data['apikey'] = api_key
-
         return self.base_request.request(
-            'device', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            'device/register', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint'), login=True
         )
 
     def restart(self, uuid):
@@ -755,7 +748,7 @@ class Device(object):
             'eq': uuid
         }
         data = {
-            'application': application['id']
+            'belongs_to__application': application['id']
         }
 
         return self.base_request.request(
@@ -877,4 +870,91 @@ class Device(object):
         return self.base_request.request(
             '/api-key/device/{id}/device-key'.format(id=device_id), 'POST',
             endpoint=self.settings.get('api_endpoint')
+        )
+
+    def get_dashboard_url(self, uuid):
+        """
+        Get Resin Dashboard URL for a specific device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Examples:
+            >>> resin.models.device.get_dashboard_url('19619a6317072b65a240b451f45f855d')
+            https://dashboard.resin.io/devices/19619a6317072b65a240b451f45f855d/summary
+
+        """
+
+        if not uuid:
+            raise ValueError("Device UUID must be a non empty string")
+        dashboard_url = self.settings.get('api_endpoint').replace('api', 'dashboard')
+        return urljoin(
+            dashboard_url,
+            '/devices/{}/summary'.format(uuid)
+        )
+
+    def grant_support_access(self, uuid, expiry_timestamp):
+        """
+        Grant support access to a device until a specified time.
+
+        Args:
+            uuid (str): device uuid.
+            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
+            'OK'
+
+        """
+
+        if not expiry_timestamp or expiry_timestamp <= int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000):
+            raise exceptions.InvalidParameter('expiry_timestamp', expiry_timestamp)
+
+        device_id = self.get(uuid)['id']
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': expiry_timestamp
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def revoke_support_access(self, uuid):
+        """
+        Revoke support access to a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.revoke_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
+            'OK'
+
+        """
+
+        device_id = self.get(uuid)['id']
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'is_accessible_by_support_until__date': None
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
         )

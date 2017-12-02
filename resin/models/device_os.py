@@ -24,6 +24,26 @@ class DeviceOs(object):
         self.base_request = BaseRequest()
         self.settings = Settings()
 
+    def get_config(self, app_id):
+        """
+        Get an application config.json
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            dict: application config.json
+
+        """
+
+        data = {
+            'appId': app_id
+        }
+        return self.base_request.request(
+            'download-config', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint')
+        )
+
     def download(self, raw=None, **data):
         """
         Download an OS image. This function only works if you log in using credentials or Auth Token.
