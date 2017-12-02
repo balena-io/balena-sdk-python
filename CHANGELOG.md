@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.0] - 2017-12-02
+
+## Added
+
+- Implement `device.get_dashboard_url()` that return the Resin Dashboard URL for a specific device.
+- Implement `device_os.get_config()` that retrieves an application config.json.
+- Implement `application.enable_device_urls()` and `application.disable_device_urls()` that enable/disable the URL for all devices belong to an application.
+- Implement methods at device and application level for granting and revoking support access.
+- Implement `application.generate_provisioning_key()` that generates a device provisioning key for a specific application.
+
+## Changed
+
+- Upgrade Pine endpoint to Resin API v3.
+- Add validation for environment variable name.
+- Update `device.register()`, device registration now uses provisioning key.
+
+
 ## [1.6.3] - 2017-11-17
 
 ## Changed
