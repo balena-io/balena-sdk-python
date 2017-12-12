@@ -1,10 +1,12 @@
-import requests
+try:  # Python 3 imports
+    from urllib.parse import urljoin
+except ImportError:  # Python 2 imports
+    from urlparse import urljoin
+
 import json
-import urllib
 from string import Template
 import os
-
-from urlparse import urljoin
+import requests
 
 from .settings import Settings
 from .token import Token
@@ -41,9 +43,8 @@ class BaseRequest(object):
         self.__set_content_type(headers, 'application/json')
         if not stream:
             return requests.post(url, data=json.dumps(data), headers=headers)
-        else:
-            return requests.post(
-                url, data=json.dumps(data), headers=headers, stream=stream)
+        return requests.post(
+            url, data=json.dumps(data), headers=headers, stream=stream)
 
     def __put(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
@@ -105,7 +106,7 @@ class BaseRequest(object):
 
         headers = headers or {}
 
-        METHODS = {
+        methods = {
             'get': self.__get,
             'post': self.__post,
             'put': self.__put,
@@ -113,7 +114,7 @@ class BaseRequest(object):
             'head': self.__head,
             'patch': self.__patch
         }
-        request_method = METHODS[method.lower()]
+        request_method = methods[method.lower()]
         url = urljoin(endpoint, url)
         if auth:
             if not api_key:
@@ -170,11 +171,11 @@ class BaseRequest(object):
             raise exceptions.RequestError(response._content)
 
         try:
-            json = response.json()
+            json_data = response.json()
         except ValueError:
             return response.content
 
-        return json
+        return json_data
 
     def _request_new_token(self):
         headers = {}

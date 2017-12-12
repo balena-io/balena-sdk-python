@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import ConfigParser
 import os.path as Path
 import os
 import shutil
@@ -8,6 +7,11 @@ import sys
 
 from . import exceptions
 from .resources import Message
+
+try:  # Python 3 imports
+    import configparser
+except ImportError:  # Python 2 imports
+    import ConfigParser as configparser
 
 
 class Settings(object):
@@ -30,14 +34,16 @@ class Settings(object):
                                 'token_refresh_interval', 'cache_directory'])
 
     _setting = {
+        # These are default config values to write default config file.
+        # All values here must be in string format otherwise there will be error when write config file.
         'pine_endpoint': 'https://api.resin.io/v3/',
         'api_endpoint': 'https://api.resin.io/',
         'api_version': 'v3',
         'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
         # cache time : 1 week in milliseconds
-        'image_cache_time': (1 * 1000 * 60 * 60 * 24 * 7),
+        'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
         # token refresh interval: 1 hour in milliseconds
-        'token_refresh_interval': (1 * 1000 * 60 * 60)
+        'token_refresh_interval': str(1 * 1000 * 60 * 60)
     }
 
     _setting['cache_directory'] = Path.join(_setting['data_directory'],
@@ -74,18 +80,18 @@ class Settings(object):
 
         if default:
             self._setting = Settings._setting
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.add_section(self.CONFIG_SECTION)
         for key in self._setting:
             config.set(self.CONFIG_SECTION, key, self._setting[key])
         if not Path.isdir(self._setting['data_directory']):
             os.makedirs(self._setting['data_directory'])
         with open(Path.join(self._setting['data_directory'],
-                            self.CONFIG_FILENAME), 'wb') as config_file:
+                            self.CONFIG_FILENAME), 'w') as config_file:
             config.write(config_file)
 
     def __read_settings(self):
-        config_reader = ConfigParser.ConfigParser()
+        config_reader = configparser.ConfigParser()
         config_reader.read(Path.join(self._setting['data_directory'],
                                      self.CONFIG_FILENAME))
         config_data = {}

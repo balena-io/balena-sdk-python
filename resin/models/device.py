@@ -3,7 +3,10 @@ import binascii
 import os
 from datetime import datetime
 
-from urlparse import urljoin
+try:  # Python 3 imports
+    from urllib.parse import urljoin
+except ImportError:  # Python 2 imports
+    from urlparse import urljoin
 
 from ..base_request import BaseRequest
 from .config import Config
@@ -141,7 +144,7 @@ class Device(object):
 
         """
         params = {
-            'filter': 'application',
+            'filter': 'belongs_to__application',
             'eq': appid
         }
         return self.base_request.request(
