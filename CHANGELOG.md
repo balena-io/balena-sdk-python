@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0] - 2017-12-12
+
+## Added
+
+- Add support for Python 3.
+- Implement base class for resin exceptions.
+
+## Changed
+
+- Fix a bug in `resin.models.device.get_all_by_application()` to make it
+works with API v3.
+
+
 ## [1.7.0] - 2017-12-02
 
 ## Added
