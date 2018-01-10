@@ -761,21 +761,22 @@ Set a custom location for a device.
 >>> resin.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
 OK
 ```
-### Function: set_to_build(uuid, build)
+### Function: set_to_build(uuid, build_commit_hash)
 
-Set a device to specific build id.
+Set a device to specific build commit hash.
 
 #### Args:
     uuid (str): device uuid.
-    build (str): build id.
+    build_commit_hash (str): build commit hash.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
     ApplicationNotFound: if application couldn't be found.
+    FailedBuild: if build commit hash points to an error build.
     IncompatibleApplication: if moving a device to an application with different device-type.
 
 #### Examples:
-    >> > resin.models.device.set_to_build('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', '123098')
+    >> > resin.models.device.set_to_build('4457d5db93be458270666ef8b8157c66', '950eac2d3efce555490c96e7c9b55c37b385acb6')
     'OK'
 ### Function: unset_custom_location(uuid)
 

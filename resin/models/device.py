@@ -14,6 +14,7 @@ from ..settings import Settings
 from ..token import Token
 from .. import exceptions
 from .application import Application
+from .build import Build
 
 
 # TODO: support both device uuid and device id
@@ -41,6 +42,7 @@ class Device(object):
         self.settings = Settings()
         self.token = Token()
         self.application = Application()
+        self.build = Build()
 
     def get(self, uuid):
         """
@@ -686,21 +688,22 @@ class Device(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
-    def set_to_build(self, uuid, build):
+    def set_to_build(self, uuid, build_commit_hash):
         """
-        Set a device to specific build id.
+        Set a device to specific build commit hash.
 
         Args:
             uuid (str): device uuid.
-            build (str): build id.
+            build_commit_hash (str): build commit hash.
 
         Raises:
             DeviceNotFound: if device couldn't be found.
             ApplicationNotFound: if application couldn't be found.
+            FailedBuild: if build commit hash points to an error build.
             IncompatibleApplication: if moving a device to an application with different device-type.
 
         Examples:
-            >> > resin.models.device.set_to_build('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', '123098')
+            >> > resin.models.device.set_to_build('4457d5db93be458270666ef8b8157c66', '950eac2d3efce555490c96e7c9b55c37b385acb6')
             'OK'
 
         """
@@ -708,12 +711,23 @@ class Device(object):
         if not self.has(uuid):
             raise exceptions.DeviceNotFound(uuid)
 
+        build_id = None
+        builds = self.build.get_by_commit(build_commit_hash)
+        for build in builds:
+            if build['status'] == 'success':
+                build_id = build['id']
+                break
+
+        if build_id is None:
+            raise exceptions.FailedBuild(build_commit_hash)
+
         params = {
             'filter': 'uuid',
             'eq': uuid
         }
+
         data = {
-            'build': build
+            'should_be_running__build': build_id
         }
 
         return self.base_request.request(
