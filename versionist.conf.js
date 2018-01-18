@@ -20,7 +20,10 @@ module.exports = {
   parseFooterTags: true,
   getGitReferenceFromVersion: 'v-prefix',
   incrementVersion: 'semver',
-  editVersion: false,
+  updateVersion: {
+    preset: 'initPy',
+    targetFile: 'resin/__init__.py'
+  },
 
   // Always add the entry to the top of the Changelog, below the header.
   addEntryToChangelog: {
