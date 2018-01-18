@@ -43,9 +43,28 @@ class Build(object):
         else:
             raise exceptions.BuildNotFound(id)
 
+    def get_by_commit(self, commit_hash):
+        """
+        Get a specific build by commit hash.
+        """
+
+        params = {
+            'filter': 'commit_hash',
+            'eq': commit_hash
+        }
+
+        build = self.base_request.request(
+            'build', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+        if build and (len(build['d']) > 0):
+            return build['d']
+        else:
+            raise exceptions.BuildNotFound(commit_hash)
+
     def get_all_by_application(self, app_id, include_logs=False):
         """
-        Get a specific build.
+        Get list of builds belong to an application.
 
         Args:
             app_id (str): application id.
