@@ -6,7 +6,7 @@ from .. import exceptions
 
 class Build(object):
     """
-    This class implements model for build for Resin Python SDK.
+    This class implements build model for Resin Python SDK.
 
     """
 
@@ -45,17 +45,14 @@ class Build(object):
 
     def get_all_by_application(self, app_id, include_logs=False):
         """
-        Get a specific build.
+        Get list of builds belonging to an application.
 
         Args:
             app_id (str): application id.
-            include_logs (bool): True if user wants to include build logs in build info, False otherwise.
+            include_logs (Optional[bool]): Defaults to False since these may be very large. True if user wants to include build logs in build info.
 
         Returns:
             list: list of build info.
-
-        Raises:
-            BuildNotFound: if build couldn't be found.
 
         """
 

@@ -11,6 +11,12 @@ class Application(object):
     """
     This class implements application model for Resin Python SDK.
 
+    Due to API changes, the returned Application object schema has changed. Here are the formats of the old and new returned objects.
+
+    The old returned object's properties: `__metadata, actor, app_name, application, commit, device_type, git_repository, id, should_track_latest_release, support_expiry_date, user, version`.
+
+    The new returned object's properties (since Python SDK v2.0.0): `__metadata, actor, app_name, commit, depends_on__application, device_type, git_repository, id, is_accessible_by_support_until__date, should_track_latest_release, user, version`.
+
     """
 
     def __init__(self):
