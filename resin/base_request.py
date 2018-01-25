@@ -26,6 +26,10 @@ class BaseRequest(object):
         self.token = Token()
         self.util = Util()
 
+    @property
+    def timeout(self):
+        return float(self.settings.get('timeout')) / 1000
+
     def __str__(self):
         return b'<{:s} at {:#x}>'.format(type(self).__name__, id(self))
 
@@ -37,29 +41,29 @@ class BaseRequest(object):
             {'Authorization': 'Bearer {:s}'.format(self.token.get())})
 
     def __get(self, url, headers, data=None, stream=None):
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout)
 
     def __post(self, url, headers, data, stream=None):
         self.__set_content_type(headers, 'application/json')
         if not stream:
-            return requests.post(url, data=json.dumps(data), headers=headers)
+            return requests.post(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
         return requests.post(
-            url, data=json.dumps(data), headers=headers, stream=stream)
+            url, data=json.dumps(data), headers=headers, stream=stream, timeout=self.timeout)
 
     def __put(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
-        return requests.put(url, data=json.dumps(data), headers=headers)
+        return requests.put(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
 
     def __patch(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
-        return requests.patch(url, data=json.dumps(data), headers=headers)
+        return requests.patch(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
 
     def __delete(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/x-www-form-urlencoded')
-        return requests.delete(url, headers=headers)
+        return requests.delete(url, headers=headers, timeout=self.timeout)
 
     def __head(self, url, headers, data=None, stream=None):
-        return requests.head(url, headers=headers)
+        return requests.head(url, headers=headers, timeout=self.timeout)
 
     def _format_params(self, params, api_key):
         query_elements = []
@@ -181,7 +185,7 @@ class BaseRequest(object):
         headers = {}
         self.__set_authorization(headers)
         url = urljoin(self.settings.get('api_endpoint'), 'whoami')
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=self.timeout)
         if not response.ok:
             raise exceptions.RequestError(response._content)
         return response.content
