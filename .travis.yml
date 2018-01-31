@@ -5,6 +5,11 @@ python:
   - "3.5"
   - "3.6"
 # command to install dependencies
-install: "pip install pep8"
-# command to run tests
-script: python ./tests/pep8-git-pr-checker
+install: 
+- pip install pep8 setuptools
+- python setup.py install
+script:
+# Stye Check 
+- python ./tests/pep8-git-pr-checker
+# Automated Testing
+- python -m unittest discover tests -v
