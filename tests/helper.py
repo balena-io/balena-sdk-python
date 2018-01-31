@@ -1,5 +1,6 @@
 from resin import Resin
 from resin import exceptions as resin_exceptions
+from resin import Token
 
 
 class TestHelper(object):
@@ -21,6 +22,11 @@ class TestHelper(object):
                     'password': self.credential['password']
                 }
             )
+
+        # Stop the test if it's run by an admin user account.
+        token = Token()
+        if any('admin' in s for s in token.get_data()['permissions']):
+            raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
     def wipe_application(self):
         """
