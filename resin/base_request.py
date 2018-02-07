@@ -46,17 +46,17 @@ class BaseRequest(object):
     def __post(self, url, headers, data, stream=None):
         self.__set_content_type(headers, 'application/json')
         if not stream:
-            return requests.post(url, data=json.dumps(self.util.to_utf(data)), headers=headers, timeout=self.timeout)
+            return requests.post(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
         return requests.post(
-            url, data=json.dumps(self.util.to_utf(data)), headers=headers, stream=stream, timeout=self.timeout)
+            url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, stream=stream, timeout=self.timeout)
 
     def __put(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
-        return requests.put(url, data=json.dumps(self.util.to_utf(data)), headers=headers, timeout=self.timeout)
+        return requests.put(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
 
     def __patch(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/json')
-        return requests.patch(url, data=json.dumps(self.util.to_utf(data)), headers=headers, timeout=self.timeout)
+        return requests.patch(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
 
     def __delete(self, url, headers, data=None, stream=None):
         self.__set_content_type(headers, 'application/x-www-form-urlencoded')
@@ -200,7 +200,7 @@ class Util(object):
         # return None if key is not present
         return os.environ.get('RESIN_API_KEY')
 
-    def to_utf(self, source):
+    def decode_utf8(self, source):
         return {
             (k.decode('utf-8') if type(k).__name__ == 'bytes' else k):
             (v.decode('utf-8') if type(v).__name__ == 'bytes' else v) for k, v in source.items()

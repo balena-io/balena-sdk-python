@@ -24,7 +24,7 @@ class TestApplication(unittest.TestCase):
         with self.assertRaises(self.helper.resin_exceptions.InvalidDeviceType):
             self.resin.models.application.create('FooBar', 'Foo')
 
-        # should be rejected if the name has less than three characters
+        # should be rejected if the name has less than four characters
         with self.assertRaises(Exception) as cm:
             self.resin.models.application.create('Fo', 'Raspberry Pi 2')
         self.assertIn('It is necessary that each app name that is of a user (Auth), has a Length (Type) that is greater than or equal to 4', cm.exception.message)
@@ -37,9 +37,12 @@ class TestApplication(unittest.TestCase):
         # given no applications, it should return empty list.
         self.assertEqual(self.resin.models.application.get_all(), [])
 
-        # given there is an application, it should return a list with length 1.
+        # given there is an application, it should return a list with length 2.
         self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertEqual(len(self.resin.models.application.get_all()), 1)
+        self.resin.models.application.create('FooBar1', 'Raspberry Pi 2')
+        all_apps = self.resin.models.application.get_all()
+        self.assertEqual(len(all_apps), 2)
+        self.assertNotEqual(all_apps[0]['app_name'], all_apps[1]['app_name'])
 
     def test_get(self):
         # raise resin.exceptions.ApplicationNotFound if no application found.
@@ -93,6 +96,7 @@ class TestApplication(unittest.TestCase):
     def test_enable_rolling_updates(self):
         # should enable rolling update for the applications devices.
         app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        self.resin.models.application.disable_rolling_updates(app['id'])
         self.resin.models.application.enable_rolling_updates(app['id'])
         app = self.resin.models.application.get('FooBar')
         self.assertTrue(app['should_track_latest_release'])
@@ -100,6 +104,7 @@ class TestApplication(unittest.TestCase):
     def test_disable_rolling_updates(self):
         # should disable rolling update for the applications devices.
         app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        self.resin.models.application.enable_rolling_updates(app['id'])
         self.resin.models.application.disable_rolling_updates(app['id'])
         app = self.resin.models.application.get('FooBar')
         self.assertFalse(app['should_track_latest_release'])
@@ -122,15 +127,15 @@ class TestApplication(unittest.TestCase):
     def test_grant_support_access(self):
         app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
         # should throw an error if the expiry timestamp is in the past.
-        expiry_timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 - 10000)
+        expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) - 10000)
         with self.assertRaises(self.helper.resin_exceptions.InvalidParameter):
             self.resin.models.application.grant_support_access(app['id'], expiry_timestamp)
 
         # should grant support access until the specified time.
-        expiry_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 + 3600 * 1000)
+        expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
         self.resin.models.application.grant_support_access(app['id'], expiry_time)
         support_date = datetime.strptime(self.resin.models.application.get('FooBar')['is_accessible_by_support_until__date'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        self.assertEqual(int((support_date - datetime.utcfromtimestamp(0)).total_seconds() * 1000), expiry_time)
+        self.assertEqual(self.helper.datetime_to_epoch_ms(support_date), expiry_time)
 
     def test_revoke_support_access(self):
         # should revoke support access.
