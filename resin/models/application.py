@@ -4,6 +4,7 @@ from .config import Config
 from .. import exceptions
 
 from datetime import datetime
+import json
 
 
 # TODO: support both app_id and app_name
@@ -173,10 +174,10 @@ class Application(object):
                 'app_name': name,
                 'device_type': device_slug[0]
             }
-            return self.base_request.request(
+            return json.loads(self.base_request.request(
                 'application', 'POST', data=data,
                 endpoint=self.settings.get('pine_endpoint'), login=True
-            )
+            ).decode('utf-8'))
         else:
             raise exceptions.InvalidDeviceType(device_type)
 
