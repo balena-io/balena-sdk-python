@@ -99,7 +99,7 @@ class DeviceEnvVariable(object):
         new_env_var = json.loads(self.base_request.request(
             'device_environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
-        ))
+        ).decode('utf-8'))
         return self._fix_device_env_var_name_key(new_env_var)
 
     def update(self, var_id, value):
@@ -228,11 +228,11 @@ class ApplicationEnvVariable(object):
             value (str): environment variable value.
 
         Returns:
-            str: new application environment info.
+            dict: new application environment info.
 
         Examples:
-            >>> resin.models.environment_variables.application.create(9020, 'app-test-env', 'test')
-            '{"id":5652,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"name":"app-test-env","value":"test","__metadata":{"uri":"/ewa/environment_variable(5652)","type":""}}'
+            >>> resin.models.environment_variables.application.create('978062', 'test2', '123')
+            {'id': 91138, 'application': {'__deferred': {'uri': '/resin/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/resin/environment_variable(91138)', 'type': ''}}
 
         """
 
@@ -243,10 +243,10 @@ class ApplicationEnvVariable(object):
             'value': value,
             'application': app_id
         }
-        return self.base_request.request(
+        return json.loads(self.base_request.request(
             'environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
-        )
+        ).decode('utf-8'))
 
     def update(self, var_id, value):
         """

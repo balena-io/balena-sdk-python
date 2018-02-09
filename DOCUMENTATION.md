@@ -46,7 +46,7 @@ Create an application. This function only works if you log in using credentials 
 #### Examples:
 ```python
 >>> resin.models.application.create('Edison','Intel Edison')
-'{"id":9021,"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"app_name":"Edison","git_repository":"g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git","commit":null,"device_type":"intel-edison","__metadata":{"uri":"/ewa/application(9021)","type":""}}'
+{'id':9021,'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'app_name':'Edison','git_repository':'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git','commit':null,'device_type':'intel-edison','__metadata':{'uri':'/ewa/application(9021)','type':''}}
 ```
 ### Function: disable_device_urls(app_id)
 
@@ -680,13 +680,13 @@ Register a new device with a Resin.io application. This function only works if y
     uuid (str): device uuid.
 
 #### Returns:
-    str: dictionary contains device info (can be parsed to dict).
+    dict: dictionary contains device info.
 
 #### Examples:
 ```python
 >>> device_uuid = resin.models.device.generate_uuid()
 >>> resin.models.device.register('RPI1',device_uuid)
-'{"id":122950,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"name":"floral-mountain","device_type":"raspberry-pi","uuid":"8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143","commit":null,"note":null,"status":null,"is_online":false,"last_seen_time":"1970-01-01T00:00:00.000Z","ip_address":null,"vpn_address":null,"public_address":"","os_version":null,"supervisor_version":null,"supervisor_release":null,"provisioning_progress":null,"provisioning_state":null,"download_progress":null,"is_web_accessible":false,"longitude":"","latitude":"","location":"","logs_channel":null,"__metadata":{"uri":"/ewa/device(122950)","type":""}}'
+{'id':122950,'application':{'__deferred':{'uri':'/ewa/application(9020)'},'__id':9020},'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'name':'floral-mountain','device_type':'raspberry-pi','uuid':'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','commit':null,'note':null,'status':null,'is_online':false,'last_seen_time':'1970-01-01T00:00:00.000Z','ip_address':null,'vpn_address':null,'public_address':'','os_version':null,'supervisor_version':null,'supervisor_release':null,'provisioning_progress':null,'provisioning_state':null,'download_progress':null,'is_web_accessible':false,'longitude':'','latitude':'','location':'','logs_channel':null,'__metadata':{'uri':'/ewa/device(122950)','type':''}}
 ```
 ### Function: remove(uuid)
 
@@ -895,12 +895,12 @@ Create an environment variable for application.
     value (str): environment variable value.
 
 #### Returns:
-    str: new application environment info.
+    dict: new application environment info.
 
 #### Examples:
 ```python
->>> resin.models.environment_variables.application.create(9020, 'app-test-env', 'test')
-'{"id":5652,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"name":"app-test-env","value":"test","__metadata":{"uri":"/ewa/environment_variable(5652)","type":""}}'
+>>> resin.models.environment_variables.application.create('978062', 'test2', '123')
+{'id': 91138, 'application': {'__deferred': {'uri': '/resin/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/resin/environment_variable(91138)', 'type': ''}}
 ```
 ### Function: get_all(app_id)
 

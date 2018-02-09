@@ -2,6 +2,7 @@ import sys
 import binascii
 import os
 from datetime import datetime
+import json
 
 try:  # Python 3 imports
     from urllib.parse import urljoin
@@ -531,12 +532,12 @@ class Device(object):
             uuid (str): device uuid.
 
         Returns:
-            str: dictionary contains device info (can be parsed to dict).
+            dict: dictionary contains device info.
 
         Examples:
             >>> device_uuid = resin.models.device.generate_uuid()
             >>> resin.models.device.register('RPI1',device_uuid)
-            '{"id":122950,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"name":"floral-mountain","device_type":"raspberry-pi","uuid":"8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143","commit":null,"note":null,"status":null,"is_online":false,"last_seen_time":"1970-01-01T00:00:00.000Z","ip_address":null,"vpn_address":null,"public_address":"","os_version":null,"supervisor_version":null,"supervisor_release":null,"provisioning_progress":null,"provisioning_state":null,"download_progress":null,"is_web_accessible":false,"longitude":"","latitude":"","location":"","logs_channel":null,"__metadata":{"uri":"/ewa/device(122950)","type":""}}'
+            {'id':122950,'application':{'__deferred':{'uri':'/ewa/application(9020)'},'__id':9020},'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'name':'floral-mountain','device_type':'raspberry-pi','uuid':'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','commit':null,'note':null,'status':null,'is_online':false,'last_seen_time':'1970-01-01T00:00:00.000Z','ip_address':null,'vpn_address':null,'public_address':'','os_version':null,'supervisor_version':null,'supervisor_release':null,'provisioning_progress':null,'provisioning_state':null,'download_progress':null,'is_web_accessible':false,'longitude':'','latitude':'','location':'','logs_channel':null,'__metadata':{'uri':'/ewa/device(122950)','type':''}}
 
         """
 
@@ -551,10 +552,10 @@ class Device(object):
             'apikey': api_key
         }
 
-        return self.base_request.request(
+        return json.loads(self.base_request.request(
             'device/register', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), login=True
-        )
+        ).decode('utf-8'))
 
     def restart(self, uuid):
         """

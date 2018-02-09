@@ -162,7 +162,7 @@ class Application(object):
 
         Examples:
             >>> resin.models.application.create('Edison','Intel Edison')
-            '{"id":9021,"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"app_name":"Edison","git_repository":"g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git","commit":null,"device_type":"intel-edison","__metadata":{"uri":"/ewa/application(9021)","type":""}}'
+            {'id':9021,'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'app_name':'Edison','git_repository':'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git','commit':null,'device_type':'intel-edison','__metadata':{'uri':'/ewa/application(9021)','type':''}}
 
         """
 
