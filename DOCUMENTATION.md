@@ -10,12 +10,13 @@ hesitate to open an issue in GitHub, we'll be happy to help.
 - [Resin](#resin)
     - [Models](#models)
         - [Application](#application)
+        - [Build](#build)
         - [Config](#config)
         - [Device](#device)
         - [DeviceOs](#deviceos)
         - [EnvironmentVariable](#environmentvariable)
-            - [DeviceEnvVariable](#deviceenvvariable)
             - [ApplicationEnvVariable](#applicationenvvariable)
+            - [DeviceEnvVariable](#deviceenvvariable)
         - [Key](#key)
         - [Supervisor](#supervisor)
     - [Auth](#auth)
@@ -29,6 +30,12 @@ This module implements all models for Resin Python SDK.
 ## Application
 
 This class implements application model for Resin Python SDK.
+
+Due to API changes, the returned Application object schema has changed. Here are the formats of the old and new returned objects.
+
+The old returned object's properties: `__metadata, actor, app_name, application, commit, device_type, git_repository, id, should_track_latest_release, support_expiry_date, user, version`.
+
+The new returned object's properties (since Python SDK v2.0.0): `__metadata, actor, app_name, commit, depends_on__application, device_type, git_repository, id, is_accessible_by_support_until__date, should_track_latest_release, user, version`.
 ### Function: create(name, device_type)
 
 Create an application. This function only works if you log in using credentials or Auth Token.
@@ -284,9 +291,70 @@ Revoke support access to an application.
 #### Examples:
     >> > resin.models.application.revoke_support_access('5685')
     'OK'
+## Build
+
+This class implements build model for Resin Python SDK.
+### Function: get(id)
+
+Get a specific build.
+
+#### Args:
+    id (str): build id.
+
+#### Returns:
+    dict: build info.
+
+#### Raises:
+    BuildNotFound: if build couldn't be found.
+### Function: get_all_by_application(app_id, include_logs)
+
+Get list of builds belonging to an application.
+
+#### Args:
+    app_id (str): application id.
+    include_logs (Optional[bool]): Defaults to False since these may be very large. True if user wants to include build logs in build info.
+
+#### Returns:
+    list: list of build info.
+## Config
+
+This class implements configuration model for Resin Python SDK.
+
+#### Attributes:
+    _config (dict): caching configuration.
+### Function: get_all()
+
+Get all configuration.
+
+#### Returns:
+    dict: configuration information.
+
+#### Examples:
+```python
+>>> resin.models.config.get_all()
+{ all configuration details }
+```
+### Function: get_device_types()
+
+Get device types configuration.
+
+#### Returns:
+    list: device types information.
+
+#### Examples:
+```python
+>>> resin.models.config.get_device_types()
+[ all configuration details ]
+```
 ## Device
 
 This class implements device model for Resin Python SDK.
+
+Due to API changes, the returned Device object schema has changed. Here are the formats of the old and new returned objects.
+
+The old returned object's properties: `__metadata, actor, application, build, commit, created_at, custom_latitude, custom_longitude, device, device_type, download_progress, id, ip_address, is_connected_to_vpn, is_online, is_web_accessible, last_connectivity_event, last_vpn_event, latitude, local_id, location, lock_expiry_date, logs_channel, longitude, name, note, os_variant, os_version, provisioning_progress, provisioning_state, public_address, service_instance, status, supervisor_release, supervisor_version, support_expiry_date, user, uuid, vpn_address`.
+
+The new returned object's properties (since Python SDK v2.0.0): `__metadata, actor, belongs_to__application, belongs_to__user, created_at, custom_latitude, custom_longitude, device_type, download_progress, id, ip_address, is_accessible_by_support_until__date, is_connected_to_vpn, is_locked_until__date, is_managed_by__device, is_managed_by__service_instance, is_on__commit, is_online, is_web_accessible, last_connectivity_event, last_vpn_event, latitude, local_id, location, logs_channel, longitude, name, note, os_variant, os_version, provisioning_progress, provisioning_state, public_address, should_be_managed_by__supervisor_release, should_be_running__build, status, supervisor_version, uuid, vpn_address`.
 ### Function: disable_device_url(uuid)
 
 Disable device url for a device.
@@ -791,36 +859,6 @@ clear custom location for a device.
 ```python
 >>> resin.models.device.unset_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
 OK
-```
-## Config
-
-This class implements configuration model for Resin Python SDK.
-
-#### Attributes:
-    _config (dict): caching configuration.
-### Function: get_all()
-
-Get all configuration.
-
-#### Returns:
-    dict: configuration information.
-
-#### Examples:
-```python
->>> resin.models.config.get_all()
-{ all configuration details }
-```
-### Function: get_device_types()
-
-Get device types configuration.
-
-#### Returns:
-    list: device types information.
-
-#### Examples:
-```python
->>> resin.models.config.get_device_types()
-[ all configuration details ]
 ```
 ## DeviceOs
 
