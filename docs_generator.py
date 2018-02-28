@@ -13,12 +13,13 @@ Table_Of_Content = [
     ('Resin', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
+    ('Build', TOC_L2),
     ('Config', TOC_L2),
     ('Device', TOC_L2),
     ('DeviceOs', TOC_L2),
     ('EnvironmentVariable', TOC_L2),
-    ('DeviceEnvVariable', TOC_L3),
     ('ApplicationEnvVariable', TOC_L3),
+    ('DeviceEnvVariable', TOC_L3),
     ('Key', TOC_L2),
     ('Supervisor', TOC_L2),
     ('Auth', TOC_L1),
@@ -65,10 +66,12 @@ def main():
     print(doc2md.doc2md(
         resin.models.application.Application.__doc__, 'Application', type=0))
     print_functions(resin.models.application.Application)
-    print(doc2md.doc2md(resin.models.device.Device.__doc__, 'Device', type=0))
-    print_functions(resin.models.device.Device)
+    print(doc2md.doc2md(resin.models.build.Build.__doc__, 'Build', type=0))
+    print_functions(resin.models.build.Build)
     print(doc2md.doc2md(resin.models.config.Config.__doc__, 'Config', type=0))
     print_functions(resin.models.config.Config)
+    print(doc2md.doc2md(resin.models.device.Device.__doc__, 'Device', type=0))
+    print_functions(resin.models.device.Device)
     print(doc2md.doc2md(
         resin.models.device_os.DeviceOs.__doc__, 'DeviceOs', type=0))
     print_functions(resin.models.device_os.DeviceOs)

@@ -31,7 +31,7 @@ class Settings(object):
     CONFIG_FILENAME = 'resin.cfg'
     DEFAULT_SETTING_KEYS = set(['pine_endpoint', 'api_endpoint', 'api_version',
                                 'data_directory', 'image_cache_time',
-                                'token_refresh_interval', 'cache_directory'])
+                                'token_refresh_interval', 'cache_directory', 'timeout'])
 
     _setting = {
         # These are default config values to write default config file.
@@ -43,7 +43,9 @@ class Settings(object):
         # cache time : 1 week in milliseconds
         'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
         # token refresh interval: 1 hour in milliseconds
-        'token_refresh_interval': str(1 * 1000 * 60 * 60)
+        'token_refresh_interval': str(1 * 1000 * 60 * 60),
+        # requests timeout: 30 seconds in milliseconds
+        'timeout': str(30 * 1000),
     }
 
     _setting['cache_directory'] = Path.join(_setting['data_directory'],
