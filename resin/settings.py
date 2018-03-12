@@ -36,9 +36,9 @@ class Settings(object):
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        'pine_endpoint': 'https://api.resin.io/v3/',
+        'pine_endpoint': 'https://api.resin.io/v4/',
         'api_endpoint': 'https://api.resin.io/',
-        'api_version': 'v3',
+        'api_version': 'v4',
         'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
         # cache time : 1 week in milliseconds
         'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
