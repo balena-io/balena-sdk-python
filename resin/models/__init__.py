@@ -11,6 +11,7 @@ from .key import Key
 from .device_os import DeviceOs
 from .supervisor import Supervisor
 from .build import Build
+from .image import Image
 
 
 class Models(object):
@@ -24,3 +25,4 @@ class Models(object):
         self.device_os = DeviceOs()
         self.supervisor = Supervisor()
         self.build = Build()
+        self.image = Image()

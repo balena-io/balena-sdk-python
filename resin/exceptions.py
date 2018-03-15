@@ -360,3 +360,18 @@ class InvalidParameter(ResinException):
     def __init__(self, parameter, value):
         super(InvalidParameter, self).__init__()
         self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)
+
+
+class ImageNotFound(ResinException):
+    """
+    Args:
+        image_id (str): image id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, image_id):
+        super(ImageNotFound, self).__init__()
+        self.message = Message.IMAGE_NOT_FOUND.format(id=image_id)
