@@ -12,6 +12,7 @@ from .device_os import DeviceOs
 from .supervisor import Supervisor
 from .build import Build
 from .image import Image
+from .service import Service
 
 
 class Models(object):
@@ -26,3 +27,4 @@ class Models(object):
         self.supervisor = Supervisor()
         self.build = Build()
         self.image = Image()
+        self.service = Service()
