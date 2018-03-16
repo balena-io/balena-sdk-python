@@ -13,6 +13,7 @@ from .supervisor import Supervisor
 from .build import Build
 from .image import Image
 from .service import Service
+from .release import Release
 
 
 class Models(object):
@@ -28,3 +29,4 @@ class Models(object):
         self.build = Build()
         self.image = Image()
         self.service = Service()
+        self.release = Release()

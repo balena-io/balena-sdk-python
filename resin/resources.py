@@ -32,3 +32,4 @@ class Message(object):
     FAILED_BUILD = "Can not set to a failed build: {id}"
     INVALID_PARAMETER = "Invalid parameter: {value} is not a valid value for parameter `{parameter}`"
     IMAGE_NOT_FOUND = "Image not found: {id}"
+    RELEASE_NOT_FOUND = "Release not found: {id}"
