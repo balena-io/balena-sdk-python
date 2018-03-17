@@ -5,6 +5,8 @@ from ..base_request import BaseRequest
 from .device import Device
 from ..settings import Settings
 from .. import exceptions
+from .service import Service
+from .service_install import ServiceInstall
 
 
 def _is_valid_env_var_name(env_var_name):
@@ -13,18 +15,17 @@ def _is_valid_env_var_name(env_var_name):
 
 class EnvironmentVariable(object):
     """
-    This class is a wrapper for device and application environment variable models.
+    This class is a wrapper for environment variable models.
 
     """
 
     def __init__(self):
-        self.device = DeviceEnvVariable()
+        self.device_service_environment_variable = DeviceServiceEnvVariable()
         self.application = ApplicationEnvVariable()
 
-
-class DeviceEnvVariable(object):
+class DeviceServiceEnvVariable(object):
     """
-    This class implements device environment variable model for Resin Python SDK.
+    This class implements device service variable model for Resin Python SDK.
 
     """
 
@@ -32,27 +33,18 @@ class DeviceEnvVariable(object):
         self.base_request = BaseRequest()
         self.device = Device()
         self.settings = Settings()
-
-    def _fix_device_env_var_name_key(self, env_var):
-        """
-        Internal method to workaround the fact that applications environment variables contain a `name` property
-        while device environment variables contain an `env_var_name` property instead.
-        """
-
-        if 'env_var_name' in env_var:
-            env_var['name'] = env_var['env_var_name']
-            env_var.pop('env_var_name', None)
-        return env_var
+        self.service = Service()
+        self.service_install = ServiceInstall()
 
     def get_all(self, uuid):
         """
-        Get all device environment variables.
+        Get all device service environment variables belong to a device.
 
         Args:
             uuid (str): device uuid.
 
         Returns:
-            list: device environment variables.
+            list: device service environment variables.
 
         Examples:
             >>> resin.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
@@ -61,57 +53,73 @@ class DeviceEnvVariable(object):
         """
 
         device = self.device.get(uuid)
-        params = {
-            'filter': 'device',
-            'eq': device['id']
-        }
-        return self.base_request.request(
-            'device_environment_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        service_installs = self.service_install.get_all_by_device(device['id'])
 
-    def create(self, uuid, env_var_name, value):
+        env_vars = []
+        for service_install in service_installs:
+            params = {
+                'filter': 'service_install',
+                'eq': service_install['id']
+            }
+
+            env_vars += (self.base_request.request(
+                'device_service_environment_variable', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d'])
+        return env_vars
+
+    def create(self, uuid, service_name, env_var_name, value):
         """
-        Create a device environment variable.
+        Create a device service environment variable.
 
         Args:
             uuid (str): device uuid.
-            env_var_name (str): environment variable name.
-            value (str): environment variable value.
+            service_name (str): service name.
+            env_var_name (str): device service environment variable name.
+            value (str): device service environment variable value.
 
         Returns:
-            dict: new device environment variable info.
+            dict: new device service environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
-            {'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 42166}
+            >>> resin.models.environment_variables.device_service_environment_variable.create('f5213eac0d63ac47721b037a7406d306', 'data', 'dev_data_sdk', 'test1')
+            {"id":28970,"created_at":"2018-03-17T10:13:14.184Z","service_install":{"__deferred":{"uri":"/resin/service_install(30789)"},"__id":30789},"value":"test1","name":"dev_data_sdk","__metadata":{"uri":"/resin/device_service_environment_variable(28970)","type":""}}
 
         """
 
         if not _is_valid_env_var_name(env_var_name):
             raise exceptions.InvalidParameter('env_var_name', env_var_name)
+
         device = self.device.get(uuid)
-        data = {
-            'device': device['id'],
-            'env_var_name': env_var_name,
-            'value': value
-        }
-        new_env_var = json.loads(self.base_request.request(
-            'device_environment_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
-        ).decode('utf-8'))
-        return self._fix_device_env_var_name_key(new_env_var)
+        services = self.service.get_all_by_application(device['belongs_to__application']['__id'])
+        service_id = [i['id'] for i in services if i['service_name'] == service_name]
+        if service_id:
+            service_installs = self.service_install.get_all_by_device(device['id'])
+            service_install_id = [i['id'] for i in service_installs if i['installs__service']['__id'] == service_id[0]]
+
+            data = {
+                'service_install': service_install_id[0],
+                'name': env_var_name,
+                'value': value
+            }
+
+            return json.loads(self.base_request.request(
+                'device_service_environment_variable', 'POST', data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            ).decode('utf-8'))
+        else:
+            raise exceptions.ServiceNotFound(service_name)
 
     def update(self, var_id, value):
         """
-        Update a device environment variable.
+        Update a device service environment variable.
 
         Args:
-            var_id (str): environment variable id.
-            value (str): new environment variable value.
+            var_id (str): device environment variable id.
+            value (str): new device environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.device.update(2184, 'new value')
+            >>> resin.models.environment_variables.device_service_environment_variable.update('28970', 'test1 new value')
             'OK'
 
         """
@@ -124,19 +132,19 @@ class DeviceEnvVariable(object):
             'value': value
         }
         return self.base_request.request(
-            'device_environment_variable', 'PATCH', params=params, data=data,
+            'device_service_environment_variable', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
 
     def remove(self, var_id):
         """
-        Remove a device environment variable.
+        Remove a device service environment variable.
 
         Args:
-            var_id (str): environment variable id.
+            var_id (str): device service environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.device.remove(2184)
+            >>> resin.models.environment_variables.device_service_environment_variable.remove('28970')
             'OK'
 
         """
@@ -146,34 +154,9 @@ class DeviceEnvVariable(object):
             'eq': var_id
         }
         return self.base_request.request(
-            'device_environment_variable', 'DELETE', params=params,
+            'device_service_environment_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
-
-    def get_all_by_application(self, app_id):
-        """
-        Get all device environment variables for an application.
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            list: list of device environment variables.
-
-        Examples:
-            >>> resin.models.environment_variables.device.get_all_by_application('5780')
-            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
-
-        """
-
-        params = {
-            'filter': 'device/belongs_to__application',
-            'eq': app_id
-        }
-        env_list = self.base_request.request(
-            'device_environment_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint'))
-        return list(map(self._fix_device_env_var_name_key, env_list['d']))
 
 
 class ApplicationEnvVariable(object):
@@ -238,6 +221,7 @@ class ApplicationEnvVariable(object):
 
         if not _is_valid_env_var_name(env_var_name):
             raise exceptions.InvalidParameter('env_var_name', env_var_name)
+
         data = {
             'name': env_var_name,
             'value': value,

@@ -33,3 +33,4 @@ class Message(object):
     INVALID_PARAMETER = "Invalid parameter: {value} is not a valid value for parameter `{parameter}`"
     IMAGE_NOT_FOUND = "Image not found: {id}"
     RELEASE_NOT_FOUND = "Release not found: {id}"
+    SERVICE_NOT_FOUND = "Service not found: {id}"

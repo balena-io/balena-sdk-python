@@ -390,3 +390,18 @@ class ReleaseNotFound(ResinException):
     def __init__(self, image_id):
         super(ReleaseNotFound, self).__init__()
         self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
+
+
+class ServiceNotFound(ResinException):
+    """
+    Args:
+        service_id (str): service id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, image_id):
+        super(ServiceNotFound, self).__init__()
+        self.message = Message.Service_NOT_FOUND.format(id=service_id)
