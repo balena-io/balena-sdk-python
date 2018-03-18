@@ -20,8 +20,8 @@ class EnvironmentVariable(object):
     """
 
     def __init__(self):
+        self.service_environment_variable = ServiceEnvVariable()
         self.device_service_environment_variable = DeviceServiceEnvVariable()
-        self.application = ApplicationEnvVariable()
 
 class DeviceServiceEnvVariable(object):
     """
@@ -159,89 +159,95 @@ class DeviceServiceEnvVariable(object):
         )
 
 
-class ApplicationEnvVariable(object):
+class ServiceEnvVariable(object):
     """
-    This class implements application environment variable model for Resin Python SDK.
-
-    Attributes:
-        SYSTEM_VARIABLE_RESERVED_NAMES (list): list of reserved system variable names.
-        OTHER_RESERVED_NAMES_START (list): list of prefix for system variable.
+    This class implements service environment variable model for Resin Python SDK.
 
     """
-
-    SYSTEM_VARIABLE_RESERVED_NAMES = ['RESIN', 'USER']
-    OTHER_RESERVED_NAMES_START = 'RESIN_'
 
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
+        self.service = Service()
 
     def get_all(self, app_id):
         """
-        Get all environment variables by application.
+        Get all service environment variables by application.
 
         Args:
             app_id (str): application id.
 
         Returns:
-            list: application environment variables.
+            list: service application environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.application.get_all(9020)
-            [{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'RESIN_RESTART'}]
+            >>> resin.models.environment_variables.service_environment_variable.get_all('1005160')
+            [{u'name': u'app_data', u'service': {u'__deferred': {u'uri': u'/resin/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:21.087Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12365)'}, u'value': u'app_data_value', u'id': 12365}, {u'name': u'app_data1', u'service': {u'__deferred': {u'uri': u'/resin/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:49.662Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12366)'}, u'value': u'app_data_value', u'id': 12366}, {u'name': u'app_front', u'service': {u'__deferred': {u'uri': u'/resin/service(21669)'}, u'__id': 21669}, u'created_at': u'2018-03-16T19:22:06.955Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12367)'}, u'value': u'front_value', u'id': 12367}]
+
 
         """
 
-        params = {
-            'filter': 'application',
-            'eq': app_id
-        }
-        return self.base_request.request(
-            'environment_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        services = self.service.get_all_by_application(app_id)
 
-    def create(self, app_id, env_var_name, value):
+        env_vars = []
+        for service in services:
+            params = {
+                'filter': 'service',
+                'eq': service['id']
+            }
+
+            env_vars += self.base_request.request(
+                'service_environment_variable', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+
+        return env_vars
+
+    def create(self, app_id, service_name, env_var_name, value):
         """
-        Create an environment variable for application.
+        Create a service environment variable for application.
 
         Args:
             app_id (str): application id.
+            service_name(str): service name.
             env_var_name (str): environment variable name.
             value (str): environment variable value.
 
         Returns:
-            dict: new application environment info.
+            str: new service environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.application.create('978062', 'test2', '123')
-            {'id': 91138, 'application': {'__deferred': {'uri': '/resin/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/resin/environment_variable(91138)', 'type': ''}}
+            >>> resin.models.environment_variables.service_environment_variable.create('1005160', 'proxy', 'app_proxy', 'test value')
+            {"id":12444,"created_at":"2018-03-18T09:34:09.144Z","service":{"__deferred":{"uri":"/resin/service(21668)"},"__id":21668},"name":"app_proxy","value":"test value","__metadata":{"uri":"/resin/service_environment_variable(12444)","type":""}}
 
         """
 
         if not _is_valid_env_var_name(env_var_name):
             raise exceptions.InvalidParameter('env_var_name', env_var_name)
 
+        services = self.service.get_all_by_application(app_id)
+        service_id = [i['id'] for i in services if i['service_name'] == service_name]
+
         data = {
             'name': env_var_name,
             'value': value,
-            'application': app_id
+            'service': service_id
         }
         return json.loads(self.base_request.request(
-            'environment_variable', 'POST', data=data,
+            'service_environment_variable', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint')
         ).decode('utf-8'))
 
     def update(self, var_id, value):
         """
-        Update an environment variable value for application.
+        Update a service environment variable value for application.
 
         Args:
-            var_id (str): environment variable id.
-            value (str): new environment variable value.
+            var_id (str): service environment variable id.
+            value (str): new service environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.application.update(5652, 'new value')
+            >>> resin.models.environment_variables.service_environment_variable.update('12444', 'new test value')
             'OK'
 
         """
@@ -255,19 +261,19 @@ class ApplicationEnvVariable(object):
             'value': value
         }
         return self.base_request.request(
-            'environment_variable', 'PATCH', params=params, data=data,
+            'service_environment_variable', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
 
     def remove(self, var_id):
         """
-        Remove application environment variable.
+        Remove service environment variable.
 
         Args:
-            var_id (str): environment variable id.
+            var_id (str): service environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.application.remove(5652)
+            >>> resin.models.environment_variables.service_environment_variable.remove('12444')
             'OK'
 
         """
@@ -277,28 +283,6 @@ class ApplicationEnvVariable(object):
             'eq': var_id
         }
         return self.base_request.request(
-            'environment_variable', 'DELETE', params=params,
+            'service_environment_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
-
-    def is_system_variable(self, variable):
-        """
-        Check if a variable is system specific.
-
-        Args:
-            variable (str): environment variable name.
-
-        Returns:
-            bool: True if system variable, False otherwise.
-
-        Examples:
-            >>> resin.models.environment_variables.application.is_system_variable('RESIN_API_KEY')
-            True
-            >>> resin.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
-            False
-
-        """
-
-        if variable in self.SYSTEM_VARIABLE_RESERVED_NAMES:
-            return True
-        return variable.startswith(self.OTHER_RESERVED_NAMES_START)
