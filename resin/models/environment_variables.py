@@ -23,6 +23,7 @@ class EnvironmentVariable(object):
         self.service_environment_variable = ServiceEnvVariable()
         self.device_service_environment_variable = DeviceServiceEnvVariable()
 
+
 class DeviceServiceEnvVariable(object):
     """
     This class implements device service variable model for Resin Python SDK.

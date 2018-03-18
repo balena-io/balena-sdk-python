@@ -14,6 +14,7 @@ from .build import Build
 from .image import Image
 from .service import Service
 from .release import Release
+from .config_variable import ConfigVariable
 
 
 class Models(object):
@@ -30,3 +31,4 @@ class Models(object):
         self.image = Image()
         self.service = Service()
         self.release = Release()
+        self.config_variable = ConfigVariable()
