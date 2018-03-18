@@ -19,6 +19,7 @@ class ConfigVariable(object):
 
     def __init__(self):
         self.device_config_variable = DeviceConfigVariable()
+        self.application_config_variable = ApplicationConfigVariable()
 
 
 class DeviceConfigVariable(object):
@@ -140,5 +141,122 @@ class DeviceConfigVariable(object):
         }
         return self.base_request.request(
             'device_config_variable', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+
+class ApplicationConfigVariable(object):
+    """
+    This class implements application config variable model for Resin Python SDK.
+
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+
+    def get_all(self, app_id):
+        """
+        Get all application config variables belong to an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            list: application config variables.
+
+        Examples:
+            >>> resin.models.config_variable.application_config_variable.get_all('1005160')
+            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005160)'}, u'__id': 1005160}, u'__metadata': {u'type': u'', u'uri': u'/resin/application_config_variable(116965)'}, u'id': 116965, u'value': u'false', u'name': u'RESIN_SUPERVISOR_NATIVE_LOGGER'}]
+
+        """
+
+        params = {
+            'filter': 'application',
+            'eq': app_id
+        }
+
+        return self.base_request.request(
+            'application_config_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def create(self, app_id, config_var_name, value):
+        """
+        Create an application config variable.
+
+        Args:
+            app_id (str): application id.
+            config_var_name (str): application config variable name.
+            value (str): application config variable value.
+
+        Returns:
+            dict: new application config variable info.
+
+        Examples:
+            >>> print(resin.models.config_variable.application_config_variable.create('1005160', 'RESIN_TEST_APP_CONFIG_VAR', 'test value'))
+            {"id":117738,"application":{"__deferred":{"uri":"/resin/application(1005160)"},"__id":1005160},"name":"RESIN_TEST_APP_CONFIG_VAR","value":"test value","__metadata":{"uri":"/resin/application_config_variable(117738)","type":""}}
+
+        """
+
+        if not _is_valid_config_var_name(config_var_name):
+            raise exceptions.InvalidParameter('config_var_name', config_var_name)
+
+        data = {
+            'application': app_id,
+            'name': config_var_name,
+            'value': value
+        }
+
+        return json.loads(self.base_request.request(
+            'application_config_variable', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        ).decode('utf-8'))
+
+    def update(self, var_id, value):
+        """
+        Update an application config variable.
+
+        Args:
+            var_id (str): application config variable id.
+            value (str): new application config variable value.
+
+        Examples:
+            >>> resin.models.config_variable.application_config_variable.update('117738', 'new test value')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+        data = {
+            'value': value
+        }
+        return self.base_request.request(
+            'application_config_variable', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def remove(self, var_id):
+        """
+        Remove a application config environment variable.
+
+        Args:
+            var_id (str): application config environment variable id.
+
+        Examples:
+            >>> resin.models.config_variable.application_config_variable.remove('117738')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+        return self.base_request.request(
+            'application_config_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )
