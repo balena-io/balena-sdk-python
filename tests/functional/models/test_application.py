@@ -30,7 +30,7 @@ class TestApplication(unittest.TestCase):
         self.assertIn('It is necessary that each app name that is of a user (Auth), has a Length (Type) that is greater than or equal to 4', cm.exception.message)
 
         # should be able to create an application
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(app['app_name'], 'FooBar')
 
     def test_get_all(self):
@@ -73,12 +73,12 @@ class TestApplication(unittest.TestCase):
             self.resin.models.application.get_by_id(1)
 
         # found an application, it should return an application with matched id.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(self.resin.models.application.get_by_id(app['id'])['id'], app['id'])
 
     def test_remove(self):
         # should be able to remove an existing application by name.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(len(self.resin.models.application.get_all()), 1)
         self.resin.models.application.remove('FooBar')
         self.assertEqual(len(self.resin.models.application.get_all()), 0)
@@ -89,13 +89,13 @@ class TestApplication(unittest.TestCase):
             self.resin.models.application.generate_provisioning_key('5685')
 
         # should be able to generate a provisioning key by app id.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         key = self.resin.models.application.generate_provisioning_key(app['id'])
         self.assertEqual(len(key), 32)
 
     def test_enable_rolling_updates(self):
         # should enable rolling update for the applications devices.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.resin.models.application.disable_rolling_updates(app['id'])
         self.resin.models.application.enable_rolling_updates(app['id'])
         app = self.resin.models.application.get('FooBar')
@@ -103,7 +103,7 @@ class TestApplication(unittest.TestCase):
 
     def test_disable_rolling_updates(self):
         # should disable rolling update for the applications devices.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.resin.models.application.enable_rolling_updates(app['id'])
         self.resin.models.application.disable_rolling_updates(app['id'])
         app = self.resin.models.application.get('FooBar')
@@ -111,21 +111,21 @@ class TestApplication(unittest.TestCase):
 
     def test_enable_device_urls(self):
         # should enable the device url for the applications devices.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
-        device = json.loads(self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid()).decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
+        device = self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
         self.resin.models.application.enable_device_urls(app['id'])
         self.assertTrue(self.resin.models.device.has_device_url(device['uuid']))
 
     def test_disable_device_urls(self):
         # should disable the device url for the applications devices.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
-        device = json.loads(self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid()).decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
+        device = self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
         self.resin.models.application.enable_device_urls(app['id'])
         self.resin.models.application.disable_device_urls(app['id'])
         self.assertFalse(self.resin.models.device.has_device_url(device['uuid']))
 
     def test_grant_support_access(self):
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         # should throw an error if the expiry timestamp is in the past.
         expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) - 10000)
         with self.assertRaises(self.helper.resin_exceptions.InvalidParameter):
@@ -139,7 +139,7 @@ class TestApplication(unittest.TestCase):
 
     def test_revoke_support_access(self):
         # should revoke support access.
-        app = json.loads(self.resin.models.application.create('FooBar', 'Raspberry Pi 2').decode('utf-8'))
+        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         expiry_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 + 3600 * 1000)
         self.resin.models.application.grant_support_access(app['id'], expiry_time)
         self.resin.models.application.revoke_support_access(app['id'])
