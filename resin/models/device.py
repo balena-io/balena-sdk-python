@@ -176,7 +176,7 @@ class Device(object):
         """
 
         params = {
-            'filter': 'name',
+            'filter': 'device_name',
             'eq': name
         }
         return self.base_request.request(
@@ -199,7 +199,7 @@ class Device(object):
 
         """
 
-        return self.get(uuid)['name']
+        return self.get(uuid)['device_name']
 
     def get_application_name(self, uuid):
         """
@@ -355,7 +355,7 @@ class Device(object):
                 'eq': uuid
             }
             data = {
-                'name': new_name
+                'device_name': new_name
             }
             return self.base_request.request(
                 'device', 'PATCH', params=params, data=data,
