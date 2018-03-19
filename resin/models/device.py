@@ -803,7 +803,7 @@ class Device(object):
         if device['provisioning_state'] == 'Post-Provisioning':
             return DeviceStatus.POST_PROVISIONING
 
-        seen = device['last_seen_time'] and (datetime.strptime(device['last_seen_time'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
+        seen = device['last_vpn_event'] and (datetime.strptime(device['last_seen_time'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
         if not device['is_online'] and not seen:
             return DeviceStatus.CONFIGURING
 
