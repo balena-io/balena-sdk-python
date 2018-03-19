@@ -314,36 +314,6 @@ class AmbiguousDevice(ResinException):
         self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
 
 
-class BuildNotFound(ResinException):
-    """
-    Args:
-        build_id (str): build id.
-
-    Attributes:
-        message (str): error message.
-
-    """
-
-    def __init__(self, build_id):
-        super(BuildNotFound, self).__init__()
-        self.message = Message.BUILD_NOT_FOUND.format(id=build_id)
-
-
-class FailedBuild(ResinException):
-    """
-    Args:
-        build_id (str): build id.
-
-    Attributes:
-        message (str): error message.
-
-    """
-
-    def __init__(self, build_id):
-        super(FailedBuild, self).__init__()
-        self.message = Message.FAILED_BUILD.format(id=build_id)
-
-
 class InvalidParameter(ResinException):
     """
     Args:
