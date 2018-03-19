@@ -374,4 +374,19 @@ class ServiceNotFound(ResinException):
 
     def __init__(self, image_id):
         super(ServiceNotFound, self).__init__()
-        self.message = Message.Service_NOT_FOUND.format(id=service_id)
+        self.message = Message.SERVICE_NOT_FOUND.format(id=service_id)
+
+
+class InvalidApplicationType(ResinException):
+    """
+    Args:
+        app_type (str): application type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, app_type):
+        super(InvalidApplicationType, self).__init__()
+        self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)

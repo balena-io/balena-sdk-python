@@ -32,3 +32,4 @@ class Message(object):
     IMAGE_NOT_FOUND = "Image not found: {id}"
     RELEASE_NOT_FOUND = "Release not found: {id}"
     SERVICE_NOT_FOUND = "Service not found: {id}"
+    INVALID_APPLICATION_TYPE = "Invalid application type: {app_type}"
