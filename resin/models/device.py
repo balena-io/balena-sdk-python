@@ -2,6 +2,7 @@ import sys
 import binascii
 import os
 from datetime import datetime
+import json
 
 try:  # Python 3 imports
     from urllib.parse import urljoin
@@ -14,6 +15,7 @@ from ..settings import Settings
 from ..token import Token
 from .. import exceptions
 from .application import Application
+from .build import Build
 
 
 # TODO: support both device uuid and device id
@@ -47,6 +49,7 @@ class Device(object):
         self.settings = Settings()
         self.token = Token()
         self.application = Application()
+        self.build = Build()
 
     def get(self, uuid):
         """
@@ -535,12 +538,12 @@ class Device(object):
             uuid (str): device uuid.
 
         Returns:
-            str: dictionary contains device info (can be parsed to dict).
+            dict: dictionary contains device info.
 
         Examples:
             >>> device_uuid = resin.models.device.generate_uuid()
             >>> resin.models.device.register('RPI1',device_uuid)
-            '{"id":122950,"application":{"__deferred":{"uri":"/ewa/application(9020)"},"__id":9020},"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"name":"floral-mountain","device_type":"raspberry-pi","uuid":"8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143","commit":null,"note":null,"status":null,"is_online":false,"last_seen_time":"1970-01-01T00:00:00.000Z","ip_address":null,"vpn_address":null,"public_address":"","os_version":null,"supervisor_version":null,"supervisor_release":null,"provisioning_progress":null,"provisioning_state":null,"download_progress":null,"is_web_accessible":false,"longitude":"","latitude":"","location":"","logs_channel":null,"__metadata":{"uri":"/ewa/device(122950)","type":""}}'
+            {'id':122950,'application':{'__deferred':{'uri':'/ewa/application(9020)'},'__id':9020},'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'name':'floral-mountain','device_type':'raspberry-pi','uuid':'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','commit':null,'note':null,'status':null,'is_online':false,'last_seen_time':'1970-01-01T00:00:00.000Z','ip_address':null,'vpn_address':null,'public_address':'','os_version':null,'supervisor_version':null,'supervisor_release':null,'provisioning_progress':null,'provisioning_state':null,'download_progress':null,'is_web_accessible':false,'longitude':'','latitude':'','location':'','logs_channel':null,'__metadata':{'uri':'/ewa/device(122950)','type':''}}
 
         """
 
@@ -555,10 +558,10 @@ class Device(object):
             'apikey': api_key
         }
 
-        return self.base_request.request(
+        return json.loads(self.base_request.request(
             'device/register', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), login=True
-        )
+        ).decode('utf-8'))
 
     def restart(self, uuid):
         """
@@ -692,21 +695,22 @@ class Device(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
-    def set_to_build(self, uuid, build):
+    def set_to_build(self, uuid, build_commit_hash):
         """
-        Set a device to specific build id.
+        Set a device to specific build commit hash.
 
         Args:
             uuid (str): device uuid.
-            build (str): build id.
+            build_commit_hash (str): build commit hash.
 
         Raises:
             DeviceNotFound: if device couldn't be found.
             ApplicationNotFound: if application couldn't be found.
+            FailedBuild: if all builds for the commit hash failed.
             IncompatibleApplication: if moving a device to an application with different device-type.
 
         Examples:
-            >> > resin.models.device.set_to_build('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', '123098')
+            >> > resin.models.device.set_to_build('4457d5db93be458270666ef8b8157c66', '950eac2d3efce555490c96e7c9b55c37b385acb6')
             'OK'
 
         """
@@ -714,12 +718,23 @@ class Device(object):
         if not self.has(uuid):
             raise exceptions.DeviceNotFound(uuid)
 
+        build_id = None
+        builds = self.build.get_by_commit(build_commit_hash)
+        for build in builds:
+            if build['status'] == 'success':
+                build_id = build['id']
+                break
+
+        if build_id is None:
+            raise exceptions.FailedBuild(build_commit_hash)
+
         params = {
             'filter': 'uuid',
             'eq': uuid
         }
+
         data = {
-            'build': build
+            'should_be_running__build': build_id
         }
 
         return self.base_request.request(
@@ -788,7 +803,7 @@ class Device(object):
         if device['provisioning_state'] == 'Post-Provisioning':
             return DeviceStatus.POST_PROVISIONING
 
-        seen = device['last_seen_time'] and (datetime.strptime(device['last_seen_time'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
+        seen = device['last_vpn_event'] and (datetime.strptime(device['last_seen_time'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
         if not device['is_online'] and not seen:
             return DeviceStatus.CONFIGURING
 

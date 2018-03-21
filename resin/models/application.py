@@ -4,6 +4,7 @@ from .config import Config
 from .. import exceptions
 
 from datetime import datetime
+import json
 
 
 # TODO: support both app_id and app_name
@@ -167,7 +168,7 @@ class Application(object):
 
         Examples:
             >>> resin.models.application.create('Edison','Intel Edison')
-            '{"id":9021,"user":{"__deferred":{"uri":"/ewa/user(5397)"},"__id":5397},"app_name":"Edison","git_repository":"g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git","commit":null,"device_type":"intel-edison","__metadata":{"uri":"/ewa/application(9021)","type":""}}'
+            {'id':9021,'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'app_name':'Edison','git_repository':'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git','commit':null,'device_type':'intel-edison','__metadata':{'uri':'/ewa/application(9021)','type':''}}
 
         """
 
@@ -179,10 +180,10 @@ class Application(object):
                 'app_name': name,
                 'device_type': device_slug[0]
             }
-            return self.base_request.request(
+            return json.loads(self.base_request.request(
                 'application', 'POST', data=data,
                 endpoint=self.settings.get('pine_endpoint'), login=True
-            )
+            ).decode('utf-8'))
         else:
             raise exceptions.InvalidDeviceType(device_type)
 
