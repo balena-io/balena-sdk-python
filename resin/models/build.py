@@ -45,7 +45,8 @@ class Build(object):
 
     def get_by_commit(self, commit_hash):
         """
-        Get a specific build by commit hash.
+        Get all builds for a commit hash.
+
         """
 
         params = {

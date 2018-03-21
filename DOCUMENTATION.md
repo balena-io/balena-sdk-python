@@ -316,6 +316,9 @@ Get list of builds belonging to an application.
 
 #### Returns:
     list: list of build info.
+### Function: get_by_commit(commit_hash)
+
+Get all builds for a commit hash.
 ## Config
 
 This class implements configuration model for Resin Python SDK.
@@ -840,7 +843,7 @@ Set a device to specific build commit hash.
 #### Raises:
     DeviceNotFound: if device couldn't be found.
     ApplicationNotFound: if application couldn't be found.
-    FailedBuild: if build commit hash points to an error build.
+    FailedBuild: if all builds for the commit hash failed.
     IncompatibleApplication: if moving a device to an application with different device-type.
 
 #### Examples:

@@ -706,7 +706,7 @@ class Device(object):
         Raises:
             DeviceNotFound: if device couldn't be found.
             ApplicationNotFound: if application couldn't be found.
-            FailedBuild: if build commit hash points to an error build.
+            FailedBuild: if all builds for the commit hash failed.
             IncompatibleApplication: if moving a device to an application with different device-type.
 
         Examples:
