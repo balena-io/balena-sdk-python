@@ -29,7 +29,6 @@ class TestApplication(unittest.TestCase):
             self.resin.models.application.create('Fo', 'Raspberry Pi 2')
         self.assertIn('It is necessary that each app name that is of a user (Auth), has a Length (Type) that is greater than or equal to 4', cm.exception.message)
 
-
         # should be able to create an application
         app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(app['app_name'], 'FooBar')

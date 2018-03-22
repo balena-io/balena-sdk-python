@@ -13,13 +13,18 @@ Table_Of_Content = [
     ('Resin', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
-    ('Build', TOC_L2),
     ('Config', TOC_L2),
+    ('ConfigVariable', TOC_L2),
+    ('ApplicationConfigVariable', TOC_L3),
+    ('DeviceConfigVariable', TOC_L3),
     ('Device', TOC_L2),
     ('DeviceOs', TOC_L2),
     ('EnvironmentVariable', TOC_L2),
-    ('ApplicationEnvVariable', TOC_L3),
-    ('DeviceEnvVariable', TOC_L3),
+    ('ServiceEnvVariable', TOC_L3),
+    ('DeviceServiceEnvVariable', TOC_L3),
+    ('Image', TOC_L2),
+    ('Release', TOC_L2),
+    ('Service', TOC_L2),
     ('Key', TOC_L2),
     ('Supervisor', TOC_L2),
     ('Auth', TOC_L1),
@@ -66,10 +71,19 @@ def main():
     print(doc2md.doc2md(
         resin.models.application.Application.__doc__, 'Application', type=0))
     print_functions(resin.models.application.Application)
-    print(doc2md.doc2md(resin.models.build.Build.__doc__, 'Build', type=0))
-    print_functions(resin.models.build.Build)
     print(doc2md.doc2md(resin.models.config.Config.__doc__, 'Config', type=0))
     print_functions(resin.models.config.Config)
+    print(doc2md.doc2md(
+        resin.models.config_variable.ConfigVariable.__doc__,
+        'ConfigVariable', type=0))
+    print(doc2md.doc2md(
+        resin.models.config_variable.ApplicationConfigVariable.__doc__,
+        'ApplicationConfigVariable', type=0))
+    print_functions(resin.models.config_variable.ApplicationConfigVariable)
+    print(doc2md.doc2md(
+        resin.models.config_variable.DeviceConfigVariable.__doc__,
+        'DeviceConfigVariable', type=0))
+    print_functions(resin.models.config_variable.DeviceConfigVariable)
     print(doc2md.doc2md(resin.models.device.Device.__doc__, 'Device', type=0))
     print_functions(resin.models.device.Device)
     print(doc2md.doc2md(
@@ -79,13 +93,19 @@ def main():
         resin.models.environment_variables.EnvironmentVariable.__doc__,
         'EnvironmentVariable', type=0))
     print(doc2md.doc2md(
-        resin.models.environment_variables.ApplicationEnvVariable.__doc__,
-        'ApplicationEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.ApplicationEnvVariable)
+        resin.models.environment_variables.ServiceEnvVariable.__doc__,
+        'ServiceEnvVariable', type=0))
+    print_functions(resin.models.environment_variables.ServiceEnvVariable)
     print(doc2md.doc2md(
-        resin.models.environment_variables.DeviceEnvVariable.__doc__,
-        'DeviceEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.DeviceEnvVariable)
+        resin.models.environment_variables.DeviceServiceEnvVariable.__doc__,
+        'DeviceServiceEnvVariable', type=0))
+    print_functions(resin.models.environment_variables.DeviceServiceEnvVariable)
+    print(doc2md.doc2md(resin.models.image.Image.__doc__, 'Image', type=0))
+    print_functions(resin.models.image.Image)
+    print(doc2md.doc2md(resin.models.release.Release.__doc__, 'Release', type=0))
+    print_functions(resin.models.release.Release)
+    print(doc2md.doc2md(resin.models.service.Service.__doc__, 'Service', type=0))
+    print_functions(resin.models.service.Service)
     print(doc2md.doc2md(resin.models.key.Key.__doc__, 'Key', type=0))
     print_functions(resin.models.key.Key)
     print(doc2md.doc2md(resin.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))
