@@ -96,18 +96,25 @@ class Release(object):
 
         """
 
-        images = []
-        release = self.get(id)
+        # TODO: pine client for python
+        raw_query = '$expand=contains__image($select=id&$expand=image($select=id&$expand=is_a_build_of__service($select=service_name))),is_created_by__user($select=id,username)'
 
-        # Details of images built, including image id and service name
-        for service in release['composition']['services']:
-            images.append({
-                'service_name': service,
-                'id': self.image._Image__get_by_option(
-                    'is_a_build_of__service',
-                    self.service._Service__get_by_option('service_name', service)[0]['id']
-                )['id']
-            })
-        release['images'] = images
+        raw_release = self.base_request.request(
+            'release({id})'.format(id=id), 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )
 
-        return release
+        if raw_release['d']:
+
+            raw_release = raw_release['d'][0]
+            release = {
+                'user': raw_release['is_created_by__user'][0],
+                'images': [{'id': i['id'], 'service_name': i['image'][0]['is_a_build_of__service'][0]['service_name'] } for i in raw_release['contains__image'] ]
+            }
+
+            raw_release.pop('is_created_by__user', None)
+            raw_release.pop('contains__image', None)
+            release.update(raw_release)
+            return release
+        else:
+            raise exceptions.ReleaseNotFound(id)

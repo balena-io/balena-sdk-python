@@ -48,26 +48,21 @@ class DeviceServiceEnvVariable(object):
             list: device service environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-            [{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'RESIN_DEVICE_RESTART'}]
+            >>> resin.models.environment_variables.device_service_environment_variable.get_all('f5213eac0d63ac47721b037a7406d306')
+            [{u'name': u'dev_proxy', u'created_at': u'2018-03-16T19:23:21.727Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28888)'}, u'value': u'value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30788)'}, u'id': 30788, u'service': [{u'service_name': u'proxy', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28888}, {u'name': u'dev_data', u'created_at': u'2018-03-16T19:23:11.614Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28887)'}, u'value': u'dev_data_value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28887}, {u'name': u'dev_data1', u'created_at': u'2018-03-17T05:53:19.257Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28964)'}, u'value': u'aaaa', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28964}]
 
         """
 
+        # TODO: pine client for python
         device = self.device.get(uuid)
-        service_installs = self.service_install.get_all_by_device(device['id'])
 
-        env_vars = []
-        for service_install in service_installs:
-            params = {
-                'filter': 'service_install',
-                'eq': service_install['id']
-            }
+        query = '$expand=service_install($select=id&$expand=service($select=service_name))&$filter=service_install/any(d:d/device%20eq%20{device_id})'.format(device_id=device['id'])
 
-            env_vars += (self.base_request.request(
-                'device_service_environment_variable', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d'])
-        return env_vars
+        return self.base_request.request(
+            'device_service_environment_variable', 'GET', raw_query=query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        #return env_vars
 
     def create(self, uuid, service_name, env_var_name, value):
         """
@@ -188,21 +183,13 @@ class ServiceEnvVariable(object):
 
         """
 
-        services = self.service.get_all_by_application(app_id)
+        # TODO: pine client for python
+        raw_query = '$expand=service&$filter=service/any(a:a/application%20eq%20{app_id})'.format(app_id=app_id)
 
-        env_vars = []
-        for service in services:
-            params = {
-                'filter': 'service',
-                'eq': service['id']
-            }
-
-            env_vars += self.base_request.request(
-                'service_environment_variable', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
-
-        return env_vars
+        return self.base_request.request(
+            'service_environment_variable', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
 
     def create(self, app_id, service_name, env_var_name, value):
         """

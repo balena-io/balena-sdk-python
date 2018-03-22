@@ -357,7 +357,7 @@ class ReleaseNotFound(ResinException):
 
     """
 
-    def __init__(self, image_id):
+    def __init__(self, release_id):
         super(ReleaseNotFound, self).__init__()
         self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
 
@@ -372,7 +372,7 @@ class ServiceNotFound(ResinException):
 
     """
 
-    def __init__(self, image_id):
+    def __init__(self, service_id):
         super(ServiceNotFound, self).__init__()
         self.message = Message.SERVICE_NOT_FOUND.format(id=service_id)
 
