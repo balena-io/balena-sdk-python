@@ -62,7 +62,6 @@ class DeviceServiceEnvVariable(object):
             'device_service_environment_variable', 'GET', raw_query=query,
             endpoint=self.settings.get('pine_endpoint')
         )['d']
-        #return env_vars
 
     def create(self, uuid, service_name, env_var_name, value):
         """

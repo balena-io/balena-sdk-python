@@ -109,7 +109,7 @@ class Release(object):
             raw_release = raw_release['d'][0]
             release = {
                 'user': raw_release['is_created_by__user'][0],
-                'images': [{'id': i['id'], 'service_name': i['image'][0]['is_a_build_of__service'][0]['service_name'] } for i in raw_release['contains__image'] ]
+                'images': [{'id': i['id'], 'service_name': i['image'][0]['is_a_build_of__service'][0]['service_name']} for i in raw_release['contains__image']]
             }
 
             raw_release.pop('is_created_by__user', None)
