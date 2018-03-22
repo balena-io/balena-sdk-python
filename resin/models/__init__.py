@@ -10,7 +10,10 @@ from .environment_variables import EnvironmentVariable
 from .key import Key
 from .device_os import DeviceOs
 from .supervisor import Supervisor
-from .build import Build
+from .image import Image
+from .service import Service
+from .release import Release
+from .config_variable import ConfigVariable
 
 
 class Models(object):
@@ -23,4 +26,7 @@ class Models(object):
         self.key = Key()
         self.device_os = DeviceOs()
         self.supervisor = Supervisor()
-        self.build = Build()
+        self.image = Image()
+        self.service = Service()
+        self.release = Release()
+        self.config_variable = ConfigVariable()

@@ -152,23 +152,25 @@ class Application(object):
         except IndexError:
             raise exceptions.ApplicationNotFound(app_id)
 
-    def create(self, name, device_type):
+    def create(self, name, device_type, app_type=None):
         """
         Create an application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
             device_type (str): device type (display form).
+            app_type (Optional[str]): application type.
 
         Returns:
             dict: application info.
 
         Raises:
             InvalidDeviceType: if device type is not supported.
+            InvalidApplicationType: if app type is not supported.
 
         Examples:
-            >>> resin.models.application.create('Edison','Intel Edison')
-            {'id':9021,'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'app_name':'Edison','git_repository':'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/edison.git','commit':null,'device_type':'intel-edison','__metadata':{'uri':'/ewa/application(9021)','type':''}}
+            >>> resin.models.application.create('Foobar', 'Raspberry Pi 3', 'microservices-starter')
+            '{"id":1005767,"user":{"__deferred":{"uri":"/resin/user(32986)"},"__id":32986},"depends_on__application":null,"actor":2630233,"app_name":"Foobar","git_repository":"pythonsdk_test_resin/foobar","commit":null,"application_type":{"__deferred":{"uri":"/resin/application_type(5)"},"__id":5},"device_type":"raspberrypi3","should_track_latest_release":true,"is_accessible_by_support_until__date":null,"__metadata":{"uri":"/resin/application(1005767)","type":""}}'
 
         """
 
@@ -176,10 +178,29 @@ class Application(object):
         device_slug = [device['slug'] for device in device_types
                        if device['name'] == device_type]
         if device_slug:
+
             data = {
                 'app_name': name,
                 'device_type': device_slug[0]
             }
+
+            if app_type:
+
+                params = {
+                    'filter': 'slug',
+                    'eq': app_type
+                }
+
+                app_type_detail = self.base_request.request(
+                    'application_type', 'GET', params=params,
+                    endpoint=self.settings.get('pine_endpoint'), login=True
+                )['d']
+
+                if not app_type_detail:
+                    raise exceptions.InvalidApplicationType(app_type)
+
+                data['application_type'] = app_type_detail[0]['id']
+
             return json.loads(self.base_request.request(
                 'application', 'POST', data=data,
                 endpoint=self.settings.get('pine_endpoint'), login=True

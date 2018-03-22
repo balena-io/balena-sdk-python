@@ -65,7 +65,7 @@ class BaseRequest(object):
     def __head(self, url, headers, data=None, stream=None):
         return requests.head(url, headers=headers, timeout=self.timeout)
 
-    def _format_params(self, params, api_key):
+    def _format_params(self, params, api_key, raw_query=None):
         query_elements = []
         if api_key:
             query_elements.append('apikey={0}'.format(api_key))
@@ -78,11 +78,13 @@ class BaseRequest(object):
             else:
                 query_template = Template("")
             query_elements.append(query_template.safe_substitute(params))
+        if raw_query:
+            query_elements.append(raw_query)
         if query_elements:
             return '?{0}'.format('&'.join(query_elements))
 
     def __request(self, url, method, params, endpoint, headers=None,
-                  data=None, stream=None, auth=True, api_key=None):
+                  data=None, stream=None, auth=True, api_key=None, raw_query=None):
         """
         This function forms HTTP request and send to Resin.io.
         Resin.io host is prepended automatically, therefore only relative urls should be passed.
@@ -96,6 +98,7 @@ class BaseRequest(object):
             stream (Optional[bool]): this argument is set to True when needing to stream the response content.
             auth (Optional[bool]): default is True. This marks the request need to be authenticated or not.
             api_key (Optional[str]): default is None. Resin API Key.
+            raw_query (Optional[str]): default is None. Raw query string.
 
         Returns:
             object: response object.
@@ -123,15 +126,15 @@ class BaseRequest(object):
         if auth:
             if not api_key:
                 self.__set_authorization(headers)
-            params = self._format_params(params, api_key=api_key)
+            params = self._format_params(params, api_key=api_key, raw_query=raw_query)
         else:
-            params = self._format_params(params, api_key=None)
+            params = self._format_params(params, api_key=None, raw_query=raw_query)
 
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
 
     def request(self, url, method, endpoint, params=None, data=None,
-                stream=None, auth=True, login=False, api_key=None):
+                stream=None, auth=True, login=False, api_key=None, raw_query=None):
         if api_key is None:
             api_key = self.util.get_api_key()
 
@@ -157,7 +160,7 @@ class BaseRequest(object):
         # About response obj:
         # https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
         response = self.__request(url, method, params, endpoint, data=data,
-                                  stream=stream, auth=auth, api_key=api_key)
+                                  stream=stream, auth=auth, api_key=api_key, raw_query=raw_query)
 
         if stream:
             return response

@@ -314,36 +314,6 @@ class AmbiguousDevice(ResinException):
         self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
 
 
-class BuildNotFound(ResinException):
-    """
-    Args:
-        build_id (str): build id.
-
-    Attributes:
-        message (str): error message.
-
-    """
-
-    def __init__(self, build_id):
-        super(BuildNotFound, self).__init__()
-        self.message = Message.BUILD_NOT_FOUND.format(id=build_id)
-
-
-class FailedBuild(ResinException):
-    """
-    Args:
-        build_id (str): build id.
-
-    Attributes:
-        message (str): error message.
-
-    """
-
-    def __init__(self, build_id):
-        super(FailedBuild, self).__init__()
-        self.message = Message.FAILED_BUILD.format(id=build_id)
-
-
 class InvalidParameter(ResinException):
     """
     Args:
@@ -360,3 +330,63 @@ class InvalidParameter(ResinException):
     def __init__(self, parameter, value):
         super(InvalidParameter, self).__init__()
         self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)
+
+
+class ImageNotFound(ResinException):
+    """
+    Args:
+        image_id (str): image id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, image_id):
+        super(ImageNotFound, self).__init__()
+        self.message = Message.IMAGE_NOT_FOUND.format(id=image_id)
+
+
+class ReleaseNotFound(ResinException):
+    """
+    Args:
+        release_id (str): release id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, release_id):
+        super(ReleaseNotFound, self).__init__()
+        self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
+
+
+class ServiceNotFound(ResinException):
+    """
+    Args:
+        service_id (str): service id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, service_id):
+        super(ServiceNotFound, self).__init__()
+        self.message = Message.SERVICE_NOT_FOUND.format(id=service_id)
+
+
+class InvalidApplicationType(ResinException):
+    """
+    Args:
+        app_type (str): application type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, app_type):
+        super(InvalidApplicationType, self).__init__()
+        self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)

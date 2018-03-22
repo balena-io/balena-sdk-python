@@ -33,6 +33,14 @@ class TestApplication(unittest.TestCase):
         app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(app['app_name'], 'FooBar')
 
+        # should be rejected if the application type is invalid
+        with self.assertRaises(self.helper.resin_exceptions.InvalidApplicationType):
+            self.resin.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starterrrrrr')
+
+        # should be able to create an application with a specific application type
+        app = self.resin.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starter')
+        self.assertEqual(app['app_name'], 'FooBar1')
+
     def test_get_all(self):
         # given no applications, it should return empty list.
         self.assertEqual(self.resin.models.application.get_all(), [])
