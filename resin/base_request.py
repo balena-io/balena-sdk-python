@@ -3,15 +3,17 @@ try:  # Python 3 imports
 except ImportError:  # Python 2 imports
     from urlparse import urljoin
 
+from datetime import datetime
 import json
 from string import Template
 import os
 import requests
+import jwt
 
 from .settings import Settings
-from .token import Token
-
 from . import exceptions
+
+TOKEN_KEY = 'token'
 
 
 class BaseRequest(object):
@@ -23,7 +25,6 @@ class BaseRequest(object):
 
     def __init__(self):
         self.settings = Settings()
-        self.token = Token()
         self.util = Util()
 
     @property
@@ -38,7 +39,7 @@ class BaseRequest(object):
 
     def __set_authorization(self, headers):
         headers.update(
-            {'Authorization': 'Bearer {:s}'.format(self.token.get())})
+            {'Authorization': 'Bearer {:s}'.format(self.settings.get(TOKEN_KEY))})
 
     def __get(self, url, headers, data=None, stream=None):
         return requests.get(url, headers=headers, timeout=self.timeout)
@@ -144,17 +145,17 @@ class BaseRequest(object):
             auth = True
 
         if auth and not api_key:
-            if not self.token.has():
+            if not self.settings.has(TOKEN_KEY):
                 if login:
                     raise exceptions.NotLoggedIn()
                 else:
                     raise exceptions.Unauthorized()
 
             if self.util.should_update_token(
-                self.token.get_age(),
+                self.settings.get(TOKEN_KEY),
                 self.settings.get('token_refresh_interval')
             ):
-                self.token.set(self._request_new_token())
+                self.settings.set(TOKEN_KEY, self._request_new_token())
         params = params or {}
         data = data or {}
         # About response obj:
@@ -196,8 +197,19 @@ class BaseRequest(object):
 
 class Util(object):
 
-    def should_update_token(self, age, token_fresh_interval):
-        return int(age) >= int(token_fresh_interval)
+    def should_update_token(self, token, token_fresh_interval):
+        try:
+            # Auth token
+            token_data = jwt.decode(token, verify=False)
+            # dt will be the same as Date.now() in Javascript but converted to
+            # milliseconds for consistency with js/sc sdk
+            dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
+            dt = dt * 1000
+            age = dt - (int(token_data['iat']) * 1000)
+            return int(age) >= int(token_fresh_interval)
+        except jwt.InvalidTokenError:
+            # User API token
+            return False
 
     def get_api_key(self):
         # return None if key is not present

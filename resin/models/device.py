@@ -12,7 +12,7 @@ except ImportError:  # Python 2 imports
 from ..base_request import BaseRequest
 from .config import Config
 from ..settings import Settings
-from ..token import Token
+from ..auth import Auth
 from .. import exceptions
 from .application import Application
 
@@ -46,8 +46,8 @@ class Device(object):
         self.base_request = BaseRequest()
         self.config = Config()
         self.settings = Settings()
-        self.token = Token()
         self.application = Application()
+        self.auth = Auth()
 
     def get(self, uuid):
         """
@@ -545,7 +545,7 @@ class Device(object):
 
         """
 
-        user_id = self.token.get_user_id()
+        user_id = self.auth.get_user_id()
         application = self.application.get_by_id(app_id)
         api_key = self.application.generate_provisioning_key(app_id)
         data = {

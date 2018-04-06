@@ -2,7 +2,7 @@ import json
 
 from ..base_request import BaseRequest
 from ..settings import Settings
-from ..token import Token
+from ..auth import Auth
 from .. import exceptions
 
 
@@ -15,7 +15,7 @@ class Key(object):
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.token = Token()
+        self.auth = Auth()
 
     def get_all(self):
         """
@@ -95,7 +95,7 @@ class Key(object):
         data = {
             'title': title,
             'public_key': key,
-            'user': self.token.get_user_id()
+            'user': self.auth.get_user_id()
         }
         key = self.base_request.request(
             'user__has__public_key', 'POST', data=data,
