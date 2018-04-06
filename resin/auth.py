@@ -1,7 +1,8 @@
 from .base_request import BaseRequest
-from .token import Token
 from .settings import Settings
 from . import exceptions
+
+TOKEN_KEY = 'token'
 
 
 class Auth(object):
@@ -10,10 +11,52 @@ class Auth(object):
 
     """
 
+    _user_detail_cache = {}
+
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.token = Token()
+
+    def __get_user_data(self):
+        """
+        Get user details from token.
+
+        Returns:
+            dict: user details.
+
+        Raises:
+            NotLoggedIn: if there is no user logged in.
+
+        """
+
+        if not self._user_detail_cache:
+            self._user_detail_cache = self.base_request.request(
+                'user/v1/whoami', 'get',
+                endpoint=self.settings.get('api_endpoint')
+            )
+
+        return self._user_detail_cache
+
+    def __get_property(self, element):
+        """
+        Get a property from user details.
+
+        Args:
+            element (str): property name.
+
+        Returns:
+            str: property value.
+
+        Raises:
+            InvalidOption: If getting a non-existent property.
+            NotLoggedIn: if there is no user logged in.
+
+        """
+
+        if element in self.__get_user_data():
+            return self._user_detail_cache[element]
+        else:
+            raise exceptions.InvalidOption(element)
 
     def login(self, **credentials):
         """
@@ -40,10 +83,8 @@ class Auth(object):
         """
 
         token = self.authenticate(**credentials).decode("utf-8")
-        if self.token.is_valid_token(token):
-            self.token.set(token)
-        else:
-            raise exceptions.LoginFailed()
+        self._user_detail_cache = {}
+        self.settings.set(TOKEN_KEY, token)
 
     def login_with_token(self, token):
         """
@@ -67,11 +108,8 @@ class Auth(object):
             (Empty Return)
 
         """
-
-        if self.token.is_valid_token(token):
-            self.token.set(token)
-        else:
-            raise exceptions.MalformedToken(token)
+        self._user_detail_cache = {}
+        self.settings.set(TOKEN_KEY, token)
 
     def who_am_i(self):
         """
@@ -89,7 +127,7 @@ class Auth(object):
 
         """
 
-        return self.token.get_username()
+        return self.__get_property('username')
 
     def authenticate(self, **credentials):
         """
@@ -135,9 +173,7 @@ class Auth(object):
         """
 
         try:
-            self.base_request.request(
-                '/whoami', 'GET', endpoint=self.settings.get('api_endpoint')
-            )
+            self.__get_user_data()
             return True
         except (exceptions.RequestError, exceptions.Unauthorized):
             return False
@@ -160,7 +196,7 @@ class Auth(object):
 
         """
 
-        return self.token.get()
+        return self.settings.get(TOKEN_KEY)
 
     def get_user_id(self):
         """
@@ -179,7 +215,7 @@ class Auth(object):
 
         """
 
-        return self.token.get_user_id()
+        return self.__get_property('id')
 
     def get_email(self):
         """
@@ -198,7 +234,7 @@ class Auth(object):
 
         """
 
-        return self.token.get_email()
+        return self.__get_property('email')
 
     def log_out(self):
         """
@@ -214,7 +250,8 @@ class Auth(object):
 
         """
 
-        return self.token.remove()
+        self._user_detail_cache = {}
+        return self.settings.remove(TOKEN_KEY)
 
     def register(self, **credentials):
         """
