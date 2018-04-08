@@ -1,6 +1,7 @@
 from datetime import datetime
 import os.path as Path
 import os
+import jwt
 try:  # Python 3 imports
     import configparser
 except ImportError:  # Python 2 imports
@@ -8,7 +9,6 @@ except ImportError:  # Python 2 imports
 
 from resin import Resin
 from resin import exceptions as resin_exceptions
-from resin import Token
 
 
 class TestHelper(object):
@@ -29,8 +29,8 @@ class TestHelper(object):
             )
 
         # Stop the test if it's run by an admin user account.
-        token = Token()
-        if any('admin' in s for s in token.get_data()['permissions']):
+        token_data = jwt.decode(self.resin.settings.get('token'), verify=False)
+        if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
     @classmethod

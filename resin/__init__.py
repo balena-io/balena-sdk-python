@@ -8,14 +8,13 @@ hesitate to open an issue in GitHub, we'll be happy to help.
 
 from .base_request import BaseRequest
 from .auth import Auth
-from .token import Token
 from .logs import Logs
 from .settings import Settings
 from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
 
-__version__ = '4.0.0'
+__version__ = '4.1.0'
 
 
 class Resin(object):

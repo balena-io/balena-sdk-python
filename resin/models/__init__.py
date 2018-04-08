@@ -14,6 +14,7 @@ from .image import Image
 from .service import Service
 from .release import Release
 from .config_variable import ConfigVariable
+from .api_key import ApiKey
 
 
 class Models(object):
@@ -30,3 +31,4 @@ class Models(object):
         self.service = Service()
         self.release = Release()
         self.config_variable = ConfigVariable()
+        self.api_key = ApiKey()

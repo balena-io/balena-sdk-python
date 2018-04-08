@@ -10,6 +10,7 @@ hesitate to open an issue in GitHub, we'll be happy to help.
 - [Resin](#resin)
     - [Models](#models)
         - [Application](#application)
+        - [ApiKey](#apikey)
         - [Config](#config)
         - [ConfigVariable](#configvariable)
             - [ApplicationConfigVariable](#applicationconfigvariable)
@@ -298,6 +299,64 @@ Revoke support access to an application.
 #### Examples:
     >> > resin.models.application.revoke_support_access('5685')
     'OK'
+## ApiKey
+
+This class implements user API key model for Resin Python SDK.
+### Function: create_api_key(name, description)
+
+This function registers a new api key for the current user with the name given.
+
+#### Args:
+    name (str): user API key name.
+    description (Optional[str]): API key description.
+
+#### Returns:
+    str: user API key.
+
+#### Examples:
+```python
+>>> resin.models.api_key.create_api_key('myApiKey')
+3YHD9DVPLe6LbjEgQb7FEFXYdtPEMkV9
+```
+### Function: get_all()
+
+This function gets all API keys.
+
+#### Returns:
+    list: user API key.
+
+#### Examples:
+```python
+>>> resin.models.api_key.get_all()
+[{u'description': None, u'created_at': u'2018-04-06T03:53:34.189Z', u'__metadata': {u'type': u'', u'uri': u'/resin/api_key(1296047)'}, u'is_of__actor': {u'__deferred': {u'uri': u'/resin/actor(2454095)'}, u'__id': 2454095}, u'id': 1296047, u'name': u'myApiKey'}]
+```
+### Function: revoke(id)
+
+This function revokes an API key.
+
+#### Args:
+    id (str): API key id.
+
+#### Examples:
+```python
+>>> resin.models.api_key.revoke(1296047)
+OK
+```
+### Function: update(id, api_key_info)
+
+This function updates details of an API key.
+
+#### Args:
+    id (str): API key id.
+    api_key_info: new API key info.
+        name (str): new API key name.
+        description (Optional[str]): new API key description.
+
+#### Examples:
+```python
+>>> resin.models.api_key.update(1296047, {'name':'new name')
+OK
+```
 ## Config
 
 This class implements configuration model for Resin Python SDK.

@@ -33,3 +33,4 @@ class Message(object):
     RELEASE_NOT_FOUND = "Release not found: {id}"
     SERVICE_NOT_FOUND = "Service not found: {id}"
     INVALID_APPLICATION_TYPE = "Invalid application type: {app_type}"
+    UNSUPPORTED_FEATURE = "You have to log in using credentials or Auth Token to use this function!"

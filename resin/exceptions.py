@@ -390,3 +390,15 @@ class InvalidApplicationType(ResinException):
     def __init__(self, app_type):
         super(InvalidApplicationType, self).__init__()
         self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)
+
+
+class UnsupportedFeature(ResinException):
+    """
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(UnsupportedFeature, self).__init__()
+        self.message = Message.UNSUPPORTED_FEATURE

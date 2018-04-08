@@ -13,6 +13,7 @@ Table_Of_Content = [
     ('Resin', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
+    ('ApiKey', TOC_L2),
     ('Config', TOC_L2),
     ('ConfigVariable', TOC_L2),
     ('ApplicationConfigVariable', TOC_L3),
@@ -71,6 +72,9 @@ def main():
     print(doc2md.doc2md(
         resin.models.application.Application.__doc__, 'Application', type=0))
     print_functions(resin.models.application.Application)
+    print(doc2md.doc2md(
+        resin.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
+    print_functions(resin.models.api_key.ApiKey)
     print(doc2md.doc2md(resin.models.config.Config.__doc__, 'Config', type=0))
     print_functions(resin.models.config.Config)
     print(doc2md.doc2md(

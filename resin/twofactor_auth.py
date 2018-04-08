@@ -4,11 +4,13 @@ except ImportError:  # Python 2 imports
     from urlparse import urlparse
 
 import pyotp
+import jwt
 
 from .base_request import BaseRequest
-from .token import Token
 from .settings import Settings
 from . import exceptions
+
+TOKEN_KEY = 'token'
 
 
 class TwoFactorAuth(object):
@@ -20,7 +22,6 @@ class TwoFactorAuth(object):
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.token = Token()
 
     def is_enabled(self):
         """
@@ -36,10 +37,14 @@ class TwoFactorAuth(object):
         """
 
         try:
-            self.token.get_property('twoFactorRequired')
-            return True
-        except exceptions.InvalidOption:
+            token = self.settings.get(TOKEN_KEY)
+            token_data = jwt.decode(token, verify=False)
+            if 'twoFactorRequired' in token_data:
+                return True
             return False
+        except jwt.InvalidTokenError:
+            # in case it's not Auth token
+            raise exceptions.UnsupportedFeature()
 
     def is_passed(self):
         """
@@ -56,7 +61,7 @@ class TwoFactorAuth(object):
 
         if not self.is_enabled():
             return True
-        return not self.token.get_property('twoFactorRequired')
+        return False
 
     def challenge(self, code):
         """
@@ -86,7 +91,7 @@ class TwoFactorAuth(object):
             'auth/totp/verify', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), login=True
         )
-        self.token.set(token)
+        self.settings.set(TOKEN_KEY, token)
 
     def generate_code(self, secret):
         """
