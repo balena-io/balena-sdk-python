@@ -3,8 +3,21 @@
 Welcome to the Resin Python SDK documentation.
 This document aims to describe all the functions supported by the SDK, as well as
 showing examples of their expected usage.
-If you feel something is missing, not clear or could be improved, please don't
-hesitate to open an issue in GitHub, we'll be happy to help.
+
+Install the Resin SDK:
+
+From Pip:
+```
+pip install resin-sdk
+```
+
+From Source (In case, you want to test a development branch):
+```
+https://github.com/resin-io/resin-sdk-python
+```
+
+If you feel something is missing, not clear or could be improved, [please don't
+hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-python/issues), we'll be happy to help.
 
 ## Table of Contents
 - [Resin](#resin)
@@ -23,6 +36,9 @@ hesitate to open an issue in GitHub, we'll be happy to help.
         - [Image](#image)
         - [Release](#release)
         - [Service](#service)
+        - [Tag](#tag)
+            - [ApplicationTag](#applicationtag)
+            - [DeviceTag](#devicetag)
         - [Key](#key)
         - [Supervisor](#supervisor)
     - [Auth](#auth)
@@ -1260,6 +1276,159 @@ Get all services from an application.
 
 #### Returns:
     list: service info.
+## Tag
+
+This class is a wrapper for Tag models.
+## DeviceTag
+
+This class implements device tag model for Resin Python SDK.
+### Function: get_all()
+
+Get all device tags.
+
+#### Returns:
+    list: list contains device tags.
+
+#### Examples:
+```python
+>>> resin.models.tag.device.get_all()
+[{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20162)'}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all device tags for an application.
+
+#### Args:
+    app_id (str): application id .
+
+#### Returns:
+    list: list contains device tags.
+
+#### Examples:
+```python
+>>> resin.models.tag.device.get_all_by_application('1005160')
+[{u'device': {u'__deferred': {u'uri': u'/resin/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20162)'}}]
+```
+### Function: get_all_by_device(uuid)
+
+Get all device tags for a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    list: list contains device tags.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+
+#### Examples:
+```python
+>>> resin.models.tag.device.get_all_by_device('a03ab646c01f39e39a1e3deb7fce76b93075c6d599fd5be4a889b8145e2f8f')
+[{u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}]
+```
+### Function: remove(uuid, tag_key)
+
+Remove a device tag.
+
+#### Args:
+    uuid (str): device uuid.
+    tag_key (str): tag key.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+
+#### Examples:
+```python
+>>> resin.models.tag.device.remove('f5213eac0d63ac47721b037a7406d306', 'testtag'))
+OK
+```
+### Function: set(uuid, tag_key, value)
+
+Set a device tag (update tag value if it exists).
+
+#### Args:
+    uuid (str): device uuid.
+    tag_key (str): tag key.
+    value (str): tag value.
+
+#### Returns:
+    dict: dict contains device tag info if tag doesn't exist.
+    OK: if tag exists.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+
+#### Examples:
+```python
+>>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
+{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'testtag', u'id': 20163, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20163)'}}
+>>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
+OK
+```
+## ApplicationTag
+
+This class implements application tag model for Resin Python SDK.
+### Function: get_all()
+
+Get all application tags.
+
+#### Returns:
+    list: list contains application tags.
+
+#### Examples:
+```python
+>>> resin.models.tag.application.get_all()
+[{u'application': {u'__deferred': {u'uri': u'/resin/application(1005160)'}, u'__id': 1005160}, u'tag_key': u'appTag', u'id': 12886, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12886)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all application tags for an application.
+
+#### Args:
+    app_id (str): application id .
+
+#### Returns:
+    list: list contains application tags.
+
+#### Examples:
+```python
+>>> resin.models.tag.application.get_all_by_application('1005767')
+[{u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+```
+### Function: remove(app_id, tag_key)
+
+Remove an application tag.
+
+#### Args:
+    app_id (str): application id.
+    tag_key (str): tag key.
+
+#### Examples:
+```python
+>>> resin.models.tag.application.remove('1005767', 'tag1')
+OK
+```
+### Function: set(app_id, tag_key, value)
+
+Set an application tag (update tag value if it exists).
+
+#### Args:
+    app_id (str): application id.
+    tag_key (str): tag key.
+    value (str): tag value.
+
+#### Returns:
+    dict: dict contains application tag info if tag doesn't exist.
+    OK: if tag exists.
+
+#### Examples:
+```python
+>>> resin.models.tag.application.set('1005767', 'tag1', 'Python SDK')
+{u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12889)'}}
+>>> resin.models.tag.application.set('1005767', 'tag1','Resin Python SDK')
+OK
+```
 ## Key
 
 This class implements ssh key model for Resin Python SDK.
@@ -1818,7 +1987,11 @@ Logs.history(uuid=uuid, callback=callback, error=error)
 ### Function: subscribe()
 
 This function allows subscribing to device logs.
-Testing
+There are fields (`m`, `t`, `s`, `c`) in the output which can be unclear. They stand for:
+    m - The log message itself.
+    t - The log timestamp.
+    s - Is this a system message?
+    c - The id of the service which produced this log (or null if the device does not support multiple containers).
 
 #### Args:
     uuid (str): device uuid.

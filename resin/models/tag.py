@@ -282,7 +282,7 @@ class ApplicationTag(BaseTag):
             OK: if tag exists.
 
         Examples:
-            >>> resin.models.tag.application.set('1005767', 'tag1','Python SDK')
+            >>> resin.models.tag.application.set('1005767', 'tag1', 'Python SDK')
             {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12889)'}}
             >>> resin.models.tag.application.set('1005767', 'tag1','Resin Python SDK')
             OK
@@ -300,7 +300,7 @@ class ApplicationTag(BaseTag):
             tag_key (str): tag key.
 
         Examples:
-            >>> resin.models.tag.application.set('1005767', 'tag1')
+            >>> resin.models.tag.application.remove('1005767', 'tag1')
             OK
 
         """

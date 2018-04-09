@@ -37,7 +37,11 @@ class Logs(object):
     def subscribe(self, uuid, callback, error):
         """
         This function allows subscribing to device logs.
-        Testing
+        There are fields (`m`, `t`, `s`, `c`) in the output which can be unclear. They stand for:
+            m - The log message itself.
+            t - The log timestamp.
+            s - Is this a system message?
+            c - The id of the service which produced this log (or null if the device does not support multiple containers).
 
         Args:
             uuid (str): device uuid.
