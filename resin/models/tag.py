@@ -14,6 +14,7 @@ class Tag(object):
 
     def __init__(self):
         self.device = DeviceTag()
+        self.application = ApplicationTag()
 
 
 class BaseTag(object):
@@ -53,7 +54,7 @@ class BaseTag(object):
         )['d']
 
     def set(self, resource_id, tag_key, value):
-        if len(self.get(resource_id,tag_key)) > 0:
+        if len(self.get(resource_id, tag_key)) > 0:
             params = {
                 'filters': {
                     self.resource: resource_id,
@@ -83,15 +84,15 @@ class BaseTag(object):
 
     def remove(self, resource_id, tag_key):
         params = {
-                'filters': {
-                    self.resource: resource_id,
-                    'tag_key': tag_key
+            'filters': {
+                self.resource: resource_id,
+                'tag_key': tag_key
             }
         }
 
         return self.base_request.request(
-                '{}_tag'.format(self.resource), 'DELETE', params=params,
-                endpoint=self.settings.get('pine_endpoint')
+            '{}_tag'.format(self.resource), 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
         )
 
 
@@ -188,7 +189,7 @@ class DeviceTag(BaseTag):
         Examples:
             >>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
             {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'testtag', u'id': 20163, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20163)'}}
-            >>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2'))
+            >>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
             OK
 
         """
@@ -217,3 +218,91 @@ class DeviceTag(BaseTag):
         device = self.device.get(uuid)
 
         return super(DeviceTag, self).remove(device['id'], tag_key)
+
+
+class ApplicationTag(BaseTag):
+    """
+    This class implements application tag model for Resin Python SDK.
+
+    """
+
+    def __init__(self):
+        super(ApplicationTag, self).__init__('application')
+
+    def get_all_by_application(self, app_id):
+        """
+        Get all application tags for an application.
+
+        Args:
+            app_id (str): application id .
+
+        Returns:
+            list: list contains application tags.
+
+        Examples:
+            >>> resin.models.tag.application.get_all_by_application('1005767')
+            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+
+
+        """
+
+        params = {
+            'filter': 'application',
+            'eq': app_id
+        }
+
+        return super(ApplicationTag, self).get_all(params=params)
+
+    def get_all(self):
+        """
+        Get all application tags.
+
+        Returns:
+            list: list contains application tags.
+
+        Examples:
+            >>> resin.models.tag.application.get_all()
+            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005160)'}, u'__id': 1005160}, u'tag_key': u'appTag', u'id': 12886, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12886)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+
+        """
+
+        return super(ApplicationTag, self).get_all()
+
+    def set(self, app_id, tag_key, value):
+        """
+        Set an application tag (update tag value if it exists).
+
+        Args:
+            app_id (str): application id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            dict: dict contains application tag info if tag doesn't exist.
+            OK: if tag exists.
+
+        Examples:
+            >>> resin.models.tag.application.set('1005767', 'tag1','Python SDK')
+            {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12889)'}}
+            >>> resin.models.tag.application.set('1005767', 'tag1','Resin Python SDK')
+            OK
+
+        """
+
+        return super(ApplicationTag, self).set(app_id, tag_key, value)
+
+    def remove(self, app_id, tag_key):
+        """
+        Remove an application tag.
+
+        Args:
+            app_id (str): application id.
+            tag_key (str): tag key.
+
+        Examples:
+            >>> resin.models.tag.application.set('1005767', 'tag1')
+            OK
+
+        """
+
+        return super(ApplicationTag, self).remove(app_id, tag_key)
