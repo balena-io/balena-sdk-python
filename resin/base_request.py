@@ -71,14 +71,24 @@ class BaseRequest(object):
         if api_key:
             query_elements.append('apikey={0}'.format(api_key))
         if params:
-            if 'expand' in params:
-                query_template = Template(
-                    "$$expand=$expand($$filter=$filter%20eq%20'$eq')")
-            elif 'filter' in params:
-                query_template = Template("$$filter=$filter%20eq%20'$eq'")
+            if 'filters' in params:
+                # Multiple filters
+                for key in params['filters']:
+                    query_elements.append(
+                        Template("$$filter=$key%20eq%20'$value'").safe_substitute(
+                            key=key,
+                            value=params['filters'][key]
+                        )
+                    )
             else:
-                query_template = Template("")
-            query_elements.append(query_template.safe_substitute(params))
+                if 'expand' in params:
+                    query_template = Template(
+                        "$$expand=$expand($$filter=$filter%20eq%20'$eq')")
+                elif 'filter' in params:
+                    query_template = Template("$$filter=$filter%20eq%20'$eq'")
+                else:
+                    query_template = Template("")
+                query_elements.append(query_template.safe_substitute(params))
         if raw_query:
             query_elements.append(raw_query)
         if query_elements:

@@ -15,6 +15,7 @@ from .service import Service
 from .release import Release
 from .config_variable import ConfigVariable
 from .api_key import ApiKey
+from .tag import Tag
 
 
 class Models(object):
@@ -32,3 +33,4 @@ class Models(object):
         self.release = Release()
         self.config_variable = ConfigVariable()
         self.api_key = ApiKey()
+        self.tag = Tag()
