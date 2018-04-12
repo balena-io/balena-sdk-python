@@ -2,8 +2,21 @@
 Welcome to the Resin Python SDK documentation.
 This document aims to describe all the functions supported by the SDK, as well as
 showing examples of their expected usage.
-If you feel something is missing, not clear or could be improved, please don't
-hesitate to open an issue in GitHub, we'll be happy to help.
+
+Install the Resin SDK:
+
+From Pip:
+```
+pip install resin-sdk
+```
+
+From Source (In case, you want to test a development branch):
+```
+https://github.com/resin-io/resin-sdk-python
+```
+
+If you feel something is missing, not clear or could be improved, [please don't
+hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-python/issues), we'll be happy to help.
 """
 
 from .base_request import BaseRequest
@@ -14,7 +27,7 @@ from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
 
-__version__ = '4.1.0'
+__version__ = '4.2.0'
 
 
 class Resin(object):
