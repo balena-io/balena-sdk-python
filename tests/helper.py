@@ -86,3 +86,11 @@ class TestHelper(object):
 
     def datetime_to_epoch_ms(self, dt):
         return int((dt - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+
+    def create_device(self, app_name='FooBar', device_type='Raspberry Pi 2'):
+        """
+        Create a device belongs to an application.
+        """
+
+        app = self.resin.models.application.create(app_name, device_type)
+        return app, self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
