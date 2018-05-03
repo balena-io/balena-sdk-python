@@ -31,7 +31,9 @@ hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-pytho
         - [Device](#device)
         - [DeviceOs](#deviceos)
         - [EnvironmentVariable](#environmentvariable)
+            - [ApplicationEnvVariable](#applicationenvvariable)
             - [ServiceEnvVariable](#serviceenvvariable)
+            - [DeviceEnvVariable](#deviceenvvariable)
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
         - [Release](#release)
@@ -1079,6 +1081,87 @@ Validate parameters for downloading device OS image.
 ## EnvironmentVariable
 
 This class is a wrapper for environment variable models.
+## ApplicationEnvVariable
+
+This class implements application environment variable model for Resin Python SDK.
+
+#### Attributes:
+    SYSTEM_VARIABLE_RESERVED_NAMES (list): list of reserved system variable names.
+    OTHER_RESERVED_NAMES_START (list): list of prefix for system variable.
+### Function: create(app_id, env_var_name, value)
+
+Create an environment variable for application.
+
+#### Args:
+    app_id (str): application id.
+    env_var_name (str): environment variable name.
+    value (str): environment variable value.
+
+#### Returns:
+    dict: new application environment info.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.application.create('978062', 'test2', '123')
+{'id': 91138, 'application': {'__deferred': {'uri': '/resin/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/resin/environment_variable(91138)', 'type': ''}}
+```
+### Function: get_all(app_id)
+
+Get all environment variables by application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    list: application environment variables.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.application.get_all(9020)
+[{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'RESIN_RESTART'}]
+```
+### Function: is_system_variable(variable)
+
+Check if a variable is system specific.
+
+#### Args:
+    variable (str): environment variable name.
+
+#### Returns:
+    bool: True if system variable, False otherwise.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.application.is_system_variable('RESIN_API_KEY')
+True
+>>> resin.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
+False
+```
+### Function: remove(var_id)
+
+Remove application environment variable.
+
+#### Args:
+    var_id (str): environment variable id.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.application.remove(5652)
+'OK'
+```
+### Function: update(var_id, value)
+
+Update an environment variable value for application.
+
+#### Args:
+    var_id (str): environment variable id.
+    value (str): new environment variable value.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.application.update(5652, 'new value')
+'OK'
+```
 ## ServiceEnvVariable
 
 This class implements service environment variable model for Resin Python SDK.
@@ -1138,6 +1221,81 @@ Update a service environment variable value for application.
 #### Examples:
 ```python
 >>> resin.models.environment_variables.service_environment_variable.update('12444', 'new test value')
+'OK'
+```
+## DeviceEnvVariable
+
+This class implements device environment variable model for Resin Python SDK.
+### Function: create(uuid, env_var_name, value)
+
+Create a device environment variable.
+
+#### Args:
+    uuid (str): device uuid.
+    env_var_name (str): environment variable name.
+    value (str): environment variable value.
+
+#### Returns:
+    dict: new device environment variable info.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
+{'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 42166}
+```
+### Function: get_all(uuid)
+
+Get all device environment variables.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    list: device environment variables.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+[{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'RESIN_DEVICE_RESTART'}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all device environment variables for an application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    list: list of device environment variables.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.device.get_all_by_application('5780')
+[{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+```
+### Function: remove(var_id)
+
+Remove a device environment variable.
+
+#### Args:
+    var_id (str): environment variable id.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.device.remove(2184)
+'OK'
+```
+### Function: update(var_id, value)
+
+Update a device environment variable.
+
+#### Args:
+    var_id (str): environment variable id.
+    value (str): new environment variable value.
+
+#### Examples:
+```python
+>>> resin.models.environment_variables.device.update(2184, 'new value')
 'OK'
 ```
 ## DeviceServiceEnvVariable

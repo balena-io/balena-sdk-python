@@ -21,7 +21,9 @@ Table_Of_Content = [
     ('Device', TOC_L2),
     ('DeviceOs', TOC_L2),
     ('EnvironmentVariable', TOC_L2),
+    ('ApplicationEnvVariable', TOC_L3),
     ('ServiceEnvVariable', TOC_L3),
+    ('DeviceEnvVariable', TOC_L3),
     ('DeviceServiceEnvVariable', TOC_L3),
     ('Image', TOC_L2),
     ('Release', TOC_L2),
@@ -100,9 +102,17 @@ def main():
         resin.models.environment_variables.EnvironmentVariable.__doc__,
         'EnvironmentVariable', type=0))
     print(doc2md.doc2md(
+        resin.models.environment_variables.ApplicationEnvVariable.__doc__,
+        'ApplicationEnvVariable', type=0))
+    print_functions(resin.models.environment_variables.ApplicationEnvVariable)
+    print(doc2md.doc2md(
         resin.models.environment_variables.ServiceEnvVariable.__doc__,
         'ServiceEnvVariable', type=0))
     print_functions(resin.models.environment_variables.ServiceEnvVariable)
+    print(doc2md.doc2md(
+        resin.models.environment_variables.DeviceEnvVariable.__doc__,
+        'DeviceEnvVariable', type=0))
+    print_functions(resin.models.environment_variables.DeviceEnvVariable)
     print(doc2md.doc2md(
         resin.models.environment_variables.DeviceServiceEnvVariable.__doc__,
         'DeviceServiceEnvVariable', type=0))
