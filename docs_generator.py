@@ -31,6 +31,7 @@ Table_Of_Content = [
     ('Tag', TOC_L2),
     ('ApplicationTag', TOC_L3),
     ('DeviceTag', TOC_L3),
+    ('ReleaseTag', TOC_L3),
     ('Key', TOC_L2),
     ('Supervisor', TOC_L2),
     ('Auth', TOC_L1),
@@ -128,6 +129,8 @@ def main():
     print_functions(resin.models.tag.DeviceTag)
     print(doc2md.doc2md(resin.models.tag.ApplicationTag.__doc__, 'ApplicationTag', type=0))
     print_functions(resin.models.tag.ApplicationTag)
+    print(doc2md.doc2md(resin.models.tag.ReleaseTag.__doc__, 'ReleaseTag', type=0))
+    print_functions(resin.models.tag.ReleaseTag)
     print(doc2md.doc2md(resin.models.key.Key.__doc__, 'Key', type=0))
     print_functions(resin.models.key.Key)
     print(doc2md.doc2md(resin.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))

@@ -15,6 +15,7 @@ class Tag(object):
     def __init__(self):
         self.device = DeviceTag()
         self.application = ApplicationTag()
+        self.release = ReleaseTag()
 
 
 class BaseTag(object):
@@ -306,3 +307,112 @@ class ApplicationTag(BaseTag):
         """
 
         return super(ApplicationTag, self).remove(app_id, tag_key)
+
+
+class ReleaseTag(BaseTag):
+    """
+    This class implements release tag model for Resin Python SDK.
+
+    """
+
+    def __init__(self):
+        super(ReleaseTag, self).__init__('release')
+
+    def get_all_by_application(self, app_id):
+        """
+        Get all release tags for an application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            list: list contains release tags.
+
+        Examples:
+            >>> resin.models.tag.release.get_all_by_application('1043050')
+            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+
+
+        """
+
+        query = '$filter=release/any(d:d/belongs_to__application%20eq%20{app_id})'.format(app_id=app_id)
+
+        return super(ReleaseTag, self).get_all(raw_query=query)
+
+    def get_all_by_release(self, release_id):
+        """
+        Get all release tags for a release.
+
+        Args:
+            release_id (str): release id.
+
+        Returns:
+            list: list contains release tags.
+
+        Examples:
+            >>> resin.models.tag.release.get_all_by_release('135')
+            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': release_id
+        }
+
+        return super(ReleaseTag, self).get_all(params=params)
+
+    def get_all(self):
+        """
+        Get all release tags.
+
+        Returns:
+            list: list contains release tags.
+
+        Examples:
+            >>> resin.models.tag.release.get_all()
+            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+
+        """
+
+        return super(ReleaseTag, self).get_all()
+
+    def set(self, release_id, tag_key, value):
+        """
+        Set a release tag (update tag value if it exists).
+
+        Args:
+            release_id (str): release id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            dict: dict contains release tag info if tag doesn't exist.
+            OK: if tag exists.
+
+        Examples:
+            >>> resin.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
+            {u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}
+            >>> resin.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
+            OK
+
+        """
+
+        return super(ReleaseTag, self).set(release_id, tag_key, value)
+
+    def remove(self, release_id, tag_key):
+        """
+        Remove a release tag.
+
+        Args:
+            release_id (str): release id.
+            tag_key (str): tag key.
+
+        Examples:
+            >>> resin.models.tag.release.remove('135', 'releaseTag1')
+            OK
+
+        """
+
+        return super(ReleaseTag, self).remove(release_id, tag_key)
