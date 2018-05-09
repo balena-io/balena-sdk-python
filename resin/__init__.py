@@ -15,6 +15,16 @@ From Source (In case, you want to test a development branch):
 https://github.com/resin-io/resin-sdk-python
 ```
 
+Getting started:
+
+```python
+>>> from resin import Resin
+>>> resin = Resin()
+>>> credentials = {'username':<your email>, 'password':<your password>}
+>>> resin.auth.login(**credentials)
+...
+```
+
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-python/issues), we'll be happy to help.
 """
@@ -27,7 +37,7 @@ from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
 
-__version__ = '4.4.0'
+__version__ = '4.4.1'
 
 
 class Resin(object):

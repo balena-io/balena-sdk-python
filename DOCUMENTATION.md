@@ -16,6 +16,16 @@ From Source (In case, you want to test a development branch):
 https://github.com/resin-io/resin-sdk-python
 ```
 
+Getting started:
+
+```python
+>>> from resin import Resin
+>>> resin = Resin()
+>>> credentials = {'username':<your email>, 'password':<your password>}
+>>> resin.auth.login(**credentials)
+...
+```
+
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-python/issues), we'll be happy to help.
 
@@ -486,8 +496,8 @@ Create a device config variable.
 
 #### Examples:
 ```python
->>> resin.models.environment_variables.device_service_environment_variable.create('f5213eac0d63ac47721b037a7406d306', 'data', 'dev_data_sdk', 'test1')
-{"id":28970,"created_at":"2018-03-17T10:13:14.184Z","service_install":{"__deferred":{"uri":"/resin/service_install(30789)"},"__id":30789},"value":"test1","name":"dev_data_sdk","__metadata":{"uri":"/resin/device_service_environment_variable(28970)","type":""}}
+>>> resin.models.config_variable.device_config_variable.create('f14a73b3a762396f7bfeacf5d530c316aa8cfeff307bea93422f71a106c344','RESIN_TEST_DEVICE_CONFIG_VAR','test value')
+{u'device': {u'__deferred': {u'uri': u'/resin/device(1083716)'}, u'__id': 1083716}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_variable(163985)'}, u'id': 163985, u'value': u'test value', u'name': u'RESIN_TEST_DEVICE_CONFIG_VAR'}
 ```
 ### Function: get_all(uuid)
 
