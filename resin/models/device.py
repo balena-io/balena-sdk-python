@@ -787,7 +787,13 @@ class Device(object):
         device = self.get(uuid)
         application = self.application.get(app_name)
 
-        if device['device_type'] != application['device_type']:
+        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['device_type'], self.config.get_device_types()))[0]
+        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['device_type'], self.config.get_device_types()))[0]
+
+        if device_dev_type['arch'] != app_dev_type['arch']:
+            raise exceptions.IncompatibleApplication(app_name)
+
+        if bool(device_dev_type.get('isDependent', None)) != bool(app_dev_type.get('isDependent', None)):
             raise exceptions.IncompatibleApplication(app_name)
 
         params = {
