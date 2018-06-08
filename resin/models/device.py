@@ -3,6 +3,7 @@ import binascii
 import os
 from datetime import datetime
 import json
+from collections import defaultdict
 
 try:  # Python 3 imports
     from urllib.parse import urljoin
@@ -183,6 +184,77 @@ class Device(object):
             'device', 'GET', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )['d']
+
+    def __get_single_install_summary(self, raw_data):
+        """
+        Builds summary data for an image install or gateway download
+
+        """
+
+        image = raw_data['image'][0]
+        service = image['is_a_build_of__service'][0]
+        release = None
+
+        if 'is_provided_by__release' in raw_data:
+            release = raw_data['is_provided_by__release'][0]
+
+        install = {
+            'service_name': service['service_name'],
+            'image_id': image['id'],
+            'service_id': service['id'],
+        }
+
+        if release:
+            install['commit'] = release['commit']
+
+        raw_data.pop('is_provided_by__release', None)
+        raw_data.pop('image', None)
+        install.update(raw_data)
+
+        return install
+
+    def get_with_service_details(self, uuid):
+        """
+        Get a single device along with its associated services' essential details.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            dict: device info with associated services details.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> resin.models.device.get_with_service_details('0fcd753af396247e035de53b4e43eec3')
+            {u'os_variant': u'prod', u'__metadata': {u'type': u'', u'uri': u'/resin/device(1136312)'}, u'is_managed_by__service_instance': {u'__deferred': {u'uri': u'/resin/service_instance(182)'}, u'__id': 182}, u'should_be_running__release': None, u'belongs_to__user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'is_web_accessible': False, u'device_type': u'raspberrypi3', u'belongs_to__application': {u'__deferred': {u'uri': u'/resin/application(1116729)'}, u'__id': 1116729}, u'id': 1136312, u'is_locked_until__date': None, u'logs_channel': u'1da2f8db7c5edbf268ba6c34d91974de8e910eef0033a1172386ad27807552', u'uuid': u'0fcd753af396247e035de53b4e43eec3', u'is_managed_by__device': None, u'should_be_managed_by__supervisor_release': None, u'is_accessible_by_support_until__date': None, u'actor': 2895243, u'note': None, u'os_version': u'Resin OS 2.12.7+rev1', u'longitude': u'105.85', u'last_connectivity_event': u'2018-05-27T05:43:54.027Z', u'is_on__commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', u'location': u'Hanoi, Thanh Pho Ha Noi, Vietnam', u'status': u'Idle', u'public_address': u'14.231.243.124', u'is_connected_to_vpn': False, u'custom_latitude': u'', u'is_active': True, u'provisioning_state': u'', u'latitude': u'21.0333', u'custom_longitude': u'', 'current_services': {u'frontend': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/resin/image_install(8952657)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296863, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52327, u'id': 8952657}], u'data': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/resin/image_install(8952656)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296864, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52329, u'id': 8952656}], u'proxy': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/resin/image_install(8952655)'}, u'install_date': u'2018-05-25T19:00:12.985Z', 'image_id': 296862, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52328, u'id': 8952655}]}, u'is_online': False, u'supervisor_version': u'7.4.3', u'ip_address': u'192.168.0.102', u'provisioning_progress': None, u'owns__device_log': {u'__deferred': {u'uri': u'/resin/device_log(1136312)'}, u'__id': 1136312}, u'created_at': u'2018-05-25T10:55:47.825Z', u'download_progress': None, u'last_vpn_event': u'2018-05-27T05:43:54.027Z', u'device_name': u'billowing-night', u'local_id': None, u'vpn_address': None, 'current_gateway_downloads': []}
+
+        """
+
+        raw_query = "$filter=uuid%20eq%20'{0}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)),is_provided_by__release($select=id,commit)),gateway_download($select=id,download_progress,status&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid)
+
+        raw_data = self.base_request.request(
+            'device', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if len(raw_data) == 0:
+            raise exceptions.DeviceNotFound(uuid)
+        else:
+            raw_data = raw_data[0]
+
+        groupedServices = defaultdict(list)
+
+        for obj in [self.__get_single_install_summary(i) for i in raw_data['image_install']]:
+            groupedServices[obj.pop('service_name', None)].append(obj)
+
+        raw_data['current_services'] = dict(groupedServices)
+        raw_data['current_gateway_downloads'] = [self.__get_single_install_summary(i) for i in raw_data['gateway_download']]
+        raw_data.pop('image_install', None)
+        raw_data.pop('gateway_download', None)
+
+        return raw_data
 
     def get_name(self, uuid):
         """
