@@ -251,10 +251,15 @@ class TestDevice(unittest.TestCase):
     def test_move(self):
         app, device = self.helper.create_device()
         app2 = self.resin.models.application.create('FooBarBar', 'Raspberry Pi 2')
+        app3 = self.resin.models.application.create('FooBarBar3', 'Raspberry Pi 3')
 
         # should be able to move a device by device uuid and application name.
         self.resin.models.device.move(device['uuid'], 'FooBarBar')
         self.assertEqual(self.resin.models.device.get_application_name(device['uuid']), 'FooBarBar')
+
+        # should be able to move a device to an application of the same architecture.
+        self.resin.models.device.move(device['uuid'], 'FooBarBar3')
+        self.assertEqual(self.resin.models.device.get_application_name(device['uuid']), 'FooBarBar3')
 
         # should be rejected with an incompatibility error.
         self.resin.models.application.create('FooBarBarBar', 'Intel NUC')
