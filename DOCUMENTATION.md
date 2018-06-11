@@ -328,6 +328,21 @@ Revoke support access to an application.
 #### Examples:
     >> > resin.models.application.revoke_support_access('5685')
     'OK'
+### Function: set_to_release(app_id, commit_id)
+
+Set an application to a specific commit.
+The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is resin.models.applicaion.disable_rolling_updates())
+
+#### Args:
+    app_id (str): application id.
+    commit_id (str) : commit id.
+
+#### Returns:
+    OK/error.
+
+#### Examples:
+    >> > resin.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
+    'OK'
 ## ApiKey
 
 This class implements user API key model for Resin Python SDK.
@@ -1040,6 +1055,21 @@ Set a custom location for a device.
 >>> resin.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
 OK
 ```
+### Function: set_to_release(uuid, commit_id)
+
+Set device to a specific release.
+Set an empty commit_id will restore rolling releases to the device.
+
+#### Args:
+    uuid (str): device uuid.
+    commit_id (str) : commit id.
+
+#### Returns:
+    OK.
+
+#### Examples:
+    >> > resin.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
+    'OK'
 ### Function: unset_custom_location(uuid)
 
 clear custom location for a device.

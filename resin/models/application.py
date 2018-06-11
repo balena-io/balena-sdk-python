@@ -492,7 +492,7 @@ class Application(object):
     def set_to_release(self, app_id, commit_id):
         """
         Set an application to a specific commit.
-        The commit will get updated on the next push unless rolling updates is disabled (there is a dedicated function for that which is resin.models.applicaion.disable_rolling_updates())
+        The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is resin.models.applicaion.disable_rolling_updates())
 
         Args:
             app_id (str): application id.
