@@ -16,6 +16,7 @@ from ..settings import Settings
 from ..auth import Auth
 from .. import exceptions
 from .application import Application
+from .release import Release
 
 
 # TODO: support both device uuid and device id
@@ -49,6 +50,7 @@ class Device(object):
         self.settings = Settings()
         self.application = Application()
         self.auth = Auth()
+        self.release = Release()
 
     def get(self, uuid):
         """
@@ -1005,6 +1007,41 @@ class Device(object):
 
         data = {
             'is_accessible_by_support_until__date': None
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_to_release(self, uuid, commit_id):
+        """
+        Set device to a specific release.
+        Set an empty commit_id will restore rolling releases to the device.
+
+        Args:
+            uuid (str): device uuid.
+            commit_id (str) : commit id.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
+            'OK'
+
+        """
+
+        device_id = self.get(uuid)['id']
+        release_id = self.release._Release__get_by_option('commit', commit_id)[0]['id'] if commit_id else None
+
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'should_be_running__release': release_id
         }
 
         return self.base_request.request(

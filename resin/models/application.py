@@ -488,3 +488,35 @@ class Application(object):
             'POST',
             endpoint=self.settings.get('api_endpoint')
         )
+
+    def set_to_release(self, app_id, commit_id):
+        """
+        Set an application to a specific commit.
+        The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is resin.models.applicaion.disable_rolling_updates())
+
+        Args:
+            app_id (str): application id.
+            commit_id (str) : commit id.
+
+        Returns:
+            OK/error.
+
+        Examples:
+            >> > resin.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'commit': commit_id
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
