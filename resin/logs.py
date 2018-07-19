@@ -1,9 +1,17 @@
 from pubnub import Pubnub
 from functools import wraps
+import logging
 
 from .base_request import BaseRequest
 from .models.config import Config
 from .models.device import Device
+
+
+logging.basicConfig(format='%(levelname)s:%(message)s')
+
+
+def _print_deprecation_warning():
+    logging.warning(" using legacy logging services, this will stop working shortly.\nPlease update to ensure logs are correctly retrieved in future.")
 
 
 # TODO: https://github.com/resin-io/resin-sdk/pull/277/files
@@ -59,6 +67,7 @@ class Logs(object):
 
         """
 
+        _print_deprecation_warning()
         channel = self.get_channel(uuid)
         self.pubnub.subscribe(channels=channel, callback=callback, error=error)
 
@@ -83,6 +92,7 @@ class Logs(object):
 
         """
 
+        _print_deprecation_warning()
         channel = self.get_channel(uuid)
         self.pubnub.history(channel=channel, callback=callback, error=error)
 
@@ -95,6 +105,7 @@ class Logs(object):
 
         """
 
+        _print_deprecation_warning()
         if hasattr(self, 'pubnub'):
             channel = self.get_channel(uuid)
             self.pubnub.unsubscribe(channel=channel)
@@ -111,6 +122,7 @@ class Logs(object):
 
         """
 
+        _print_deprecation_warning()
         if not hasattr(self, 'logs_channel'):
             device_info = self.device.get(uuid)
             if 'logs_channel' in device_info:
