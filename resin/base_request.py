@@ -42,7 +42,7 @@ class BaseRequest(object):
             {'Authorization': 'Bearer {:s}'.format(self.settings.get(TOKEN_KEY))})
 
     def __get(self, url, headers, data=None, stream=None):
-        return requests.get(url, headers=headers, timeout=self.timeout)
+        return requests.get(url, headers=headers, timeout=self.timeout, stream=stream)
 
     def __post(self, url, headers, data, stream=None):
         self.__set_content_type(headers, 'application/json')
