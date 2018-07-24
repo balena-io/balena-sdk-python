@@ -1,3 +1,4 @@
+from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .config import Config
@@ -24,10 +25,11 @@ class Application(object):
         self.base_request = BaseRequest()
         self.settings = Settings()
         self.config = Config()
+        self.auth = Auth()
 
     def get_all(self):
         """
-        Get all applications.
+        Get all applications (including collaborator applications).
 
         Returns:
             list: list contains info of applications.
@@ -38,8 +40,10 @@ class Application(object):
 
         """
 
+        raw_query = "$filter=(user eq '{user_id}') or (includes__user/any(x:x/user eq '{user_id}'))".format(user_id=self.auth.get_user_id())
+
         return self.base_request.request(
-            'application', 'GET', endpoint=self.settings.get('pine_endpoint')
+            'application', 'GET', raw_query=raw_query, endpoint=self.settings.get('pine_endpoint')
         )['d']
 
     def get(self, name):
