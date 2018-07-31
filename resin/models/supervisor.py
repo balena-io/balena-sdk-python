@@ -1,10 +1,18 @@
 import os
 from pkg_resources import parse_version
+import logging
 
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .. import exceptions
 from .device import Device
+
+
+logging.basicConfig(format='%(levelname)s:%(message)s')
+
+
+def _print_deprecation_warning():
+    logging.warning("This is not supported on multicontainer devices, and will be removed in future")
 
 
 class Supervisor(object):
@@ -429,6 +437,7 @@ class Supervisor(object):
 
     def stop_application(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Temporarily stops a user application container. Application container will not be removed after invoking this function and a reboot or supervisor restart will cause the container to start again.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -448,6 +457,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         return self._do_command(
@@ -460,6 +470,7 @@ class Supervisor(object):
 
     def start_application(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Starts a user application container, usually after it has been stopped with `stop_application()`.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -479,6 +490,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         return self._do_command(
@@ -491,6 +503,7 @@ class Supervisor(object):
 
     def get_application_info(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Return information about the application running on the device.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -510,6 +523,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         on_device_method = 'GET'
