@@ -31,6 +31,8 @@ class Supervisor(object):
     """
 
     SUPERVISOR_API_VERSION = 'v1'
+    MIN_SUPERVISOR_MC_API = '7.0.0'
+
     RESIN_SUPERVISOR_ADDRESS = os.environ.get('RESIN_SUPERVISOR_ADDRESS')
     RESIN_SUPERVISOR_API_KEY = os.environ.get('RESIN_SUPERVISOR_API_KEY')
 
@@ -543,3 +545,82 @@ class Supervisor(object):
                 required_version,
                 method='GET'
             )
+
+    def __service_request(self, endpoint, device_uuid, image_id):
+        """
+        Service request.
+
+        Args:
+            endpoint (str): service endpoint.
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        """
+
+        device = self.device.get(device_uuid)
+        app_id = device['belongs_to__application']['__id']
+
+        if (parse_version(self.MIN_SUPERVISOR_MC_API) > parse_version(device['supervisor_version'])):
+            raise exceptions.UnsupportedFunction(self.MIN_SUPERVISOR_MC_API, device['supervisor_version'])
+
+        data = {
+            'deviceId': device['id'],
+            'appId': app_id,
+            'data': {
+                    'appId': app_id,
+                    'imageId': image_id
+            }
+        }
+
+        return self.base_request.request(
+            '/supervisor/v2/applications/{app_id}/{endpoint}'.format(app_id=app_id, endpoint=endpoint), 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint')
+        )
+
+    def start_service(self, device_uuid, image_id):
+        """
+        Start a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.start_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('start-service', device_uuid, image_id)
+
+    def stop_service(self, device_uuid, image_id):
+        """
+        Stop a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.stop_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('stop-service', device_uuid, image_id)
+
+    def restart_service(self, device_uuid, image_id):
+        """
+        Restart a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.restart_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('restart-service', device_uuid, image_id)
