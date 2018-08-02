@@ -24,23 +24,37 @@ class DeviceOs(object):
         self.base_request = BaseRequest()
         self.settings = Settings()
 
-    def get_config(self, app_id):
+    def get_config(self, app_id, options):
         """
-        Get an application config.json
+        Get an application config.json.
 
         Args:
             app_id (str): application id.
+            options (dict): OS configuration options to use. The available options are listed below:
+                version (str): the OS version of the image.
+                network (Optional[str]): the network type that the device will use, one of 'ethernet' or 'wifi' and defaults to 'ethernet' if not specified.
+                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
+                wifiKey (Optional[str]): the key for the wifi network the device will connect to.
+                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to.
+                ip (Optional[str]): static ip address.
+                gateway (Optional[str]): static ip gateway.
+                netmask (Optional[str]): static ip netmask.
 
         Returns:
             dict: application config.json
 
         """
 
-        data = {
-            'appId': app_id
-        }
+        if 'version' not in options:
+            raise exceptions.MissingOption('An OS version is required when calling device_os.get_config()')
+
+        if 'network' not in options:
+            options['network'] = 'ethernet'
+
+        options['appId'] = app_id
+
         return self.base_request.request(
-            'download-config', 'POST', data=data,
+            'download-config', 'POST', data=options,
             endpoint=self.settings.get('api_endpoint')
         )
 
