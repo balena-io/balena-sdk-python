@@ -488,7 +488,7 @@ class ServiceEnvVariable(object):
         self.settings = Settings()
         self.service = Service()
 
-    def get_all(self, app_id):
+    def get_all_by_application(self, app_id):
         """
         Get all service environment variables by application.
 
@@ -506,7 +506,7 @@ class ServiceEnvVariable(object):
         """
 
         # TODO: pine client for python
-        raw_query = '$expand=service&$filter=service/any(a:a/application%20eq%20{app_id})'.format(app_id=app_id)
+        raw_query = '$filter=service/any(s:s/application%20eq%20{app_id})'.format(app_id=app_id)
 
         return self.base_request.request(
             'service_environment_variable', 'GET', raw_query=raw_query,
