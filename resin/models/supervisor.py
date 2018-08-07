@@ -567,8 +567,8 @@ class Supervisor(object):
             'deviceId': device['id'],
             'appId': app_id,
             'data': {
-                    'appId': app_id,
-                    'imageId': image_id
+                'appId': app_id,
+                'imageId': image_id
             }
         }
 
