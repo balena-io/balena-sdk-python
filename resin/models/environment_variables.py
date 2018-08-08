@@ -309,6 +309,29 @@ class DeviceServiceEnvVariable(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
+    def get_all_by_application(self, app_id):
+        """
+        Get all device service environment variables belong to an application.
+
+        Args:
+            app_id (int): application id.
+
+        Returns:
+            list: list of device service environment variables.
+
+        Examples:
+            >>> resin.models.environment_variables.device_service_environment_variable(1043050)
+            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+
+        """
+
+        raw_query = '$filter=service_install/any(si:si/device/any(d:d/belongs_to__application%20eq%20{0}))'.format(app_id)
+
+        return self.base_request.request(
+            'device_service_environment_variable', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
 
 class ApplicationEnvVariable(object):
     """
@@ -465,7 +488,7 @@ class ServiceEnvVariable(object):
         self.settings = Settings()
         self.service = Service()
 
-    def get_all(self, app_id):
+    def get_all_by_application(self, app_id):
         """
         Get all service environment variables by application.
 
@@ -483,7 +506,7 @@ class ServiceEnvVariable(object):
         """
 
         # TODO: pine client for python
-        raw_query = '$expand=service&$filter=service/any(a:a/application%20eq%20{app_id})'.format(app_id=app_id)
+        raw_query = '$filter=service/any(s:s/application%20eq%20{app_id})'.format(app_id=app_id)
 
         return self.base_request.request(
             'service_environment_variable', 'GET', raw_query=raw_query,

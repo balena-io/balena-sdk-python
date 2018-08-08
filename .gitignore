@@ -1,4 +1,4 @@
 *.pyc
-test.py
+test*
 *.py.bak
 .env*

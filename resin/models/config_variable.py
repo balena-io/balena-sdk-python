@@ -61,6 +61,29 @@ class DeviceConfigVariable(object):
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
+    def get_all_by_application(self, app_id):
+        """
+        Get all device config variables by application.
+
+        Args:
+            app_id (int): application id.
+
+        Returns:
+            list: device config variables.
+
+        Examples:
+            >>> resin.models.config_variable.device_config_variable.get_all_by_application(1043050)
+            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'RESIN_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uresin/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'RESIN_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'RESIN_HOST_LOG_TO_DISPLAY'}]
+
+        """
+
+        raw_query = '$filter=device/any(d:d/belongs_to__application%20eq%20{app_id})'.format(app_id=app_id)
+
+        return self.base_request.request(
+            'device_config_variable', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
     def create(self, uuid, config_var_name, value):
         """
         Create a device config variable.

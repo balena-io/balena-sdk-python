@@ -1,10 +1,18 @@
 import os
 from pkg_resources import parse_version
+import logging
 
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .. import exceptions
 from .device import Device
+
+
+logging.basicConfig(format='%(levelname)s:%(message)s')
+
+
+def _print_deprecation_warning():
+    logging.warning("This is not supported on multicontainer devices, and will be removed in future")
 
 
 class Supervisor(object):
@@ -23,6 +31,8 @@ class Supervisor(object):
     """
 
     SUPERVISOR_API_VERSION = 'v1'
+    MIN_SUPERVISOR_MC_API = '7.0.0'
+
     RESIN_SUPERVISOR_ADDRESS = os.environ.get('RESIN_SUPERVISOR_ADDRESS')
     RESIN_SUPERVISOR_API_KEY = os.environ.get('RESIN_SUPERVISOR_API_KEY')
 
@@ -356,67 +366,6 @@ class Supervisor(object):
             method='POST'
         )
 
-    def enable_tcp_ping(self, app_id=None, device_uuid=None):
-        """
-        Enable TCP ping in case it has been disabled.
-        When the device's connection to the Resin VPN is down, by default the device performs a TCP ping heartbeat to check for connectivity.
-        No need to set device_uuid and app_id if command is sent to the API on device.
-
-        Args:
-            app_id (Optional[str]): application id.
-            device_uuid (Optional[str]): device uuid.
-
-        Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
-
-        Examples:
-            >>> resin.models.supervisor.enable_tcp_ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
-            (Empty response)
-
-        """
-
-        return self._do_command(
-            '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
-            device_uuid=device_uuid,
-            app_id=app_id,
-            method='POST'
-        )
-
-    def disable_tcp_ping(self, app_id=None, device_uuid=None):
-        """
-        Disable TCP ping.
-        When the device's connection to the Resin VPN is down, by default the device performs a TCP ping heartbeat to check for connectivity.
-        No need to set device_uuid and app_id if command is sent to the API on device.
-
-        Args:
-            app_id (Optional[str]): application id.
-            device_uuid (Optional[str]): device uuid.
-
-        Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
-
-        Examples:
-            >>> resin.models.supervisor.disable_tcp_ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
-            (Empty response)
-
-        """
-
-        on_device_method = 'DELETE'
-
-        if not self._on_device:
-            return self._do_command(
-                '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
-                on_device_method=on_device_method,
-                device_uuid=device_uuid,
-                app_id=app_id,
-                method='POST'
-            )
-        else:
-            return self._do_command(
-                '{0}/tcp-ping'.format(self.SUPERVISOR_API_VERSION),
-                method=on_device_method
-            )
-
     def regenerate_supervisor_api_key(self, app_id=None, device_uuid=None):
         """
         Invalidate the current RESIN_SUPERVISOR_API_KEY and generates a new one.
@@ -490,6 +439,7 @@ class Supervisor(object):
 
     def stop_application(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Temporarily stops a user application container. Application container will not be removed after invoking this function and a reboot or supervisor restart will cause the container to start again.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -509,6 +459,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         return self._do_command(
@@ -521,6 +472,7 @@ class Supervisor(object):
 
     def start_application(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Starts a user application container, usually after it has been stopped with `stop_application()`.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -540,6 +492,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         return self._do_command(
@@ -552,6 +505,7 @@ class Supervisor(object):
 
     def get_application_info(self, app_id, device_uuid=None):
         """
+        ***Deprecated***
         Return information about the application running on the device.
         This function requires supervisor v1.8 or higher.
         No need to set device_uuid if command is sent to the API on device.
@@ -571,6 +525,7 @@ class Supervisor(object):
 
         """
 
+        _print_deprecation_warning()
         required_version = '1.8'
 
         on_device_method = 'GET'
@@ -590,3 +545,82 @@ class Supervisor(object):
                 required_version,
                 method='GET'
             )
+
+    def __service_request(self, endpoint, device_uuid, image_id):
+        """
+        Service request.
+
+        Args:
+            endpoint (str): service endpoint.
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        """
+
+        device = self.device.get(device_uuid)
+        app_id = device['belongs_to__application']['__id']
+
+        if (parse_version(self.MIN_SUPERVISOR_MC_API) > parse_version(device['supervisor_version'])):
+            raise exceptions.UnsupportedFunction(self.MIN_SUPERVISOR_MC_API, device['supervisor_version'])
+
+        data = {
+            'deviceId': device['id'],
+            'appId': app_id,
+            'data': {
+                'appId': app_id,
+                'imageId': image_id
+            }
+        }
+
+        return self.base_request.request(
+            '/supervisor/v2/applications/{app_id}/{endpoint}'.format(app_id=app_id, endpoint=endpoint), 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint')
+        )
+
+    def start_service(self, device_uuid, image_id):
+        """
+        Start a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.start_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('start-service', device_uuid, image_id)
+
+    def stop_service(self, device_uuid, image_id):
+        """
+        Stop a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.stop_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('stop-service', device_uuid, image_id)
+
+    def restart_service(self, device_uuid, image_id):
+        """
+        Restart a service on device.
+
+        Args:
+            device_uuid (str): device uuid.
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> resin.models.supervisor.restart_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            OK
+
+        """
+
+        return self.__service_request('restart-service', device_uuid, image_id)
