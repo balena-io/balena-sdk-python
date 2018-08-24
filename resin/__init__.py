@@ -29,7 +29,6 @@ If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/resin-io/resin-sdk-python/issues), we'll be happy to help.
 """
 
-from .base_request import BaseRequest
 from .auth import Auth
 from .logs import Logs
 from .settings import Settings
