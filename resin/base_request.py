@@ -73,13 +73,15 @@ class BaseRequest(object):
         if params:
             if 'filters' in params:
                 # Multiple filters
+                filters = []
                 for key in params['filters']:
-                    query_elements.append(
-                        Template("$$filter=$key%20eq%20'$value'").safe_substitute(
+                    filters.append(
+                        Template("$key%20eq%20'$value'").safe_substitute(
                             key=key,
                             value=params['filters'][key]
                         )
                     )
+                query_elements.append("$filter={}".format('%20and%20'.join(filters)))
             else:
                 if 'expand' in params:
                     query_template = Template(
