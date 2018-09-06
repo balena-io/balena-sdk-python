@@ -357,7 +357,7 @@ class ReleaseTag(BaseTag):
         """
 
         params = {
-            'filter': 'id',
+            'filter': 'release',
             'eq': release_id
         }
 
