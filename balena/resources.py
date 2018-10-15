@@ -10,7 +10,7 @@ class Message(object):
 
     # Exception Error Message
     NOT_LOGGED_IN = "You have to log in!"
-    UNAUTHORIZED = "You have to log in or RESIN_API_KEY environment variable must be set!"
+    UNAUTHORIZED = "You have to log in or BALENA_API_KEY environment variable must be set!"
     REQUEST_ERROR = "Request error: {body}"
     KEY_NOT_FOUND = "Key not found: {key}"
     DEVICE_NOT_FOUND = "Device not found: {uuid}"

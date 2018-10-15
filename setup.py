@@ -19,21 +19,21 @@ def get_version(package):
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 setup(
-    name='resin-sdk',
+    name='balena-sdk',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=get_version('resin'),
+    version=get_version('balena'),
 
-    description='Resin.io SDK for Python',
+    description='Balena SDK for Python',
 
     # The project's main homepage.
-    url='https://github.com/resin-io/resin-sdk-python',
+    url='https://github.com/balena-io/balena-sdk-python',
 
     # Author details
-    author='Resin IO',
-    author_email='info@resin.io',
+    author='Balena',
+    author_email='info@balena.io',
 
     # Choose your license
     license='MIT',
@@ -63,7 +63,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='resin api sdk',
+    keywords='balena balena.io resin resin.io api sdk',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

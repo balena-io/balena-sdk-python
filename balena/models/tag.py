@@ -99,7 +99,7 @@ class BaseTag(object):
 
 class DeviceTag(BaseTag):
     """
-    This class implements device tag model for Resin Python SDK.
+    This class implements device tag model for balena python SDK.
 
     """
 
@@ -118,8 +118,8 @@ class DeviceTag(BaseTag):
             list: list contains device tags.
 
         Examples:
-            >>> resin.models.tag.device.get_all_by_application('1005160')
-            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20162)'}}]
+            >>> balena.models.tag.device.get_all_by_application('1005160')
+            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20162)'}}]
 
 
         """
@@ -142,8 +142,8 @@ class DeviceTag(BaseTag):
             DeviceNotFound: if device couldn't be found.
 
         Examples:
-            >>> resin.models.tag.device.get_all_by_device('a03ab646c01f39e39a1e3deb7fce76b93075c6d599fd5be4a889b8145e2f8f')
-            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}]
+            >>> balena.models.tag.device.get_all_by_device('a03ab646c01f39e39a1e3deb7fce76b93075c6d599fd5be4a889b8145e2f8f')
+            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}]
 
         """
 
@@ -164,8 +164,8 @@ class DeviceTag(BaseTag):
             list: list contains device tags.
 
         Examples:
-            >>> resin.models.tag.device.get_all()
-            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20162)'}}]
+            >>> balena.models.tag.device.get_all()
+            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20162)'}}]
 
         """
 
@@ -188,9 +188,9 @@ class DeviceTag(BaseTag):
             DeviceNotFound: if device couldn't be found.
 
         Examples:
-            >>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
-            {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'testtag', u'id': 20163, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_tag(20163)'}}
-            >>> resin.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
+            >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
+            {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'testtag', u'id': 20163, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20163)'}}
+            >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
             OK
 
         """
@@ -211,7 +211,7 @@ class DeviceTag(BaseTag):
             DeviceNotFound: if device couldn't be found.
 
         Examples:
-            >>> resin.models.tag.device.remove('f5213eac0d63ac47721b037a7406d306', 'testtag'))
+            >>> balena.models.tag.device.remove('f5213eac0d63ac47721b037a7406d306', 'testtag'))
             OK
 
         """
@@ -223,7 +223,7 @@ class DeviceTag(BaseTag):
 
 class ApplicationTag(BaseTag):
     """
-    This class implements application tag model for Resin Python SDK.
+    This class implements application tag model for balena python SDK.
 
     """
 
@@ -241,8 +241,8 @@ class ApplicationTag(BaseTag):
             list: list contains application tags.
 
         Examples:
-            >>> resin.models.tag.application.get_all_by_application('1005767')
-            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+            >>> balena.models.tag.application.get_all_by_application('1005767')
+            [{u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12888)'}}]
 
 
         """
@@ -262,8 +262,8 @@ class ApplicationTag(BaseTag):
             list: list contains application tags.
 
         Examples:
-            >>> resin.models.tag.application.get_all()
-            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005160)'}, u'__id': 1005160}, u'tag_key': u'appTag', u'id': 12886, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12886)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12888)'}}]
+            >>> balena.models.tag.application.get_all()
+            [{u'application': {u'__deferred': {u'uri': u'/balena/application(1005160)'}, u'__id': 1005160}, u'tag_key': u'appTag', u'id': 12886, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12886)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12888)'}}]
 
         """
 
@@ -283,9 +283,9 @@ class ApplicationTag(BaseTag):
             OK: if tag exists.
 
         Examples:
-            >>> resin.models.tag.application.set('1005767', 'tag1', 'Python SDK')
-            {u'application': {u'__deferred': {u'uri': u'/resin/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/application_tag(12889)'}}
-            >>> resin.models.tag.application.set('1005767', 'tag1','Resin Python SDK')
+            >>> balena.models.tag.application.set('1005767', 'tag1', 'Python SDK')
+            {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12889)'}}
+            >>> balena.models.tag.application.set('1005767', 'tag1','Balena Python SDK')
             OK
 
         """
@@ -301,7 +301,7 @@ class ApplicationTag(BaseTag):
             tag_key (str): tag key.
 
         Examples:
-            >>> resin.models.tag.application.remove('1005767', 'tag1')
+            >>> balena.models.tag.application.remove('1005767', 'tag1')
             OK
 
         """
@@ -311,7 +311,7 @@ class ApplicationTag(BaseTag):
 
 class ReleaseTag(BaseTag):
     """
-    This class implements release tag model for Resin Python SDK.
+    This class implements release tag model for balena python SDK.
 
     """
 
@@ -329,8 +329,8 @@ class ReleaseTag(BaseTag):
             list: list contains release tags.
 
         Examples:
-            >>> resin.models.tag.release.get_all_by_application('1043050')
-            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+            >>> balena.models.tag.release.get_all_by_application('1043050')
+            [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 
 
         """
@@ -350,8 +350,8 @@ class ReleaseTag(BaseTag):
             list: list contains release tags.
 
         Examples:
-            >>> resin.models.tag.release.get_all_by_release('135')
-            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+            >>> balena.models.tag.release.get_all_by_release('135')
+            [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 
 
         """
@@ -371,8 +371,8 @@ class ReleaseTag(BaseTag):
             list: list contains release tags.
 
         Examples:
-            >>> resin.models.tag.release.get_all()
-            [{u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}]
+            >>> balena.models.tag.release.get_all()
+            [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 
         """
 
@@ -392,9 +392,9 @@ class ReleaseTag(BaseTag):
             OK: if tag exists.
 
         Examples:
-            >>> resin.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
-            {u'release': {u'__deferred': {u'uri': u'/resin/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/resin/release_tag(135)'}}
-            >>> resin.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
+            >>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
+            {u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}
+            >>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
             OK
 
         """
@@ -410,7 +410,7 @@ class ReleaseTag(BaseTag):
             tag_key (str): tag key.
 
         Examples:
-            >>> resin.models.tag.release.remove('135', 'releaseTag1')
+            >>> balena.models.tag.release.remove('135', 'releaseTag1')
             OK
 
         """

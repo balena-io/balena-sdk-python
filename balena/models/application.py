@@ -11,13 +11,13 @@ import json
 # TODO: support both app_id and app_name
 class Application(object):
     """
-    This class implements application model for Resin Python SDK.
+    This class implements application model for balena python SDK.
 
     Due to API changes, the returned Application object schema has changed. Here are the formats of the old and new returned objects.
 
     The old returned object's properties: `__metadata, actor, app_name, application, commit, device_type, git_repository, id, should_track_latest_release, support_expiry_date, user, version`.
 
-    The new returned object's properties (since Python SDK v2.0.0): `__metadata, actor, app_name, commit, depends_on__application, device_type, git_repository, id, is_accessible_by_support_until__date, should_track_latest_release, user, version`.
+    The new returned object's properties (since python SDK v2.0.0): `__metadata, actor, app_name, commit, depends_on__application, device_type, git_repository, id, is_accessible_by_support_until__date, should_track_latest_release, user, version`.
 
     """
 
@@ -35,8 +35,8 @@ class Application(object):
             list: list contains info of applications.
 
         Examples:
-            >>> resin.models.application.get_all()
-            [{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}, {u'app_name': u'RPI2', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9019)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi2.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi2', u'commit': None, u'id': 9019}]
+            >>> balena.models.application.get_all()
+            [{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}, {u'app_name': u'RPI2', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9019)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi2.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi2', u'commit': None, u'id': 9019}]
 
         """
 
@@ -61,8 +61,8 @@ class Application(object):
             AmbiguousApplication: when more than one application is returned.
 
         Examples:
-            >>> resin.models.application.get('RPI1')
-            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+            >>> balena.models.application.get('RPI1')
+            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
 
         """
 
@@ -92,7 +92,7 @@ class Application(object):
             bool: True if application exists, False otherwise.
 
         Examples:
-            >>> resin.models.application.has('RPI1')
+            >>> balena.models.application.has('RPI1')
             True
 
         """
@@ -115,7 +115,7 @@ class Application(object):
             bool: True if user has any applications, False otherwise.
 
         Examples:
-            >>> resin.models.application.has_any()
+            >>> balena.models.application.has_any()
             True
 
         """
@@ -139,8 +139,8 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> resin.models.application.get_by_id(9020)
-            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.resin.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+            >>> balena.models.application.get_by_id(9020)
+            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
 
         """
 
@@ -173,8 +173,8 @@ class Application(object):
             InvalidApplicationType: if app type is not supported.
 
         Examples:
-            >>> resin.models.application.create('Foobar', 'Raspberry Pi 3', 'microservices-starter')
-            '{"id":1005767,"user":{"__deferred":{"uri":"/resin/user(32986)"},"__id":32986},"depends_on__application":null,"actor":2630233,"app_name":"Foobar","git_repository":"pythonsdk_test_resin/foobar","commit":null,"application_type":{"__deferred":{"uri":"/resin/application_type(5)"},"__id":5},"device_type":"raspberrypi3","should_track_latest_release":true,"is_accessible_by_support_until__date":null,"__metadata":{"uri":"/resin/application(1005767)","type":""}}'
+            >>> balena.models.application.create('Foobar', 'Raspberry Pi 3', 'microservices-starter')
+            '{"id":1005767,"user":{"__deferred":{"uri":"/balena/user(32986)"},"__id":32986},"depends_on__application":null,"actor":2630233,"app_name":"Foobar","git_repository":"pythonsdk_test_balena/foobar","commit":null,"application_type":{"__deferred":{"uri":"/balena/application_type(5)"},"__id":5},"device_type":"raspberrypi3","should_track_latest_release":true,"is_accessible_by_support_until__date":null,"__metadata":{"uri":"/balena/application(1005767)","type":""}}'
 
         """
 
@@ -220,7 +220,7 @@ class Application(object):
             name (str): application name.
 
         Examples:
-            >>> resin.models.application.remove('Edison')
+            >>> balena.models.application.remove('Edison')
             'OK'
 
         """
@@ -245,7 +245,7 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> resin.models.application.restart('RPI1')
+            >>> balena.models.application.restart('RPI1')
             'OK'
 
         """
@@ -270,8 +270,8 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> resin.models.application.get_config('106640')
-            {u'applicationName': u'RPI3', u'username': u'nghiant2710', u'apiKey': u'kIaqS6ZLOoxkFzpzqSYhWtr2lj6m8KZi', u'vpnPort': 443, u'listenPort': 48484, u'pubnubSubscribeKey': u'sub-c-bbc12eba-ce4a-11e3-9782-02ee2ddab7fe', u'vpnEndpoint': u'vpn.resin.io', u'userId': 189, u'files': {u'network/network.config': u'[service_home_ethernet]\nType = ethernet\nNameservers = 8.8.8.8,8.8.4.4', u'network/settings': u'[global]\nOfflineMode=false\nTimeUpdates=manual\n\n[WiFi]\nEnable=true\nTethering=false\n\n[Wired]\nEnable=true\nTethering=false\n\n[Bluetooth]\nEnable=true\nTethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.resin.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'12345678912345678912345678912345', u'deltaEndpoint': u'https://delta.resin.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.resin.io'}
+            >>> balena.models.application.get_config('106640')
+            {u'applicationName': u'RPI3', u'username': u'nghiant2710', u'apiKey': u'kIaqS6ZLOoxkFzpzqSYhWtr2lj6m8KZi', u'vpnPort': 443, u'listenPort': 48484, u'pubnubSubscribeKey': u'sub-c-bbc12eba-ce4a-11e3-9782-02ee2ddab7fe', u'vpnEndpoint': u'vpn.balena.io', u'userId': 189, u'files': {u'network/network.config': u'[service_home_ethernet]\nType = ethernet\nNameservers = 8.8.8.8,8.8.4.4', u'network/settings': u'[global]\nOfflineMode=false\nTimeUpdates=manual\n\n[WiFi]\nEnable=true\nTethering=false\n\n[Wired]\nEnable=true\nTethering=false\n\n[Bluetooth]\nEnable=true\nTethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.balena.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'99eec53325d4f45dd0633abd719e3ff1', u'deltaEndpoint': u'https://delta.balena.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.balena.io'}
         """
 
         # Application not found will be raised if can't get app by id.
@@ -298,7 +298,7 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >> > resin.models.application.enable_rolling_updates('106640')
+            >> > balena.models.application.enable_rolling_updates('106640')
             'OK'
         """
 
@@ -329,7 +329,7 @@ class Application(object):
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >> > resin.models.application.disable_rolling_updates('106640')
+            >> > balena.models.application.disable_rolling_updates('106640')
             'OK'
         """
 
@@ -357,7 +357,7 @@ class Application(object):
             OK/error.
 
         Examples:
-            >> > resin.models.application.enable_device_urls('5685')
+            >> > balena.models.application.enable_device_urls('5685')
             'OK'
 
         """
@@ -386,7 +386,7 @@ class Application(object):
             OK/error.
 
         Examples:
-            >> > resin.models.application.disable_device_urls('5685')
+            >> > balena.models.application.disable_device_urls('5685')
             'OK'
 
         """
@@ -416,7 +416,7 @@ class Application(object):
             OK/error.
 
         Examples:
-            >> > resin.models.application.grant_support_access('5685', 1511974999000)
+            >> > balena.models.application.grant_support_access('5685', 1511974999000)
             'OK'
 
         """
@@ -449,7 +449,7 @@ class Application(object):
             OK/error.
 
         Examples:
-            >> > resin.models.application.revoke_support_access('5685')
+            >> > balena.models.application.revoke_support_access('5685')
             'OK'
 
         """
@@ -479,7 +479,7 @@ class Application(object):
             str: device provisioning key.
 
         Examples:
-            >> > resin.models.application.generate_provisioning_key('5685')
+            >> > balena.models.application.generate_provisioning_key('5685')
             'GThZJps91PoJCdzfYqF7glHXzBDGrkr9'
 
         """
@@ -496,7 +496,7 @@ class Application(object):
     def set_to_release(self, app_id, commit_id):
         """
         Set an application to a specific commit.
-        The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is resin.models.applicaion.disable_rolling_updates())
+        The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is balena.models.applicaion.disable_rolling_updates())
 
         Args:
             app_id (str): application id.
@@ -506,7 +506,7 @@ class Application(object):
             OK/error.
 
         Examples:
-            >> > resin.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
+            >> > balena.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
             'OK'
 
         """

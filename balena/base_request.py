@@ -18,7 +18,7 @@ TOKEN_KEY = 'token'
 
 class BaseRequest(object):
     """
-    This class provides an exclusive client to make HTTP requests to Resin.io servers.
+    This class provides an exclusive client to make HTTP requests to balena servers.
     This is low level class and is not meant to be used by end users directly.
 
     """
@@ -99,18 +99,18 @@ class BaseRequest(object):
     def __request(self, url, method, params, endpoint, headers=None,
                   data=None, stream=None, auth=True, api_key=None, raw_query=None):
         """
-        This function forms HTTP request and send to Resin.io.
-        Resin.io host is prepended automatically, therefore only relative urls should be passed.
+        This function builds HTTP requests and send them to the balena API.
+        The API host is prepended automatically, therefore only relative urls should be passed.
 
         Args:
             url (str): relative url.
             method (str): HTTP methods. Available methods are: GET, POST , PUT, PATCH, DELETE, HEAD.
-            endpoint (str): target resin.io host. Available endpoints are saved in settings.
+            endpoint (str): target balena API host. Available endpoints are saved in settings.
             params (Optional[dict]): parameters to generate query.
             data (Optional[dict]): request body.
             stream (Optional[bool]): this argument is set to True when needing to stream the response content.
             auth (Optional[bool]): default is True. This marks the request need to be authenticated or not.
-            api_key (Optional[str]): default is None. Resin API Key.
+            api_key (Optional[str]): default is None. Balena API Key.
             raw_query (Optional[str]): default is None. Raw query string.
 
         Returns:
@@ -225,7 +225,7 @@ class Util(object):
 
     def get_api_key(self):
         # return None if key is not present
-        return os.environ.get('RESIN_API_KEY')
+        return os.environ.get('BALENA_API_KEY') or os.environ.get('RESIN_API_KEY')
 
     def decode_utf8(self, source):
         return {

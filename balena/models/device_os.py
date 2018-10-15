@@ -13,10 +13,10 @@ NETWORK_TYPES = [
 ]
 
 
-# TODO: https://github.com/resin-io/resin-sdk/pull/288
+# TODO: https://github.com/balena-io/balena-sdk/pull/288
 class DeviceOs(object):
     """
-    This class implements device os model for Resin Python SDK.
+    This class implements device os model for balena python SDK.
 
     """
 
@@ -77,12 +77,12 @@ class DeviceOs(object):
 
         Examples:
             >>> data = {'appId':'9020', 'network':'ethernet'}
-            >>> response = resin.models.device_os.download(**data)
+            >>> response = balena.models.device_os.download(**data)
             >>> type(response)
             <class 'requests.models.Response'>
             >>> response['headers']
             >>> response.headers
-            {'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'content-disposition': 'attachment; filename="resin-RPI1-0.1.0-1.1.0-7588720e0262.img"', 'content-encoding': 'gzip', 'transfer-encoding': 'chunked', 'x-powered-by': 'Express', 'connection': 'keep-alive', 'access-control-allow-credentials': 'true', 'date': 'Mon, 23 Nov 2015 15:13:39 GMT', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'content-type': 'application/octet-stream', 'x-frame-options': 'DENY'}
+            {'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'content-disposition': 'attachment; filename="balena-RPI1-0.1.0-1.1.0-7588720e0262.img"', 'content-encoding': 'gzip', 'transfer-encoding': 'chunked', 'x-powered-by': 'Express', 'connection': 'keep-alive', 'access-control-allow-credentials': 'true', 'date': 'Mon, 23 Nov 2015 15:13:39 GMT', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'content-type': 'application/octet-stream', 'x-frame-options': 'DENY'}
 
         """
 

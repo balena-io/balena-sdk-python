@@ -9,7 +9,7 @@ from .service import Service
 
 class Release(object):
     """
-    This class implements release model for Resin Python SDK.
+    This class implements release model for balena python SDK.
 
     """
 

@@ -5,9 +5,10 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class Service(object):
+class ServiceInstall(object):
     """
-    This class implements service model for Resin Python SDK.
+    This class implements service_install model for balena python SDK.
+    This is low level class and is not meant to be used by end users directly.
 
     """
 
@@ -17,7 +18,7 @@ class Service(object):
 
     def __get_by_option(self, key, value):
         """
-        Private function to get a specific service using any possible key.
+        Private function to get a specific image_install using any possible key.
 
         Args:
             key (str): query field.
@@ -33,23 +34,21 @@ class Service(object):
             'eq': value
         }
 
-        services = self.base_request.request(
-            'service', 'GET', params=params,
+        return self.base_request.request(
+            'service_install', 'GET', params=params,
             endpoint=self.settings.get('pine_endpoint')
-        )
+        )['d']
 
-        return services['d']
-
-    def get_all_by_application(self, app_id):
+    def get_all_by_device(self, device_id):
         """
-        Get all services from an application.
+        Get all service_install from a device.
 
         Args:
-            app_id (str): application id.
+            device_id (str): device id.
 
         Returns:
-            list: service info.
+            list: service_install info.
 
         """
 
-        return self.__get_by_option('application', app_id)
+        return self.__get_by_option('device', device_id)

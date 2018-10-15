@@ -8,21 +8,21 @@ try:  # Python 3 imports
 except ImportError:  # Python 2 imports
     import ConfigParser as configparser
 
-from resin import Resin
-from resin import exceptions as resin_exceptions
-from resin.base_request import BaseRequest
-from resin.settings import Settings
+from balena import Balena
+from balena import exceptions as balena_exceptions
+from balena.base_request import BaseRequest
+from balena.settings import Settings
 
 
 class TestHelper(object):
 
     credentials = {}
 
-    resin = Resin()
+    balena = Balena()
 
     def __init__(self):
         TestHelper.load_env()
-        self.resin_exceptions = resin_exceptions
+        self.balena_exceptions = balena_exceptions
         self.base_request = BaseRequest()
         self.settings = Settings()
 
@@ -30,8 +30,8 @@ class TestHelper(object):
             self.settings.set('api_endpoint', self.credentials['api_endpoint'])
             self.settings.set('pine_endpoint', '{0}/{1}/'.format(self.credentials['api_endpoint'], self.settings.get('api_version')))
 
-        if not self.resin.auth.is_logged_in():
-            self.resin.auth.login(
+        if not self.balena.auth.is_logged_in():
+            self.balena.auth.login(
                 **{
                     'username': self.credentials['user_id'],
                     'password': self.credentials['password']
@@ -39,7 +39,7 @@ class TestHelper(object):
             )
 
         # Stop the test if it's run by an admin user account.
-        token_data = jwt.decode(self.resin.settings.get('token'), verify=False)
+        token_data = jwt.decode(self.balena.settings.get('token'), verify=False)
         if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
@@ -80,9 +80,9 @@ class TestHelper(object):
         Wipe all user's apps
         """
 
-        self.resin.models.application.base_request.request(
+        self.balena.models.application.base_request.request(
             'application', 'DELETE',
-            endpoint=self.resin.settings.get('pine_endpoint'), login=True
+            endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
 
     def reset_user(self):
@@ -90,11 +90,11 @@ class TestHelper(object):
         Wipe all user's apps and ssh keys added.
         """
 
-        if self.resin.auth.is_logged_in():
+        if self.balena.auth.is_logged_in():
             self.wipe_application()
-            self.resin.models.key.base_request.request(
+            self.balena.models.key.base_request.request(
                 'user__has__public_key', 'DELETE',
-                endpoint=self.resin.settings.get('pine_endpoint'), login=True
+                endpoint=self.balena.settings.get('pine_endpoint'), login=True
             )
 
     def datetime_to_epoch_ms(self, dt):
@@ -105,16 +105,16 @@ class TestHelper(object):
         Create a device belongs to an application.
         """
 
-        app = self.resin.models.application.create(app_name, device_type)
-        return app, self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
+        app = self.balena.models.application.create(app_name, device_type)
+        return app, self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
 
     def create_multicontainer_app(self, app_name='FooBar', device_type='Raspberry Pi 2'):
         """
         Create a multicontainer application with a device and two releases.
         """
 
-        app = self.resin.models.application.create(app_name, device_type, 'microservices-starter')
-        dev = self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
+        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+        dev = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
 
         # Register web & DB services
 
@@ -170,7 +170,7 @@ class TestHelper(object):
         }
 
         self.base_request.request('device', 'PATCH', params=params, data=data, endpoint=self.settings.get('pine_endpoint'))
-        dev = self.resin.models.device.get(dev['uuid'])
+        dev = self.balena.models.device.get(dev['uuid'])
 
         # Register an old & new web image build from the old and new
         # releases, a db build in the new release only

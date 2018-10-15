@@ -5,7 +5,7 @@ from .. import exceptions
 
 class ApiKey(object):
     """
-    This class implements user API key model for Resin Python SDK.
+    This class implements user API key model for balena python SDK.
 
     """
 
@@ -25,7 +25,7 @@ class ApiKey(object):
             str: user API key.
 
         Examples:
-            >>> resin.models.api_key.create_api_key('myApiKey')
+            >>> balena.models.api_key.create_api_key('myApiKey')
             3YHD9DVPLe6LbjEgQb7FEFXYdtPEMkV9
 
         """
@@ -48,8 +48,8 @@ class ApiKey(object):
             list: user API key.
 
         Examples:
-            >>> resin.models.api_key.get_all()
-            [{u'description': None, u'created_at': u'2018-04-06T03:53:34.189Z', u'__metadata': {u'type': u'', u'uri': u'/resin/api_key(1296047)'}, u'is_of__actor': {u'__deferred': {u'uri': u'/resin/actor(2454095)'}, u'__id': 2454095}, u'id': 1296047, u'name': u'myApiKey'}]
+            >>> balena.models.api_key.get_all()
+            [{u'description': None, u'created_at': u'2018-04-06T03:53:34.189Z', u'__metadata': {u'type': u'', u'uri': u'/balena/api_key(1296047)'}, u'is_of__actor': {u'__deferred': {u'uri': u'/balena/actor(2454095)'}, u'__id': 2454095}, u'id': 1296047, u'name': u'myApiKey'}]
 
         """
 
@@ -69,7 +69,7 @@ class ApiKey(object):
                 description (Optional[str]): new API key description.
 
         Examples:
-            >>> resin.models.api_key.update(1296047, {'name':'new name')
+            >>> balena.models.api_key.update(1296047, {'name':'new name')
             OK
 
         """
@@ -93,7 +93,7 @@ class ApiKey(object):
             id (str): API key id.
 
         Examples:
-            >>> resin.models.api_key.revoke(1296047)
+            >>> balena.models.api_key.revoke(1296047)
             OK
 
         """

@@ -1,7 +1,7 @@
 import inspect
 import importlib
 
-resin = importlib.import_module('resin', '.')
+balena = importlib.import_module('balena', '.')
 doc2md = importlib.import_module('docs.doc2md', '.')
 
 TOC_ROOT = 0
@@ -10,7 +10,7 @@ TOC_L2 = 2
 TOC_L3 = 3
 
 Table_Of_Content = [
-    ('Resin', TOC_ROOT),
+    ('Balena', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
     ('ApiKey', TOC_L2),
@@ -69,80 +69,80 @@ def make_function_name(func, func_name):
 
 def main():
 
-    print(doc2md.doc2md(resin.__doc__, 'Resin Python SDK', type=0))
+    print(doc2md.doc2md(balena.__doc__, 'Balena Python SDK', type=0))
     print_newline()
     print('## Table of Contents')
     print(doc2md.make_toc(Table_Of_Content))
     print_newline()
-    print(doc2md.doc2md(resin.models.__doc__, 'Models', type=0))
+    print(doc2md.doc2md(balena.models.__doc__, 'Models', type=0))
     print(doc2md.doc2md(
-        resin.models.application.Application.__doc__, 'Application', type=0))
-    print_functions(resin.models.application.Application)
+        balena.models.application.Application.__doc__, 'Application', type=0))
+    print_functions(balena.models.application.Application)
     print(doc2md.doc2md(
-        resin.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
-    print_functions(resin.models.api_key.ApiKey)
-    print(doc2md.doc2md(resin.models.config.Config.__doc__, 'Config', type=0))
-    print_functions(resin.models.config.Config)
+        balena.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
+    print_functions(balena.models.api_key.ApiKey)
+    print(doc2md.doc2md(balena.models.config.Config.__doc__, 'Config', type=0))
+    print_functions(balena.models.config.Config)
     print(doc2md.doc2md(
-        resin.models.config_variable.ConfigVariable.__doc__,
+        balena.models.config_variable.ConfigVariable.__doc__,
         'ConfigVariable', type=0))
     print(doc2md.doc2md(
-        resin.models.config_variable.ApplicationConfigVariable.__doc__,
+        balena.models.config_variable.ApplicationConfigVariable.__doc__,
         'ApplicationConfigVariable', type=0))
-    print_functions(resin.models.config_variable.ApplicationConfigVariable)
+    print_functions(balena.models.config_variable.ApplicationConfigVariable)
     print(doc2md.doc2md(
-        resin.models.config_variable.DeviceConfigVariable.__doc__,
+        balena.models.config_variable.DeviceConfigVariable.__doc__,
         'DeviceConfigVariable', type=0))
-    print_functions(resin.models.config_variable.DeviceConfigVariable)
-    print(doc2md.doc2md(resin.models.device.Device.__doc__, 'Device', type=0))
-    print_functions(resin.models.device.Device)
+    print_functions(balena.models.config_variable.DeviceConfigVariable)
+    print(doc2md.doc2md(balena.models.device.Device.__doc__, 'Device', type=0))
+    print_functions(balena.models.device.Device)
     print(doc2md.doc2md(
-        resin.models.device_os.DeviceOs.__doc__, 'DeviceOs', type=0))
-    print_functions(resin.models.device_os.DeviceOs)
+        balena.models.device_os.DeviceOs.__doc__, 'DeviceOs', type=0))
+    print_functions(balena.models.device_os.DeviceOs)
     print(doc2md.doc2md(
-        resin.models.environment_variables.EnvironmentVariable.__doc__,
+        balena.models.environment_variables.EnvironmentVariable.__doc__,
         'EnvironmentVariable', type=0))
     print(doc2md.doc2md(
-        resin.models.environment_variables.ApplicationEnvVariable.__doc__,
+        balena.models.environment_variables.ApplicationEnvVariable.__doc__,
         'ApplicationEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.ApplicationEnvVariable)
+    print_functions(balena.models.environment_variables.ApplicationEnvVariable)
     print(doc2md.doc2md(
-        resin.models.environment_variables.ServiceEnvVariable.__doc__,
+        balena.models.environment_variables.ServiceEnvVariable.__doc__,
         'ServiceEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.ServiceEnvVariable)
+    print_functions(balena.models.environment_variables.ServiceEnvVariable)
     print(doc2md.doc2md(
-        resin.models.environment_variables.DeviceEnvVariable.__doc__,
+        balena.models.environment_variables.DeviceEnvVariable.__doc__,
         'DeviceEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.DeviceEnvVariable)
+    print_functions(balena.models.environment_variables.DeviceEnvVariable)
     print(doc2md.doc2md(
-        resin.models.environment_variables.DeviceServiceEnvVariable.__doc__,
+        balena.models.environment_variables.DeviceServiceEnvVariable.__doc__,
         'DeviceServiceEnvVariable', type=0))
-    print_functions(resin.models.environment_variables.DeviceServiceEnvVariable)
-    print(doc2md.doc2md(resin.models.image.Image.__doc__, 'Image', type=0))
-    print_functions(resin.models.image.Image)
-    print(doc2md.doc2md(resin.models.release.Release.__doc__, 'Release', type=0))
-    print_functions(resin.models.release.Release)
-    print(doc2md.doc2md(resin.models.service.Service.__doc__, 'Service', type=0))
-    print_functions(resin.models.service.Service)
-    print(doc2md.doc2md(resin.models.tag.Tag.__doc__, 'Tag', type=0))
-    print(doc2md.doc2md(resin.models.tag.DeviceTag.__doc__, 'DeviceTag', type=0))
-    print_functions(resin.models.tag.DeviceTag)
-    print(doc2md.doc2md(resin.models.tag.ApplicationTag.__doc__, 'ApplicationTag', type=0))
-    print_functions(resin.models.tag.ApplicationTag)
-    print(doc2md.doc2md(resin.models.tag.ReleaseTag.__doc__, 'ReleaseTag', type=0))
-    print_functions(resin.models.tag.ReleaseTag)
-    print(doc2md.doc2md(resin.models.key.Key.__doc__, 'Key', type=0))
-    print_functions(resin.models.key.Key)
-    print(doc2md.doc2md(resin.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))
-    print_functions(resin.models.supervisor.Supervisor)
-    print(doc2md.doc2md(resin.auth.Auth.__doc__, 'Auth', type=0))
-    print_functions(resin.auth.Auth)
-    print(doc2md.doc2md(resin.logs.Logs.__doc__, 'Logs', type=0))
-    print_functions(resin.logs.Logs)
-    print(doc2md.doc2md(resin.settings.Settings.__doc__, 'Settings', type=0))
-    print_functions(resin.settings.Settings)
-    print(doc2md.doc2md(resin.twofactor_auth.TwoFactorAuth.__doc__, 'TwoFactorAuth', type=0))
-    print_functions(resin.twofactor_auth.TwoFactorAuth)
+    print_functions(balena.models.environment_variables.DeviceServiceEnvVariable)
+    print(doc2md.doc2md(balena.models.image.Image.__doc__, 'Image', type=0))
+    print_functions(balena.models.image.Image)
+    print(doc2md.doc2md(balena.models.release.Release.__doc__, 'Release', type=0))
+    print_functions(balena.models.release.Release)
+    print(doc2md.doc2md(balena.models.service.Service.__doc__, 'Service', type=0))
+    print_functions(balena.models.service.Service)
+    print(doc2md.doc2md(balena.models.tag.Tag.__doc__, 'Tag', type=0))
+    print(doc2md.doc2md(balena.models.tag.DeviceTag.__doc__, 'DeviceTag', type=0))
+    print_functions(balena.models.tag.DeviceTag)
+    print(doc2md.doc2md(balena.models.tag.ApplicationTag.__doc__, 'ApplicationTag', type=0))
+    print_functions(balena.models.tag.ApplicationTag)
+    print(doc2md.doc2md(balena.models.tag.ReleaseTag.__doc__, 'ReleaseTag', type=0))
+    print_functions(balena.models.tag.ReleaseTag)
+    print(doc2md.doc2md(balena.models.key.Key.__doc__, 'Key', type=0))
+    print_functions(balena.models.key.Key)
+    print(doc2md.doc2md(balena.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))
+    print_functions(balena.models.supervisor.Supervisor)
+    print(doc2md.doc2md(balena.auth.Auth.__doc__, 'Auth', type=0))
+    print_functions(balena.auth.Auth)
+    print(doc2md.doc2md(balena.logs.Logs.__doc__, 'Logs', type=0))
+    print_functions(balena.logs.Logs)
+    print(doc2md.doc2md(balena.settings.Settings.__doc__, 'Settings', type=0))
+    print_functions(balena.settings.Settings)
+    print(doc2md.doc2md(balena.twofactor_auth.TwoFactorAuth.__doc__, 'TwoFactorAuth', type=0))
+    print_functions(balena.twofactor_auth.TwoFactorAuth)
 
 if __name__ == '__main__':
     main()

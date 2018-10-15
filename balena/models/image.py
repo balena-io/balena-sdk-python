@@ -7,7 +7,7 @@ from .. import exceptions
 
 class Image(object):
     """
-    This class implements image model for Resin Python SDK.
+    This class implements image model for balena python SDK.
 
     """
 

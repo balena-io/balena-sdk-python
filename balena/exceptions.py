@@ -2,9 +2,9 @@
 from .resources import Message
 
 
-class ResinException(Exception):
+class BalenaException(Exception):
     """
-    Exception base class for Python SDK.
+    Exception base class for python SDK.
 
     Attributes:
         code (str): exception code.
@@ -17,7 +17,7 @@ class ResinException(Exception):
         self.exit_code = 1
 
 
-class MissingOption(ResinException):
+class MissingOption(BalenaException):
     """
     Exception type for missing option in settings or auth token.
 
@@ -34,7 +34,7 @@ class MissingOption(ResinException):
         self.message = Message.MISSING_OPTION.format(option=option)
 
 
-class InvalidOption(ResinException):
+class InvalidOption(BalenaException):
     """
     Exception type for invalid option in settings or auth token.
 
@@ -51,7 +51,7 @@ class InvalidOption(ResinException):
         self.message = Message.INVALID_OPTION.format(option=option)
 
 
-class NonAllowedOption(ResinException):
+class NonAllowedOption(BalenaException):
     """
     Exception type for non allowed option in parameters for downloading device OS.
 
@@ -68,7 +68,7 @@ class NonAllowedOption(ResinException):
         self.message = Message.NON_ALLOWED_OPTION.format(option=option)
 
 
-class InvalidDeviceType(ResinException):
+class InvalidDeviceType(BalenaException):
     """
     Exception type for invalid device type.
 
@@ -85,7 +85,7 @@ class InvalidDeviceType(ResinException):
         self.message = Message.INVALID_DEVICE_TYPE.format(dev_type=dev_type)
 
 
-class MalformedToken(ResinException):
+class MalformedToken(BalenaException):
     """
     Exception type for malformed token.
 
@@ -102,7 +102,7 @@ class MalformedToken(ResinException):
         self.message = Message.MALFORMED_TOKEN.format(token=token)
 
 
-class ApplicationNotFound(ResinException):
+class ApplicationNotFound(BalenaException):
     """
     Exception type for application not found.
 
@@ -120,7 +120,7 @@ class ApplicationNotFound(ResinException):
             application=application)
 
 
-class DeviceNotFound(ResinException):
+class DeviceNotFound(BalenaException):
     """
     Exception type for device not found.
 
@@ -137,7 +137,7 @@ class DeviceNotFound(ResinException):
         self.message = Message.DEVICE_NOT_FOUND.format(uuid=uuid)
 
 
-class KeyNotFound(ResinException):
+class KeyNotFound(BalenaException):
     """
     Exception type for ssh key not found.
 
@@ -154,7 +154,7 @@ class KeyNotFound(ResinException):
         self.message = Message.KEY_NOT_FOUND.format(key=key)
 
 
-class RequestError(ResinException):
+class RequestError(BalenaException):
     """
     Exception type for request error.
 
@@ -171,7 +171,7 @@ class RequestError(ResinException):
         self.message = Message.REQUEST_ERROR.format(body=body)
 
 
-class NotLoggedIn(ResinException):
+class NotLoggedIn(BalenaException):
     """
     Exception when no user logged in.
 
@@ -185,9 +185,9 @@ class NotLoggedIn(ResinException):
         self.message = Message.NOT_LOGGED_IN
 
 
-class Unauthorized(ResinException):
+class Unauthorized(BalenaException):
     """
-    Exception when no user logged in and no Resin API Key provided.
+    Exception when no user logged in and no Balena API Key provided.
 
     Attributes:
         message (str): error message.
@@ -199,7 +199,7 @@ class Unauthorized(ResinException):
         self.message = Message.UNAUTHORIZED
 
 
-class LoginFailed(ResinException):
+class LoginFailed(BalenaException):
     """
     Exception when login unsuccessful.
 
@@ -215,7 +215,7 @@ class LoginFailed(ResinException):
         self.message = Message.LOGIN_FAILED
 
 
-class DeviceOffline(ResinException):
+class DeviceOffline(BalenaException):
     """
     Exception when a device is offline.
 
@@ -232,7 +232,7 @@ class DeviceOffline(ResinException):
         self.message = Message.DEVICE_OFFLINE.format(uuid=uuid)
 
 
-class DeviceNotWebAccessible(ResinException):
+class DeviceNotWebAccessible(BalenaException):
     """
     Exception when a device is not web accessible.
 
@@ -249,7 +249,7 @@ class DeviceNotWebAccessible(ResinException):
         self.message = Message.DEVICE_NOT_WEB_ACCESSIBLE.format(uuid=uuid)
 
 
-class IncompatibleApplication(ResinException):
+class IncompatibleApplication(BalenaException):
     """
     Exception when moving a device to an application with different device-type.
 
@@ -266,7 +266,7 @@ class IncompatibleApplication(ResinException):
         self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
 
 
-class UnsupportedFunction(ResinException):
+class UnsupportedFunction(BalenaException):
     """
     Exception when invoking an unsupported function in a specific supervisor version.
 
@@ -284,7 +284,7 @@ class UnsupportedFunction(ResinException):
         self.message = Message.SUPERVISOR_VERSION_ERROR.format(req_version=required_version, cur_version=current_version)
 
 
-class AmbiguousApplication(ResinException):
+class AmbiguousApplication(BalenaException):
     """
     Args:
         application (str): application name.
@@ -299,7 +299,7 @@ class AmbiguousApplication(ResinException):
         self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
 
 
-class AmbiguousDevice(ResinException):
+class AmbiguousDevice(BalenaException):
     """
     Args:
         uuid (str): device uuid.
@@ -314,7 +314,7 @@ class AmbiguousDevice(ResinException):
         self.message = Message.AMBIGUOUS_DEVICE.format(uuid=uuid)
 
 
-class InvalidParameter(ResinException):
+class InvalidParameter(BalenaException):
     """
     Args:
         parameter (str): parameter name.
@@ -332,7 +332,7 @@ class InvalidParameter(ResinException):
         self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)
 
 
-class ImageNotFound(ResinException):
+class ImageNotFound(BalenaException):
     """
     Args:
         image_id (str): image id.
@@ -347,7 +347,7 @@ class ImageNotFound(ResinException):
         self.message = Message.IMAGE_NOT_FOUND.format(id=image_id)
 
 
-class ReleaseNotFound(ResinException):
+class ReleaseNotFound(BalenaException):
     """
     Args:
         release_id (str): release id.
@@ -362,7 +362,7 @@ class ReleaseNotFound(ResinException):
         self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
 
 
-class ServiceNotFound(ResinException):
+class ServiceNotFound(BalenaException):
     """
     Args:
         service_id (str): service id.
@@ -377,7 +377,7 @@ class ServiceNotFound(ResinException):
         self.message = Message.SERVICE_NOT_FOUND.format(id=service_id)
 
 
-class InvalidApplicationType(ResinException):
+class InvalidApplicationType(BalenaException):
     """
     Args:
         app_type (str): application type.
@@ -392,7 +392,7 @@ class InvalidApplicationType(ResinException):
         self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)
 
 
-class UnsupportedFeature(ResinException):
+class UnsupportedFeature(BalenaException):
     """
     Attributes:
         message (str): error message.

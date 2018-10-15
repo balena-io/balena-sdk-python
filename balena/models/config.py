@@ -18,7 +18,7 @@ def _normalize_device_type(dev_type):
 
 class Config(object):
     """
-    This class implements configuration model for Resin Python SDK.
+    This class implements configuration model for balena python SDK.
 
     Attributes:
         _config (dict): caching configuration.
@@ -45,7 +45,7 @@ class Config(object):
             dict: configuration information.
 
         Examples:
-            >>> resin.models.config.get_all()
+            >>> balena.models.config.get_all()
             { all configuration details }
 
         """
@@ -64,7 +64,7 @@ class Config(object):
             list: device types information.
 
         Examples:
-            >>> resin.models.config.get_device_types()
+            >>> balena.models.config.get_device_types()
             [ all configuration details ]
 
         """

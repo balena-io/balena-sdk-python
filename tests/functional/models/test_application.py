@@ -8,12 +8,12 @@ from tests.helper import TestHelper
 class TestApplication(unittest.TestCase):
 
     helper = None
-    resin = None
+    balena = None
 
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
-        cls.resin = cls.helper.resin
+        cls.balena = cls.helper.balena
 
     def tearDown(self):
         # Wipe all apps after every test case.
@@ -21,137 +21,137 @@ class TestApplication(unittest.TestCase):
 
     def test_create(self):
         # should be rejected if the device type is invalid
-        with self.assertRaises(self.helper.resin_exceptions.InvalidDeviceType):
-            self.resin.models.application.create('FooBar', 'Foo')
+        with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
+            self.balena.models.application.create('FooBar', 'Foo')
 
         # should be rejected if the name has less than four characters
         with self.assertRaises(Exception) as cm:
-            self.resin.models.application.create('Fo', 'Raspberry Pi 2')
+            self.balena.models.application.create('Fo', 'Raspberry Pi 2')
         self.assertIn('It is necessary that each application has an app name that has a Length (Type) that is greater than or equal to 4 and is less than or equal to 30.', cm.exception.message)
 
         # should be able to create an application
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(app['app_name'], 'FooBar')
 
         # should be rejected if the application type is invalid
-        with self.assertRaises(self.helper.resin_exceptions.InvalidApplicationType):
-            self.resin.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starterrrrrr')
+        with self.assertRaises(self.helper.balena_exceptions.InvalidApplicationType):
+            self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starterrrrrr')
 
         # should be able to create an application with a specific application type
-        app = self.resin.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starter')
+        app = self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', 'microservices-starter')
         self.assertEqual(app['app_name'], 'FooBar1')
 
     def test_get_all(self):
         # given no applications, it should return empty list.
-        self.assertEqual(self.resin.models.application.get_all(), [])
+        self.assertEqual(self.balena.models.application.get_all(), [])
 
         # given there is an application, it should return a list with length 2.
-        self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.resin.models.application.create('FooBar1', 'Raspberry Pi 2')
-        all_apps = self.resin.models.application.get_all()
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.balena.models.application.create('FooBar1', 'Raspberry Pi 2')
+        all_apps = self.balena.models.application.get_all()
         self.assertEqual(len(all_apps), 2)
         self.assertNotEqual(all_apps[0]['app_name'], all_apps[1]['app_name'])
 
     def test_get(self):
-        # raise resin.exceptions.ApplicationNotFound if no application found.
-        with self.assertRaises(self.helper.resin_exceptions.ApplicationNotFound):
-            self.resin.models.application.get('AppNotExist')
+        # raise balena.exceptions.ApplicationNotFound if no application found.
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.get('AppNotExist')
 
         # found an application, it should return an application with matched name.
-        self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertEqual(self.resin.models.application.get('FooBar')['app_name'], 'FooBar')
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertEqual(self.balena.models.application.get('FooBar')['app_name'], 'FooBar')
 
     def test_has(self):
         # should be true if the application name exists, otherwise it should return false.
-        self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertFalse(self.resin.models.application.has('FooBar1'))
-        self.assertTrue(self.resin.models.application.has('FooBar'))
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertFalse(self.balena.models.application.has('FooBar1'))
+        self.assertTrue(self.balena.models.application.has('FooBar'))
 
     def test_has_any(self):
         # given no applications, it should return false.
-        self.assertFalse(self.resin.models.application.has_any())
+        self.assertFalse(self.balena.models.application.has_any())
 
         # should return true if at least one application exists.
-        self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertTrue(self.resin.models.application.has_any())
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertTrue(self.balena.models.application.has_any())
 
     def test_get_by_id(self):
-        # raise resin.exceptions.ApplicationNotFound if no application found.
-        with self.assertRaises(self.helper.resin_exceptions.ApplicationNotFound):
-            self.resin.models.application.get_by_id(1)
+        # raise balena.exceptions.ApplicationNotFound if no application found.
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.get_by_id(1)
 
         # found an application, it should return an application with matched id.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertEqual(self.resin.models.application.get_by_id(app['id'])['id'], app['id'])
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertEqual(self.balena.models.application.get_by_id(app['id'])['id'], app['id'])
 
     def test_remove(self):
         # should be able to remove an existing application by name.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.assertEqual(len(self.resin.models.application.get_all()), 1)
-        self.resin.models.application.remove('FooBar')
-        self.assertEqual(len(self.resin.models.application.get_all()), 0)
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertEqual(len(self.balena.models.application.get_all()), 1)
+        self.balena.models.application.remove('FooBar')
+        self.assertEqual(len(self.balena.models.application.get_all()), 0)
 
     def test_generate_provisioning_key(self):
         # should be rejected if the application id does not exist.
-        with self.assertRaises(self.helper.resin_exceptions.ApplicationNotFound):
-            self.resin.models.application.generate_provisioning_key('5685')
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.generate_provisioning_key('5685')
 
         # should be able to generate a provisioning key by app id.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        key = self.resin.models.application.generate_provisioning_key(app['id'])
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        key = self.balena.models.application.generate_provisioning_key(app['id'])
         self.assertEqual(len(key), 32)
 
     def test_enable_rolling_updates(self):
         # should enable rolling update for the applications devices.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.resin.models.application.disable_rolling_updates(app['id'])
-        self.resin.models.application.enable_rolling_updates(app['id'])
-        app = self.resin.models.application.get('FooBar')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.balena.models.application.disable_rolling_updates(app['id'])
+        self.balena.models.application.enable_rolling_updates(app['id'])
+        app = self.balena.models.application.get('FooBar')
         self.assertTrue(app['should_track_latest_release'])
 
     def test_disable_rolling_updates(self):
         # should disable rolling update for the applications devices.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        self.resin.models.application.enable_rolling_updates(app['id'])
-        self.resin.models.application.disable_rolling_updates(app['id'])
-        app = self.resin.models.application.get('FooBar')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.balena.models.application.enable_rolling_updates(app['id'])
+        self.balena.models.application.disable_rolling_updates(app['id'])
+        app = self.balena.models.application.get('FooBar')
         self.assertFalse(app['should_track_latest_release'])
 
     def test_enable_device_urls(self):
         # should enable the device url for the applications devices.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        device = self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
-        self.resin.models.application.enable_device_urls(app['id'])
-        self.assertTrue(self.resin.models.device.has_device_url(device['uuid']))
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        device = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
+        self.balena.models.application.enable_device_urls(app['id'])
+        self.assertTrue(self.balena.models.device.has_device_url(device['uuid']))
 
     def test_disable_device_urls(self):
         # should disable the device url for the applications devices.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
-        device = self.resin.models.device.register(app['id'], self.resin.models.device.generate_uuid())
-        self.resin.models.application.enable_device_urls(app['id'])
-        self.resin.models.application.disable_device_urls(app['id'])
-        self.assertFalse(self.resin.models.device.has_device_url(device['uuid']))
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        device = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
+        self.balena.models.application.enable_device_urls(app['id'])
+        self.balena.models.application.disable_device_urls(app['id'])
+        self.assertFalse(self.balena.models.device.has_device_url(device['uuid']))
 
     def test_grant_support_access(self):
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
         # should throw an error if the expiry timestamp is in the past.
         expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) - 10000)
-        with self.assertRaises(self.helper.resin_exceptions.InvalidParameter):
-            self.resin.models.application.grant_support_access(app['id'], expiry_timestamp)
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.application.grant_support_access(app['id'], expiry_timestamp)
 
         # should grant support access until the specified time.
         expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
-        self.resin.models.application.grant_support_access(app['id'], expiry_time)
-        support_date = datetime.strptime(self.resin.models.application.get('FooBar')['is_accessible_by_support_until__date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        self.balena.models.application.grant_support_access(app['id'], expiry_time)
+        support_date = datetime.strptime(self.balena.models.application.get('FooBar')['is_accessible_by_support_until__date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         self.assertEqual(self.helper.datetime_to_epoch_ms(support_date), expiry_time)
 
     def test_revoke_support_access(self):
         # should revoke support access.
-        app = self.resin.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
         expiry_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 + 3600 * 1000)
-        self.resin.models.application.grant_support_access(app['id'], expiry_time)
-        self.resin.models.application.revoke_support_access(app['id'])
-        app = self.resin.models.application.get('FooBar')
+        self.balena.models.application.grant_support_access(app['id'], expiry_time)
+        self.balena.models.application.revoke_support_access(app['id'])
+        app = self.balena.models.application.get('FooBar')
         self.assertIsNone(app['is_accessible_by_support_until__date'])
 
 if __name__ == '__main__':

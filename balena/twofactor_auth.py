@@ -15,7 +15,7 @@ TOKEN_KEY = 'token'
 
 class TwoFactorAuth(object):
     """
-    This class implements basic 2FA functionalities for Resin Python SDK.
+    This class implements basic 2FA functionalities for balena python SDK.
 
     """
 
@@ -31,7 +31,7 @@ class TwoFactorAuth(object):
             bool: True if enabled. Otherwise False.
 
         Examples:
-            >>> resin.twofactor_auth.is_enabled()
+            >>> balena.twofactor_auth.is_enabled()
             False
 
         """
@@ -54,7 +54,7 @@ class TwoFactorAuth(object):
             bool: True if enabled. Otherwise False.
 
         Examples:
-            >>> resin.twofactor_auth.is_passed()
+            >>> balena.twofactor_auth.is_passed()
             True
 
         """
@@ -74,12 +74,12 @@ class TwoFactorAuth(object):
         Examples:
             # You need to enable two-factor authentication on dashboard first.
             # Check if two-factor authentication is passed for current session.
-            >>> resin.twofactor_auth.is_passed()
+            >>> balena.twofactor_auth.is_passed()
             False
-            >>> secret = resin.twofactor_auth.get_otpauth_secret()
-            >>> resin.twofactor_auth.challenge(resin.twofactor_auth.generate_code(secret))
+            >>> secret = balena.twofactor_auth.get_otpauth_secret()
+            >>> balena.twofactor_auth.challenge(balena.twofactor_auth.generate_code(secret))
             # Check again if two-factor authentication is passed for current session.
-            >>> resin.twofactor_auth.is_passed()
+            >>> balena.twofactor_auth.is_passed()
             True
 
         """
@@ -104,8 +104,8 @@ class TwoFactorAuth(object):
             str: 6 digit two-factor authentication code.
 
         Examples:
-            >>> secret = resin.twofactor_auth.get_otpauth_secret()
-            >>> resin.twofactor_auth.generate_code(secret)
+            >>> secret = balena.twofactor_auth.get_otpauth_secret()
+            >>> balena.twofactor_auth.generate_code(secret)
             '259975'
 
         """
@@ -122,7 +122,7 @@ class TwoFactorAuth(object):
             str: one time password authentication secret string.
 
         Examples:
-            >>> resin.twofactor_auth.get_otpauth_secret()
+            >>> balena.twofactor_auth.get_otpauth_secret()
             'WGURB3DIUWXTGQDBGFNGKDLV2L3LXOVN'
 
         """
