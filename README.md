@@ -49,6 +49,20 @@ To generate the documentation:
 python docs_generators.py > DOCUMENTATION.md
 ```
 
+Tests
+-----
+
+To run the tests, first create a `.env` file with your test user configuration, e.g.:
+
+```
+[Credentials]
+email=my_test_user@resin.io
+user_id=my_test_user
+password=123456my_password
+```
+
+Then run `python -m unittest discover tests -v`.
+
 Support
 -------
 
