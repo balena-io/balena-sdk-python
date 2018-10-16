@@ -25,6 +25,11 @@ class TestHelper(object):
         self.resin_exceptions = resin_exceptions
         self.base_request = BaseRequest()
         self.settings = Settings()
+
+        if 'api_endpoint' in self.credentials and self.credentials['api_endpoint'] is not None:
+            self.settings.set('api_endpoint', self.credentials['api_endpoint'])
+            self.settings.set('pine_endpoint', '{0}/{1}/'.format(self.credentials['api_endpoint'], self.settings.get('api_version')))
+
         if not self.resin.auth.is_logged_in():
             self.resin.auth.login(
                 **{
@@ -41,7 +46,7 @@ class TestHelper(object):
     @classmethod
     def load_env(cls):
         env_file_name = '.env'
-        default_env_keys = set(['email', 'user_id', 'password'])
+        required_env_keys = set(['email', 'user_id', 'password'])
         cls.credentials = {}
 
         if Path.isfile(env_file_name):
@@ -55,7 +60,7 @@ class TestHelper(object):
                     config_data[option] = config_reader.get('Credentials', option)
                 except:
                     config_data[option] = None
-            if not default_env_keys.issubset(set(config_data)):
+            if not required_env_keys.issubset(set(config_data)):
                 raise Exception('Mandatory env keys missing!')
             cls.credentials = config_data
         else:
@@ -64,6 +69,9 @@ class TestHelper(object):
                 cls.credentials['email'] = os.environ['TEST_ENV_EMAIL']
                 cls.credentials['user_id'] = os.environ['TEST_ENV_USER_ID']
                 cls.credentials['password'] = os.environ['TEST_ENV_PASSWORD']
+
+                # Optional endpoint override:
+                cls.credentials['api_endpoint'] = os.environ.get('TEST_API_ENDPOINT')
             except:
                 raise Exception('Mandatory env keys missing!')
 
