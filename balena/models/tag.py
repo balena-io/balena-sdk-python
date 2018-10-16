@@ -41,7 +41,7 @@ class BaseTag(object):
                 endpoint=self.settings.get('pine_endpoint')
             )['d']
 
-    def get(self, resource_id, tag_key):
+    def _get(self, resource_id, tag_key):
         params = {
             'filters': {
                 self.resource: resource_id,
@@ -55,7 +55,7 @@ class BaseTag(object):
         )['d']
 
     def set(self, resource_id, tag_key, value):
-        if len(self.get(resource_id, tag_key)) > 0:
+        if len(self._get(resource_id, tag_key)) > 0:
             params = {
                 'filters': {
                     self.resource: resource_id,
