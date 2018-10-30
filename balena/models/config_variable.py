@@ -8,7 +8,7 @@ from .. import exceptions
 
 
 def _is_valid_config_var_name(config_var_name):
-    return config_var_name.startswith('RESIN_')
+    return config_var_name.startswith('RESIN_') or config_var_name.startswith('BALENA_')
 
 
 class ConfigVariable(object):
@@ -24,7 +24,7 @@ class ConfigVariable(object):
 
 class DeviceConfigVariable(object):
     """
-    This class implements device config variable model for Resin Python SDK.
+    This class implements device config variable model for balena python SDK.
 
     """
 
@@ -44,8 +44,8 @@ class DeviceConfigVariable(object):
             list: device config variables.
 
         Examples:
-            >>> resin.models.config_variable.device_config_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'RESIN_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uresin/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'RESIN_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'RESIN_HOST_LOG_TO_DISPLAY'}]
+            >>> balena.models.config_variable.device_config_variable.get_all('f5213eac0d63ac47721b037a7406d306')
+            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
 
         """
 
@@ -72,8 +72,8 @@ class DeviceConfigVariable(object):
             list: device config variables.
 
         Examples:
-            >>> resin.models.config_variable.device_config_variable.get_all_by_application(1043050)
-            [{u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'RESIN_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/resin/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'RESIN_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uresin/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'RESIN_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'RESIN_HOST_LOG_TO_DISPLAY'}]
+            >>> balena.models.config_variable.device_config_variable.get_all_by_application(1043050)
+            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
 
         """
 
@@ -97,8 +97,8 @@ class DeviceConfigVariable(object):
             dict: new device config variable info.
 
         Examples:
-            >>> resin.models.config_variable.device_config_variable.create('f14a73b3a762396f7bfeacf5d530c316aa8cfeff307bea93422f71a106c344','RESIN_TEST_DEVICE_CONFIG_VAR','test value')
-            {u'device': {u'__deferred': {u'uri': u'/resin/device(1083716)'}, u'__id': 1083716}, u'__metadata': {u'type': u'', u'uri': u'/resin/device_config_variable(163985)'}, u'id': 163985, u'value': u'test value', u'name': u'RESIN_TEST_DEVICE_CONFIG_VAR'}
+            >>> balena.models.config_variable.device_config_variable.create('f14a73b3a762396f7bfeacf5d530c316aa8cfeff307bea93422f71a106c344','BALENA_TEST_DEVICE_CONFIG_VAR','test value')
+            {u'device': {u'__deferred': {u'uri': u'/balena/device(1083716)'}, u'__id': 1083716}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variable(163985)'}, u'id': 163985, u'value': u'test value', u'name': u'BALENA_TEST_DEVICE_CONFIG_VAR'}
 
         """
 
@@ -128,7 +128,7 @@ class DeviceConfigVariable(object):
             value (str): new device config variable value.
 
         Examples:
-            >>> resin.models.config_variable.device_config_variable.update('132715', 'new test value')
+            >>> balena.models.config_variable.device_config_variable.update('132715', 'new test value')
             'OK'
 
         """
@@ -153,7 +153,7 @@ class DeviceConfigVariable(object):
             var_id (str): device config environment variable id.
 
         Examples:
-            >>> resin.models.config_variable.device_config_variable.remove('132715')
+            >>> balena.models.config_variable.device_config_variable.remove('132715')
             'OK'
 
         """
@@ -170,7 +170,7 @@ class DeviceConfigVariable(object):
 
 class ApplicationConfigVariable(object):
     """
-    This class implements application config variable model for Resin Python SDK.
+    This class implements application config variable model for balena python SDK.
 
     """
 
@@ -189,8 +189,8 @@ class ApplicationConfigVariable(object):
             list: application config variables.
 
         Examples:
-            >>> resin.models.config_variable.application_config_variable.get_all('1005160')
-            [{u'application': {u'__deferred': {u'uri': u'/resin/application(1005160)'}, u'__id': 1005160}, u'__metadata': {u'type': u'', u'uri': u'/resin/application_config_variable(116965)'}, u'id': 116965, u'value': u'false', u'name': u'RESIN_SUPERVISOR_NATIVE_LOGGER'}]
+            >>> balena.models.config_variable.application_config_variable.get_all('1005160')
+            [{u'application': {u'__deferred': {u'uri': u'/balena/application(1005160)'}, u'__id': 1005160}, u'__metadata': {u'type': u'', u'uri': u'/balena/application_config_variable(116965)'}, u'id': 116965, u'value': u'false', u'name': u'BALENA_SUPERVISOR_NATIVE_LOGGER'}]
 
         """
 
@@ -217,8 +217,8 @@ class ApplicationConfigVariable(object):
             dict: new application config variable info.
 
         Examples:
-            >>> print(resin.models.config_variable.application_config_variable.create('1005160', 'RESIN_TEST_APP_CONFIG_VAR', 'test value'))
-            {"id":117738,"application":{"__deferred":{"uri":"/resin/application(1005160)"},"__id":1005160},"name":"RESIN_TEST_APP_CONFIG_VAR","value":"test value","__metadata":{"uri":"/resin/application_config_variable(117738)","type":""}}
+            >>> print(balena.models.config_variable.application_config_variable.create('1005160', 'BALENA_TEST_APP_CONFIG_VAR', 'test value'))
+            {"id":117738,"application":{"__deferred":{"uri":"/balena/application(1005160)"},"__id":1005160},"name":"BALENA_TEST_APP_CONFIG_VAR","value":"test value","__metadata":{"uri":"/balena/application_config_variable(117738)","type":""}}
 
         """
 
@@ -245,7 +245,7 @@ class ApplicationConfigVariable(object):
             value (str): new application config variable value.
 
         Examples:
-            >>> resin.models.config_variable.application_config_variable.update('117738', 'new test value')
+            >>> balena.models.config_variable.application_config_variable.update('117738', 'new test value')
             'OK'
 
         """
@@ -270,7 +270,7 @@ class ApplicationConfigVariable(object):
             var_id (str): application config environment variable id.
 
         Examples:
-            >>> resin.models.config_variable.application_config_variable.remove('117738')
+            >>> balena.models.config_variable.application_config_variable.remove('117738')
             'OK'
 
         """

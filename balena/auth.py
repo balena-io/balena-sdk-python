@@ -7,7 +7,7 @@ TOKEN_KEY = 'token'
 
 class Auth(object):
     """
-    This class implements all authentication functions for Resin Python SDK.
+    This class implements all authentication functions for balena python SDK.
 
     """
 
@@ -60,11 +60,11 @@ class Auth(object):
 
     def login(self, **credentials):
         """
-        This function is used for logging into Resin.io using email and password.
+        This function is used for logging into balena using email and password.
 
         Args:
             **credentials: credentials keyword arguments.
-                username (str): Resin.io email.
+                username (str): Balena email.
                 password (str): Password.
 
         Returns:
@@ -74,10 +74,10 @@ class Auth(object):
             LoginFailed: if the email or password is invalid.
 
         Examples:
-            >>> from resin import Resin
-            >>> resin = Resin()
+            >>> from balena import Balena
+            >>> balena = Balena()
             >>> credentials = {'username': '<your email>', 'password': '<your password>''}
-            >>> resin.auth.login(**credentials)
+            >>> balena.auth.login(**credentials)
             (Empty Return)
 
         """
@@ -88,8 +88,8 @@ class Auth(object):
 
     def login_with_token(self, token):
         """
-        This function is used for logging into Resin.io using Auth Token.
-        Auth Token can be found in Preferences section on Resin.io Dashboard.
+        This function is used for logging into balena using Auth Token.
+        Auth Token can be found in Preferences section on balena Dashboard.
 
         Args:
             token (str): Auth Token.
@@ -101,10 +101,10 @@ class Auth(object):
             MalformedToken: if token is invalid.
 
         Examples:
-            >>> from resin import Resin
-            >>> resin = Resin()
+            >>> from balena import Balena
+            >>> balena = Balena()
             >>> auth_token = <your token>
-            >>> resin.auth.login_with_token(auth_token)
+            >>> balena.auth.login_with_token(auth_token)
             (Empty Return)
 
         """
@@ -122,7 +122,7 @@ class Auth(object):
             NotLoggedIn: if there is no user logged in.
 
         Examples:
-            >>> resin.auth.who_am_i()
+            >>> balena.auth.who_am_i()
             u'g_trong_nghia_nguyen'
 
         """
@@ -136,7 +136,7 @@ class Auth(object):
 
         Args:
             **credentials: credentials keyword arguments.
-                username (str): Resin.io username.
+                username (str): Balena username.
                 password (str): Password.
 
         Returns:
@@ -146,7 +146,7 @@ class Auth(object):
             LoginFailed: if the username or password is invalid.
 
         Examples:
-            >>> resin.auth.authenticate(username='<your email>', password='<your password>')
+            >>> balena.auth.authenticate(username='<your email>', password='<your password>')
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5NywidXNlcm5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImVtYWlsIjoicmVzaW5weXRob25zZGt0ZXN0QGdtYWlsLmNvbSIsInNvY2lhbF9zZXJ2aWNlX2FjY291bnQiOlt7ImNyZWF0ZWRfYXQiOiIyMDE1LTExLTIzVDAzOjMwOjE0LjU3MloiLCJpZCI6MTE2NiwidXNlciI6eyJfX2RlZmVycmVkIjp7InVyaSI6Ii9ld2EvdXNlcig1Mzk3KSJ9LCJfX2lkIjo1Mzk3fSwicHJvdmlkZXIiOiJnb29nbGUiLCJyZW1vdGVfaWQiOiIxMDE4OTMzNzc5ODQ3NDg1NDMwMDIiLCJkaXNwbGF5X25hbWUiOiJUcm9uZyBOZ2hpYSBOZ3V5ZW4iLCJfX21ldGFkYXRhIjp7InVyaSI6Ii9ld2Evc29jaWFsX3NlcnZpY2VfYWNjb3VudCgxMTY2KSIsInR5cGUiOiIifX1dLCJoYXNfZGlzYWJsZWRfbmV3c2xldHRlciI6ZmFsc2UsImp3dF9zZWNyZXQiOiI0UDVTQzZGV1pIVU5JR0NDT1dJQUtST0tST0RMUTRNVSIsImhhc1Bhc3N3b3JkU2V0Ijp0cnVlLCJuZWVkc1Bhc3N3b3JkUmVzZXQiOmZhbHNlLCJwdWJsaWNfa2V5Ijp0cnVlLCJmZWF0dXJlcyI6W10sImludGVyY29tVXNlck5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImludGVyY29tVXNlckhhc2giOiI5YTM0NmUwZTgzNjk0MzYxODU3MTdjNWRhZTZkZWZhZDdiYmM4YzZkOGNlMzgxYjhhYTY5YWRjMTRhYWZiNGU0IiwicGVybWlzc2lvbnMiOltdLCJpYXQiOjE0NDgyNTYzMDYsImV4cCI6MTQ0ODg2MTEwNn0.U9lfEpPHBRvGQSayASE-glI-lQtAjyIFYd00uXOUzLI'
 
         """
@@ -165,7 +165,7 @@ class Auth(object):
 
         Examples:
             # Check if user logged in.
-            >>> if resin.auth.is_logged_in():
+            >>> if balena.auth.is_logged_in():
             ...     print('You are logged in!')
             ... else:
             ...     print('You are not logged in!')
@@ -190,7 +190,7 @@ class Auth(object):
 
         Examples:
             # If you are logged in.
-            >>> resin.auth.get_token()
+            >>> balena.auth.get_token()
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5NywidXNlcm5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImVtYWlsIjoicmVzaW5weXRob25zZGt0ZXN0QGdtYWlsLmNvbSIsInNvY2lhbF9zZXJ2aWNlX2FjY291bnQiOlt7ImNyZWF0ZWRfYXQiOiIyMDE1LTExLTIzVDAzOjMwOjE0LjU3MloiLCJpZCI6MTE2NiwidXNlciI6eyJfX2RlZmVycmVkIjp7InVyaSI6Ii9ld2EvdXNlcig1Mzk3KSJ9LCJfX2lkIjo1Mzk3fSwicHJvdmlkZXIiOiJnb29nbGUiLCJyZW1vdGVfaWQiOiIxMDE4OTMzNzc5ODQ3NDg1NDMwMDIiLCJkaXNwbGF5X25hbWUiOiJUcm9uZyBOZ2hpYSBOZ3V5ZW4iLCJfX21ldGFkYXRhIjp7InVyaSI6Ii9ld2Evc29jaWFsX3NlcnZpY2VfYWNjb3VudCgxMTY2KSIsInR5cGUiOiIifX1dLCJoYXNfZGlzYWJsZWRfbmV3c2xldHRlciI6ZmFsc2UsImp3dF9zZWNyZXQiOiI0UDVTQzZGV1pIVU5JR0NDT1dJQUtST0tST0RMUTRNVSIsImhhc1Bhc3N3b3JkU2V0Ijp0cnVlLCJuZWVkc1Bhc3N3b3JkUmVzZXQiOmZhbHNlLCJwdWJsaWNfa2V5Ijp0cnVlLCJmZWF0dXJlcyI6W10sImludGVyY29tVXNlck5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImludGVyY29tVXNlckhhc2giOiI5YTM0NmUwZTgzNjk0MzYxODU3MTdjNWRhZTZkZWZhZDdiYmM4YzZkOGNlMzgxYjhhYTY5YWRjMTRhYWZiNGU0IiwicGVybWlzc2lvbnMiOltdLCJpYXQiOjE0NDgyNTY2ODMsImV4cCI6MTQ0ODg2MTQ4M30.oqq4DUI4cTbhzYznSwODZ_4zLOeGiJYuZRn82gTfQ6o'
 
 
@@ -210,7 +210,7 @@ class Auth(object):
 
         Examples:
             # If you are logged in.
-            >>> resin.auth.get_user_id()
+            >>> balena.auth.get_user_id()
             5397
 
         """
@@ -229,8 +229,8 @@ class Auth(object):
 
         Examples:
             # If you are logged in.
-            >>> resin.auth.get_email()
-            u'resinpythonsdktest@gmail.com'
+            >>> balena.auth.get_email()
+            u'balenapythonsdktest@gmail.com'
 
         """
 
@@ -238,14 +238,14 @@ class Auth(object):
 
     def log_out(self):
         """
-        This function is used for logging out from Resin.io.
+        This function is used for logging out from balena.
 
         Returns:
             bool: True if successful, False otherwise.
 
         Examples:
             # If you are logged in.
-            >>> resin.auth.log_out()
+            >>> balena.auth.log_out()
             True
 
         """
@@ -255,7 +255,7 @@ class Auth(object):
 
     def register(self, **credentials):
         """
-        This function is used for registering to Resin.io.
+        This function is used for registering to balena.
 
         Args:
             **credentials: credentials keyword arguments.
@@ -270,7 +270,7 @@ class Auth(object):
 
         Examples:
             >>> credentials = {'email': '<your email>', 'password': '<your password>'}
-            >>> resin.auth.register(**credentials)
+            >>> balena.auth.register(**credentials)
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5OCwidXNlcm5hbWUiOiJ0ZXN0MjcxMCIsImVtYWlsIjoidGVzdDI3MTBAZ21haWwuY29tIiwic29jaWFsX3NlcnZpY2VfYWNjb3VudCI6bnVsbCwiaGFzX2Rpc2FibGVkX25ld3NsZXR0ZXIiOmZhbHNlLCJqd3Rfc2VjcmV0IjoiQlJXR0ZIVUgzNVBKT0VKTVRSSVo2MjdINjVKVkJKWDYiLCJoYXNQYXNzd29yZFNldCI6dHJ1ZSwibmVlZHNQYXNzd29yZFJlc2V0IjpmYWxzZSwicHVibGljX2tleSI6ZmFsc2UsImZlYXR1cmVzIjpbXSwiaW50ZXJjb21Vc2VyTmFtZSI6InRlc3QyNzEwIiwiaW50ZXJjb21Vc2VySGFzaCI6IjNiYTRhZDRkZjk4MDQ1OTc1YmU2ZGUwYWJmNjFiYjRmYWY4ZmEzYTljZWI0YzE4Y2QxOGU1NmViNmI1NzkxZDAiLCJwZXJtaXNzaW9ucyI6W10sImlhdCI6MTQ0ODI1NzgyOCwiZXhwIjoxNDQ4ODYyNjI4fQ.chhf6deZ9BNDMmPr1Hm-SlRoWkK7t_4cktAPo12aCoE'
 
         """

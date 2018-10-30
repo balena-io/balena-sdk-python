@@ -1,5 +1,5 @@
 """
-This module implements all models for Resin Python SDK.
+This module implements all models for balena python SDK.
 
 """
 

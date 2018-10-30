@@ -17,28 +17,28 @@ def _print_deprecation_warning():
 
 class Supervisor(object):
     """
-    This class implements supervisor model for Resin Python SDK.
+    This class implements supervisor model for balena python SDK.
 
     Attributes:
         SUPERVISOR_API_VERSION (str): supervisor API version.
-        RESIN_SUPERVISOR_ADDRESS (str): supervisor endpoint address on device.
-        RESIN_SUPERVISOR_API_KEY (str): supervisor API key on device.
+        SUPERVISOR_ADDRESS (str): supervisor endpoint address on device.
+        SUPERVISOR_API_KEY (str): supervisor API key on device.
         _on_device (bool): API endpoint flag.
             If True then all commands will be sent to the API on device.
-            If False then all command will be sent to the Resin API proxy endpoint (api.resin.io/supervisor/<url>).
-            If RESIN_SUPERVISOR_ADDRESS and RESIN_SUPERVISOR_API_KEY are available, _on_device will be set to True by default. Otherwise, it's False.
+            If False then all command will be sent to the balena API proxy endpoint (api.balena.io/supervisor/<url>).
+            If SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY are available, _on_device will be set to True by default. Otherwise, it's False.
 
     """
 
     SUPERVISOR_API_VERSION = 'v1'
     MIN_SUPERVISOR_MC_API = '7.0.0'
 
-    RESIN_SUPERVISOR_ADDRESS = os.environ.get('RESIN_SUPERVISOR_ADDRESS')
-    RESIN_SUPERVISOR_API_KEY = os.environ.get('RESIN_SUPERVISOR_API_KEY')
+    SUPERVISOR_ADDRESS = os.environ.get('BALENA_SUPERVISOR_ADDRESS') or os.environ.get('RESIN_SUPERVISOR_ADDRESS')
+    SUPERVISOR_API_KEY = os.environ.get('BALENA_SUPERVISOR_ADDRESS') or os.environ.get('RESIN_SUPERVISOR_API_KEY')
 
-    # _on_device = True, if RESIN_SUPERVISOR_ADDRESS and RESIN_SUPERVISOR_API_KEY env vars are avaiable => can communicate with both supervisor API endpoints on device or Resin API endpoints.
-    # _on_device = False, if RESIN_SUPERVISOR_ADDRESS and RESIN_SUPERVISOR_API_KEY env vars are not avaiable => can only communicate with Resin API endpoints.
-    _on_device = all([RESIN_SUPERVISOR_ADDRESS, RESIN_SUPERVISOR_API_KEY])
+    # _on_device = True, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are avaiable => can communicate with both supervisor API endpoints on device or balena API endpoints.
+    # _on_device = False, if UPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are not avaiable => can only communicate with balena API endpoints.
+    _on_device = all([SUPERVISOR_ADDRESS, SUPERVISOR_API_KEY])
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -87,7 +87,7 @@ class Supervisor(object):
             )
         else:
             if required_version:
-                current_version = os.environ.get('RESIN_SUPERVISOR_VERSION')
+                current_version = os.environ.get('BALENA_SUPERVISOR_VERSION') or os.environ.get('RESIN_SUPERVISOR_VERSION')
                 if not current_version or (parse_version(required_version) > parse_version(current_version)):
                     raise exceptions.UnsupportedFunction(required_version, current_version)
 
@@ -95,8 +95,8 @@ class Supervisor(object):
                 endpoint,
                 method,
                 data=req_data,
-                endpoint=self.RESIN_SUPERVISOR_ADDRESS,
-                api_key=self.RESIN_SUPERVISOR_API_KEY
+                endpoint=self.SUPERVISOR_ADDRESS,
+                api_key=self.SUPERVISOR_API_KEY
             )
 
     def force_api_endpoint(self, endpoint):
@@ -104,7 +104,7 @@ class Supervisor(object):
         Force all API commands to a specific endpoint.
 
         Args:
-            endpoint (bool): True if selecting the API on device. False if selecting the Resin API proxy endpoint.
+            endpoint (bool): True if selecting the API on device. False if selecting the balena API proxy endpoint.
 
         Raises:
             InvalidOption: if endpoint value is not bool.
@@ -126,10 +126,10 @@ class Supervisor(object):
             str: `OK` signals that the supervisor is alive and well.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not set.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not set.
 
         Examples:
-            >>> resin.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             'OK'
 
         """
@@ -159,13 +159,13 @@ class Supervisor(object):
             return self.base_request.request(
                 'ping',
                 'GET',
-                endpoint=self.RESIN_SUPERVISOR_ADDRESS,
-                api_key=self.RESIN_SUPERVISOR_API_KEY
+                endpoint=self.SUPERVISOR_ADDRESS,
+                api_key=self.SUPERVISOR_API_KEY
             )
 
     def blink(self, device_uuid=None, app_id=None):
         """
-        Start a blink pattern on a LED for 15 seconds. This is the same with `resin.models.device.identify()`.
+        Start a blink pattern on a LED for 15 seconds. This is the same with `balena.models.device.identify()`.
         No need to set device_uuid and app_id if command is sent to the API on device.
 
         Args:
@@ -173,10 +173,10 @@ class Supervisor(object):
             app_id (Optional[str]): application id.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.blink(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.blink(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             'OK'
 
         """
@@ -199,14 +199,14 @@ class Supervisor(object):
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.update(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.update(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             (Empty Response)
 
             # Force an update
-            >>> resin.models.supervisor.update(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020', force=True)
+            >>> balena.models.supervisor.update(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020', force=True)
             (Empty Response)
 
         """
@@ -240,10 +240,10 @@ class Supervisor(object):
             dict: when successful, this dictionary is returned `{ 'Data': 'OK', 'Error': '' }`.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.reboot(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.reboot(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             {u'Data': u'OK', u'Error': u''}
 
         """
@@ -277,10 +277,10 @@ class Supervisor(object):
             dict: when successful, this dictionary is returned `{ 'Data': 'OK', 'Error': '' }`.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.shutdown(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='8362')
+            >>> balena.models.supervisor.shutdown(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='8362')
             {u'Data': u'OK', u'Error': u''}
 
         """
@@ -313,10 +313,10 @@ class Supervisor(object):
             dict: when successful, this dictionary is returned `{ 'Data': 'OK', 'Error': '' }`.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.purge(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.purge(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             {u'Data': u'OK', u'Error': u''}
 
         """
@@ -346,10 +346,10 @@ class Supervisor(object):
             str: `OK` signals that the supervisor is alive and well.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.restart(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.restart(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             'OK'
 
         """
@@ -368,7 +368,7 @@ class Supervisor(object):
 
     def regenerate_supervisor_api_key(self, app_id=None, device_uuid=None):
         """
-        Invalidate the current RESIN_SUPERVISOR_API_KEY and generates a new one.
+        Invalidate the current SUPERVISOR_API_KEY and generates a new one.
         The application will be restarted on the next update cycle to update the API key environment variable.
         No need to set device_uuid and app_id if command is sent to the API on device.
 
@@ -380,10 +380,10 @@ class Supervisor(object):
             str: new supervisor API key.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.regenerate_supervisor_api_key(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.regenerate_supervisor_api_key(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             '480af7bb8a9cf56de8a1e295f0d50e6b3bb46676aaddbf4103aa43cb57039364'
 
         """
@@ -397,7 +397,7 @@ class Supervisor(object):
 
     def get_device_state(self, app_id=None, device_uuid=None):
         """
-        Return the current device state, as reported to the Resin API and with some extra fields added to allow control over pending/locked updates.
+        Return the current device state, as reported to the balena API and with some extra fields added to allow control over pending/locked updates.
         This function requires supervisor v1.6 or higher.
         No need to set device_uuid and app_id if command is sent to the API on device.
 
@@ -409,11 +409,11 @@ class Supervisor(object):
             dict: dictionary contains device state.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
-            {u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Resin OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
+            >>> balena.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            {u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Balena OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
 
         """
 
@@ -452,10 +452,10 @@ class Supervisor(object):
             dict: dictionary contains stopped application container id.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.stop_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.stop_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
         """
 
@@ -485,10 +485,10 @@ class Supervisor(object):
             dict: dictionary contains started application container id.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.start_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.start_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
         """
 
@@ -518,10 +518,10 @@ class Supervisor(object):
             dict: dictionary contains application information.
 
         Raises:
-            InvalidOption: if the endpoint is Resin API proxy endpoint and device_uuid or app_id is not specified.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not specified.
 
         Examples:
-            >>> resin.models.supervisor.get_application_info(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.get_application_info(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
         """
 
@@ -586,7 +586,7 @@ class Supervisor(object):
             image_id (int): id of the image to start
 
         Examples:
-            >>> resin.models.supervisor.start_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            >>> balena.models.supervisor.start_service('f3887b184396844f52402c5cf09bd3b9', 392229)
             OK
 
         """
@@ -602,7 +602,7 @@ class Supervisor(object):
             image_id (int): id of the image to start
 
         Examples:
-            >>> resin.models.supervisor.stop_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            >>> balena.models.supervisor.stop_service('f3887b184396844f52402c5cf09bd3b9', 392229)
             OK
 
         """
@@ -618,7 +618,7 @@ class Supervisor(object):
             image_id (int): id of the image to start
 
         Examples:
-            >>> resin.models.supervisor.restart_service('f3887b184396844f52402c5cf09bd3b9', 392229)
+            >>> balena.models.supervisor.restart_service('f3887b184396844f52402c5cf09bd3b9', 392229)
             OK
 
         """

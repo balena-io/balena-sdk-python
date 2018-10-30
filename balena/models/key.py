@@ -8,7 +8,7 @@ from .. import exceptions
 
 class Key(object):
     """
-    This class implements ssh key model for Resin Python SDK.
+    This class implements ssh key model for balena python SDK.
 
     """
 

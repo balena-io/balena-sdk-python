@@ -55,6 +55,11 @@ class BaseTagTest(object):
         test_runner.assertEqual(tags[0]['tag_key'], 'Foo')
         test_runner.assertEqual(tags[0]['value'], '1')
 
+        # should not allow creating a balena tag
+        with test_runner.assertRaises(Exception) as cm:
+            self.test_obj.set(resource_id, 'io.balena.test', 'not allowed')
+        test_runner.assertIn('Tag keys beginning with io.balena. are reserved.', cm.exception.message)
+
         # should not allow creating a resin tag
         with test_runner.assertRaises(Exception) as cm:
             self.test_obj.set(resource_id, 'io.resin.test', 'not allowed')
@@ -104,15 +109,15 @@ class BaseTagTest(object):
 class TestReleaseTag(unittest.TestCase):
 
     helper = None
-    resin = None
+    balena = None
     release_tag = None
     base_tag_test = None
 
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
-        cls.resin = cls.helper.resin
-        cls.release_tag = cls.resin.models.tag.release
+        cls.balena = cls.helper.balena
+        cls.release_tag = cls.balena.models.tag.release
         cls.base_tag_test = BaseTagTest(cls.release_tag)
 
     def tearDown(self):

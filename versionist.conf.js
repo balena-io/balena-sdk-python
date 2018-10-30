@@ -22,7 +22,7 @@ module.exports = {
   incrementVersion: 'semver',
   updateVersion: {
     preset: 'initPy',
-    targetFile: 'resin/__init__.py'
+    targetFile: 'balena/__init__.py'
   },
 
   // Always add the entry to the top of the Changelog, below the header.

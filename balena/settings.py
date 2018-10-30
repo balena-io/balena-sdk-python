@@ -16,7 +16,7 @@ except ImportError:  # Python 2 imports
 
 class Settings(object):
     """
-    This class handles settings for Resin Python SDK.
+    This class handles settings for balena python SDK.
 
     Attributes:
         HOME_DIRECTORY (str): home directory path.
@@ -28,7 +28,7 @@ class Settings(object):
 
     HOME_DIRECTORY = Path.expanduser('~')
     CONFIG_SECTION = 'Settings'
-    CONFIG_FILENAME = 'resin.cfg'
+    CONFIG_FILENAME = 'balena.cfg'
     DEFAULT_SETTING_KEYS = set(['pine_endpoint', 'api_endpoint', 'api_version',
                                 'data_directory', 'image_cache_time',
                                 'token_refresh_interval', 'cache_directory', 'timeout'])
@@ -36,10 +36,10 @@ class Settings(object):
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        'pine_endpoint': 'https://api.resin.io/v4/',
-        'api_endpoint': 'https://api.resin.io/',
+        'pine_endpoint': 'https://api.balena-cloud.com/v4/',
+        'api_endpoint': 'https://api.balena-cloud.com/',
         'api_version': 'v4',
-        'data_directory': Path.join(HOME_DIRECTORY, '.resin'),
+        'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
         # cache time : 1 week in milliseconds
         'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
         # token refresh interval: 1 hour in milliseconds
@@ -117,7 +117,7 @@ class Settings(object):
             bool: True if exists, False otherwise.
 
         Examples:
-            >>> resin.settings.has('api_endpoint')
+            >>> balena.settings.has('api_endpoint')
             True
 
         """
@@ -141,8 +141,8 @@ class Settings(object):
             InvalidOption: If getting a non-existent setting.
 
         Examples:
-            >>> resin.settings.get('api_endpoint')
-            'https://api.resin.io/'
+            >>> balena.settings.get('api_endpoint')
+            'https://api.balena.io/'
 
         """
 
@@ -160,8 +160,8 @@ class Settings(object):
             dict: all settings.
 
         Examples:
-            >>> resin.settings.get_all()
-            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.resin.io/', 'data_directory': '/root/.resin', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.resin/cache', 'pine_endpoint': 'https://api.resin.io/ewa/'}
+            >>> balena.settings.get_all()
+            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena.io/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena.io/ewa/'}
 
 
         """
@@ -178,7 +178,7 @@ class Settings(object):
             value (str): setting value.
 
         Examples:
-            >>> resin.settings.set(key='tmp',value='123456')
+            >>> balena.settings.set(key='tmp',value='123456')
             (Empty Return)
 
         """
@@ -198,10 +198,10 @@ class Settings(object):
 
         Examples:
             # Remove an existing key from settings
-            >>> resin.settings.remove('tmp')
+            >>> balena.settings.remove('tmp')
             True
             # Remove a non-existing key from settings
-            >>> resin.settings.remove('tmp1')
+            >>> balena.settings.remove('tmp1')
             False
 
         """

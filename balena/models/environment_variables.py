@@ -28,7 +28,7 @@ class EnvironmentVariable(object):
 
 class DeviceEnvVariable(object):
     """
-    This class implements device environment variable model for Resin Python SDK.
+    This class implements device environment variable model for balena python SDK.
 
     """
 
@@ -59,8 +59,8 @@ class DeviceEnvVariable(object):
             list: device environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-            [{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'RESIN_DEVICE_RESTART'}]
+            >>> balena.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
+            [{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'BALENA_DEVICE_RESTART'}]
 
         """
 
@@ -87,8 +87,8 @@ class DeviceEnvVariable(object):
             dict: new device environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
-            {'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 42166}
+            >>> balena.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
+            {'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 42166}
 
         """
 
@@ -115,7 +115,7 @@ class DeviceEnvVariable(object):
             value (str): new environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.device.update(2184, 'new value')
+            >>> balena.models.environment_variables.device.update(2184, 'new value')
             'OK'
 
         """
@@ -140,7 +140,7 @@ class DeviceEnvVariable(object):
             var_id (str): environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.device.remove(2184)
+            >>> balena.models.environment_variables.device.remove(2184)
             'OK'
 
         """
@@ -165,8 +165,8 @@ class DeviceEnvVariable(object):
             list: list of device environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.device.get_all_by_application('5780')
-            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+            >>> balena.models.environment_variables.device.get_all_by_application('5780')
+            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'BALENA_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/balena/device(121794)'}, u'__id': 121794}, u'id': 1524}]
 
         """
 
@@ -182,7 +182,7 @@ class DeviceEnvVariable(object):
 
 class DeviceServiceEnvVariable(object):
     """
-    This class implements device service variable model for Resin Python SDK.
+    This class implements device service variable model for balena python SDK.
 
     """
 
@@ -204,8 +204,8 @@ class DeviceServiceEnvVariable(object):
             list: device service environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.device_service_environment_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-            [{u'name': u'dev_proxy', u'created_at': u'2018-03-16T19:23:21.727Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28888)'}, u'value': u'value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30788)'}, u'id': 30788, u'service': [{u'service_name': u'proxy', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28888}, {u'name': u'dev_data', u'created_at': u'2018-03-16T19:23:11.614Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28887)'}, u'value': u'dev_data_value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28887}, {u'name': u'dev_data1', u'created_at': u'2018-03-17T05:53:19.257Z', u'__metadata': {u'type': u'', u'uri': u'/resin/device_service_environment_variable(28964)'}, u'value': u'aaaa', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/resin/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/resin/service(NaN)'}}]}], u'id': 28964}]
+            >>> balena.models.environment_variables.device_service_environment_variable.get_all('f5213eac0d63ac47721b037a7406d306')
+            [{u'name': u'dev_proxy', u'created_at': u'2018-03-16T19:23:21.727Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28888)'}, u'value': u'value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30788)'}, u'id': 30788, u'service': [{u'service_name': u'proxy', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28888}, {u'name': u'dev_data', u'created_at': u'2018-03-16T19:23:11.614Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28887)'}, u'value': u'dev_data_value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28887}, {u'name': u'dev_data1', u'created_at': u'2018-03-17T05:53:19.257Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28964)'}, u'value': u'aaaa', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28964}]
 
         """
 
@@ -233,8 +233,8 @@ class DeviceServiceEnvVariable(object):
             dict: new device service environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.device_service_environment_variable.create('f5213eac0d63ac47721b037a7406d306', 'data', 'dev_data_sdk', 'test1')
-            {"id":28970,"created_at":"2018-03-17T10:13:14.184Z","service_install":{"__deferred":{"uri":"/resin/service_install(30789)"},"__id":30789},"value":"test1","name":"dev_data_sdk","__metadata":{"uri":"/resin/device_service_environment_variable(28970)","type":""}}
+            >>> balena.models.environment_variables.device_service_environment_variable.create('f5213eac0d63ac47721b037a7406d306', 'data', 'dev_data_sdk', 'test1')
+            {"id":28970,"created_at":"2018-03-17T10:13:14.184Z","service_install":{"__deferred":{"uri":"/balena/service_install(30789)"},"__id":30789},"value":"test1","name":"dev_data_sdk","__metadata":{"uri":"/balena/device_service_environment_variable(28970)","type":""}}
 
         """
 
@@ -270,7 +270,7 @@ class DeviceServiceEnvVariable(object):
             value (str): new device environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.device_service_environment_variable.update('28970', 'test1 new value')
+            >>> balena.models.environment_variables.device_service_environment_variable.update('28970', 'test1 new value')
             'OK'
 
         """
@@ -295,7 +295,7 @@ class DeviceServiceEnvVariable(object):
             var_id (str): device service environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.device_service_environment_variable.remove('28970')
+            >>> balena.models.environment_variables.device_service_environment_variable.remove('28970')
             'OK'
 
         """
@@ -320,8 +320,8 @@ class DeviceServiceEnvVariable(object):
             list: list of device service environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.device_service_environment_variable(1043050)
-            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/resin/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'RESIN_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/resin/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/resin/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+            >>> balena.models.environment_variables.device_service_environment_variable(1043050)
+            [{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'BALENA_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/balena/device(121794)'}, u'__id': 121794}, u'id': 1524}]
 
         """
 
@@ -335,7 +335,7 @@ class DeviceServiceEnvVariable(object):
 
 class ApplicationEnvVariable(object):
     """
-    This class implements application environment variable model for Resin Python SDK.
+    This class implements application environment variable model for balena python SDK.
 
     Attributes:
         SYSTEM_VARIABLE_RESERVED_NAMES (list): list of reserved system variable names.
@@ -343,8 +343,8 @@ class ApplicationEnvVariable(object):
 
     """
 
-    SYSTEM_VARIABLE_RESERVED_NAMES = ['RESIN', 'USER']
-    OTHER_RESERVED_NAMES_START = 'RESIN_'
+    SYSTEM_VARIABLE_RESERVED_NAMES = ['BALENA', 'RESIN', 'USER']
+    OTHER_RESERVED_NAMES_START = ['BALENA_', 'RESIN_']
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -361,8 +361,8 @@ class ApplicationEnvVariable(object):
             list: application environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.application.get_all(9020)
-            [{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'RESIN_RESTART'}]
+            >>> balena.models.environment_variables.application.get_all(9020)
+            [{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'BALENA_RESTART'}]
 
         """
 
@@ -388,8 +388,8 @@ class ApplicationEnvVariable(object):
             dict: new application environment info.
 
         Examples:
-            >>> resin.models.environment_variables.application.create('978062', 'test2', '123')
-            {'id': 91138, 'application': {'__deferred': {'uri': '/resin/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/resin/environment_variable(91138)', 'type': ''}}
+            >>> balena.models.environment_variables.application.create('978062', 'test2', '123')
+            {'id': 91138, 'application': {'__deferred': {'uri': '/balena/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/balena/environment_variable(91138)', 'type': ''}}
 
         """
 
@@ -414,7 +414,7 @@ class ApplicationEnvVariable(object):
             value (str): new environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.application.update(5652, 'new value')
+            >>> balena.models.environment_variables.application.update(5652, 'new value')
             'OK'
 
         """
@@ -440,7 +440,7 @@ class ApplicationEnvVariable(object):
             var_id (str): environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.application.remove(5652)
+            >>> balena.models.environment_variables.application.remove(5652)
             'OK'
 
         """
@@ -465,21 +465,25 @@ class ApplicationEnvVariable(object):
             bool: True if system variable, False otherwise.
 
         Examples:
-            >>> resin.models.environment_variables.application.is_system_variable('RESIN_API_KEY')
+            >>> balena.models.environment_variables.application.is_system_variable('BALENA_API_KEY')
             True
-            >>> resin.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
+            >>> balena.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
             False
 
         """
 
         if variable in self.SYSTEM_VARIABLE_RESERVED_NAMES:
             return True
-        return variable.startswith(self.OTHER_RESERVED_NAMES_START)
+
+        return any(
+            true for prefix in self.OTHER_RESERVED_NAMES_START
+            if variable.startswith(prefix)
+        )
 
 
 class ServiceEnvVariable(object):
     """
-    This class implements service environment variable model for Resin Python SDK.
+    This class implements service environment variable model for balena python SDK.
 
     """
 
@@ -499,8 +503,8 @@ class ServiceEnvVariable(object):
             list: service application environment variables.
 
         Examples:
-            >>> resin.models.environment_variables.service_environment_variable.get_all('1005160')
-            [{u'name': u'app_data', u'service': {u'__deferred': {u'uri': u'/resin/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:21.087Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12365)'}, u'value': u'app_data_value', u'id': 12365}, {u'name': u'app_data1', u'service': {u'__deferred': {u'uri': u'/resin/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:49.662Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12366)'}, u'value': u'app_data_value', u'id': 12366}, {u'name': u'app_front', u'service': {u'__deferred': {u'uri': u'/resin/service(21669)'}, u'__id': 21669}, u'created_at': u'2018-03-16T19:22:06.955Z', u'__metadata': {u'type': u'', u'uri': u'/resin/service_environment_variable(12367)'}, u'value': u'front_value', u'id': 12367}]
+            >>> balena.models.environment_variables.service_environment_variable.get_all('1005160')
+            [{u'name': u'app_data', u'service': {u'__deferred': {u'uri': u'/balena/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:21.087Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12365)'}, u'value': u'app_data_value', u'id': 12365}, {u'name': u'app_data1', u'service': {u'__deferred': {u'uri': u'/balena/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:49.662Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12366)'}, u'value': u'app_data_value', u'id': 12366}, {u'name': u'app_front', u'service': {u'__deferred': {u'uri': u'/balena/service(21669)'}, u'__id': 21669}, u'created_at': u'2018-03-16T19:22:06.955Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12367)'}, u'value': u'front_value', u'id': 12367}]
 
 
         """
@@ -527,8 +531,8 @@ class ServiceEnvVariable(object):
             str: new service environment variable info.
 
         Examples:
-            >>> resin.models.environment_variables.service_environment_variable.create('1005160', 'proxy', 'app_proxy', 'test value')
-            {"id":12444,"created_at":"2018-03-18T09:34:09.144Z","service":{"__deferred":{"uri":"/resin/service(21668)"},"__id":21668},"name":"app_proxy","value":"test value","__metadata":{"uri":"/resin/service_environment_variable(12444)","type":""}}
+            >>> balena.models.environment_variables.service_environment_variable.create('1005160', 'proxy', 'app_proxy', 'test value')
+            {"id":12444,"created_at":"2018-03-18T09:34:09.144Z","service":{"__deferred":{"uri":"/balena/service(21668)"},"__id":21668},"name":"app_proxy","value":"test value","__metadata":{"uri":"/balena/service_environment_variable(12444)","type":""}}
 
         """
 
@@ -557,7 +561,7 @@ class ServiceEnvVariable(object):
             value (str): new service environment variable value.
 
         Examples:
-            >>> resin.models.environment_variables.service_environment_variable.update('12444', 'new test value')
+            >>> balena.models.environment_variables.service_environment_variable.update('12444', 'new test value')
             'OK'
 
         """
@@ -583,7 +587,7 @@ class ServiceEnvVariable(object):
             var_id (str): service environment variable id.
 
         Examples:
-            >>> resin.models.environment_variables.service_environment_variable.remove('12444')
+            >>> balena.models.environment_variables.service_environment_variable.remove('12444')
             'OK'
 
         """
