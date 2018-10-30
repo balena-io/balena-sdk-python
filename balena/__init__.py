@@ -35,7 +35,6 @@ from .settings import Settings
 from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
-from .util.deprecation_warning import print_rename_warning
 
 __version__ = '5.1.3'
 
@@ -52,8 +51,6 @@ class Balena(object):
     """
 
     def __init__(self):
-        print_rename_warning()
-
         self.settings = Settings()
         self.logs = Logs()
         self.auth = Auth()
