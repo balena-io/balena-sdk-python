@@ -37,7 +37,7 @@ from .twofactor_auth import TwoFactorAuth
 
 from .util.deprecation_warning import print_rename_warning
 
-__version__ = '5.1.2'
+__version__ = '5.1.3'
 
 
 class Resin(object):
