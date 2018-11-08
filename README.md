@@ -46,7 +46,7 @@ We generate markdown documentation in [DOCUMENTATION.md](https://github.com/bale
 
 To generate the documentation:
 ```bash
-python docs_generators.py > DOCUMENTATION.md
+python docs_generator.py > DOCUMENTATION.md
 ```
 
 Tests
