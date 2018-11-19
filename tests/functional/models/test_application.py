@@ -61,6 +61,20 @@ class TestApplication(unittest.TestCase):
         self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(self.balena.models.application.get('FooBar')['app_name'], 'FooBar')
 
+    def test_get_by_owner(self):
+        # raise balena.exceptions.ApplicationNotFound if no application found.
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.test_get_by_owner('AppNotExist', self.helper.credentials['user_id'])
+
+        # found an application, it should return an application with matched name.
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertEqual(self.balena.models.application.get('FooBar', self.helper.credentials['user_id'])['app_name'], 'FooBar')
+
+        # should not find the created application with a different username
+        with self.assertRaises(Exception) as cm:
+            self.balena.models.application.get('FooBar', 'random_username')
+        self.assertIn('Application not found: random_username/foobar', cm.exception.message)
+
     def test_has(self):
         # should be true if the application name exists, otherwise it should return false.
         self.balena.models.application.create('FooBar', 'Raspberry Pi 2')

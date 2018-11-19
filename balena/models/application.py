@@ -79,6 +79,44 @@ class Application(object):
         except IndexError:
             raise exceptions.ApplicationNotFound(name)
 
+    def get_by_owner(self, name, owner):
+        """
+        Get a single application.
+
+        Args:
+            name (str): application name.
+            owner (str):  owner's username.
+
+        Returns:
+            dict: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+            AmbiguousApplication: when more than one application is returned.
+
+        Examples:
+            >>> balena.models.application.get('RPI1')
+            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+
+        """
+
+        slug = '{owner}/{app_name}'.format(owner=owner.lower(), app_name=name.lower())
+
+        params = {
+            'filter': 'slug',
+            'eq': slug
+        }
+        try:
+            apps = self.base_request.request(
+                'application', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+            if len(apps) > 1:
+                raise exceptions.AmbiguousApplication(slug)
+            return apps[0]
+        except IndexError:
+            raise exceptions.ApplicationNotFound(slug)
+
     def has(self, name):
         """
         Check if an application exists.
