@@ -40,10 +40,8 @@ class Application(object):
 
         """
 
-        raw_query = "$filter=(user eq '{user_id}') or (includes__user/any(x:x/user eq '{user_id}'))".format(user_id=self.auth.get_user_id())
-
         return self.base_request.request(
-            'application', 'GET', raw_query=raw_query, endpoint=self.settings.get('pine_endpoint')
+            'my_application', 'GET', endpoint=self.settings.get('pine_endpoint')
         )['d']
 
     def get(self, name):
