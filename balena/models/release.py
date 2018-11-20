@@ -48,7 +48,32 @@ class Release(object):
         if release['d']:
             return release['d']
         else:
-            raise exceptions.ReleaseNotFound(key)
+            raise exceptions.ReleaseNotFound(value)
+
+    def __get_by_raw_query(self, raw_query):
+        """
+        Private function to get releases using raw query.
+
+        Args:
+            raw_query (str): query field.
+
+        Returns:
+            list: release info.
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        release = self.base_request.request(
+            'release', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+        if release['d']:
+            return release['d']
+        else:
+            raise exceptions.ReleaseNotFound(raw_query)
 
     def get(self, id):
         """
@@ -80,6 +105,24 @@ class Release(object):
         """
 
         return self.__get_by_option('belongs_to__application', app_id)
+
+    def get_latest_by_application(self, app_id):
+        """
+        Get the latest successful release for an application.
+
+        Args:
+            app_id (str): applicaiton id.
+
+        Returns:
+            dict: release info.
+
+        """
+
+        raw_query = "$top=1&$filter=belongs_to__application%20eq%20'{}'%20and%20status%20eq%20'success'".format(app_id)
+        try:
+            return self.__get_by_raw_query(raw_query)[0]
+        except exceptions.ReleaseNotFound:
+            raise exceptions.ReleaseNotFound(app_id)
 
     def get_with_image_details(self, id):
         """

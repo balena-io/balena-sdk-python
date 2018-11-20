@@ -1048,3 +1048,48 @@ class Device(object):
             'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def is_tracking_application_release(self, uuid):
+        """
+        Get whether the device is configured to track the current application release.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            bool: is tracking the current application release.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        return not bool(self.get(uuid)['should_be_running__release'])
+
+    def track_application_release(self, uuid):
+        """
+        Configure a specific device to track the current application release.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'should_be_running__release': None
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
