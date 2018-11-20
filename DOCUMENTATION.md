@@ -212,6 +212,26 @@ Get a single application by application id.
 >>> balena.models.application.get_by_id(9020)
 {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
 ```
+### Function: get_by_owner(name, owner)
+
+Get a single application.
+
+#### Args:
+    name (str): application name.
+    owner (str):  owner's username.
+
+#### Returns:
+    dict: application info.
+
+#### Raises:
+    ApplicationNotFound: if application couldn't be found.
+    AmbiguousApplication: when more than one application is returned.
+
+#### Examples:
+```python
+>>> balena.models.application.get_by_owner('mothaiba', 'pythonsdk_test_resin')
+{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'mothaiba', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(1307755)'}, u'is_accessible_by_support_until__date': None, u'actor': 3438708, u'id': 1307755, u'user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'pythonsdk_test_resin/mothaiba'}
+```
 ### Function: get_config(app_id)
 
         Download application config.json.
@@ -247,6 +267,20 @@ Tethering=false
 Enable=true
 Tethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.balena.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'11111111111111111111111111111111', u'deltaEndpoint': u'https://delta.balena.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.balena.io'}
         
+### Function: get_target_release_hash(app_id)
+
+Get the hash of the current release for a specific application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    str: The release hash of the current release.
+
+#### Examples:
+```python
+>>> balena.models.application.get_target_release_hash('5685')
+```
 ### Function: grant_support_access(app_id, expiry_timestamp)
 
 Grant support access to an application until a specified time.
@@ -288,6 +322,19 @@ Check if the user has any applications.
 >>> balena.models.application.has_any()
 True
 ```
+### Function: is_tracking_latest_release(app_id)
+
+Get whether the application is up to date and is tracking the latest release for updates.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    bool: is tracking the latest release.
+
+#### Examples:
+    >> > balena.models.application.is_tracking_latest_release('5685')
+    True
 ### Function: remove(name)
 
 Remove application. This function only works if you log in using credentials or Auth Token.
@@ -328,14 +375,13 @@ Revoke support access to an application.
 #### Examples:
     >> > balena.models.application.revoke_support_access('5685')
     'OK'
-### Function: set_to_release(app_id, commit_id)
+### Function: set_to_release(app_id, full_release_hash)
 
 Set an application to a specific commit.
-The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is balena.models.applicaion.disable_rolling_updates())
 
 #### Args:
     app_id (str): application id.
-    commit_id (str) : commit id.
+    full_release_hash (str) : full_release_hash.
 
 #### Returns:
     OK/error.
@@ -343,6 +389,30 @@ The commit will get updated on the next push unless rolling updates are disabled
 #### Examples:
     >> > balena.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
     'OK'
+### Function: track_latest_release(app_id)
+
+Configure a specific application to track the latest available release.
+
+#### Args:
+    app_id (str): application id.
+
+#### Examples:
+```python
+>>> balena.models.application.track_latest_release('5685')
+```
+### Function: will_track_new_releases(app_id)
+
+Get whether the application is configured to receive updates whenever a new release is available.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    bool: is tracking the latest release.
+
+#### Examples:
+    >> > balena.models.application.will_track_new_releases('5685')
+    True
 ## ApiKey
 
 This class implements user API key model for balena python SDK.
@@ -946,6 +1016,18 @@ Check if a device is online.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
+### Function: is_tracking_application_release(uuid)
+
+Get whether the device is configured to track the current application release.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    bool: is tracking the current application release.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: move(uuid, app_name)
 
 Move a device to another application.
@@ -1085,6 +1167,15 @@ Set an empty commit_id will restore rolling releases to the device.
 #### Examples:
     >> > balena.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
     'OK'
+### Function: track_application_release(uuid)
+
+Configure a specific device to track the current application release.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: unset_custom_location(uuid)
 
 clear custom location for a device.
@@ -1508,6 +1599,15 @@ Get all releases from an application.
 
 #### Returns:
     list: release info.
+### Function: get_latest_by_application(app_id)
+
+Get the latest successful release for an application.
+
+#### Args:
+    app_id (str): applicaiton id.
+
+#### Returns:
+    dict: release info.
 ### Function: get_with_image_details(id)
 
 Get a specific release with the details of the images built.

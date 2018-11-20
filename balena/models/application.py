@@ -97,8 +97,8 @@ class Application(object):
             AmbiguousApplication: when more than one application is returned.
 
         Examples:
-            >>> balena.models.application.get('RPI1')
-            {u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+            >>> balena.models.application.get_by_owner('mothaiba', 'pythonsdk_test_resin')
+            {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'mothaiba', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(1307755)'}, u'is_accessible_by_support_until__date': None, u'actor': 3438708, u'id': 1307755, u'user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'pythonsdk_test_resin/mothaiba'}
 
         """
 
