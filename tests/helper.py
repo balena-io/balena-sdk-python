@@ -327,3 +327,42 @@ class TestHelper(object):
             'old_db_image': old_db_image,
             'current_db_image': new_db_image
         }
+
+    def create_app_with_releases(self, app_name='FooBar', device_type='Raspberry Pi 2'):
+        """
+        Create a multicontainer application with  two releases.
+        """
+
+        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+
+        # Register an old & new release of this application
+
+        data = {
+            'belongs_to__application': app['id'],
+            'is_created_by__user': app['user']['__id'],
+            'commit': 'old-release-commit',
+            'status': 'success',
+            'source': 'cloud',
+            'composition': {},
+            'start_timestamp': 1234
+        }
+
+        old_release = json.loads(self.base_request.request('release', 'POST', data=data, endpoint=self.settings.get('pine_endpoint')).decode('utf-8'))
+
+        data = {
+            'belongs_to__application': app['id'],
+            'is_created_by__user': app['user']['__id'],
+            'commit': 'new-release-commit',
+            'status': 'success',
+            'source': 'cloud',
+            'composition': {},
+            'start_timestamp': 54321
+        }
+
+        new_release = json.loads(self.base_request.request('release', 'POST', data=data, endpoint=self.settings.get('pine_endpoint')).decode('utf-8'))
+
+        return {
+            'app': app,
+            'old_release': old_release,
+            'current_release': new_release
+        }

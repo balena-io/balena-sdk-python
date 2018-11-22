@@ -28,7 +28,8 @@ class Config(object):
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self._config = None
+        self._config = {}
+        self._device_types = None
 
     def _get_config(self, key):
         if self._config:
@@ -50,10 +51,9 @@ class Config(object):
 
         """
 
-        if self._config is None:
+        if not self._config:
             self._config = self.base_request.request(
                 'config', 'GET', endpoint=self.settings.get('api_endpoint'))
-            self._config['deviceTypes'] = list(map(_normalize_device_type, self._config['deviceTypes']))
         return self._config
 
     def get_device_types(self):
@@ -69,4 +69,8 @@ class Config(object):
 
         """
 
-        return self._get_config('deviceTypes')
+        if not self._device_types:
+            self._device_types = self.base_request.request(
+                'device-types/v1', 'GET', endpoint=self.settings.get('api_endpoint'), auth=False)
+            self._device_types = list(map(_normalize_device_type, self._device_types))
+        return self._device_types

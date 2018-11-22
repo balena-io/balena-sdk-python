@@ -61,6 +61,20 @@ class TestApplication(unittest.TestCase):
         self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
         self.assertEqual(self.balena.models.application.get('FooBar')['app_name'], 'FooBar')
 
+    def test_get_by_owner(self):
+        # raise balena.exceptions.ApplicationNotFound if no application found.
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.get_by_owner('AppNotExist', self.helper.credentials['user_id'])
+
+        # found an application, it should return an application with matched name.
+        self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        self.assertEqual(self.balena.models.application.get_by_owner('FooBar', self.helper.credentials['user_id'])['app_name'], 'FooBar')
+
+        # should not find the created application with a different username
+        with self.assertRaises(Exception) as cm:
+            self.balena.models.application.get_by_owner('FooBar', 'random_username')
+        self.assertIn('Application not found: random_username/foobar', cm.exception.message)
+
     def test_has(self):
         # should be true if the application name exists, otherwise it should return false.
         self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
@@ -153,6 +167,59 @@ class TestApplication(unittest.TestCase):
         self.balena.models.application.revoke_support_access(app['id'])
         app = self.balena.models.application.get('FooBar')
         self.assertIsNone(app['is_accessible_by_support_until__date'])
+
+    def test_will_track_new_releases(self):
+        # should be configured to track new releases by default.
+        app_info = self.helper.create_app_with_releases()
+        self.assertTrue(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+
+        # should be false when should_track_latest_release is false.
+        self.balena.models.application.disable_rolling_updates(app_info['app']['id'])
+        self.assertFalse(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+        self.balena.models.application.enable_rolling_updates(app_info['app']['id'])
+        self.assertTrue(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+
+    def test_is_tracking_latest_release(self):
+        # should be tracking the latest release by default.
+        app_info = self.helper.create_app_with_releases()
+        self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+
+        # should be false when should_track_latest_release is false.
+        self.balena.models.application.disable_rolling_updates(app_info['app']['id'])
+        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+        self.balena.models.application.enable_rolling_updates(app_info['app']['id'])
+        self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+
+        # should be false when the current commit is not of the latest release.
+        self.balena.models.application.set_to_release(app_info['app']['id'], app_info['old_release']['commit'])
+        # app.set_to_release() will set should_track_latest_release to false so need to set it to true again.
+        self.balena.models.application.enable_rolling_updates(app_info['app']['id'])
+        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+
+    def test_get_target_release_hash(self):
+        # should retrieve the commit hash of the current release.
+        app_info = self.helper.create_app_with_releases()
+        self.assertEqual(self.balena.models.application.get_target_release_hash(app_info['app']['id']), app_info['current_release']['commit'])
+
+    def test_set_to_release(self):
+        # should set the application to specific release & disable latest release tracking
+        app_info = self.helper.create_app_with_releases()
+        self.balena.models.application.set_to_release(app_info['app']['id'], app_info['old_release']['commit'])
+        self.assertEqual(self.balena.models.application.get_target_release_hash(app_info['app']['id']), app_info['old_release']['commit'])
+        self.assertFalse(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+
+    def test_track_latest_release(self):
+        # should re-enable latest release tracking
+        app_info = self.helper.create_app_with_releases()
+        self.balena.models.application.set_to_release(app_info['app']['id'], app_info['old_release']['commit'])
+        self.assertEqual(self.balena.models.application.get_target_release_hash(app_info['app']['id']), app_info['old_release']['commit'])
+        self.assertFalse(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
+        self.balena.models.application.track_latest_release(app_info['app']['id'])
+        self.assertEqual(self.balena.models.application.get_target_release_hash(app_info['app']['id']), app_info['current_release']['commit'])
+        self.assertTrue(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
+        self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
 
 if __name__ == '__main__':
     unittest.main()

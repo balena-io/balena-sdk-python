@@ -325,6 +325,19 @@ class TestDevice(unittest.TestCase):
         self.balena.models.device.revoke_support_access(device['uuid'])
         self.assertIsNone(self.balena.models.device.get(device['uuid'])['is_accessible_by_support_until__date'])
 
+    def test_is_tracking_application_release(self):
+        app, device = self.helper.create_device()
+
+        # should be tracking the latest release by default.
+        self.assertTrue(self.balena.models.device.is_tracking_application_release(device['uuid']))
+
+    def test_track_application_release(self):
+        app_info = self.helper.create_multicontainer_app()
+
+        # should set the device to track the current application release.
+        self.balena.models.device.set_to_release(app_info['device']['uuid'], app_info['old_release']['commit'])
+        self.balena.models.device.track_application_release(app_info['device']['uuid'])
+        self.assertTrue(self.balena.models.device.is_tracking_application_release(app_info['device']['uuid']))
 
 if __name__ == '__main__':
     unittest.main()

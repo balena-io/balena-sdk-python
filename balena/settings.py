@@ -36,9 +36,9 @@ class Settings(object):
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        'pine_endpoint': 'https://api.balena-cloud.com/v4/',
+        'pine_endpoint': 'https://api.balena-cloud.com/v5/',
         'api_endpoint': 'https://api.balena-cloud.com/',
-        'api_version': 'v4',
+        'api_version': 'v5',
         'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
         # cache time : 1 week in milliseconds
         'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),

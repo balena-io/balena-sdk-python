@@ -2,6 +2,7 @@ from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .config import Config
+from .release import Release
 from .. import exceptions
 
 from datetime import datetime
@@ -26,6 +27,7 @@ class Application(object):
         self.settings = Settings()
         self.config = Config()
         self.auth = Auth()
+        self.release = Release()
 
     def get_all(self):
         """
@@ -40,10 +42,8 @@ class Application(object):
 
         """
 
-        raw_query = "$filter=(user eq '{user_id}') or (includes__user/any(x:x/user eq '{user_id}'))".format(user_id=self.auth.get_user_id())
-
         return self.base_request.request(
-            'application', 'GET', raw_query=raw_query, endpoint=self.settings.get('pine_endpoint')
+            'my_application', 'GET', endpoint=self.settings.get('pine_endpoint')
         )['d']
 
     def get(self, name):
@@ -80,6 +80,44 @@ class Application(object):
             return apps[0]
         except IndexError:
             raise exceptions.ApplicationNotFound(name)
+
+    def get_by_owner(self, name, owner):
+        """
+        Get a single application.
+
+        Args:
+            name (str): application name.
+            owner (str):  owner's username.
+
+        Returns:
+            dict: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+            AmbiguousApplication: when more than one application is returned.
+
+        Examples:
+            >>> balena.models.application.get_by_owner('mothaiba', 'pythonsdk_test_resin')
+            {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'mothaiba', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(1307755)'}, u'is_accessible_by_support_until__date': None, u'actor': 3438708, u'id': 1307755, u'user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'pythonsdk_test_resin/mothaiba'}
+
+        """
+
+        slug = '{owner}/{app_name}'.format(owner=owner.lower(), app_name=name.lower())
+
+        params = {
+            'filter': 'slug',
+            'eq': slug
+        }
+        try:
+            apps = self.base_request.request(
+                'application', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+            if len(apps) > 1:
+                raise exceptions.AmbiguousApplication(slug)
+            return apps[0]
+        except IndexError:
+            raise exceptions.ApplicationNotFound(slug)
 
     def has(self, name):
         """
@@ -493,14 +531,13 @@ class Application(object):
             endpoint=self.settings.get('api_endpoint')
         )
 
-    def set_to_release(self, app_id, commit_id):
+    def set_to_release(self, app_id, full_release_hash):
         """
         Set an application to a specific commit.
-        The commit will get updated on the next push unless rolling updates are disabled (there is a dedicated method for that which is balena.models.applicaion.disable_rolling_updates())
 
         Args:
             app_id (str): application id.
-            commit_id (str) : commit id.
+            full_release_hash (str) : full_release_hash.
 
         Returns:
             OK/error.
@@ -517,8 +554,106 @@ class Application(object):
         }
 
         data = {
-            'commit': commit_id
+            'commit': full_release_hash,
+            'should_track_latest_release': False
         }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def will_track_new_releases(self, app_id):
+        """
+        Get whether the application is configured to receive updates whenever a new release is available.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            bool: is tracking the latest release.
+
+        Examples:
+            >> > balena.models.application.will_track_new_releases('5685')
+            True
+
+        """
+
+        return bool(self.get_by_id(app_id)['should_track_latest_release'])
+
+    def is_tracking_latest_release(self, app_id):
+        """
+        Get whether the application is up to date and is tracking the latest release for updates.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            bool: is tracking the latest release.
+
+        Examples:
+            >> > balena.models.application.is_tracking_latest_release('5685')
+            True
+
+        """
+
+        app = self.get_by_id(app_id)
+        latest_release = None
+
+        try:
+            latest_release = self.release.get_latest_by_application(app_id)
+        except exceptions.ReleaseNotFound:
+            pass
+
+        return bool(app['should_track_latest_release']) and (not latest_release or app['commit'] == latest_release['commit'])
+
+    def get_target_release_hash(self, app_id):
+        """
+        Get the hash of the current release for a specific application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            str: The release hash of the current release.
+
+        Examples:
+            >>> balena.models.application.get_target_release_hash('5685')
+
+        """
+
+        return self.get_by_id(app_id)['commit']
+
+    def track_latest_release(self, app_id):
+        """
+        Configure a specific application to track the latest available release.
+
+        Args:
+            app_id (str): application id.
+
+        Examples:
+            >>> balena.models.application.track_latest_release('5685')
+
+        """
+
+        latest_release = None
+
+        try:
+            latest_release = self.release.get_latest_by_application(app_id)
+        except exceptions.ReleaseNotFound:
+            pass
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+
+        data = {
+            'should_track_latest_release': True
+        }
+
+        if latest_release:
+            data['commit'] = latest_release['commit']
 
         return self.base_request.request(
             'application', 'PATCH', params=params, data=data,
