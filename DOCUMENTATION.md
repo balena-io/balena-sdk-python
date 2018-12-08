@@ -232,41 +232,27 @@ Get a single application.
 >>> balena.models.application.get_by_owner('mothaiba', 'pythonsdk_test_resin')
 {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'mothaiba', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(1307755)'}, u'is_accessible_by_support_until__date': None, u'actor': 3438708, u'id': 1307755, u'user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'pythonsdk_test_resin/mothaiba'}
 ```
-### Function: get_config(app_id)
+### Function: get_config(app_id, version)
 
-        Download application config.json.
+Download application config.json.
 
-####         Args:
-            app_id (str): application id.
+#### Args:
+    app_id (str): application id.
+    version (str): the OS version of the image.
+    **options (dict): OS configuration keyword arguments to use. The available options are listed below:
+        network (Optional[str]): the network type that the device will use, one of 'ethernet' or 'wifi' and defaults to 'ethernet' if not specified.
+        appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
+        wifiKey (Optional[str]): the key for the wifi network the device will connect to.
+        wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to.
+        ip (Optional[str]): static ip address.
+        gateway (Optional[str]): static ip gateway.
+        netmask (Optional[str]): static ip netmask.
 
-####         Returns:
-            dict: application config.json content.
+#### Returns:
+    dict: application config.json content.
 
-####         Raises:
-            ApplicationNotFound: if application couldn't be found.
-
-####         Examples:
-```python
-            >>> balena.models.application.get_config('106640')
-            {u'applicationName': u'RPI3', u'username': u'nghiant2710', u'apiKey': u'kIaqS6ZLOoxkFzpzqSYhWtr2lj6m8KZi', u'vpnPort': 443, u'listenPort': 48484, u'pubnubSubscribeKey': u'sub-c-bbc12eba-ce4a-11e3-9782-02ee2ddab7fe', u'vpnEndpoint': u'vpn.balena.io', u'userId': 189, u'files': {u'network/network.config': u'[service_home_ethernet]
-Type = ethernet
-Nameservers = 8.8.8.8,8.8.4.4', u'network/settings': u'[global]
-OfflineMode=false
-TimeUpdates=manual
-```
-
-[WiFi]
-Enable=true
-Tethering=false
-
-[Wired]
-Enable=true
-Tethering=false
-
-[Bluetooth]
-Enable=true
-Tethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.balena.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'11111111111111111111111111111111', u'deltaEndpoint': u'https://delta.balena.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.balena.io'}
-        
+#### Raises:
+    ApplicationNotFound: if application couldn't be found.
 ### Function: get_target_release_hash(app_id)
 
 Get the hash of the current release for a specific application.
