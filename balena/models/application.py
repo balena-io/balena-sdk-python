@@ -294,12 +294,21 @@ class Application(object):
             endpoint=self.settings.get('api_endpoint'), login=True
         )
 
-    def get_config(self, app_id):
+    def get_config(self, app_id, version, **options):
         """
         Download application config.json.
 
         Args:
             app_id (str): application id.
+            version (str): the OS version of the image.
+            **options (dict): OS configuration keyword arguments to use. The available options are listed below:
+                network (Optional[str]): the network type that the device will use, one of 'ethernet' or 'wifi' and defaults to 'ethernet' if not specified.
+                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
+                wifiKey (Optional[str]): the key for the wifi network the device will connect to.
+                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to.
+                ip (Optional[str]): static ip address.
+                gateway (Optional[str]): static ip gateway.
+                netmask (Optional[str]): static ip netmask.
 
         Returns:
             dict: application config.json content.
@@ -307,18 +316,22 @@ class Application(object):
         Raises:
             ApplicationNotFound: if application couldn't be found.
 
-        Examples:
-            >>> balena.models.application.get_config('106640')
-            {u'applicationName': u'RPI3', u'username': u'nghiant2710', u'apiKey': u'kIaqS6ZLOoxkFzpzqSYhWtr2lj6m8KZi', u'vpnPort': 443, u'listenPort': 48484, u'pubnubSubscribeKey': u'sub-c-bbc12eba-ce4a-11e3-9782-02ee2ddab7fe', u'vpnEndpoint': u'vpn.balena.io', u'userId': 189, u'files': {u'network/network.config': u'[service_home_ethernet]\nType = ethernet\nNameservers = 8.8.8.8,8.8.4.4', u'network/settings': u'[global]\nOfflineMode=false\nTimeUpdates=manual\n\n[WiFi]\nEnable=true\nTethering=false\n\n[Wired]\nEnable=true\nTethering=false\n\n[Bluetooth]\nEnable=true\nTethering=false'}, u'pubnubPublishKey': u'pub-c-6cbce8db-bfd1-4fdf-a8c8-53671ae2b226', u'apiEndpoint': u'https://api.balena.io', u'connectivity': u'connman', u'deviceType': u'raspberrypi3', u'mixpanelToken': u'11111111111111111111111111111111', u'deltaEndpoint': u'https://delta.balena.io', u'appUpdatePollInterval': 60000, u'applicationId': 106640, u'registryEndpoint': u'registry.balena.io'}
         """
 
         # Application not found will be raised if can't get app by id.
         self.get_by_id(app_id)
-        data = {
-            'appId': app_id
-        }
+
+        if not version:
+            raise exceptions.MissingOption('An OS version is required when calling application.get_config()')
+
+        if 'network' not in options:
+            options['network'] = 'ethernet'
+
+        options['appId'] = app_id
+        options['version'] = version
+
         return self.base_request.request(
-            '/download-config', 'POST', data=data,
+            '/download-config', 'POST', data=options,
             endpoint=self.settings.get('api_endpoint')
         )
 
