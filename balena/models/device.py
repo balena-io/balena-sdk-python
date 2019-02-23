@@ -1093,3 +1093,81 @@ class Device(object):
             'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def __set_lock_overriden(self, uuid, should_override):
+        """
+        Private method to set lock override.
+
+        Args:
+            uuid (str): device uuid.
+            should_override (bool): lock override status.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        value = '1' if should_override else '0'
+
+        data = {
+            'value': value
+        }
+
+        return self.base_request.request(
+            'device/{0}/lock-override'.format(device_id), 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint')
+        )
+
+    def enable_lock_override(self, uuid):
+        """
+        Enable lock override.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        return self.__set_lock_overriden(uuid, True)
+
+    def disable_lock_override(self, uuid):
+        """
+        Disable lock override.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        return self.__set_lock_overriden(uuid, False)
+
+    def has_lock_override(self, uuid):
+        """
+        Check if a device has the lock override enabled.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            bool: lock override status.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        res = self.base_request.request(
+            'device/{0}/lock-override'.format(device_id), 'GET',
+            endpoint=self.settings.get('api_endpoint')
+        )
+
+        return res == 1

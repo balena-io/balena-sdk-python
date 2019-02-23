@@ -339,5 +339,29 @@ class TestDevice(unittest.TestCase):
         self.balena.models.device.track_application_release(app_info['device']['uuid'])
         self.assertTrue(self.balena.models.device.is_tracking_application_release(app_info['device']['uuid']))
 
+    def test_has_lock_override(self):
+        app, device = self.helper.create_device()
+
+        # should be false by default for a device.
+        self.assertFalse(self.balena.models.device.has_lock_override(device['uuid']))
+
+    def test_enable_lock_override(self):
+        app, device = self.helper.create_device()
+
+        # should be able to enable lock override.
+        self.assertFalse(self.balena.models.device.has_lock_override(device['uuid']))
+        self.balena.models.device.enable_lock_override(device['uuid'])
+        self.assertTrue(self.balena.models.device.has_lock_override(device['uuid']))
+
+    def test_disable_lock_override(self):
+        app, device = self.helper.create_device()
+
+        # should be able to disable lock override.
+        self.balena.models.device.enable_lock_override(device['uuid'])
+        self.assertTrue(self.balena.models.device.has_lock_override(device['uuid']))
+        self.balena.models.device.disable_lock_override(device['uuid'])
+        self.assertFalse(self.balena.models.device.has_lock_override(device['uuid']))
+
+
 if __name__ == '__main__':
     unittest.main()
