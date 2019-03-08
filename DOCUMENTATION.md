@@ -66,11 +66,7 @@ This module implements all models for balena python SDK.
 
 This class implements application model for balena python SDK.
 
-Due to API changes, the returned Application object schema has changed. Here are the formats of the old and new returned objects.
-
-The old returned object's properties: `__metadata, actor, app_name, application, commit, device_type, git_repository, id, should_track_latest_release, support_expiry_date, user, version`.
-
-The new returned object's properties (since python SDK v2.0.0): `__metadata, actor, app_name, commit, depends_on__application, device_type, git_repository, id, is_accessible_by_support_until__date, should_track_latest_release, user, version`.
+The returned objects properties are `__metadata, actor, app_name, application_type, commit, depends_on__application, device_type, id, is_accessible_by_support_until__date, should_track_latest_release, slug, user`.
 ### Function: create(name, device_type, app_type)
 
 Create an application. This function only works if you log in using credentials or Auth Token.
@@ -89,8 +85,8 @@ Create an application. This function only works if you log in using credentials 
 
 #### Examples:
 ```python
->>> balena.models.application.create('Foobar', 'Raspberry Pi 3', 'microservices-starter')
-'{"id":1005767,"user":{"__deferred":{"uri":"/balena/user(32986)"},"__id":32986},"depends_on__application":null,"actor":2630233,"app_name":"Foobar","git_repository":"pythonsdk_test_balena/foobar","commit":null,"application_type":{"__deferred":{"uri":"/balena/application_type(5)"},"__id":5},"device_type":"raspberrypi3","should_track_latest_release":true,"is_accessible_by_support_until__date":null,"__metadata":{"uri":"/balena/application(1005767)","type":""}}'
+>>> balena.models.application.create('foo', 'Raspberry Pi 3', 'microservices-starter')
+'{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: disable_device_urls(app_id)
 
@@ -179,8 +175,8 @@ Get a single application.
 
 #### Examples:
 ```python
->>> balena.models.application.get('RPI1')
-{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+>>> balena.models.application.get('foo')
+'{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: get_all()
 
@@ -192,7 +188,7 @@ Get all applications (including collaborator applications).
 #### Examples:
 ```python
 >>> balena.models.application.get_all()
-[{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}, {u'app_name': u'RPI2', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9019)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi2.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi2', u'commit': None, u'id': 9019}]
+'[{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}, {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'bar', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12346)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12346, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/bar'}]'
 ```
 ### Function: get_by_id(app_id)
 
@@ -209,8 +205,8 @@ Get a single application by application id.
 
 #### Examples:
 ```python
->>> balena.models.application.get_by_id(9020)
-{u'app_name': u'RPI1', u'__metadata': {u'type': u'', u'uri': u'/ewa/application(9020)'}, u'git_repository': u'g_trong_nghia_nguyen@git.balena.io:g_trong_nghia_nguyen/rpi1.git', u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'device_type': u'raspberry-pi', u'commit': None, u'id': 9020}
+>>> balena.models.application.get_by_id(12345)
+'{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: get_by_owner(name, owner)
 
@@ -229,8 +225,8 @@ Get a single application.
 
 #### Examples:
 ```python
->>> balena.models.application.get_by_owner('mothaiba', 'pythonsdk_test_resin')
-{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'mothaiba', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(1307755)'}, u'is_accessible_by_support_until__date': None, u'actor': 3438708, u'id': 1307755, u'user': {u'__deferred': {u'uri': u'/resin/user(32986)'}, u'__id': 32986}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'pythonsdk_test_resin/mothaiba'}
+>>> balena.models.application.get_by_owner('foo', 'my_user')
+'{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: get_config(app_id, version)
 
@@ -293,7 +289,7 @@ Check if an application exists.
 
 #### Examples:
 ```python
->>> balena.models.application.has('RPI1')
+>>> balena.models.application.has('foo')
 True
 ```
 ### Function: has_any()
