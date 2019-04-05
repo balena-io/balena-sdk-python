@@ -4,3 +4,4 @@ pyotp>=2.2.5
 pyOpenSSL==18.0.0
 Twisted>=18.7.0
 service-identity
+semver

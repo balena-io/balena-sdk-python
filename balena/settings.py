@@ -31,7 +31,8 @@ class Settings(object):
     CONFIG_FILENAME = 'balena.cfg'
     DEFAULT_SETTING_KEYS = set(['pine_endpoint', 'api_endpoint', 'api_version',
                                 'data_directory', 'image_cache_time',
-                                'token_refresh_interval', 'cache_directory', 'timeout'])
+                                'token_refresh_interval', 'cache_directory', 'timeout',
+                                'image_maker_endpoint', 'device_actions_endpoint_version'])
 
     _setting = {
         # These are default config values to write default config file.
@@ -39,6 +40,8 @@ class Settings(object):
         'pine_endpoint': 'https://api.balena-cloud.com/v5/',
         'api_endpoint': 'https://api.balena-cloud.com/',
         'api_version': 'v5',
+        'image_maker_endpoint': 'https://img.balena-cloud.com/api/v1/',
+        'device_actions_endpoint_version': 'v1',
         'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
         # cache time : 1 week in milliseconds
         'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
