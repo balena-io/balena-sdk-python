@@ -362,6 +362,18 @@ class TestDevice(unittest.TestCase):
         self.balena.models.device.disable_lock_override(device['uuid'])
         self.assertFalse(self.balena.models.device.has_lock_override(device['uuid']))
 
+    def test_get_supervisor_state(self):
+        device = self.helper.create_device()[1]
+
+        # should be rejected if the device doesn't exist.
+        with self.assertRaises(Exception) as cm:
+            self.balena.models.device.get_supervisor_state('9999999')
+        self.assertIn('No online device(s) found', cm.exception.message)
+        # should be rejected if the device doesn't exist.
+        with self.assertRaises(Exception) as cm:
+            self.balena.models.device.get_supervisor_state(device['uuid'])
+        self.assertIn('No online device(s) found', cm.exception.message)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1027,7 +1027,7 @@ class Device(object):
             OK.
 
         Examples:
-            >> > balena.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
+            >>> balena.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
             'OK'
 
         """
@@ -1171,3 +1171,29 @@ class Device(object):
         )
 
         return res == 1
+
+    def get_supervisor_state(self, uuid):
+        """
+        Get the supervisor state on a device
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            dict: supervisor state.
+
+        Examples:
+            >>> balena.models.device.get_supervisor_state('b6070f4fea5edf808b576123157fe5ec')
+            {u'status': u'Idle', u'update_failed': False, u'os_version': u'balenaOS 2.29.0+rev1', u'download_progress': None, u'update_pending': False, u'api_port': u'48484', u'commit': u'd26dd8a68a47c40daaa1d32e03c96d934f37c53b', u'update_downloaded': False, u'supervisor_version': u'9.0.1', u'ip_address': u'192.168.100.16'}
+
+        """
+
+        data = {
+            'uuid': uuid,
+            'method': 'GET'
+        }
+
+        return self.base_request.request(
+            '/supervisor/v1/device', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint')
+        )
