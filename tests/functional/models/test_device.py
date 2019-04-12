@@ -152,6 +152,14 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.rename('99999999999', 'new-test-device')
 
+    def test_get_status(self):
+        # should be able to get the device's status.
+        app, device = self.helper.create_device()
+        self.assertEqual(
+            self.balena.models.device.get_status(device['uuid']),
+            'Configuring'
+        )
+
     def test_get_by_name(self):
         # should be able to get the device.
         app, device = self.helper.create_device()
