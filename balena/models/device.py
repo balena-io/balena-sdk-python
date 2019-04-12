@@ -1048,6 +1048,40 @@ class Device(object):
             'device', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+        
+    def set_to_build(self, uuid, build_id):
+        """
+        Set device to a specific release.
+        Set an empty commit_id will restore rolling releases to the device.
+
+        Args:
+            uuid (str): device uuid.
+            build_id (str) : build id.
+
+        Returns:
+            OK.
+
+        Examples:
+            >> > resin.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '165432')
+            'OK'
+
+        """
+
+        device_id = self.get(uuid)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': device_id
+        }
+
+        data = {
+            'should_be_running__release': build_id
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+            )
 
     def is_tracking_application_release(self, uuid):
         """
