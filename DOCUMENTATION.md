@@ -1196,6 +1196,21 @@ Set an empty commit_id will restore rolling releases to the device.
 >>> balena.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
 'OK'
 ```
+### Function: set_to_release_by_id(uuid, release_id)
+
+Set device to a specific release by release id (please notice that release id is not the commit hash on balena dashboard).
+Set an empty commit_id will restore rolling releases to the device.
+
+#### Args:
+    uuid (str): device uuid.
+    release_id (str) : build id.
+
+#### Returns:
+    OK.
+
+#### Examples:
+    >> > balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '165432')
+    'OK'
 ### Function: track_application_release(uuid)
 
 Configure a specific device to track the current application release.

@@ -1032,8 +1032,38 @@ class Device(object):
 
         """
 
+        device = self.get(uuid)
+        query = {
+            'commit': commit_id,
+            'status': 'success',
+            'belongs_to__application': device['belongs_to__application']['__id']
+        }
+
+        release_id = self.release._Release__get_by_option(**query)[0]['id'] if commit_id else None
+
+        return self.set_to_release_by_id(uuid, release_id=release_id)
+
+    def set_to_release_by_id(self, uuid, release_id=None):
+        """
+        Set device to a specific release by release id (please notice that release id is not the commit hash on balena dashboard).
+        Remove release_id will restore rolling releases to the device.
+
+        Args:
+            uuid (str): device uuid.
+            release_id (Optional[int]): release id.
+
+        Returns:
+            OK.
+
+        Examples:
+            >>> balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 165432)
+            'OK'
+            >>> balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
+            'OK'
+
+        """
+
         device_id = self.get(uuid)['id']
-        release_id = self.release._Release__get_by_option('commit', commit_id, status='success')[0]['id'] if commit_id else None
 
         params = {
             'filter': 'id',

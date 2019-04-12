@@ -19,14 +19,12 @@ class Release(object):
         self.image = Image()
         self.service = Service()
 
-    def __get_by_option(self, key, value, status=None):
+    def __get_by_option(self, **options):
         """
         Private function to get releases using any possible key.
 
         Args:
-            key (str): query field.
-            value (str): key's value.
-            status (Optional[str]): filter on release status. 
+            **options: options keyword arguments.
 
         Returns:
             list: release info.
@@ -36,18 +34,9 @@ class Release(object):
 
         """
 
-        if status:
-            params = {
-                'filters': {
-                    key: value,
-                    'status': status
-                }
-            }
-        else:
-            params = {
-                'filter': key,
-                'eq': value
-            }
+        params = {
+            'filters': options
+        }
 
         release = self.base_request.request(
             'release', 'GET', params=params,
@@ -57,7 +46,7 @@ class Release(object):
         if release['d']:
             return release['d']
         else:
-            raise exceptions.ReleaseNotFound(value)
+            raise exceptions.ReleaseNotFound(options)
 
     def __get_by_raw_query(self, raw_query):
         """
@@ -99,7 +88,7 @@ class Release(object):
 
         """
 
-        return self.__get_by_option('id', id)[0]
+        return self.__get_by_option(id=id)[0]
 
     def get_all_by_application(self, app_id):
         """
@@ -113,7 +102,7 @@ class Release(object):
 
         """
 
-        return self.__get_by_option('belongs_to__application', app_id)
+        return self.__get_by_option(belongs_to__application=app_id)
 
     def get_latest_by_application(self, app_id):
         """
