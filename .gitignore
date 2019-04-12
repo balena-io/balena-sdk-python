@@ -2,3 +2,4 @@
 test.py
 *.py.bak
 .env*
+build/*
