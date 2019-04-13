@@ -1033,7 +1033,7 @@ class Device(object):
         """
 
         device_id = self.get(uuid)['id']
-        release_id = self.release._Release__get_by_option('commit', commit_id)[0]['id'] if commit_id else None
+        release_id = self.release._Release__get_by_option('commit', commit_id, status='success')[0]['id'] if commit_id else None
 
         params = {
             'filter': 'id',

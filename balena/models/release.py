@@ -19,13 +19,14 @@ class Release(object):
         self.image = Image()
         self.service = Service()
 
-    def __get_by_option(self, key, value):
+    def __get_by_option(self, key, value, status=None):
         """
         Private function to get releases using any possible key.
 
         Args:
             key (str): query field.
             value (str): key's value.
+            status (Optional[str]): filter on release status. 
 
         Returns:
             list: release info.
@@ -35,10 +36,18 @@ class Release(object):
 
         """
 
-        params = {
-            'filter': key,
-            'eq': value
-        }
+        if status:
+            params = {
+                'filters': {
+                    key: value,
+                    'status': status
+                }
+            }
+        else:
+            params = {
+                'filter': key,
+                'eq': value
+            }
 
         release = self.base_request.request(
             'release', 'GET', params=params,
