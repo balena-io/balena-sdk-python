@@ -542,15 +542,19 @@ class ServiceEnvVariable(object):
         services = self.service.get_all_by_application(app_id)
         service_id = [i['id'] for i in services if i['service_name'] == service_name]
 
-        data = {
-            'name': env_var_name,
-            'value': value,
-            'service': service_id
-        }
-        return json.loads(self.base_request.request(
-            'service_environment_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
-        ).decode('utf-8'))
+        if service_id:
+            data = {
+                'name': env_var_name,
+                'value': value,
+                'service': service_id[0]
+            }
+
+            return json.loads(self.base_request.request(
+                'service_environment_variable', 'POST', data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            ).decode('utf-8'))
+        else:
+            raise exceptions.ServiceNotFound(service_name)
 
     def update(self, var_id, value):
         """

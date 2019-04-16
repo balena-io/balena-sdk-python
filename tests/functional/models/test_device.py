@@ -382,6 +382,16 @@ class TestDevice(unittest.TestCase):
             self.balena.models.device.get_supervisor_state(device['uuid'])
         self.assertIn('No online device(s) found', cm.exception.message)
 
+    def test_get_supervisor_target_state(self):
+        app, device = self.helper.create_device()
+
+        # should match device and app
+        supervisor_target_state = self.balena.models.device.get_supervisor_target_state(device['uuid'])
+        self.assertEqual(int(list(supervisor_target_state['local']['apps'].keys())[0]), app['id'])
+        self.assertEqual(supervisor_target_state['local']['apps']['{}'.format(app['id'])]['name'], app['app_name'])
+        # should return a blank string if the device doesn't exist.
+        supervisor_target_state_empty = self.balena.models.device.get_supervisor_target_state('9999999')
+        self.assertEqual(supervisor_target_state_empty.decode(), '')
 
 if __name__ == '__main__':
     unittest.main()
