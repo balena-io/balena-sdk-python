@@ -1,4 +1,7 @@
 import json
+import re
+
+import semver
 
 from ..base_request import BaseRequest
 from ..settings import Settings
@@ -19,6 +22,8 @@ class DeviceOs(object):
     This class implements device os model for balena python SDK.
 
     """
+
+    OS_UPDATE_ACTION_NAME = 'resinhup'
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -134,3 +139,95 @@ class DeviceOs(object):
             # if 'wifiKey' not in params:
             #    raise exceptions.MissingOption('wifiKey')
         return params
+
+    def __normalize_balena_semver(self, os_version):
+        """
+        safeSemver and trimOsText from resin-semver in Python.
+        ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
+
+        """
+
+        # fix major.minor.patch.rev to use rev as build metadata
+        version = re.sub(r'(\.[0-9]+)\.rev', r'\1+rev', os_version)
+        # fix major.minor.patch.prod to be treat .dev & .prod as build metadata
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+)\.(dev|prod)', r'\1+\2', version)
+        # if there are no build metadata, then treat the parenthesized value as one
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1+\2', version)
+        # if there are build metadata, then treat the parenthesized value as point value
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\+\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1.\2', version)
+        # Remove "Resin OS" and "Balena OS" text
+        version = re.sub(r'(resin|balena)\s*os\s*', '', version, flags=re.IGNORECASE)
+        # remove optional versioning, eg "(prod)", "(dev)"
+        version = re.sub(r'\s+\(\w+\)$', '', version)
+        # remove "v" prefix
+        version = re.sub(r'^v', '', version)
+        return version
+
+    def get_device_os_semver_with_variant(self, os_version, os_variant):
+        """
+        Get current device os semver with variant.
+
+        Args:
+            os_version (str): current os version.
+            os_variant (str): os variant.
+
+        Examples:
+            >>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
+            '2.29.2+rev1.prod'
+
+        """
+
+        if not os_version:
+            return None
+
+        version_info = semver.VersionInfo.parse(self.__normalize_balena_semver(os_version))
+
+        if not version_info:
+            return os_version
+
+        tmp = []
+        if version_info.prerelease:
+            tmp = version_info.prerelease.split('.')
+        if version_info.build:
+            tmp = tmp + version_info.build.split('.')
+
+        xstr = lambda s: '' if s is None else str(s)
+        return semver.format_version(
+            version_info.major,
+            version_info.minor,
+            version_info.patch,
+            version_info.prerelease,
+            xstr(version_info.build) + '.' + os_variant if os_variant and os_variant not in tmp else version_info.build
+        )
+
+    def get_supported_versions(self, device_type):
+        """
+        Get OS supported versions.
+
+        Args:
+            device_type (str): device type slug
+
+        Returns:
+            dict: the versions information, of the following structure:
+                * versions - an array of strings, containing exact version numbers supported by the current environment.
+                * recommended - the recommended version, i.e. the most recent version that is _not_ pre-release, can be `None`.
+                * latest - the most recent version, including pre-releases.
+                * default - recommended (if available) or latest otherwise.
+
+        """
+
+        response = self.base_request.request(
+            'image/{device_type}/versions'.format(device_type=device_type), 'GET',
+            endpoint=self.settings.get('image_maker_endpoint'), auth=False
+        )
+
+        potential_recommended_versions = [i for i in response['versions'] if not re.search(r'(\.|\+|-)dev', i)]
+        potential_recommended_versions = [i for i in potential_recommended_versions if not semver.parse(i)['prerelease']]
+        recommended = potential_recommended_versions[0] if potential_recommended_versions else None
+
+        return {
+            'versions': response['versions'],
+            'recommended': recommended,
+            'latest': response['latest'],
+            'default': recommended if recommended else response['latest']
+        }

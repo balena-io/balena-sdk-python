@@ -34,3 +34,4 @@ class Message(object):
     SERVICE_NOT_FOUND = "Service not found: {id}"
     INVALID_APPLICATION_TYPE = "Invalid application type: {app_type}"
     UNSUPPORTED_FEATURE = "You have to log in using credentials or Auth Token to use this function!"
+    OS_UPDATE_ERROR = "OS update failed: {message}"

@@ -402,3 +402,19 @@ class UnsupportedFeature(BalenaException):
     def __init__(self):
         super(UnsupportedFeature, self).__init__()
         self.message = Message.UNSUPPORTED_FEATURE
+
+
+class OsUpdateError(BalenaException):
+    """
+
+    Args:
+        message (str): message.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, message):
+        super(OsUpdateError, self).__init__()
+        self.message = Message.OS_UPDATE_ERROR.format(message=message)

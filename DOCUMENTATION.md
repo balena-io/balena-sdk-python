@@ -912,6 +912,23 @@ Get device name by device uuid.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
+### Function: get_os_update_status(uuid)
+
+        Get the OS update status of a device.
+
+####         Args:
+            uuid (str): device uuid.
+
+####         Returns:
+            dict: action response.
+
+####         Examples:
+```python
+            >>> balena.models.device.get_os_update_status('b6070f4fea5edf808b576123157fe5ec')
+            {u'status': u'done', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'stdout': u'[1554490814][LOG]Normalized target version: 2.29.2+rev1
+', u'last_run': 1554491107242L, u'error': u'', u'action': u'resinhup'}
+        
+```
 ### Function: get_status(uuid)
 
 Get the status of a device.
@@ -958,7 +975,7 @@ Get the supervisor target state on a device
 #### Examples:
 ```python
 >>> balena.models.device.get_supervisor_target_state('b6070f4fea5edf808b576123157fe5ec')
-{u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', 6 u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, 6 u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
+{u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
 ```
 ### Function: get_supported_device_types()
 
@@ -1214,18 +1231,44 @@ Set an empty commit_id will restore rolling releases to the device.
 ### Function: set_to_release_by_id(uuid, release_id)
 
 Set device to a specific release by release id (please notice that release id is not the commit hash on balena dashboard).
-Set an empty commit_id will restore rolling releases to the device.
+Remove release_id will restore rolling releases to the device.
 
 #### Args:
     uuid (str): device uuid.
-    release_id (str) : build id.
+    release_id (Optional[int]): release id.
 
 #### Returns:
     OK.
 
 #### Examples:
-    >> > balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '165432')
-    'OK'
+```python
+>>> balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 165432)
+'OK'
+>>> balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
+'OK'
+```
+### Function: start_os_update(uuid, target_os_version)
+
+Start an OS update on a device.
+
+#### Args:
+    uuid (str): device uuid.
+    target_os_version (str): semver-compatible version for the target device.
+        Unsupported (unpublished) version will result in rejection.
+        The version **must** be the exact version number, a "prod" variant and greater than the one running on the device.
+
+#### Returns:
+    dict: action response.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+    InvalidParameter|OsUpdateError: if target_os_version is invalid.
+
+#### Examples:
+```python
+>>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.29.2+rev1.prod')
+{u'status': u'in_progress', u'action': u'resinhup', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'last_run': 1554490809219L}
+```
 ### Function: track_application_release(uuid)
 
 Configure a specific device to track the current application release.
@@ -1298,6 +1341,32 @@ Get an application config.json.
 
 #### Returns:
     dict: application config.json
+### Function: get_device_os_semver_with_variant(os_version, os_variant)
+
+Get current device os semver with variant.
+
+#### Args:
+    os_version (str): current os version.
+    os_variant (str): os variant.
+
+#### Examples:
+```python
+>>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
+'2.29.2+rev1.prod'
+```
+### Function: get_supported_versions(device_type)
+
+Get OS supported versions.
+
+#### Args:
+    device_type (str): device type slug
+
+#### Returns:
+    dict: the versions information, of the following structure:
+        * versions - an array of strings, containing exact version numbers supported by the current environment.
+        * recommended - the recommended version, i.e. the most recent version that is _not_ pre-release, can be `None`.
+        * latest - the most recent version, including pre-releases.
+        * default - recommended (if available) or latest otherwise.
 ### Function: parse_params()
 
 Validate parameters for downloading device OS image.
