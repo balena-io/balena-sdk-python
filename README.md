@@ -23,6 +23,29 @@ From git:
 pip install git+https://github.com/balena-io/balena-sdk-python.git
 ```
 
+Example of installing on a Debian container:
+```
+FROM balenalib/amd64-debian:stretch
+
+# Install python 3 and balena SDK dependencies.
+RUN install_packages build-essential python3 python3-pip python3-setuptools \
+    python3-dev libffi-dev libssl-dev
+
+# Install balena python SDK in python 3.
+RUN pip3 install balena-sdk
+```
+
+Example of installing on a Alpine Linux container:
+```
+FROM balenalib/amd64-alpine:3.9
+
+# Install python 3 and balena SDK dependencies.
+RUN install_packages build-base python3 py3-setuptools python3-dev libffi-dev openssl-dev
+
+# Install balena python SDK in python 3.
+RUN pip3 install balena-sdk
+```
+
 Platforms
 ---------
 
