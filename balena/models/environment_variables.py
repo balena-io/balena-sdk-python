@@ -97,7 +97,7 @@ class DeviceEnvVariable(object):
         device = self.device.get(uuid)
         data = {
             'device': device['id'],
-            'env_var_name': env_var_name,
+            'name': env_var_name,
             'value': value
         }
         new_env_var = json.loads(self.base_request.request(
