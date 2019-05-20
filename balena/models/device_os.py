@@ -217,8 +217,8 @@ class DeviceOs(object):
         """
 
         response = self.base_request.request(
-            'image/{device_type}/versions'.format(device_type=device_type), 'GET',
-            endpoint=self.settings.get('image_maker_endpoint'), auth=False
+            '/device-types/v1/{device_type}/images'.format(device_type=device_type), 'GET',
+            endpoint=self.settings.get('api_endpoint'), auth=False
         )
 
         potential_recommended_versions = [i for i in response['versions'] if not re.search(r'(\.|\+|-)dev', i)]
