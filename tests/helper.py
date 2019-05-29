@@ -282,7 +282,7 @@ class TestHelper(object):
             'is_provided_by__release': old_release['id'],
             'device': dev['id'],
             'download_progress': 100,
-            'status': 'Deleted',
+            'status': 'deleted',
             'install_date': '2017-09-30'
         }
 
