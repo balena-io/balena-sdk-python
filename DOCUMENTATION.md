@@ -940,7 +940,7 @@ Get the status of a device.
     DeviceNotFound: if device couldn't be found.
 
 #### Returns:
-    str: status of a device. List of available statuses: Idle, Configuring, Updating, Offline and Post Provisioning.
+    str: status of a device. List of available statuses: Idle, Configuring, Updating, Offline, Inactive and Post Provisioning.
 
 #### Examples:
 ```python
