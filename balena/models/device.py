@@ -239,7 +239,7 @@ class Device(object):
 
         """
 
-        raw_query = "$filter=uuid%20eq%20'{0}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)),is_provided_by__release($select=id,commit)),gateway_download($select=id,download_progress,status&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid)
+        raw_query = "$filter=uuid%20eq%20'{0}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)),is_provided_by__release($select=id,commit)),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid)
 
         raw_data = self.base_request.request(
             'device', 'GET', raw_query=raw_query,
