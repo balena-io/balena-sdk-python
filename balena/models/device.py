@@ -33,6 +33,7 @@ class DeviceStatus(object):
     UPDATING = "Updating"
     OFFLINE = "Offline"
     POST_PROVISIONING = "Post Provisioning"
+    INACTIVE = "Inactive"
 
 
 class Device(object):
@@ -827,7 +828,7 @@ class Device(object):
             DeviceNotFound: if device couldn't be found.
 
         Returns:
-            str: status of a device. List of available statuses: Idle, Configuring, Updating, Offline and Post Provisioning.
+            str: status of a device. List of available statuses: Idle, Configuring, Updating, Offline, Inactive and Post Provisioning.
 
         Examples:
             >>> balena.models.device.get_status('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
@@ -835,11 +836,14 @@ class Device(object):
 
         """
 
-        device = self.get(uuid)
+        device = self.get_with_service_details(uuid)
+        if not device['is_active']:
+            return DeviceStatus.INACTIVE
+
         if device['provisioning_state'] == 'Post-Provisioning':
             return DeviceStatus.POST_PROVISIONING
 
-        seen = device['last_vpn_event'] and (datetime.strptime(device['last_vpn_event'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
+        seen = device['last_connectivity_event'] and (datetime.strptime(device['last_connectivity_event'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
         if not device['is_online'] and not seen:
             return DeviceStatus.CONFIGURING
 
@@ -851,6 +855,13 @@ class Device(object):
 
         if device['download_progress'] is not None:
             return DeviceStatus.CONFIGURING
+
+        if device['current_services']:
+            for service_name in device['current_services']:
+                installs = device['current_services'][service_name]
+                install = max(installs, key=lambda x: x['id'])
+                if install and install['download_progress'] is not None and install['status'] == 'Downloading':
+                    return DeviceStatus.UPDATING
 
         return DeviceStatus.IDLE
 
