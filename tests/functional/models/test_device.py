@@ -157,7 +157,7 @@ class TestDevice(unittest.TestCase):
         app, device = self.helper.create_device()
         self.assertEqual(
             self.balena.models.device.get_status(device['uuid']),
-            'Configuring'
+            'Inactive'
         )
 
     def test_get_by_name(self):
