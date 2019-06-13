@@ -221,12 +221,13 @@ class Device(object):
 
         return install
 
-    def get_with_service_details(self, uuid):
+    def get_with_service_details(self, uuid, expand_release=True):
         """
         Get a single device along with its associated services' essential details.
 
         Args:
             uuid (str): device uuid.
+            expand_release (Optional[bool]): Set this parameter to False then the commit of service details will not be included.
 
         Returns:
             dict: device info with associated services details.
@@ -240,7 +241,11 @@ class Device(object):
 
         """
 
-        raw_query = "$filter=uuid%20eq%20'{0}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)),is_provided_by__release($select=id,commit)),gateway_download($select=id,download_progress,status&$filter=tolower(status)%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid)
+        release = ''
+        if expand_release:
+            release = ",is_provided_by__release($select=id,commit)"
+
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release}),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid=uuid, release=release)
 
         raw_data = self.base_request.request(
             'device', 'GET', raw_query=raw_query,
