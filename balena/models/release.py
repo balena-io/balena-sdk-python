@@ -116,7 +116,7 @@ class Release(object):
 
         """
 
-        raw_query = "$top=1&$filter=belongs_to__application%20eq%20'{}'%20and%20status%20eq%20'success'".format(app_id)
+        raw_query = "$top=1&$filter=belongs_to__application%20eq%20'{}'%20and%20status%20eq%20'success'&$orderby=created_at%20desc".format(app_id)
         try:
             return self.__get_by_raw_query(raw_query)[0]
         except exceptions.ReleaseNotFound:
