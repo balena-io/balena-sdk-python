@@ -1397,6 +1397,16 @@ Get OS supported versions.
         * recommended - the recommended version, i.e. the most recent version that is _not_ pre-release, can be `None`.
         * latest - the most recent version, including pre-releases.
         * default - recommended (if available) or latest otherwise.
+### Function: is_architecture_compatible_with(os_architecture, application_architecture)
+
+Returns whether the specified OS architecture is compatible with the target architecture.
+
+#### Args:
+    os_architecture (str): The OS's architecture as specified in its device type.
+    application_architecture (str): The application's architecture as specified in its device type.
+
+#### Returns:
+    bool: Whether the specified OS architecture is capable of running applications build for the target architecture.
 ### Function: parse_params()
 
 Validate parameters for downloading device OS image.

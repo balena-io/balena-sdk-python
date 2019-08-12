@@ -803,7 +803,7 @@ class Device(object):
         device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['device_type'], self.config.get_device_types()))[0]
         app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['device_type'], self.config.get_device_types()))[0]
 
-        if device_dev_type['arch'] != app_dev_type['arch']:
+        if not self.device_os.is_architecture_compatible_with(device_dev_type['arch'], app_dev_type['arch']):
             raise exceptions.IncompatibleApplication(app_name)
 
         if bool(device_dev_type.get('isDependent', None)) != bool(app_dev_type.get('isDependent', None)):
