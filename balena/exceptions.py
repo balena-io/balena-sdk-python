@@ -362,6 +362,21 @@ class ReleaseNotFound(BalenaException):
         self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
 
 
+class AmbiguousRelease(BalenaException):
+    """
+    Args:
+        commit (str): release commit.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, commit):
+        super(AmbiguousRelease, self).__init__()
+        self.message = Message.AMBIGUOUS_RELEASE.format(commit=commit)
+
+
 class ServiceNotFound(BalenaException):
     """
     Args:

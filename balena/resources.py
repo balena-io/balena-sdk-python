@@ -31,6 +31,7 @@ class Message(object):
     INVALID_PARAMETER = "Invalid parameter: {value} is not a valid value for parameter `{parameter}`"
     IMAGE_NOT_FOUND = "Image not found: {id}"
     RELEASE_NOT_FOUND = "Release not found: {id}"
+    AMBIGUOUS_RELEASE = "Release commit is ambiguous: {commit}"
     SERVICE_NOT_FOUND = "Service not found: {id}"
     INVALID_APPLICATION_TYPE = "Invalid application type: {app_type}"
     UNSUPPORTED_FEATURE = "You have to log in using credentials or Auth Token to use this function!"
