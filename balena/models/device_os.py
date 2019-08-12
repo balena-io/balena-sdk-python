@@ -15,6 +15,10 @@ NETWORK_TYPES = [
     NETWORK_ETHERNET
 ]
 
+ARCH_COMPATIBILITY_MAP = {
+    'aarch64': ['armv7hf']
+}
+
 
 # TODO: https://github.com/balena-io/balena-sdk/pull/288
 class DeviceOs(object):
@@ -231,3 +235,23 @@ class DeviceOs(object):
             'latest': response['latest'],
             'default': recommended if recommended else response['latest']
         }
+
+    def is_architecture_compatible_with(self, os_architecture, application_architecture):
+        """
+        Returns whether the specified OS architecture is compatible with the target architecture.
+
+        Args:
+            os_architecture (str): The OS's architecture as specified in its device type.
+            application_architecture (str): The application's architecture as specified in its device type.
+
+        Returns:
+            bool: Whether the specified OS architecture is capable of running applications build for the target architecture.
+
+        """
+
+        if os_architecture != application_architecture:
+            if os_architecture in ARCH_COMPATIBILITY_MAP and application_architecture in ARCH_COMPATIBILITY_MAP[os_architecture]:
+                return True
+            return False
+
+        return True
