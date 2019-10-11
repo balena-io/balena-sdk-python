@@ -2,6 +2,7 @@ import json
 
 from ..base_request import BaseRequest
 from .device import Device
+from .release import Release
 from ..settings import Settings
 from .. import exceptions
 
@@ -317,6 +318,7 @@ class ReleaseTag(BaseTag):
 
     def __init__(self):
         super(ReleaseTag, self).__init__('release')
+        self.release = Release()
 
     def get_all_by_application(self, app_id):
         """
@@ -339,22 +341,24 @@ class ReleaseTag(BaseTag):
 
         return super(ReleaseTag, self).get_all(raw_query=query)
 
-    def get_all_by_release(self, release_id):
+    def get_all_by_release(self, commit_or_id):
         """
         Get all release tags for a release.
 
         Args:
-            release_id (str): release id.
+            commit_or_id: release commit (str) or id (int).
 
         Returns:
             list: list contains release tags.
 
         Examples:
-            >>> balena.models.tag.release.get_all_by_release('135')
+            >>> balena.models.tag.release.get_all_by_release(135)
             [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 
 
         """
+
+        release_id = self.release.get(commit_or_id)['id']
 
         params = {
             'filter': 'release',
@@ -378,12 +382,12 @@ class ReleaseTag(BaseTag):
 
         return super(ReleaseTag, self).get_all()
 
-    def set(self, release_id, tag_key, value):
+    def set(self, commit_or_id, tag_key, value):
         """
         Set a release tag (update tag value if it exists).
 
         Args:
-            release_id (str): release id.
+            commit_or_id: release commit (str) or id (int).
             tag_key (str): tag key.
             value (str): tag value.
 
@@ -392,27 +396,30 @@ class ReleaseTag(BaseTag):
             OK: if tag exists.
 
         Examples:
-            >>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
+            >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
             {u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}
-            >>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
+            >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK 1')
             OK
 
         """
 
+        release_id = self.release.get(commit_or_id)['id']
+
         return super(ReleaseTag, self).set(release_id, tag_key, value)
 
-    def remove(self, release_id, tag_key):
+    def remove(self, commit_or_id, tag_key):
         """
         Remove a release tag.
 
         Args:
-            release_id (str): release id.
+            commit_or_id: release commit (str) or id (int).
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.tag.release.remove('135', 'releaseTag1')
+            >>> balena.models.tag.release.remove(135, 'releaseTag1')
             OK
 
         """
 
+        release_id = self.release.get(commit_or_id)['id']
         return super(ReleaseTag, self).remove(release_id, tag_key)
