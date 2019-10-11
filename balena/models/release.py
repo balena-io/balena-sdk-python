@@ -175,3 +175,49 @@ class Release(object):
             return release
         else:
             raise exceptions.ReleaseNotFound(commit_or_id)
+
+    def create_from_url(self, app_id, url, flatten_tarball=True):
+        """
+        Create a new release built from the source in the provided url.
+
+        Args:
+            app_id (int): application id.
+            url (str): a url with a tarball of the project to build.
+            flatten_tarball (Optional[bool]): Should be true when the tarball includes an extra root folder with all the content.
+
+        Returns:
+            int: release Id.
+
+        Raises:
+            BuilderRequestError: if builder returns any errors.
+
+        """
+
+        raw_query = "$filter=id%20eq%20'{app_id}'&select=app_name&$expand=user($select=username)".format(app_id=app_id)
+
+        app = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if len(app) == 0:
+            raise exceptions.ApplicationNotFound(app_id)
+        if len(app) > 1:
+            raise exceptions.AmbiguousApplication(app_id)
+
+        data = {
+            'url': url,
+            'shouldFlatten': flatten_tarball
+        }
+
+        response = self.base_request.request(
+            '/v3/buildFromUrl?headless=true&owner={owner}&app={app_name}'.format(app_name=app[0]['app_name'], owner=app[0]['user'][0]['username']),
+            'POST',
+            data=data,
+            endpoint=self.settings.get('builder_url')
+        )
+
+        if response['started']:
+            return response['releaseId']
+
+        raise exceptions.BuilderRequestError(response['message'])
