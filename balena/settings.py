@@ -29,7 +29,7 @@ class Settings(object):
     HOME_DIRECTORY = Path.expanduser('~')
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'balena.cfg'
-    DEFAULT_SETTING_KEYS = set(['pine_endpoint', 'api_endpoint', 'api_version',
+    DEFAULT_SETTING_KEYS = set(['builder_url', 'pine_endpoint', 'api_endpoint', 'api_version',
                                 'data_directory', 'image_cache_time',
                                 'token_refresh_interval', 'cache_directory', 'timeout',
                                 'device_actions_endpoint_version'])
@@ -39,6 +39,7 @@ class Settings(object):
         # All values here must be in string format otherwise there will be error when write config file.
         'pine_endpoint': 'https://api.balena-cloud.com/v5/',
         'api_endpoint': 'https://api.balena-cloud.com/',
+        'builder_url': 'https://builder.balena-cloud.com/',
         'api_version': 'v5',
         'device_actions_endpoint_version': 'v1',
         'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
