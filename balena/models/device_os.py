@@ -16,7 +16,8 @@ NETWORK_TYPES = [
 ]
 
 ARCH_COMPATIBILITY_MAP = {
-    'aarch64': ['armv7hf']
+    'aarch64': ['armv7hf', 'rpi'],
+    'armv7hf': ['rpi']
 }
 
 
