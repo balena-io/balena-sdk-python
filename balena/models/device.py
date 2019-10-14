@@ -17,9 +17,15 @@ from .device_os import DeviceOs
 from ..settings import Settings
 from ..auth import Auth
 from .. import exceptions
+from ..resources import Message
 from .application import Application
 from .release import Release
 from .hup import Hup
+
+
+LOCAL_MODE_MIN_OS_VERSION = '2.0.0'
+LOCAL_MODE_MIN_SUPERVISOR_VERSION = '4.0.0'
+LOCAL_MODE_ENV_VAR = 'RESIN_SUPERVISOR_LOCAL_MODE'
 
 
 # TODO: support both device uuid and device id
@@ -1361,3 +1367,157 @@ class Device(object):
                 device_actions_api_version=self.settings.get('device_actions_endpoint_version')
             )
         )
+
+    def __is_provisioned_device(self, device):
+        return device['supervisor_version'] and device['last_connectivity_event']
+
+    def __check_local_mode_supported(self, device):
+        if not self.__is_provisioned_device(device):
+            raise exceptions.LocalModeError(Message.DEVICE_NOT_PROVISIONED)
+
+        if semver.compare(self.device_os._DeviceOs__normalize_balena_semver(device['os_version']), LOCAL_MODE_MIN_OS_VERSION) < 0:
+            raise exceptions.LocalModeError(Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE)
+
+        if semver.compare(self.device_os._DeviceOs__normalize_balena_semver(device['supervisor_version']), LOCAL_MODE_MIN_SUPERVISOR_VERSION) < 0:
+            raise exceptions.LocalModeError(Message.DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE)
+
+        if device['os_variant'] != 'dev':
+            raise exceptions.LocalModeError(Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE)
+
+    def __upsert_device_local_mode(self, device, value):
+        try:
+            data = {
+                'device': device['id'],
+                'name': LOCAL_MODE_ENV_VAR,
+                'value': value
+            }
+
+            return self.base_request.request(
+                'device_config_variable', 'POST', data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            )
+        except exceptions.RequestError as e:
+            if 'Unique key constraint violated' in e.message or 'must be unique' in e.message:
+                params = {
+                    'filters': {
+                        'device': device['id'],
+                        'name': LOCAL_MODE_ENV_VAR
+                    }
+                }
+
+                data = {
+                    'value': value
+                }
+
+                return self.base_request.request(
+                    'device_config_variable', 'PATCH', params=params, data=data,
+                    endpoint=self.settings.get('pine_endpoint')
+                )
+            raise e
+
+    def is_in_local_mode(self, uuid):
+        """
+        Check if local mode is enabled on the device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            bool: True if local mode enabled, otherwise False.
+
+        Examples:
+            >>> balena.models.device.is_in_local_mode('b6070f4fea5edf808b576123157fe5ec')
+            True
+
+        """
+
+        device = self.get(uuid)
+
+        params = {
+            'filters': {
+                'device': device['id'],
+                'name': LOCAL_MODE_ENV_VAR
+            }
+        }
+
+        response = self.base_request.request(
+            'device_config_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if len(response) == 0:
+            return False
+        if response[0]['value'] == '1':
+            return True
+        return False
+
+    def enable_local_mode(self, uuid):
+        """
+        Enable local mode.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            None.
+
+        Examples:
+            >>> balena.models.device.enable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+
+        Raises:
+            LocalModeError: if local mode can't be enabled.
+
+        """
+
+        device = self.get(uuid)
+
+        # this will throw an error if a device doesn't support local mode
+        self.__check_local_mode_supported(device)
+
+        self.__upsert_device_local_mode(device, '1')
+
+    def disable_local_mode(self, uuid):
+        """
+        Disable local mode.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            None.
+
+        Examples:
+            >>> balena.models.device.disable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+
+        """
+
+        device = self.get(uuid)
+        self.__upsert_device_local_mode(device, '0')
+
+    def get_local_mode_support(self, uuid):
+        """
+        Returns whether local mode is supported along with a message describing the reason why local mode is not supported.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            dict: local mode support information ({'supported': True/False, 'message': '...'}).
+
+        Examples:
+            >>> balena.models.device.get_local_mode_support('b6070f4fea5edf808b576123157fe5ec')
+            {'message': 'Local mode is only supported on development OS versions', 'supported': False}
+        """
+
+        device = self.get(uuid)
+        try:
+            self.__check_local_mode_supported(device)
+            return {
+                'supported': True,
+                'message': 'Supported'
+            }
+        except exceptions.LocalModeError as e:
+            return {
+                'supported': False,
+                'message': e.message
+            }

@@ -437,6 +437,21 @@ class OsUpdateError(BalenaException):
 
 class BuilderRequestError(BalenaException):
     """
+    Args:
+        message (str): message.
+
+    Attributes:
+        message (str): error message.
+    """
+
+    def __init__(self, message):
+        super(BuilderRequestError, self).__init__()
+        self.message = message
+
+
+class LocalModeError(BalenaException):
+    """
+    Generic Local Mode Exception.
 
     Args:
         message (str): message.
@@ -447,5 +462,5 @@ class BuilderRequestError(BalenaException):
     """
 
     def __init__(self, message):
-        super(BuilderRequestError, self).__init__()
+        super(LocalModeError, self).__init__()
         self.message = message
