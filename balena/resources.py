@@ -36,3 +36,7 @@ class Message(object):
     INVALID_APPLICATION_TYPE = "Invalid application type: {app_type}"
     UNSUPPORTED_FEATURE = "You have to log in using credentials or Auth Token to use this function!"
     OS_UPDATE_ERROR = "OS update failed: {message}"
+    DEVICE_NOT_PROVISIONED = "Device is not yet fully provisioned"
+    DEVICE_OS_NOT_SUPPORT_LOCAL_MODE = "Device OS version does not support local mode"
+    DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE = "Device supervisor version does not support local mode"
+    DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE = "Local mode is only supported on development OS versions"

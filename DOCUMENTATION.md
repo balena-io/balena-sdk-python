@@ -674,6 +674,20 @@ Disable device url for a device.
 >>> balena.models.device.disable_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 'OK'
 ```
+### Function: disable_local_mode(uuid)
+
+Disable local mode.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    None.
+
+#### Examples:
+```python
+>>> balena.models.device.disable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+```
 ### Function: disable_lock_override(uuid)
 
 Disable lock override.
@@ -705,6 +719,23 @@ False
 >>> balena.models.device.has_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 True
 ```
+### Function: enable_local_mode(uuid)
+
+Enable local mode.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    None.
+
+#### Examples:
+```python
+>>> balena.models.device.enable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+```
+
+#### Raises:
+    LocalModeError: if local mode can't be enabled.
 ### Function: enable_lock_override(uuid)
 
 Enable lock override.
@@ -908,6 +939,21 @@ Get the local IP addresses of a device.
 #### Raises:
     DeviceNotFound: if device couldn't be found.
     DeviceOffline: if device is offline.
+### Function: get_local_mode_support(uuid)
+
+Returns whether local mode is supported along with a message describing the reason why local mode is not supported.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    dict: local mode support information ({'supported': True/False, 'message': '...'}).
+
+#### Examples:
+```python
+>>> balena.models.device.get_local_mode_support('b6070f4fea5edf808b576123157fe5ec')
+{'message': 'Local mode is only supported on development OS versions', 'supported': False}
+```
 ### Function: get_manifest_by_application(app_name)
 
 Get a device manifest by application name.
@@ -1092,6 +1138,21 @@ Identify device. This function only works if you log in using credentials or Aut
 ```python
 >>> balena.models.device.identify('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 'OK'
+```
+### Function: is_in_local_mode(uuid)
+
+Check if local mode is enabled on the device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    bool: True if local mode enabled, otherwise False.
+
+#### Examples:
+```python
+>>> balena.models.device.is_in_local_mode('b6070f4fea5edf808b576123157fe5ec')
+True
 ```
 ### Function: is_online(uuid)
 
