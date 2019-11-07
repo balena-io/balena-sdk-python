@@ -1,6 +1,5 @@
 import os
 from pkg_resources import parse_version
-import logging
 
 from ..base_request import BaseRequest
 from ..settings import Settings
@@ -8,11 +7,10 @@ from .. import exceptions
 from .device import Device
 
 
-logging.basicConfig(format='%(levelname)s:%(message)s')
 
 
 def _print_deprecation_warning():
-    logging.warning("This is not supported on multicontainer devices, and will be removed in future")
+    print("This is not supported on multicontainer devices, and will be removed in future")
 
 
 class Supervisor(object):
