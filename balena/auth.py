@@ -17,9 +17,12 @@ class Auth(object):
         self.base_request = BaseRequest()
         self.settings = Settings()
 
-    def __get_user_data(self):
+    def __get_user_data(self, login=False):
         """
         Get user details from token.
+
+        Args:
+            login (bool): whether or not the operation is a login
 
         Returns:
             dict: user details.
@@ -32,17 +35,19 @@ class Auth(object):
         if not self._user_detail_cache:
             self._user_detail_cache = self.base_request.request(
                 'user/v1/whoami', 'get',
-                endpoint=self.settings.get('api_endpoint')
+                endpoint=self.settings.get('api_endpoint'),
+                login=login
             )
 
         return self._user_detail_cache
 
-    def __get_property(self, element):
+    def __get_property(self, element, login=False):
         """
         Get a property from user details.
 
         Args:
             element (str): property name.
+            login (bool): whether or not the operation is a login
 
         Returns:
             str: property value.
@@ -53,7 +58,7 @@ class Auth(object):
 
         """
 
-        if element in self.__get_user_data():
+        if element in self.__get_user_data(login):
             return self._user_detail_cache[element]
         else:
             raise exceptions.InvalidOption(element)
@@ -76,7 +81,7 @@ class Auth(object):
         Examples:
             >>> from balena import Balena
             >>> balena = Balena()
-            >>> credentials = {'username': '<your email>', 'password': '<your password>''}
+            >>> credentials = {'username': '<your email>', 'password': '<your password>'}
             >>> balena.auth.login(**credentials)
             (Empty Return)
 
@@ -127,7 +132,7 @@ class Auth(object):
 
         """
 
-        return self.__get_property('username')
+        return self.__get_property('username', login=True)
 
     def authenticate(self, **credentials):
         """
@@ -173,7 +178,7 @@ class Auth(object):
         """
 
         try:
-            self.__get_user_data()
+            self.__get_user_data(login=True)
             return True
         except (exceptions.RequestError, exceptions.Unauthorized):
             return False
@@ -215,7 +220,7 @@ class Auth(object):
 
         """
 
-        return self.__get_property('id')
+        return self.__get_property('id', login=True)
 
     def get_email(self):
         """
@@ -234,7 +239,7 @@ class Auth(object):
 
         """
 
-        return self.__get_property('email')
+        return self.__get_property('email', login=True)
 
     def log_out(self):
         """

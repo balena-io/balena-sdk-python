@@ -36,8 +36,8 @@ class Supervisor(object):
     SUPERVISOR_ADDRESS = os.environ.get('BALENA_SUPERVISOR_ADDRESS') or os.environ.get('RESIN_SUPERVISOR_ADDRESS')
     SUPERVISOR_API_KEY = os.environ.get('BALENA_SUPERVISOR_API_KEY') or os.environ.get('RESIN_SUPERVISOR_API_KEY')
 
-    # _on_device = True, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are avaiable => can communicate with both supervisor API endpoints on device or balena API endpoints.
-    # _on_device = False, if UPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are not avaiable => can only communicate with balena API endpoints.
+    # _on_device = True, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are available => can communicate with both supervisor API endpoints on device or balena API endpoints.
+    # _on_device = False, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are not available => can only communicate with balena API endpoints.
     _on_device = all([SUPERVISOR_ADDRESS, SUPERVISOR_API_KEY])
 
     def __init__(self):
