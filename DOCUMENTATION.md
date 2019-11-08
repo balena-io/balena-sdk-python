@@ -1746,6 +1746,20 @@ Get the build log from an image.
 ## Release
 
 This class implements release model for balena python SDK.
+### Function: create_from_url(app_id, url, flatten_tarball)
+
+Create a new release built from the source in the provided url.
+
+#### Args:
+    app_id (int): application id.
+    url (str): a url with a tarball of the project to build.
+    flatten_tarball (Optional[bool]): Should be true when the tarball includes an extra root folder with all the content.
+
+#### Returns:
+    int: release Id.
+
+#### Raises:
+    BuilderRequestError: if builder returns any errors.
 ### Function: get(id)
 
 Get a specific release.

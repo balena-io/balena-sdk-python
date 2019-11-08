@@ -433,3 +433,19 @@ class OsUpdateError(BalenaException):
     def __init__(self, message):
         super(OsUpdateError, self).__init__()
         self.message = Message.OS_UPDATE_ERROR.format(message=message)
+
+
+class BuilderRequestError(BalenaException):
+    """
+
+    Args:
+        message (str): message.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, message):
+        super(BuilderRequestError, self).__init__()
+        self.message = message
