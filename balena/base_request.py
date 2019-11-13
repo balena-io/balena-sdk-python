@@ -156,18 +156,26 @@ class BaseRequest(object):
             api_key = None
             auth = True
 
-        if auth and not api_key:
-            if not self.settings.has(TOKEN_KEY):
+        if auth:
+            if self.settings.has(TOKEN_KEY):
+                # Auth Token found, ignore BALENA_API_KEY/RESIN_API_KEY
+                api_key = None
+
+                if self.util.should_update_token(
+                    self.settings.get(TOKEN_KEY),
+                    self.settings.get('token_refresh_interval')
+                ):
+                    self.settings.set(TOKEN_KEY, self._request_new_token())
+            else:
+                # Auth Token not found
+                # Raise exception if this request requires logging in using credentials or Auth Token
                 if login:
                     raise exceptions.NotLoggedIn()
-                else:
+
+                # Check if BALENA_API_KEY/RESIN_API_KEY is set
+                if not api_key:
                     raise exceptions.Unauthorized()
 
-            if self.util.should_update_token(
-                self.settings.get(TOKEN_KEY),
-                self.settings.get('token_refresh_interval')
-            ):
-                self.settings.set(TOKEN_KEY, self._request_new_token())
         params = params or {}
         data = data or {}
         # About response obj:
