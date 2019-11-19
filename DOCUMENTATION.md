@@ -1821,12 +1821,12 @@ Create a new release built from the source in the provided url.
 
 #### Raises:
     BuilderRequestError: if builder returns any errors.
-### Function: get(id)
+### Function: get(commit_or_id)
 
 Get a specific release.
 
 #### Args:
-    id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     dict: release info.
@@ -1851,12 +1851,12 @@ Get the latest successful release for an application.
 
 #### Returns:
     dict: release info.
-### Function: get_with_image_details(id)
+### Function: get_with_image_details(commit_or_id)
 
 Get a specific release with the details of the images built.
 
 #### Args:
-    id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     dict: release info.
@@ -2058,40 +2058,40 @@ Get all release tags for an application.
 >>> balena.models.tag.release.get_all_by_application('1043050')
 [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 ```
-### Function: get_all_by_release(release_id)
+### Function: get_all_by_release(commit_or_id)
 
 Get all release tags for a release.
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     list: list contains release tags.
 
 #### Examples:
 ```python
->>> balena.models.tag.release.get_all_by_release('135')
+>>> balena.models.tag.release.get_all_by_release(135)
 [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 ```
-### Function: remove(release_id, tag_key)
+### Function: remove(commit_or_id, tag_key)
 
 Remove a release tag.
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
     tag_key (str): tag key.
 
 #### Examples:
 ```python
->>> balena.models.tag.release.remove('135', 'releaseTag1')
+>>> balena.models.tag.release.remove(135, 'releaseTag1')
 OK
 ```
-### Function: set(release_id, tag_key, value)
+### Function: set(commit_or_id, tag_key, value)
 
 Set a release tag (update tag value if it exists).
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
     tag_key (str): tag key.
     value (str): tag value.
 
@@ -2101,9 +2101,9 @@ Set a release tag (update tag value if it exists).
 
 #### Examples:
 ```python
->>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
+>>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
 {u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}
->>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
+>>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK 1')
 OK
 ```
 ## Key

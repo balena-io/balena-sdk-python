@@ -7,8 +7,6 @@ from .. import exceptions
 from .device import Device
 
 
-
-
 def _print_deprecation_warning():
     print("This is not supported on multicontainer devices, and will be removed in future")
 
