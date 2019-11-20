@@ -37,9 +37,11 @@ class BaseRequest(object):
     def __set_content_type(self, headers, ctype):
         headers.update({'Content-Type': ctype})
 
-    def __set_authorization(self, headers):
-        headers.update(
-            {'Authorization': 'Bearer {:s}'.format(self.settings.get(TOKEN_KEY))})
+    def __set_authorization(self, headers, key=None):
+        if not key:
+            headers.update({'Authorization': 'Bearer {:s}'.format(self.settings.get(TOKEN_KEY))})
+        else:
+            headers.update({'Authorization': 'Bearer {:s}'.format(key)})
 
     def __get(self, url, headers, data=None, stream=None):
         return requests.get(url, headers=headers, timeout=self.timeout, stream=stream)
@@ -66,10 +68,8 @@ class BaseRequest(object):
     def __head(self, url, headers, data=None, stream=None):
         return requests.head(url, headers=headers, timeout=self.timeout)
 
-    def _format_params(self, params, api_key, raw_query=None):
+    def _format_params(self, params, raw_query=None):
         query_elements = []
-        if api_key:
-            query_elements.append('apikey={0}'.format(api_key))
         if params:
             if 'filters' in params:
                 # Multiple filters
@@ -137,11 +137,9 @@ class BaseRequest(object):
         request_method = methods[method.lower()]
         url = urljoin(endpoint, url)
         if auth:
-            if not api_key:
-                self.__set_authorization(headers)
-            params = self._format_params(params, api_key=api_key, raw_query=raw_query)
-        else:
-            params = self._format_params(params, api_key=None, raw_query=raw_query)
+            # api_key will be None if Auth token is found so we can just pass api_key here.
+            self.__set_authorization(headers, api_key)
+        params = self._format_params(params, raw_query=raw_query)
 
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
