@@ -674,6 +674,20 @@ Disable device url for a device.
 >>> balena.models.device.disable_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 'OK'
 ```
+### Function: disable_local_mode(uuid)
+
+Disable local mode.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    None.
+
+#### Examples:
+```python
+>>> balena.models.device.disable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+```
 ### Function: disable_lock_override(uuid)
 
 Disable lock override.
@@ -705,6 +719,23 @@ False
 >>> balena.models.device.has_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 True
 ```
+### Function: enable_local_mode(uuid)
+
+Enable local mode.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    None.
+
+#### Examples:
+```python
+>>> balena.models.device.enable_local_mode('b6070f4fea5edf808b576123157fe5ec')
+```
+
+#### Raises:
+    LocalModeError: if local mode can't be enabled.
 ### Function: enable_lock_override(uuid)
 
 Enable lock override.
@@ -908,6 +939,21 @@ Get the local IP addresses of a device.
 #### Raises:
     DeviceNotFound: if device couldn't be found.
     DeviceOffline: if device is offline.
+### Function: get_local_mode_support(uuid)
+
+Returns whether local mode is supported along with a message describing the reason why local mode is not supported.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    dict: local mode support information ({'supported': True/False, 'message': '...'}).
+
+#### Examples:
+```python
+>>> balena.models.device.get_local_mode_support('b6070f4fea5edf808b576123157fe5ec')
+{'message': 'Local mode is only supported on development OS versions', 'supported': False}
+```
 ### Function: get_manifest_by_application(app_name)
 
 Get a device manifest by application name.
@@ -1092,6 +1138,21 @@ Identify device. This function only works if you log in using credentials or Aut
 ```python
 >>> balena.models.device.identify('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 'OK'
+```
+### Function: is_in_local_mode(uuid)
+
+Check if local mode is enabled on the device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    bool: True if local mode enabled, otherwise False.
+
+#### Examples:
+```python
+>>> balena.models.device.is_in_local_mode('b6070f4fea5edf808b576123157fe5ec')
+True
 ```
 ### Function: is_online(uuid)
 
@@ -1746,12 +1807,26 @@ Get the build log from an image.
 ## Release
 
 This class implements release model for balena python SDK.
-### Function: get(id)
+### Function: create_from_url(app_id, url, flatten_tarball)
+
+Create a new release built from the source in the provided url.
+
+#### Args:
+    app_id (int): application id.
+    url (str): a url with a tarball of the project to build.
+    flatten_tarball (Optional[bool]): Should be true when the tarball includes an extra root folder with all the content.
+
+#### Returns:
+    int: release Id.
+
+#### Raises:
+    BuilderRequestError: if builder returns any errors.
+### Function: get(commit_or_id)
 
 Get a specific release.
 
 #### Args:
-    id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     dict: release info.
@@ -1776,12 +1851,12 @@ Get the latest successful release for an application.
 
 #### Returns:
     dict: release info.
-### Function: get_with_image_details(id)
+### Function: get_with_image_details(commit_or_id)
 
 Get a specific release with the details of the images built.
 
 #### Args:
-    id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     dict: release info.
@@ -1983,40 +2058,40 @@ Get all release tags for an application.
 >>> balena.models.tag.release.get_all_by_application('1043050')
 [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 ```
-### Function: get_all_by_release(release_id)
+### Function: get_all_by_release(commit_or_id)
 
 Get all release tags for a release.
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
 
 #### Returns:
     list: list contains release tags.
 
 #### Examples:
 ```python
->>> balena.models.tag.release.get_all_by_release('135')
+>>> balena.models.tag.release.get_all_by_release(135)
 [{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
 ```
-### Function: remove(release_id, tag_key)
+### Function: remove(commit_or_id, tag_key)
 
 Remove a release tag.
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
     tag_key (str): tag key.
 
 #### Examples:
 ```python
->>> balena.models.tag.release.remove('135', 'releaseTag1')
+>>> balena.models.tag.release.remove(135, 'releaseTag1')
 OK
 ```
-### Function: set(release_id, tag_key, value)
+### Function: set(commit_or_id, tag_key, value)
 
 Set a release tag (update tag value if it exists).
 
 #### Args:
-    release_id (str): release id.
+    commit_or_id: release commit (str) or id (int).
     tag_key (str): tag key.
     value (str): tag value.
 
@@ -2026,9 +2101,9 @@ Set a release tag (update tag value if it exists).
 
 #### Examples:
 ```python
->>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK')
+>>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
 {u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}
->>> balena.models.tag.release.set('465307', 'releaseTag1', 'Python SDK 1')
+>>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK 1')
 OK
 ```
 ## Key

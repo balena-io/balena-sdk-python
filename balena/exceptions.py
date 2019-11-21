@@ -362,6 +362,21 @@ class ReleaseNotFound(BalenaException):
         self.message = Message.RELEASE_NOT_FOUND.format(id=release_id)
 
 
+class AmbiguousRelease(BalenaException):
+    """
+    Args:
+        commit (str): release commit.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, commit):
+        super(AmbiguousRelease, self).__init__()
+        self.message = Message.AMBIGUOUS_RELEASE.format(commit=commit)
+
+
 class ServiceNotFound(BalenaException):
     """
     Args:
@@ -418,3 +433,34 @@ class OsUpdateError(BalenaException):
     def __init__(self, message):
         super(OsUpdateError, self).__init__()
         self.message = Message.OS_UPDATE_ERROR.format(message=message)
+
+
+class BuilderRequestError(BalenaException):
+    """
+    Args:
+        message (str): message.
+
+    Attributes:
+        message (str): error message.
+    """
+
+    def __init__(self, message):
+        super(BuilderRequestError, self).__init__()
+        self.message = message
+
+
+class LocalModeError(BalenaException):
+    """
+    Generic Local Mode Exception.
+
+    Args:
+        message (str): message.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, message):
+        super(LocalModeError, self).__init__()
+        self.message = message
