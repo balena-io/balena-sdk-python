@@ -76,7 +76,7 @@ class Auth(object):
         Examples:
             >>> from balena import Balena
             >>> balena = Balena()
-            >>> credentials = {'username': '<your email>', 'password': '<your password>''}
+            >>> credentials = {'username': '<your email>', 'password': '<your password>'}
             >>> balena.auth.login(**credentials)
             (Empty Return)
 

@@ -153,7 +153,7 @@ class Logs(object):
 
         Args:
             uuid (str): device uuid.
-            count (Optional[int]): this callback is called on receiving a message from the channel.
+            count (Optional[int]): number of historical messages to include.
 
         """
 
