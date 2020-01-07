@@ -68,18 +68,17 @@ class DeviceOs(object):
             endpoint=self.settings.get('api_endpoint')
         )
 
-    def download(self, raw=None, is_dev_image=False, **data):
+    def download(self, raw=False, **data):
         """
         Download an OS image. This function only works if you log in using credentials or Auth Token.
 
         Args:
             raw (bool): determining function return value.
-            is_dev_image (Optional[bool]): select development image instead of production image. defaults to False.
             **data: os parameters keyword arguments.
-                version (str): the Balena OS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
+                version (str): the balenaOS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
                 appId (str): the application ID.
                 network (str): the network type that the device will use, one of 'ethernet' or 'wifi'.
-                fileType (Optional[str]): one of '.img' or '.zip' or '.gz', defaults to '.img'. 
+                fileType (Optional[str]): one of '.img' or '.zip' or '.gz', defaults to '.img'.
                 wifiKey (Optional[str]): the key for the wifi network the device will connect to if network is wifi.
                 wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to if network is wifi.
                 appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
@@ -104,14 +103,54 @@ class DeviceOs(object):
         """
 
         self.params = self.parse_params(**data)
-        if is_dev_image:
-            data['version'] = self.get_device_os_semver_with_variant(data['version'], 'dev')
-        else:
-            data['version'] = self.get_device_os_semver_with_variant(data['version'], 'prod')
+        data['version'] = self.get_device_os_semver_with_variant(data['version'])
 
         response = self.base_request.request(
             'download', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), stream=True, login=True
+        )
+        if raw:
+            # return urllib3.HTTPResponse object
+            return response.raw
+        else:
+            return response
+
+    def download_unconfigured_image(self, device_type, version, raw=False):
+        """
+        Download an unconfigured OS image.
+
+        Args:
+            device_type (str): device type slug.
+            version (str): the balenaOS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
+            raw (bool): determining function return value.
+
+        Returns:
+            object:
+                If raw is True, urllib3.HTTPResponse object is returned.
+                If raw is False, original response object is returned.
+
+        Notes:
+            default OS image file name can be found in response headers.
+
+        Examples:
+            >>> response = balena.models.device_os.download_unconfigured_image('raspberry-pi2', 'latest')
+            >>> type(response)
+            <class 'requests.models.Response'>
+            >>> response['headers']
+            >>> response.headers
+            {'Access-Control-Allow-Headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client', 'content-disposition': 'attachment; filename="balena-cloud-raspberry-pi2-2.43.0+rev1-v10.2.2.img"', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Max-Age': '86400', 'Transfer-Encoding': 'chunked', 'x-powered-by': 'Express', 'content-encoding': 'gzip', 'x-transfer-length': '134445269', 'last-modified': 'Mon, 23 Sep 2019 15:21:33 GMT', 'Connection': 'keep-alive', 'Access-Control-Allow-Credentials': 'true', 'Date': 'Tue, 07 Jan 2020 18:14:47 GMT', 'X-Frame-Options': 'DENY', 'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'Content-Type': 'application/octet-stream', 'Access-Control-Allow-Origin': '*'}
+
+        """
+
+        if version == 'latest':
+            version = self.get_supported_versions(device_type)['latest']
+        else:
+            version = self.get_device_os_semver_with_variant(version)
+
+        response = self.base_request.request(
+            '/download?deviceType={device_type}&version={version}'.format(device_type=device_type, version=version),
+            'GET',
+            endpoint=self.settings.get('api_endpoint'), stream=True, auth=False
         )
         if raw:
             # return urllib3.HTTPResponse object
@@ -183,13 +222,13 @@ class DeviceOs(object):
         version = re.sub(r'^v', '', version)
         return version
 
-    def get_device_os_semver_with_variant(self, os_version, os_variant):
+    def get_device_os_semver_with_variant(self, os_version, os_variant=None):
         """
         Get current device os semver with variant.
 
         Args:
             os_version (str): current os version.
-            os_variant (str): os variant.
+            os_variant (Optional[str]): os variant.
 
         Examples:
             >>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
