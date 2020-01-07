@@ -68,14 +68,21 @@ class DeviceOs(object):
             endpoint=self.settings.get('api_endpoint')
         )
 
-    def download(self, raw=None, **data):
+    def download(self, raw=None, is_dev_image=False, **data):
         """
         Download an OS image. This function only works if you log in using credentials or Auth Token.
 
         Args:
             raw (bool): determining function return value.
+            is_dev_image (Optional[bool]): select development image instead of production image. defaults to False.
             **data: os parameters keyword arguments.
-                Details about os parameters can be found in parse_params function
+                version (str): the Balena OS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
+                appId (str): the application ID.
+                network (str): the network type that the device will use, one of 'ethernet' or 'wifi'.
+                fileType (Optional[str]): one of '.img' or '.zip' or '.gz', defaults to '.img'. 
+                wifiKey (Optional[str]): the key for the wifi network the device will connect to if network is wifi.
+                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to if network is wifi.
+                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
 
         Returns:
             object:
@@ -86,17 +93,22 @@ class DeviceOs(object):
             default OS image file name can be found in response headers.
 
         Examples:
-            >>> data = {'appId':'9020', 'network':'ethernet'}
+            >>> data = {'appId': '1476418', 'network': 'ethernet', 'version': '2.43.0+rev1.prod'}
             >>> response = balena.models.device_os.download(**data)
             >>> type(response)
             <class 'requests.models.Response'>
             >>> response['headers']
             >>> response.headers
-            {'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'content-disposition': 'attachment; filename="balena-RPI1-0.1.0-1.1.0-7588720e0262.img"', 'content-encoding': 'gzip', 'transfer-encoding': 'chunked', 'x-powered-by': 'Express', 'connection': 'keep-alive', 'access-control-allow-credentials': 'true', 'date': 'Mon, 23 Nov 2015 15:13:39 GMT', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'content-type': 'application/octet-stream', 'x-frame-options': 'DENY'}
+            {'Content-Length': '134445838', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client', 'content-disposition': 'attachment; filename="balena-cloud-FooBar4-raspberry-pi2-2.43.0+rev1-v10.2.2.img.zip"', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Max-Age': '86400', 'x-powered-by': 'Express', 'Vary': 'X-HTTP-Method-Override', 'x-transfer-length': '134445838', 'Connection': 'keep-alive', 'Access-Control-Allow-Credentials': 'true', 'Date': 'Tue, 07 Jan 2020 17:40:52 GMT', 'X-Frame-Options': 'DENY', 'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'Content-Type': 'application/zip', 'Access-Control-Allow-Origin': '*'}
 
         """
 
         self.params = self.parse_params(**data)
+        if is_dev_image:
+            data['version'] = self.get_device_os_semver_with_variant(data['version'], 'dev')
+        else:
+            data['version'] = self.get_device_os_semver_with_variant(data['version'], 'prod')
+
         response = self.base_request.request(
             'download', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), stream=True, login=True
@@ -130,6 +142,9 @@ class DeviceOs(object):
             params['appId'] = int(params['appId'])
         except ValueError:
             raise exceptions.InvalidOption('appId')
+
+        if 'version' not in params:
+            raise exceptions.MissingOption('version')
 
         if 'network' not in params:
             raise exceptions.MissingOption('network')
