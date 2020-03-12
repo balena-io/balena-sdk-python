@@ -24,9 +24,6 @@ class BaseTagTest(object):
         test_runner.assertEqual(tags[0]['value'], 'Bar')
 
     def test_get_all(self, test_runner, resource_id):
-        # should become an empty array by default
-        test_runner.assertEqual(self.test_obj.get_all(), [])
-
         # given a tag
         self.test_obj.set(resource_id, 'Foo', 'Bar')
         self.test_obj.set(resource_id, 'Foo1', 'Bar1')
