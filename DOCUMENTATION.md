@@ -258,6 +258,24 @@ Download application config.json.
 
 #### Raises:
     ApplicationNotFound: if application couldn't be found.
+### Function: get_dashboard_url(app_id)
+
+Get Dashboard URL for a specific application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Raises:
+    InvalidParameter: if the app_id is not a finite number.
+
+#### Returns:
+    str: Dashboard URL for the specific application.
+
+#### Examples:
+```python
+>>> balena.models.application.get_dashboard_url('1476418')
+https://dashboard.balena-cloud.com/apps/1476418
+```
 ### Function: get_target_release_hash(app_id)
 
 Get the hash of the current release for a specific application.
