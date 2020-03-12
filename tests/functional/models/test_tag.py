@@ -5,6 +5,13 @@ from datetime import datetime
 from tests.helper import TestHelper
 
 
+def find_with_tag_key(tag_list, tag_key):
+    for item in tag_list:
+        if item['tag_key'] == tag_key:
+            return item
+    return None
+
+
 class BaseTagTest(object):
 
     def __init__(self, test_obj):
@@ -24,33 +31,30 @@ class BaseTagTest(object):
         test_runner.assertEqual(tags[0]['value'], 'Bar')
 
     def test_get_all(self, test_runner, resource_id):
-        # given a tag
+        # given 2 tags
+        current_length = len(self.test_obj.get_all())
         self.test_obj.set(resource_id, 'Foo', 'Bar')
         self.test_obj.set(resource_id, 'Foo1', 'Bar1')
 
         # should retrieve all the tags
-        tags = self.test_obj.get_all()
-        tags = sorted(tags, key=lambda k: k['tag_key'])
-        test_runner.assertEqual(len(tags), 2)
-        test_runner.assertEqual(tags[0]['tag_key'], 'Foo')
-        test_runner.assertEqual(tags[0]['value'], 'Bar')
-        test_runner.assertEqual(tags[1]['tag_key'], 'Foo1')
-        test_runner.assertEqual(tags[1]['value'], 'Bar1')
+        test_runner.assertEqual(len(self.test_obj.get_all()), (current_length + 2))
 
     def test_set(self, test_runner, resource_id):
         # should be able to create a tag given a resource id
-        self.test_obj.set(resource_id, 'Foo', 'Bar')
-        tags = self.test_obj.get_all()
-        test_runner.assertEqual(len(tags), 1)
-        test_runner.assertEqual(tags[0]['tag_key'], 'Foo')
-        test_runner.assertEqual(tags[0]['value'], 'Bar')
+        current_length = len(self.test_obj.get_all())
+        new_tag = self.test_obj.set(resource_id, 'Foo', 'Bar')
+
+        test_runner.assertEqual(len(self.test_obj.get_all()), (current_length + 1))
+        test_runner.assertEqual(new_tag['tag_key'], 'Foo')
+        test_runner.assertEqual(new_tag['value'], 'Bar')
 
         # should be able to create a numeric tag
-        self.test_obj.set(resource_id, 'Foo', '1')
-        tags = self.test_obj.get_all()
-        test_runner.assertEqual(len(tags), 1)
-        test_runner.assertEqual(tags[0]['tag_key'], 'Foo')
-        test_runner.assertEqual(tags[0]['value'], '1')
+        current_length = len(self.test_obj.get_all())
+        new_tag = self.test_obj.set(resource_id, 'Foo1', '1')
+
+        test_runner.assertEqual(len(self.test_obj.get_all()), (current_length + 1))
+        test_runner.assertEqual(new_tag['tag_key'], 'Foo1')
+        test_runner.assertEqual(new_tag['value'], '1')
 
         # should not allow creating a balena tag
         with test_runner.assertRaises(Exception) as cm:
@@ -82,25 +86,25 @@ class BaseTagTest(object):
         test_runner.assertIn('Tag key cannot be empty.', cm.exception.message)
 
         # given 2 tags, should be able to update a tag without affecting the rest
-        self.test_obj.set(resource_id, 'Foo', 'Bar')
-        self.test_obj.set(resource_id, 'Foo1', 'Bar1')
+        self.test_obj.set(resource_id, 'Foo2', 'Bar')
+        self.test_obj.set(resource_id, 'Foo21', 'Bar1')
+        self.test_obj.set(resource_id, 'Foo2', 'BarBar')
+        tag_list = self.test_obj.get_all()
 
-        self.test_obj.set(resource_id, 'Foo', 'BarBar')
-        tags = self.test_obj.get_all()
-        tags = sorted(tags, key=lambda k: k['tag_key'])
-        test_runner.assertEqual(len(tags), 2)
-        test_runner.assertEqual(tags[0]['tag_key'], 'Foo')
-        test_runner.assertEqual(tags[0]['value'], 'BarBar')
-        test_runner.assertEqual(tags[1]['tag_key'], 'Foo1')
-        test_runner.assertEqual(tags[1]['value'], 'Bar1')
+        tag1 = find_with_tag_key(tag_list, 'Foo2')
+        tag2 = find_with_tag_key(tag_list, 'Foo21')
+
+        test_runner.assertEqual(tag1['value'], 'BarBar')
+        test_runner.assertEqual(tag2['value'], 'Bar1')
 
     def test_remove(self, test_runner, resource_id):
         # should be able to remove a tag by resource id
         tag = self.test_obj.set(resource_id, 'Foo', 'Bar')
-        test_runner.assertEqual(len(self.test_obj.get_all()), 1)
+        current_length = len(self.test_obj.get_all())
 
         self.test_obj.remove(resource_id, tag['tag_key'])
-        test_runner.assertEqual(len(self.test_obj.get_all()), 0)
+        # after removing a tag, current_length should be reduced by 1
+        test_runner.assertEqual(len(self.test_obj.get_all()), (current_length - 1))
 
 
 class TestReleaseTag(unittest.TestCase):
