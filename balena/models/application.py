@@ -265,10 +265,7 @@ class Application(object):
 
         """
 
-        apps = self.base_request.request(
-            'application', 'GET', endpoint=self.settings.get('pine_endpoint')
-        )['d']
-        return bool(apps)
+        return len(self.get_all()) > 0
 
     def get_by_id(self, app_id):
         """
