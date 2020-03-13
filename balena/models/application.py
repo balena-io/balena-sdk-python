@@ -1,3 +1,8 @@
+try:  # Python 3 imports
+    from urllib.parse import urljoin
+except ImportError:  # Python 2 imports
+    from urlparse import urljoin
+
 from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
@@ -7,6 +12,7 @@ from .. import exceptions
 
 from datetime import datetime
 import json
+from math import isinf
 from collections import defaultdict
 
 
@@ -775,4 +781,33 @@ class Application(object):
         return self.base_request.request(
             'application', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def get_dashboard_url(self, app_id):
+        """
+        Get Dashboard URL for a specific application.
+
+        Args:
+            app_id (str): application id.
+
+        Raises:
+            InvalidParameter: if the app_id is not a finite number.
+
+        Returns:
+            str: Dashboard URL for the specific application.
+
+        Examples:
+            >>> balena.models.application.get_dashboard_url('1476418')
+            https://dashboard.balena-cloud.com/apps/1476418
+
+        """
+        try:
+            if isinf(int(app_id)):
+                raise exceptions.InvalidParameter('app_id', app_id)
+        except ValueError:
+            raise exceptions.InvalidParameter('app_id', app_id)
+
+        return urljoin(
+            self.settings.get('api_endpoint').replace('api', 'dashboard'),
+            '/apps/{app_id}'.format(app_id=app_id)
         )

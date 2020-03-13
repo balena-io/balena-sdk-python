@@ -221,5 +221,17 @@ class TestApplication(unittest.TestCase):
         self.assertTrue(self.balena.models.application.will_track_new_releases(app_info['app']['id']))
         self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info['app']['id']))
 
+    def test_get_dashboard_url(self):
+        # raise balena.exceptions.InvalidParameter if application id is not a number.
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.application.get_dashboard_url('1476418a')
+
+        # should return the respective dashboard url when an application id is provided.
+        url = self.balena.models.application.get_dashboard_url('1476418')
+        self.assertEqual(
+            url,
+            'https://dashboard.balena-cloud.com/apps/1476418'
+        )
+
 if __name__ == '__main__':
     unittest.main()
