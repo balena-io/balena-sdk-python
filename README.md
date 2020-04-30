@@ -72,6 +72,16 @@ To generate the documentation:
 python docs_generator.py > DOCUMENTATION.md
 ```
 
+Deprecation policy
+------------------
+
+The balena SDK for Python uses [semver versioning](https://semver.org/), with the concepts of major, minor and patch version releases.
+
+The latest release of the previous major version of the balena SDK will be supported for one year from the date when the next major version is released.
+For example, the balena SDK v8.1.1 (the latest v8 release) will be supported for one year from the date when v9.0.0 is released.
+
+At the end of this support period, the older major version is considered deprecated and you are highly encouraged to upgrade to the to latest major version.
+
 Tests
 -----
 
