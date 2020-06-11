@@ -972,6 +972,18 @@ Returns whether local mode is supported along with a message describing the reas
 >>> balena.models.device.get_local_mode_support('b6070f4fea5edf808b576123157fe5ec')
 {'message': 'Local mode is only supported on development OS versions', 'supported': False}
 ```
+### Function: get_mac_address(uuid)
+
+Get the MAC addresses of a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    list: MAC addresses of a device.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: get_manifest_by_application(app_name)
 
 Get a device manifest by application name.
