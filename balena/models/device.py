@@ -1521,3 +1521,24 @@ class Device(object):
                 'supported': False,
                 'message': e.message
             }
+
+    def get_mac_address(self, uuid):
+        """
+        Get the MAC addresses of a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            list: MAC addresses of a device.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device = self.get(uuid)
+        if 'mac_address' in device:
+            return device['mac_address'].split()
+        else:
+            return []
