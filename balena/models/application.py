@@ -9,6 +9,7 @@ from ..settings import Settings
 from .config import Config
 from .release import Release
 from .. import exceptions
+from ..utils import is_id
 
 from datetime import datetime
 import json
@@ -304,13 +305,14 @@ class Application(object):
         except IndexError:
             raise exceptions.ApplicationNotFound(app_id)
 
-    def create(self, name, device_type, app_type=None):
+    def create(self, name, device_type, organization, app_type=None):
         """
         Create an application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
             device_type (str): device type (display form).
+            organization (str): handle or id of the organization that the application will belong to.
             app_type (Optional[str]): application type.
 
         Returns:
@@ -319,25 +321,46 @@ class Application(object):
         Raises:
             InvalidDeviceType: if device type is not supported.
             InvalidApplicationType: if app type is not supported.
+            InvalidParameter: if organization is missing.
+            OrganizationNotFound: if organization couldn't be found.
 
         Examples:
-            >>> balena.models.application.create('foo', 'Raspberry Pi 3', 'microservices-starter')
+            >>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices-starter')
             '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 
         """
 
+        if not organization:
+            raise exceptions.InvalidParameter('organization', organization)
+        else:
+            if is_id(organization):
+                key = 'id'
+            else:
+                key = 'handle'
+            raw_query = "$top=1&$select=id&$filter={key}%20eq%20'{value}'".format(key=key, value=organization)
+
+            org = self.base_request.request(
+                'organization', 'GET', raw_query=raw_query,
+                endpoint=self.settings.get('pine_endpoint'), login=True
+            )['d']
+
+            if not org:
+                raise exceptions.OrganizationNotFound(organization)
+
         device_types = self.config.get_device_types()
-        device_slug = [device['slug'] for device in device_types
-                       if device['name'] == device_type]
-        if device_slug:
+        device_manifest = [device for device in device_types if device['name'] == device_type]
+
+        if device_manifest:
+            if device_manifest[0]['state'] == 'DISCONTINUED':
+                raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
             data = {
                 'app_name': name,
-                'device_type': device_slug[0]
+                'device_type': device_manifest[0]['slug'],
+                'organization': org['id']
             }
 
             if app_type:
-
                 params = {
                     'filter': 'slug',
                     'eq': app_type

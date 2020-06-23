@@ -43,6 +43,9 @@ class TestHelper(object):
         if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
+        self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.whoami())
+
+
     @classmethod
     def load_env(cls):
         env_file_name = '.env'
@@ -74,6 +77,8 @@ class TestHelper(object):
                 cls.credentials['api_endpoint'] = os.environ.get('TEST_API_ENDPOINT')
             except:
                 raise Exception('Mandatory env keys missing!')
+
+
 
     def wipe_application(self):
         """
@@ -115,7 +120,7 @@ class TestHelper(object):
         Create a device belongs to an application.
         """
 
-        app = self.balena.models.application.create(app_name, device_type)
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'])
         return app, self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
 
     def create_multicontainer_app(self, app_name='FooBar', device_type='Raspberry Pi 2'):
@@ -123,7 +128,7 @@ class TestHelper(object):
         Create a multicontainer application with a device and two releases.
         """
 
-        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
         dev = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
 
         # Register web & DB services
@@ -343,7 +348,7 @@ class TestHelper(object):
         Create a multicontainer application with  two releases.
         """
 
-        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
 
         # Register an old & new release of this application
 

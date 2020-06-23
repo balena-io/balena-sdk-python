@@ -76,7 +76,7 @@ class TestDevice(unittest.TestCase):
         )
 
     def test_register(self):
-        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
 
         # should be able to register a device to a valid application id.
         self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
@@ -107,7 +107,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(len(self.balena.models.device.get_all()), 2)
 
     def test_get_all_by_application_id(self):
-        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
         # should return empty
         self.assertEqual(len(self.balena.models.device.get_all_by_application_id(app['id'])), 0)
 
@@ -117,7 +117,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(len(self.balena.models.device.get_all_by_application_id(app['id'])), 2)
 
     def test_get_all_by_application(self):
-        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2')
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
         # should return empty
         self.assertEqual(len(self.balena.models.device.get_all_by_application(app['app_name'])), 0)
 
@@ -258,8 +258,8 @@ class TestDevice(unittest.TestCase):
 
     def test_move(self):
         app, device = self.helper.create_device()
-        app2 = self.balena.models.application.create('FooBarBar', 'Raspberry Pi 2')
-        app3 = self.balena.models.application.create('FooBarBar3', 'Raspberry Pi 3')
+        app2 = self.balena.models.application.create('FooBarBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
+        app3 = self.balena.models.application.create('FooBarBar3', 'Raspberry Pi 3', self.helper.default_organization['id'])
 
         # should be able to move a device by device uuid and application name.
         self.balena.models.device.move(device['uuid'], 'FooBarBar')
@@ -270,7 +270,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.balena.models.device.get_application_name(device['uuid']), 'FooBarBar3')
 
         # should be rejected with an incompatibility error.
-        self.balena.models.application.create('FooBarBarBar', 'Intel NUC')
+        self.balena.models.application.create('FooBarBarBar', 'Intel NUC', self.helper.default_organization['id'])
         with self.assertRaises(self.helper.balena_exceptions.IncompatibleApplication):
             self.balena.models.device.move(device['uuid'], 'FooBarBarBar')
 
