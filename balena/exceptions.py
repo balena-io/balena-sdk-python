@@ -482,3 +482,20 @@ class OrganizationNotFound(BalenaException):
         super(OrganizationNotFound, self).__init__()
         self.message = Message.ORGANIZATION_NOT_FOUND.format(
             organization=organization)
+
+
+class BalenaDiscontinuedDeviceType(BalenaException):
+    """
+    The device type that you specified is invalid because it is discontinued, and this operation is no longer supported.
+
+    Args:
+        type (str): device type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, commit):
+        super(BalenaDiscontinuedDeviceType, self).__init__()
+        self.message = Message.BALENA_DISCONTINUE_DEVICE_TYPE.format(type=type)
