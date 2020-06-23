@@ -37,10 +37,10 @@ class Settings(object):
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        'pine_endpoint': 'https://api.balena-cloud.com/v5/',
+        'pine_endpoint': 'https://api.balena-cloud.com/v6/',
         'api_endpoint': 'https://api.balena-cloud.com/',
         'builder_url': 'https://builder.balena-cloud.com/',
-        'api_version': 'v5',
+        'api_version': 'v6',
         'device_actions_endpoint_version': 'v1',
         'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
         # cache time : 1 week in milliseconds
