@@ -85,6 +85,16 @@ class TestHelper(object):
             endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
 
+    def wipe_organization(self):
+        """
+        Wipe all user's orgs
+        """
+
+        self.balena.models.application.base_request.request(
+            'organization', 'DELETE',
+            endpoint=self.balena.settings.get('pine_endpoint'), login=True
+        )
+
     def reset_user(self):
         """
         Wipe all user's apps and ssh keys added.

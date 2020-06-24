@@ -464,3 +464,21 @@ class LocalModeError(BalenaException):
     def __init__(self, message):
         super(LocalModeError, self).__init__()
         self.message = message
+
+
+class OrganizationNotFound(BalenaException):
+    """
+    Exception type for organization not found.
+
+    Args:
+        organization (str): organization detail (organization handle or id).
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, organization):
+        super(OrganizationNotFound, self).__init__()
+        self.message = Message.ORGANIZATION_NOT_FOUND.format(
+            organization=organization)
