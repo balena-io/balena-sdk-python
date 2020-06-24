@@ -43,7 +43,7 @@ class TestHelper(object):
         if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
-        self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.whoami())
+        self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.who_am_i())
 
 
     @classmethod

@@ -68,7 +68,7 @@ class TestApplication(unittest.TestCase):
 
         # found an application, it should return an application with matched name.
         self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
-        self.assertEqual(self.balena.models.application.get_by_owner('FooBar', self.helper.credentials['user_id'])['app_name'], 'FooBar')
+        self.assertEqual(self.balena.models.application.get_by_owner('FooBar', self.helper.default_organization['handle'])['app_name'], 'FooBar')
 
         # should not find the created application with a different username
         with self.assertRaises(Exception) as cm:

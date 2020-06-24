@@ -197,11 +197,11 @@ class Application(object):
 
     def get_by_owner(self, name, owner):
         """
-        Get a single application.
+        Get a single application using the appname and the handle of the owning organization.
 
         Args:
             name (str): application name.
-            owner (str):  owner's username.
+            owner (str): The handle of the owning organization.
 
         Returns:
             dict: application info.
@@ -211,7 +211,7 @@ class Application(object):
             AmbiguousApplication: when more than one application is returned.
 
         Examples:
-            >>> balena.models.application.get_by_owner('foo', 'my_user')
+            >>> balena.models.application.get_by_owner('foo', 'my_org')
             '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 
         """
@@ -357,7 +357,7 @@ class Application(object):
             data = {
                 'app_name': name,
                 'device_type': device_manifest[0]['slug'],
-                'organization': org['id']
+                'organization': org[0]['id']
             }
 
             if app_type:
