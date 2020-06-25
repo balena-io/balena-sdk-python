@@ -354,34 +354,45 @@ class Application(object):
             if device_manifest[0]['state'] == 'DISCONTINUED':
                 raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
-            data = {
-                'app_name': name,
-                'device_type': device_manifest[0]['slug'],
-                'organization': org[0]['id']
+            params = {
+                'filter': 'slug',
+                'eq': device_manifest[0]['slug']
             }
 
-            if app_type:
-                params = {
-                    'filter': 'slug',
-                    'eq': app_type
-                }
-
-                app_type_detail = self.base_request.request(
-                    'application_type', 'GET', params=params,
-                    endpoint=self.settings.get('pine_endpoint'), login=True
-                )['d']
-
-                if not app_type_detail:
-                    raise exceptions.InvalidApplicationType(app_type)
-
-                data['application_type'] = app_type_detail[0]['id']
-
-            return json.loads(self.base_request.request(
-                'application', 'POST', data=data,
+            device_type_detail = self.base_request.request(
+                'device_type', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint'), login=True
-            ).decode('utf-8'))
+            )['d']
         else:
             raise exceptions.InvalidDeviceType(device_type)
+
+        data = {
+            'app_name': name,
+            'is_for__device_type': device_type_detail['id'],
+            'organization': org[0]['id']
+        }
+
+        if app_type:
+            params = {
+                'filter': 'slug',
+                'eq': app_type
+            }
+
+            app_type_detail = self.base_request.request(
+                'application_type', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint'), login=True
+            )['d']
+
+            if not app_type_detail:
+                raise exceptions.InvalidApplicationType(app_type)
+
+            data['application_type'] = app_type_detail[0]['id']
+
+        return json.loads(self.base_request.request(
+            'application', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        ).decode('utf-8'))
+        
 
     def remove(self, name):
         """
