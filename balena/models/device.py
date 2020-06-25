@@ -1336,7 +1336,7 @@ class Device(object):
             raise exceptions.OsUpdateError('The os variant of the device is not available: {uuid}'.format(uuid=uuid))
 
         current_os_version = self.device_os.get_device_os_semver_with_variant(device_info['os_version'], device_info['os_variant'])
-        self.hup.get_hup_action_type(device_info['is_of__device_type'][0]['slug], current_os_version, target_os_version)
+        self.hup.get_hup_action_type(device_info['is_of__device_type'][0]['slug'], current_os_version, target_os_version)
 
     def start_os_update(self, uuid, target_os_version):
         """
