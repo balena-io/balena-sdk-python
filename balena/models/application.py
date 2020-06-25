@@ -694,13 +694,23 @@ class Application(object):
 
         """
 
+        raw_query = "$filter=startswith(commit, '{release_hash}')&$top=1&select=id&filter=belongs_to__application%20eq%20'{app_id}'%20and%20status%20eq%20'success'".format(
+            release_hash=full_release_hash,
+            app_id=app_id
+        )
+
+        try:
+            release = self.release.__get_by_raw_query(raw_query)[0]
+        except exceptions.ReleaseNotFound:
+            raise exceptions.ReleaseNotFound(app_id)
+
         params = {
             'filter': 'id',
             'eq': app_id
         }
 
         data = {
-            'commit': full_release_hash,
+            'should_be_running__release': release['id'],
             'should_track_latest_release': False
         }
 
@@ -743,15 +753,27 @@ class Application(object):
 
         """
 
-        app = self.get_by_id(app_id)
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=should_track_latest_release&$expand=should_be_running__release($select=id),owns__release($select=id&$top=1&$filter=status%20eq%20'success'&$orderby=created_at%20desc)".format(app_id=app_id)
+
+        app = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+        if not app:
+            raise exceptions.ApplicationNotFound(app_id)
+
+        app = app[0]
+
         latest_release = None
+        if app['owns__release']:
+            latest_release = app['owns__release'][0]
 
-        try:
-            latest_release = self.release.get_latest_by_application(app_id)
-        except exceptions.ReleaseNotFound:
-            pass
+        tracked_release = None
+        if app['should_be_running__release']:
+            tracked_release = app['should_be_running__release'][0]
 
-        return bool(app['should_track_latest_release']) and (not latest_release or app['commit'] == latest_release['commit'])
+        return bool(app['should_track_latest_release']) and (not latest_release or (tracked_release and tracked_release['id'] == latest_release['id']))
 
     def get_target_release_hash(self, app_id):
         """
@@ -768,7 +790,22 @@ class Application(object):
 
         """
 
-        return self.get_by_id(app_id)['commit']
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=should_be_running__release($select=commit)".format(app_id=app_id)
+
+        app = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+        if not app:
+            raise exceptions.ApplicationNotFound(app_id)
+
+        app = app[0]
+
+        if app['should_be_running__release']:
+            return app['should_be_running__release'][0]['commit']
+
+        return ''
 
     def track_latest_release(self, app_id):
         """
@@ -799,7 +836,7 @@ class Application(object):
         }
 
         if latest_release:
-            data['commit'] = latest_release['commit']
+            data['should_be_running__release'] = latest_release['id']
 
         return self.base_request.request(
             'application', 'PATCH', params=params, data=data,

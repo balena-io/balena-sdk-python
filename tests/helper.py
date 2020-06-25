@@ -85,8 +85,13 @@ class TestHelper(object):
         Wipe all user's apps
         """
 
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
         self.balena.models.application.base_request.request(
-            'application', 'DELETE',
+            'application', 'DELETE', params=params,
             endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
 
@@ -95,8 +100,13 @@ class TestHelper(object):
         Wipe all user's orgs
         """
 
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
         self.balena.models.application.base_request.request(
-            'organization', 'DELETE',
+            'organization', 'DELETE', params=params,
             endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
 
@@ -105,10 +115,15 @@ class TestHelper(object):
         Wipe all user's apps and ssh keys added.
         """
 
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
         if self.balena.auth.is_logged_in():
             self.wipe_application()
             self.balena.models.key.base_request.request(
-                'user__has__public_key', 'DELETE',
+                'user__has__public_key', 'DELETE', params=params,
                 endpoint=self.balena.settings.get('pine_endpoint'), login=True
             )
 
@@ -176,7 +191,7 @@ class TestHelper(object):
         # Set device to the new release
 
         data = {
-            'is_on__commit': new_release['commit']
+            'is_running__release': new_release['id']
         }
 
         params = {
