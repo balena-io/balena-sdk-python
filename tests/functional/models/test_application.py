@@ -27,7 +27,7 @@ class TestApplication(unittest.TestCase):
         # should be rejected if the name has less than four characters
         with self.assertRaises(Exception) as cm:
             self.balena.models.application.create('Fo', 'Raspberry Pi 2', self.helper.default_organization['id'])
-        self.assertIn('It is necessary that each application has an app name that has a Length (Type) that is greater than or equal to 4 and is less than or equal to 30.', cm.exception.message)
+        self.assertIn('It is necessary that each application has an app name that has a Length (Type) that is greater than or equal to 4 and is less than or equal to 30', cm.exception.message)
 
         # should be able to create an application
         app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
