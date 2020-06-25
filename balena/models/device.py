@@ -593,8 +593,18 @@ class Device(object):
 
         """
 
-        application = self.application.get(app_name)
-        return self.get_manifest_by_slug(application['device_type'])
+        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_name=app_name)
+
+        application = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not application:
+            raise exceptions.ApplicationNotFound(app_name)
+        application = application[0]
+
+        return self.get_manifest_by_slug(application['is_for__device_type'][0]['slug'])
 
     def generate_uuid(self):
         """
@@ -637,12 +647,23 @@ class Device(object):
         """
 
         user_id = self.auth.get_user_id()
-        application = self.application.get_by_id(app_id)
+
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_id=app_id)
+
+        application = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not application:
+            raise exceptions.ApplicationNotFound(app_id)
+        application = application[0]
+
         api_key = self.application.generate_provisioning_key(app_id)
         data = {
             'user': user_id,
             'application': app_id,
-            'device_type': application['device_type'],
+            'device_type': application['is_for__device_type'][0]['slug'],
             'uuid': uuid,
             'apikey': api_key
         }
@@ -803,11 +824,30 @@ class Device(object):
 
         """
 
-        device = self.get(uuid)
-        application = self.application.get(app_name)
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=uuid&$expand=is_of__device_type($select=slug)".format(uuid=uuid)
 
-        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['device_type'], self.config.get_device_types()))[0]
-        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['device_type'], self.config.get_device_types()))[0]
+        device = self.base_request.request(
+            'device', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not device:
+            raise exceptions.DeviceNotFound(uuid)
+        device = device[0]
+
+        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_name=app_name)
+
+        application = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not application:
+            raise exceptions.ApplicationNotFound(app_name)
+        application = application[0]
+
+        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['is_of__device_type'][0]['slug'], self.config.get_device_types()))[0]
+        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['is_for__device_type'][0]['slug'], self.config.get_device_types()))[0]
 
         if not self.device_os.is_architecture_compatible_with(device_dev_type['arch'], app_dev_type['arch']):
             raise exceptions.IncompatibleApplication(app_name)
@@ -1289,14 +1329,14 @@ class Device(object):
         if 'os_version' not in device_info or not device_info['os_version']:
             raise exceptions.OsUpdateError('The current os version of the device is not available: {uuid}'.format(uuid=uuid))
 
-        if 'device_type' not in device_info or not device_info['device_type']:
+        if 'is_of__device_type' not in device_info or not device_info['is_of__device_type']:
             raise exceptions.OsUpdateError('The device type of the device is not available: {uuid}'.format(uuid=uuid))
 
         if 'os_variant' not in device_info:
             raise exceptions.OsUpdateError('The os variant of the device is not available: {uuid}'.format(uuid=uuid))
 
         current_os_version = self.device_os.get_device_os_semver_with_variant(device_info['os_version'], device_info['os_variant'])
-        self.hup.get_hup_action_type(device_info['device_type'], current_os_version, target_os_version)
+        self.hup.get_hup_action_type(device_info['is_of__device_type'][0]['slug], current_os_version, target_os_version)
 
     def start_os_update(self, uuid, target_os_version):
         """
@@ -1320,11 +1360,21 @@ class Device(object):
             {u'status': u'in_progress', u'action': u'resinhup', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'last_run': 1554490809219L}
         """
 
-        device = self.get(uuid)
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=is_of__device_type($select=slug)".format(uuid=uuid)
+
+        device = self.base_request.request(
+            'device', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not device:
+            raise exceptions.DeviceNotFound(uuid)
+        device = device[0]
+
         # this will throw an error if the action is not available
         self.__check_os_update_target(device, target_os_version)
 
-        all_versions = self.device_os.get_supported_versions(device['device_type'])['versions']
+        all_versions = self.device_os.get_supported_versions(device['is_of__device_type'][0]['slug'])['versions']
         if not [v for v in all_versions if semver.compare(target_os_version, v) == 0]:
             raise exceptions.InvalidParameter('target_os_version', target_os_version)
 
