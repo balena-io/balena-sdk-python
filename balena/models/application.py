@@ -392,7 +392,6 @@ class Application(object):
             'application', 'POST', data=data,
             endpoint=self.settings.get('pine_endpoint'), login=True
         ).decode('utf-8'))
-        
 
     def remove(self, name):
         """
@@ -713,7 +712,7 @@ class Application(object):
         try:
             release = self.release._Release__get_by_raw_query(raw_query)[0]
         except exceptions.ReleaseNotFound:
-            raise exceptions.ReleaseNotFound(app_id)
+            raise exceptions.ReleaseNotFound(full_release_hash)
 
         params = {
             'filter': 'id',

@@ -45,7 +45,6 @@ class TestHelper(object):
 
         self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.who_am_i())
 
-
     @classmethod
     def load_env(cls):
         env_file_name = '.env'
@@ -77,8 +76,6 @@ class TestHelper(object):
                 cls.credentials['api_endpoint'] = os.environ.get('TEST_API_ENDPOINT')
             except:
                 raise Exception('Mandatory env keys missing!')
-
-
 
     def wipe_application(self):
         """
