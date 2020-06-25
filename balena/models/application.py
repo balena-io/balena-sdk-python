@@ -362,7 +362,7 @@ class Application(object):
             device_type_detail = self.base_request.request(
                 'device_type', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint'), login=True
-            )['d']
+            )['d'][0]
         else:
             raise exceptions.InvalidDeviceType(device_type)
 
@@ -711,7 +711,7 @@ class Application(object):
         )
 
         try:
-            release = self.release.__get_by_raw_query(raw_query)[0]
+            release = self.release._Release__get_by_raw_query(raw_query)[0]
         except exceptions.ReleaseNotFound:
             raise exceptions.ReleaseNotFound(app_id)
 

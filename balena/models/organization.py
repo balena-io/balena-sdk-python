@@ -157,12 +157,7 @@ class Organization (object):
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': org_id
-        }
-
         return self.base_request.request(
-            'organization', 'DELETE', params=params,
+            'organization({org_id})'.format(org_id=org_id), 'DELETE',
             endpoint=self.settings.get('pine_endpoint'), login=True
         )

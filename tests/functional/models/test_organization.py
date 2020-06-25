@@ -1,8 +1,16 @@
 import unittest
 import json
 from datetime import datetime
+import sys
 
 from tests.helper import TestHelper
+
+PY2 = sys.version_info[0] == 2
+
+if PY2:
+    string_types = basestring
+else:
+    string_types = str
 
 
 class TestOrganization(unittest.TestCase):
@@ -24,7 +32,7 @@ class TestOrganization(unittest.TestCase):
         # should be able to create a new organization
         org1 = self.balena.models.organization.create(self.test_org_name)
         self.assertEqual(org1['name'], self.test_org_name)
-        self.assertIsInstance(org1['handle'], str)
+        self.assertIsInstance(org1['handle'], string_types)
 
         # should be able to create a new organization with handle
         org2 = self.balena.models.organization.create(self.test_org_name, 'python_sdk_test')
@@ -69,17 +77,11 @@ class TestOrganization(unittest.TestCase):
         self.assertEqual(self.balena.models.organization.get_by_handle('python_sdk_test_handle')['id'], org['id'])
 
     def test_remove(self):
-        # should be rejected if the organization id does not exist.
-        with self.assertRaises(Exception) as cm:
-            self.balena.models.organization.remove('999999999')
-        self.assertIn('You must provide organization ID', cm.exception.message)
-
         # should remove an organization by id.
         org = self.balena.models.organization.create(self.test_org_name)
+        orgs_count = len(self.balena.models.organization.get_all())
         self.balena.models.organization.remove(org['id'])
-        with self.assertRaises(Exception) as cm:
-            self.balena.models.organization.remove(org['id'])
-        self.assertIn('You must provide organization ID', cm.exception.message)
+        self.assertEqual(len(self.balena.models.organization.get_all()), orgs_count - 1)
 
 
 if __name__ == '__main__':

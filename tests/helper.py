@@ -100,15 +100,8 @@ class TestHelper(object):
         Wipe all user's orgs
         """
 
-        params = {
-            'filter': '1',
-            'eq': 1
-        }
-
-        self.balena.models.application.base_request.request(
-            'organization', 'DELETE', params=params,
-            endpoint=self.balena.settings.get('pine_endpoint'), login=True
-        )
+        for org in self.balena.models.organization.get_all():
+            self.balena.models.organization.remove(org['id'])
 
     def reset_user(self):
         """
@@ -145,6 +138,7 @@ class TestHelper(object):
 
         app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
         dev = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
+        user_id = self.balena.auth.get_user_id()
 
         # Register web & DB services
 
@@ -166,7 +160,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'old-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -178,7 +172,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'new-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -364,12 +358,13 @@ class TestHelper(object):
         """
 
         app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
+        user_id = self.balena.auth.get_user_id()
 
         # Register an old & new release of this application
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'old-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -381,7 +376,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'new-release-commit',
             'status': 'success',
             'source': 'cloud',
