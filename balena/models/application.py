@@ -9,6 +9,7 @@ from ..settings import Settings
 from .config import Config
 from .release import Release
 from .. import exceptions
+from ..utils import is_id
 
 from datetime import datetime
 import json
@@ -196,11 +197,11 @@ class Application(object):
 
     def get_by_owner(self, name, owner):
         """
-        Get a single application.
+        Get a single application using the appname and the handle of the owning organization.
 
         Args:
             name (str): application name.
-            owner (str):  owner's username.
+            owner (str): The handle of the owning organization.
 
         Returns:
             dict: application info.
@@ -210,7 +211,7 @@ class Application(object):
             AmbiguousApplication: when more than one application is returned.
 
         Examples:
-            >>> balena.models.application.get_by_owner('foo', 'my_user')
+            >>> balena.models.application.get_by_owner('foo', 'my_org')
             '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 
         """
@@ -304,13 +305,14 @@ class Application(object):
         except IndexError:
             raise exceptions.ApplicationNotFound(app_id)
 
-    def create(self, name, device_type, app_type=None):
+    def create(self, name, device_type, organization, app_type=None):
         """
         Create an application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             name (str): application name.
             device_type (str): device type (display form).
+            organization (str): handle or id of the organization that the application will belong to.
             app_type (Optional[str]): application type.
 
         Returns:
@@ -319,46 +321,77 @@ class Application(object):
         Raises:
             InvalidDeviceType: if device type is not supported.
             InvalidApplicationType: if app type is not supported.
+            InvalidParameter: if organization is missing.
+            OrganizationNotFound: if organization couldn't be found.
 
         Examples:
-            >>> balena.models.application.create('foo', 'Raspberry Pi 3', 'microservices-starter')
+            >>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices-starter')
             '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 
         """
 
-        device_types = self.config.get_device_types()
-        device_slug = [device['slug'] for device in device_types
-                       if device['name'] == device_type]
-        if device_slug:
+        if not organization:
+            raise exceptions.InvalidParameter('organization', organization)
+        else:
+            if is_id(organization):
+                key = 'id'
+            else:
+                key = 'handle'
+            raw_query = "$top=1&$select=id&$filter={key}%20eq%20'{value}'".format(key=key, value=organization)
 
-            data = {
-                'app_name': name,
-                'device_type': device_slug[0]
+            org = self.base_request.request(
+                'organization', 'GET', raw_query=raw_query,
+                endpoint=self.settings.get('pine_endpoint'), login=True
+            )['d']
+
+            if not org:
+                raise exceptions.OrganizationNotFound(organization)
+
+        device_types = self.config.get_device_types()
+        device_manifest = [device for device in device_types if device['name'] == device_type]
+
+        if device_manifest:
+            if device_manifest[0]['state'] == 'DISCONTINUED':
+                raise exceptions.BalenaDiscontinuedDeviceType(device_type)
+
+            params = {
+                'filter': 'slug',
+                'eq': device_manifest[0]['slug']
             }
 
-            if app_type:
-
-                params = {
-                    'filter': 'slug',
-                    'eq': app_type
-                }
-
-                app_type_detail = self.base_request.request(
-                    'application_type', 'GET', params=params,
-                    endpoint=self.settings.get('pine_endpoint'), login=True
-                )['d']
-
-                if not app_type_detail:
-                    raise exceptions.InvalidApplicationType(app_type)
-
-                data['application_type'] = app_type_detail[0]['id']
-
-            return json.loads(self.base_request.request(
-                'application', 'POST', data=data,
+            device_type_detail = self.base_request.request(
+                'device_type', 'GET', params=params,
                 endpoint=self.settings.get('pine_endpoint'), login=True
-            ).decode('utf-8'))
+            )['d'][0]
         else:
             raise exceptions.InvalidDeviceType(device_type)
+
+        data = {
+            'app_name': name,
+            'is_for__device_type': device_type_detail['id'],
+            'organization': org[0]['id']
+        }
+
+        if app_type:
+            params = {
+                'filter': 'slug',
+                'eq': app_type
+            }
+
+            app_type_detail = self.base_request.request(
+                'application_type', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint'), login=True
+            )['d']
+
+            if not app_type_detail:
+                raise exceptions.InvalidApplicationType(app_type)
+
+            data['application_type'] = app_type_detail[0]['id']
+
+        return json.loads(self.base_request.request(
+            'application', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        ).decode('utf-8'))
 
     def remove(self, name):
         """
@@ -671,13 +704,23 @@ class Application(object):
 
         """
 
+        raw_query = "$filter=startswith(commit, '{release_hash}')&$top=1&select=id&filter=belongs_to__application%20eq%20'{app_id}'%20and%20status%20eq%20'success'".format(
+            release_hash=full_release_hash,
+            app_id=app_id
+        )
+
+        try:
+            release = self.release._Release__get_by_raw_query(raw_query)[0]
+        except exceptions.ReleaseNotFound:
+            raise exceptions.ReleaseNotFound(full_release_hash)
+
         params = {
             'filter': 'id',
             'eq': app_id
         }
 
         data = {
-            'commit': full_release_hash,
+            'should_be_running__release': release['id'],
             'should_track_latest_release': False
         }
 
@@ -720,15 +763,27 @@ class Application(object):
 
         """
 
-        app = self.get_by_id(app_id)
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=should_track_latest_release&$expand=should_be_running__release($select=id),owns__release($select=id&$top=1&$filter=status%20eq%20'success'&$orderby=created_at%20desc)".format(app_id=app_id)
+
+        app = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+        if not app:
+            raise exceptions.ApplicationNotFound(app_id)
+
+        app = app[0]
+
         latest_release = None
+        if app['owns__release']:
+            latest_release = app['owns__release'][0]
 
-        try:
-            latest_release = self.release.get_latest_by_application(app_id)
-        except exceptions.ReleaseNotFound:
-            pass
+        tracked_release = None
+        if app['should_be_running__release']:
+            tracked_release = app['should_be_running__release'][0]
 
-        return bool(app['should_track_latest_release']) and (not latest_release or app['commit'] == latest_release['commit'])
+        return bool(app['should_track_latest_release']) and (not latest_release or (tracked_release and tracked_release['id'] == latest_release['id']))
 
     def get_target_release_hash(self, app_id):
         """
@@ -745,7 +800,22 @@ class Application(object):
 
         """
 
-        return self.get_by_id(app_id)['commit']
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=should_be_running__release($select=commit)".format(app_id=app_id)
+
+        app = self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+        if not app:
+            raise exceptions.ApplicationNotFound(app_id)
+
+        app = app[0]
+
+        if app['should_be_running__release']:
+            return app['should_be_running__release'][0]['commit']
+
+        return ''
 
     def track_latest_release(self, app_id):
         """
@@ -776,7 +846,7 @@ class Application(object):
         }
 
         if latest_release:
-            data['commit'] = latest_release['commit']
+            data['should_be_running__release'] = latest_release['id']
 
         return self.base_request.request(
             'application', 'PATCH', params=params, data=data,

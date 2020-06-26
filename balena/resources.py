@@ -40,3 +40,5 @@ class Message(object):
     DEVICE_OS_NOT_SUPPORT_LOCAL_MODE = "Device OS version does not support local mode"
     DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE = "Device supervisor version does not support local mode"
     DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE = "Local mode is only supported on development OS versions"
+    ORGANIZATION_NOT_FOUND = "Organization not found: {organization}"
+    BALENA_DISCONTINUE_DEVICE_TYPE = "Discontinued device type: {type}"

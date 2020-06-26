@@ -193,7 +193,7 @@ class Release(object):
 
         """
 
-        raw_query = "$filter=id%20eq%20'{app_id}'&select=app_name&$expand=user($select=username)".format(app_id=app_id)
+        raw_query = "$filter=id%20eq%20'{app_id}'&select=app_name&$expand=organization($select=handle)".format(app_id=app_id)
 
         app = self.base_request.request(
             'application', 'GET', raw_query=raw_query,
@@ -211,7 +211,7 @@ class Release(object):
         }
 
         response = self.base_request.request(
-            '/v3/buildFromUrl?headless=true&owner={owner}&app={app_name}'.format(app_name=app[0]['app_name'], owner=app[0]['user'][0]['username']),
+            '/v3/buildFromUrl?headless=true&owner={owner}&app={app_name}'.format(app_name=app[0]['app_name'], owner=app[0]['organization'][0]['handle']),
             'POST',
             data=data,
             endpoint=self.settings.get('builder_url')

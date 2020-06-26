@@ -46,6 +46,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceEnvVariable](#deviceenvvariable)
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
+        - [Organization](#organization)
         - [Release](#release)
         - [Service](#service)
         - [Tag](#tag)
@@ -67,13 +68,14 @@ This module implements all models for balena python SDK.
 This class implements application model for balena python SDK.
 
 The returned objects properties are `__metadata, actor, app_name, application_type, commit, depends_on__application, device_type, id, is_accessible_by_support_until__date, should_track_latest_release, slug, user`.
-### Function: create(name, device_type, app_type)
+### Function: create(name, device_type, organization, app_type)
 
 Create an application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     name (str): application name.
     device_type (str): device type (display form).
+    organization (str): handle or id of the organization that the application will belong to.
     app_type (Optional[str]): application type.
 
 #### Returns:
@@ -82,10 +84,12 @@ Create an application. This function only works if you log in using credentials 
 #### Raises:
     InvalidDeviceType: if device type is not supported.
     InvalidApplicationType: if app type is not supported.
+    InvalidParameter: if organization is missing.
+    OrganizationNotFound: if organization couldn't be found.
 
 #### Examples:
 ```python
->>> balena.models.application.create('foo', 'Raspberry Pi 3', 'microservices-starter')
+>>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices-starter')
 '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: disable_device_urls(app_id)
@@ -219,11 +223,11 @@ Get a single application by application id.
 ```
 ### Function: get_by_owner(name, owner)
 
-Get a single application.
+Get a single application using the appname and the handle of the owning organization.
 
 #### Args:
     name (str): application name.
-    owner (str):  owner's username.
+    owner (str): The handle of the owning organization.
 
 #### Returns:
     dict: application info.
@@ -234,7 +238,7 @@ Get a single application.
 
 #### Examples:
 ```python
->>> balena.models.application.get_by_owner('foo', 'my_user')
+>>> balena.models.application.get_by_owner('foo', 'my_org')
 '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: get_config(app_id, version)
@@ -1866,6 +1870,88 @@ Get the build log from an image.
 
 #### Raises:
     ImageNotFound: if image couldn't be found.
+## Organization
+
+This class implements organization model for balena python SDK.
+### Function: create(name, handle)
+
+Creates a new organization.
+
+#### Args:
+    name (str): the name of the organization that will be created.
+    handle (Optional[str]): The handle of the organization that will be created.
+
+#### Returns:
+    dict: organization info.
+
+#### Examples:
+```python
+>>> balena.models.organization.create('My Org', 'test_org')
+'{'id': 147950, 'created_at': '2020-06-23T09:33:25.187Z', 'name': 'My Org', 'handle': 'test_org', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=147950'}}'
+```
+### Function: get(org_id)
+
+Get a single organization by id.
+
+#### Args:
+    org_id (str): organization id.
+
+#### Returns:
+    dict: organization info.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.get('26474')
+'{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}'
+```
+### Function: get_all()
+
+Get all organizations.
+
+#### Returns:
+    list: list contains information of organizations.
+
+#### Examples:
+```python
+>>> balena.models.organization.get_all()
+'[{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}]'
+```
+### Function: get_by_handle(handle)
+
+Get a single organization by handle.
+
+#### Args:
+    handle (str): organization handle.
+
+#### Returns:
+    dict: organization info.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.get_by_handle('test_account1')
+''{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}''
+```
+### Function: remove(org_id)
+
+Remove an organization.
+
+#### Args:
+    org_id (str): organization id.
+
+#### Returns:
+    dict: organization info.
+
+#### Examples:
+```python
+>>> balena.models.organization.remove('148003')
+'OK
+```
 ## Release
 
 This class implements release model for balena python SDK.

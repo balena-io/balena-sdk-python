@@ -464,3 +464,38 @@ class LocalModeError(BalenaException):
     def __init__(self, message):
         super(LocalModeError, self).__init__()
         self.message = message
+
+
+class OrganizationNotFound(BalenaException):
+    """
+    Exception type for organization not found.
+
+    Args:
+        organization (str): organization detail (organization handle or id).
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, organization):
+        super(OrganizationNotFound, self).__init__()
+        self.message = Message.ORGANIZATION_NOT_FOUND.format(
+            organization=organization)
+
+
+class BalenaDiscontinuedDeviceType(BalenaException):
+    """
+    The device type that you specified is invalid because it is discontinued, and this operation is no longer supported.
+
+    Args:
+        type (str): device type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, commit):
+        super(BalenaDiscontinuedDeviceType, self).__init__()
+        self.message = Message.BALENA_DISCONTINUE_DEVICE_TYPE.format(type=type)

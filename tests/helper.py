@@ -43,6 +43,8 @@ class TestHelper(object):
         if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
+        self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.who_am_i())
+
     @classmethod
     def load_env(cls):
         env_file_name = '.env'
@@ -80,20 +82,38 @@ class TestHelper(object):
         Wipe all user's apps
         """
 
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
         self.balena.models.application.base_request.request(
-            'application', 'DELETE',
+            'application', 'DELETE', params=params,
             endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
+
+    def wipe_organization(self):
+        """
+        Wipe all user's orgs
+        """
+
+        for org in self.balena.models.organization.get_all():
+            self.balena.models.organization.remove(org['id'])
 
     def reset_user(self):
         """
         Wipe all user's apps and ssh keys added.
         """
 
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
         if self.balena.auth.is_logged_in():
             self.wipe_application()
             self.balena.models.key.base_request.request(
-                'user__has__public_key', 'DELETE',
+                'user__has__public_key', 'DELETE', params=params,
                 endpoint=self.balena.settings.get('pine_endpoint'), login=True
             )
 
@@ -105,7 +125,7 @@ class TestHelper(object):
         Create a device belongs to an application.
         """
 
-        app = self.balena.models.application.create(app_name, device_type)
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'])
         return app, self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
 
     def create_multicontainer_app(self, app_name='FooBar', device_type='Raspberry Pi 2'):
@@ -113,8 +133,9 @@ class TestHelper(object):
         Create a multicontainer application with a device and two releases.
         """
 
-        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
         dev = self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid())
+        user_id = self.balena.auth.get_user_id()
 
         # Register web & DB services
 
@@ -136,7 +157,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'old-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -148,7 +169,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'new-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -161,7 +182,7 @@ class TestHelper(object):
         # Set device to the new release
 
         data = {
-            'is_on__commit': new_release['commit']
+            'is_running__release': new_release['id']
         }
 
         params = {
@@ -333,13 +354,14 @@ class TestHelper(object):
         Create a multicontainer application with  two releases.
         """
 
-        app = self.balena.models.application.create(app_name, device_type, 'microservices-starter')
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
+        user_id = self.balena.auth.get_user_id()
 
         # Register an old & new release of this application
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'old-release-commit',
             'status': 'success',
             'source': 'cloud',
@@ -351,7 +373,7 @@ class TestHelper(object):
 
         data = {
             'belongs_to__application': app['id'],
-            'is_created_by__user': app['user']['__id'],
+            'is_created_by__user': user_id,
             'commit': 'new-release-commit',
             'status': 'success',
             'source': 'cloud',
