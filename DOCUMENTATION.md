@@ -1009,6 +1009,18 @@ Get a device manifest by slug.
 
 #### Raises:
     InvalidDeviceType: if device slug name is not supported.
+### Function: get_metrics(uuid)
+
+Get the metrics related information for a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Returns:
+    dict: metrics of the device.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
 ### Function: get_name(uuid)
 
 Get device name by device uuid.
