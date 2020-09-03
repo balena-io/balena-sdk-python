@@ -1592,3 +1592,25 @@ class Device(object):
             return device['mac_address'].split()
         else:
             return []
+
+    def get_metrics(self, uuid):
+        """
+        Get the metrics related information for a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Returns:
+            dict: metrics of the device.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        """
+
+        device = self.get(uuid)
+        if "memory_usage" in device:
+            metrics = ["memory_usage", "memory_total", "storage_block_device", "storage_usage", "storage_total", "cpu_usage", "cpu_temp", "cpu_id" "is_undervolted"]
+            return {k: device.get(k, "") for k in metrics }
+        else:
+            return {}
