@@ -26,7 +26,7 @@ class Settings(object):
 
     """
 
-    HOME_DIRECTORY = Path.expanduser('~')
+    HOME_DIRECTORY = '/tmp'
     CONFIG_SECTION = 'Settings'
     CONFIG_FILENAME = 'balena.cfg'
     DEFAULT_SETTING_KEYS = set(['builder_url', 'pine_endpoint', 'api_endpoint', 'api_version',
