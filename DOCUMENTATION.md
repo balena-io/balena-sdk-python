@@ -47,6 +47,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
         - [Organization](#organization)
+            - [OrganizationMembership](#organizationmembership)
         - [Release](#release)
         - [Service](#service)
         - [Tag](#tag)
@@ -1963,6 +1964,39 @@ Remove an organization.
 ```python
 >>> balena.models.organization.remove('148003')
 'OK
+```
+## OrganizationMembership
+
+This class implements organization membership model for balena python SDK.
+### Function: get_all()
+
+Get all organization memberships.
+
+#### Returns:
+    list: organization memberships.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get_all()
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
+### Function: get_by_organization(handle_or_id)
+
+Get all memberships by organization.
+
+#### Args:
+    handle_or_id (str): organization handle (string) or id (number).
+
+#### Returns:
+    list: organization memberships.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get_by_organization(3014)
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
 ```
 ## Release
 

@@ -7,6 +7,7 @@ from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .config import Config
+from ..utils import is_id
 from .. import exceptions
 
 from datetime import datetime
@@ -26,6 +27,7 @@ class Organization (object):
         self.settings = Settings()
         self.config = Config()
         self.auth = Auth()
+        self.membership = OrganizationMembership()
 
     def create(self, name, handle=None):
         """
@@ -161,3 +163,78 @@ class Organization (object):
             'organization({org_id})'.format(org_id=org_id), 'DELETE',
             endpoint=self.settings.get('pine_endpoint'), login=True
         )
+
+
+class OrganizationMembership (object):
+    """
+    This class implements organization membership model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+        self.config = Config()
+        self.auth = Auth()
+
+    def get_all(self):
+        """
+        Get all organization memberships.
+
+        Returns:
+            list: organization memberships.
+
+        Examples:
+            >>> balena.models.organization.membership.get_all()
+            '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+
+        """
+
+        return self.base_request.request(
+            'organization_membership', 'GET', endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+    def get_by_organization(self, handle_or_id):
+        """
+        Get all memberships by organization.
+
+        Args:
+            handle_or_id (str): organization handle (string) or id (number).
+
+        Returns:
+            list: organization memberships.
+
+        Raises:
+            OrganizationNotFound: if organization couldn't be found.
+
+        Examples:
+            >>> balena.models.organization.membership.get_by_organization(3014)
+            '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+
+        """
+
+        params = {
+            'filter': 'is_member_of__organization',
+            'eq': handle_or_id
+        }
+
+        if not is_id(handle_or_id):
+            params1 = {
+                'filter': 'handle',
+                'eq': handle_or_id
+            }
+
+            org = self.base_request.request(
+                'organization', 'GET', params=params1,
+                endpoint=self.settings.get('pine_endpoint'), login=True
+            )['d']
+
+            if not org:
+                raise exceptions.OrganizationNotFound(handle_or_id)
+
+            params['eq'] = org['id']
+
+        return self.base_request.request(
+            'organization_membership', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
