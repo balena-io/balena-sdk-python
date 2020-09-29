@@ -484,6 +484,24 @@ class OrganizationNotFound(BalenaException):
             organization=organization)
 
 
+class OrganizationMembershipNotFound(BalenaException):
+    """
+    Exception type for organization membership not found.
+
+    Args:
+        org_membership (str): organization membership id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, org_membership):
+        super(OrganizationMembershipNotFound, self).__init__()
+        self.message = Message.ORGANIZATION_MEMBERSHIP_NOT_FOUND.format(
+            org_membership=org_membership)
+
+
 class BalenaDiscontinuedDeviceType(BalenaException):
     """
     The device type that you specified is invalid because it is discontinued, and this operation is no longer supported.

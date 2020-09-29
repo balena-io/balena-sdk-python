@@ -9,6 +9,7 @@ TOC_ROOT = 0
 TOC_L1 = 1
 TOC_L2 = 2
 TOC_L3 = 3
+TOC_L4 = 4
 
 Table_Of_Content = [
     ('Balena', TOC_ROOT),
@@ -29,6 +30,7 @@ Table_Of_Content = [
     ('Image', TOC_L2),
     ('Organization', TOC_L2),
     ('OrganizationMembership', TOC_L3),
+    ('OrganizationMembershipTag', TOC_L4),
     ('Release', TOC_L2),
     ('Service', TOC_L2),
     ('Tag', TOC_L2),
@@ -127,6 +129,8 @@ def main():
     print_functions(balena.models.organization.Organization)
     print(doc2md.doc2md(balena.models.organization.OrganizationMembership.__doc__, 'OrganizationMembership', type=0))
     print_functions(balena.models.organization.OrganizationMembership)
+    print(doc2md.doc2md(balena.models.organization.OrganizationMembershipTag.__doc__, 'OrganizationMembershipTag', type=0))
+    print_functions(balena.models.organization.OrganizationMembershipTag)
     print(doc2md.doc2md(balena.models.release.Release.__doc__, 'Release', type=0))
     print_functions(balena.models.release.Release)
     print(doc2md.doc2md(balena.models.service.Service.__doc__, 'Service', type=0))

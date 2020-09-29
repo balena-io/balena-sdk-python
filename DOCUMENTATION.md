@@ -48,6 +48,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
         - [Image](#image)
         - [Organization](#organization)
             - [OrganizationMembership](#organizationmembership)
+                - [OrganizationMembershipTag](#organizationmembershiptag)
         - [Release](#release)
         - [Service](#service)
         - [Tag](#tag)
@@ -1968,6 +1969,24 @@ Remove an organization.
 ## OrganizationMembership
 
 This class implements organization membership model for balena python SDK.
+### Function: get(membership_id)
+
+Get a single organization membership.
+
+#### Args:
+    membership_id (str): organization id.
+
+#### Returns:
+    Organization membership.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get(3014)
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
 ### Function: get_all()
 
 Get all organization memberships.
@@ -1980,7 +1999,7 @@ Get all organization memberships.
 >>> balena.models.organization.membership.get_all()
 '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
 ```
-### Function: get_by_organization(handle_or_id)
+### Function: get_all_by_organization(handle_or_id)
 
 Get all memberships by organization.
 
@@ -1995,8 +2014,89 @@ Get all memberships by organization.
 
 #### Examples:
 ```python
->>> balena.models.organization.membership.get_by_organization(3014)
+>>> balena.models.organization.membership.get_all_by_organization(3014)
 '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
+## OrganizationMembershipTag
+
+This class implements organization membership tag model for balena python SDK.
+### Function: get_all()
+
+Get all organization membership tags.
+
+#### Returns:
+    list: organization membership tags.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all()
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: get_all_by_organization(handle_or_id)
+
+Get all organization membership tags for an organization.
+
+#### Args:
+    handle_or_id (str): organization handle (string) or id (number).
+
+#### Returns:
+    list: organization membership tags.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all_by_organization(3014)
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: get_all_by_organization_membership(membership_id)
+
+Get all organization membership tags for all memberships of an organization.
+
+#### Args:
+    membership_id (str): organization membership id.
+
+#### Returns:
+    list: organization membership tags.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all_by_organization_membership(3014)
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: remove(membership_id, tag_key)
+
+Remove an organization membership tag.
+
+#### Args:
+    membership_id: organization membership id.
+    tag_key (str): tag key.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.remove(17608, 'mTag1')
+'OK'
+```
+### Function: set(membership_id, tag_key, value)
+
+Set an organization membership tag.
+
+#### Args:
+    membership_id: organization membership id.
+    tag_key (str): tag key.
+    value (str): tag value.
+
+#### Returns:
+    dict: dict contains organization membership tag info if tag doesn't exist.
+    OK: if tag exists.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
+{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}
+>>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK 1')
+'OK'
 ```
 ## Release
 
