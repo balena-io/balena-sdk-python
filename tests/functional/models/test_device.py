@@ -138,6 +138,18 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.get('999999999999')
 
+    def test_get_by_short_uuid(self):
+        # should be able to get the device by the human-friendly short uuid.
+        app, device = self.helper.create_device()
+        self.assertEqual(
+            self.balena.models.device.get(device['uuid'][0:7])['id'],
+            device['id']
+        )
+
+        # should be rejected if the device uuid does not exist.
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.get('abcdef1')
+
     def test_rename(self):
         app, device = self.helper.create_device()
 

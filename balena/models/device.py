@@ -83,13 +83,10 @@ class Device(object):
 
         """
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
+        raw_query = "$filter=startswith(uuid,'{uuid}')".format(uuid=uuid)
         try:
             devices = self.base_request.request(
-                'device', 'GET', params=params,
+                'device', 'GET', raw_query=raw_query,
                 endpoint=self.settings.get('pine_endpoint')
             )['d']
             if len(devices) > 1:
@@ -251,7 +248,7 @@ class Device(object):
         if expand_release:
             release = ",is_provided_by__release($select=id,commit)"
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release}),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid=uuid, release=release)
+        raw_query = "$filter=startswith(uuid,'{uuid}')&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release}),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid=uuid, release=release)
 
         raw_data = self.base_request.request(
             'device', 'GET', raw_query=raw_query,
