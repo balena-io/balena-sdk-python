@@ -26,9 +26,9 @@ class Settings(object):
 
     """
 
-    HOME_DIRECTORY = Path.expanduser('~')
-    CONFIG_SECTION = 'Settings'
-    CONFIG_FILENAME = 'balena.cfg'
+    HOME_DIRECTORY = os.getenv('BALENA_SETTINGS_HOME_DIRECTORY', default=Path.expanduser('~'))
+    CONFIG_SECTION = os.getenv('BALENA_SETTINGS_CONFIG_SECTION', default='Settings')
+    CONFIG_FILENAME = os.getenv('BALENA_SETTINGS_CONFIG_FILENAME', default='balena.cfg')
     DEFAULT_SETTING_KEYS = set(['builder_url', 'pine_endpoint', 'api_endpoint', 'api_version',
                                 'data_directory', 'image_cache_time',
                                 'token_refresh_interval', 'cache_directory', 'timeout',
