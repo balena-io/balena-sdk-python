@@ -83,7 +83,7 @@ class BaseTagTest(object):
         # should be rejected if the tag_key is empty
         with test_runner.assertRaises(Exception) as cm:
             self.test_obj.set(resource_id, '', 'not allowed')
-        test_runner.assertIn('Tag key cannot be empty.', cm.exception.message)
+        test_runner.assertIn('It is necessary that each release tag has a tag key that has a Length (Type) that is greater than 0.', cm.exception.message)
 
         # given 2 tags, should be able to update a tag without affecting the rest
         self.test_obj.set(resource_id, 'Foo2', 'Bar')
