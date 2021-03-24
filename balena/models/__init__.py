@@ -17,6 +17,7 @@ from .config_variable import ConfigVariable
 from .api_key import ApiKey
 from .tag import Tag
 from .organization import Organization
+from .release_delta import ReleaseDelta
 
 
 class Models(object):
@@ -36,3 +37,4 @@ class Models(object):
         self.api_key = ApiKey()
         self.tag = Tag()
         self.organization = Organization()
+        self.release_delta = ReleaseDelta()

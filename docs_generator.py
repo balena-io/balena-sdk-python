@@ -29,6 +29,7 @@ Table_Of_Content = [
     ('Image', TOC_L2),
     ('Organization', TOC_L2),
     ('Release', TOC_L2),
+    ('ReleaseDelta', TOC_L2),
     ('Service', TOC_L2),
     ('Tag', TOC_L2),
     ('ApplicationTag', TOC_L3),
@@ -126,6 +127,8 @@ def main():
     print_functions(balena.models.organization.Organization)
     print(doc2md.doc2md(balena.models.release.Release.__doc__, 'Release', type=0))
     print_functions(balena.models.release.Release)
+    print(doc2md.doc2md(balena.models.release_delta.ReleaseDelta.__doc__, 'ReleaseDelta', type=0))
+    print_functions(balena.models.release_delta.ReleaseDelta)
     print(doc2md.doc2md(balena.models.service.Service.__doc__, 'Service', type=0))
     print_functions(balena.models.service.Service)
     print(doc2md.doc2md(balena.models.tag.Tag.__doc__, 'Tag', type=0))
