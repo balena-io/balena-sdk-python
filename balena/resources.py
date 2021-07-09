@@ -42,3 +42,4 @@ class Message(object):
     DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE = "Local mode is only supported on development OS versions"
     ORGANIZATION_NOT_FOUND = "Organization not found: {organization}"
     BALENA_DISCONTINUE_DEVICE_TYPE = "Discontinued device type: {type}"
+    BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"

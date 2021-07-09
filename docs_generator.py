@@ -14,6 +14,7 @@ Table_Of_Content = [
     ('Balena', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
+    ('ApplicationInvite', TOC_L3),
     ('ApiKey', TOC_L2),
     ('Config', TOC_L2),
     ('ConfigVariable', TOC_L2),
@@ -80,6 +81,10 @@ def main():
     print(doc2md.doc2md(
         balena.models.application.Application.__doc__, 'Application', type=0))
     print_functions(balena.models.application.Application)
+    print(doc2md.doc2md(
+        balena.models.application.ApplicationInvite.__doc__,
+        'ApplicationInvite', type=0))
+    print_functions(balena.models.application.ApplicationInvite)
     print(doc2md.doc2md(
         balena.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
     print_functions(balena.models.api_key.ApiKey)
