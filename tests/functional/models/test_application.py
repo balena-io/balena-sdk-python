@@ -232,6 +232,45 @@ class TestApplication(unittest.TestCase):
             url,
             'https://dashboard.balena-cloud.com/apps/1476418'
         )
+        
+    def test_invite_create(self):
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
+
+        # should create and return an application invite
+        invite = self.balena.models.application.invite.create(app['id'], 'james@resin.io', 'developer', 'Python SDK test invite')
+        self.assertEqual(invite['message'], 'Python SDK test invite')
+        self.assertEqual(invite['is_invited_to__application']['__id'], app['id'])
+        self.balena.models.application.invite.revoke(invite['id'])
+        
+        # should throw an error when role is not found
+        # raise balena.exceptions.BalenaApplicationMembershipRoleNotFound if  role is not found.
+        with self.assertRaises(self.helper.balena_exceptions.BalenaApplicationMembershipRoleNotFound):
+            self.balena.models.application.invite.create(app['id'], 'james@resin.io', 'developer1', 'Python SDK test invite')
+            
+    def test_invite_get_all(self):
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
+
+        # shoud return an empty list
+        invite_list = self.balena.models.application.invite.get_all()
+        self.assertEqual(0, len(invite_list))
+        
+        # shoud return an invite list with length equals 1.
+        self.balena.models.application.invite.create(app['id'], 'james@resin.io', 'developer', 'Python SDK test invite')
+        invite_list = self.balena.models.application.invite.get_all()
+        self.assertEqual(1, len(invite_list))
+        
+    def test_invite_get_all_by_application(self):
+        app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])
+
+        # shoud return an empty list
+        invite_list = self.balena.models.application.invite.get_all_by_application(app['id'])
+        self.assertEqual(0, len(invite_list))
+        
+        # shoud return an invite list with length equals 1.
+        self.balena.models.application.invite.create(app['id'], 'james@resin.io', 'developer', 'Python SDK test invite')
+        invite_list = self.balena.models.application.invite.get_all_by_application(app['id'])
+        self.assertEqual(1, len(invite_list))
+
 
 if __name__ == '__main__':
     unittest.main()

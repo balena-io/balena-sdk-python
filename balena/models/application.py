@@ -32,6 +32,7 @@ class Application(object):
         self.config = Config()
         self.auth = Auth()
         self.release = Release()
+        self.invite = ApplicationInvite()
 
     def __get_single_install_summary(self, raw_data):
         """
@@ -908,4 +909,145 @@ class Application(object):
         return urljoin(
             self.settings.get('api_endpoint').replace('api', 'dashboard'),
             '/apps/{app_id}'.format(app_id=app_id)
+        )
+
+
+class ApplicationInvite():
+    """
+    This class implements application invite model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+        self.config = Config()
+        self.auth = Auth()
+        self.release = Release()
+        self.RESOURCE = 'invitee__is_invited_to__application'
+
+    def get_all(self):
+        """
+        Get all invites.
+
+        Returns:
+            list: list contains info of invites.
+            
+        Examples:
+            >>> balena.models.application.invite.get_all()
+            [{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+
+        """
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        
+    def get_all_by_application(self, app_id):
+        """
+        Get all invites by application.
+
+        Args:
+            app_id (str): application id.
+
+        Returns:
+            list: list contains info of invites.
+            
+        Examples:
+            >>> balena.models.application.invite.get_all_by_application(1681618)
+            [{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+
+        """
+
+        params = {
+            'filter': 'is_invited_to__application',
+            'eq': app_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        
+    def create(self, app_id, invitee, role_name=None, message=None):
+        """
+        Creates a new invite for an application.
+
+        Args:
+            app_id (str): application id.
+            invitee (str): the email/balena_username of the invitee.
+            role_name (Optional[str]): the role name to be granted to the invitee.
+            message (Optional[str]): the message to send along with the invite.
+
+        Returns:
+            dict: application invite.
+
+        Examples:
+            >>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
+            {'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}
+
+        """
+        
+        data = {
+            'invitee': invitee,
+            'is_invited_to__application': app_id,
+            'message': message
+        }
+
+        if role_name:
+            params = {
+                'filter': 'name',
+                'eq': role_name
+            }
+            
+            roles = self.base_request.request(
+                'application_membership_role', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+            
+            if not roles:
+                raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name=role_name)
+            else:
+                data['application_membership_role '] = roles[0]['id']
+        
+        return json.loads(self.base_request.request(
+            self.RESOURCE, 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        ).decode('utf-8'))
+        
+    def revoke(self, invite_id):
+        """
+        Revoke an invite.
+
+        Args:
+            invite_id (str): application invite id.
+
+        Examples:
+            >>> balena.models.application.invite.revoke(5860)
+            'OK'
+
+        """
+        
+        params = {
+            'filter': 'id',
+            'eq': invite_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+        
+    def accept(self, invite_token):
+        """
+        Accepts an invite.
+
+        Args:
+            invite_token (str): invitationToken - invite token.
+
+        """
+        
+        return self.base_request.request(
+            '/user/v1/invitation/{0}'.format(invite_token), 'POST',
+            endpoint=self.settings.get('api_endpoint'), login=True
         )

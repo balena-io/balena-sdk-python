@@ -43,3 +43,4 @@ class Message(object):
     ORGANIZATION_NOT_FOUND = "Organization not found: {organization}"
     BALENA_DISCONTINUE_DEVICE_TYPE = "Discontinued device type: {type}"
     BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND = "Organization membership role not found: {role_name}"
+    BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"

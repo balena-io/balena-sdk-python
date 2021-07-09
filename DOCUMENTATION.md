@@ -33,6 +33,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
 - [Balena](#balena)
     - [Models](#models)
         - [Application](#application)
+            - [ApplicationInvite](#applicationinvite)
         - [ApiKey](#apikey)
         - [Config](#config)
         - [ConfigVariable](#configvariable)
@@ -461,6 +462,72 @@ Get whether the application is configured to receive updates whenever a new rele
 #### Examples:
     >> > balena.models.application.will_track_new_releases('5685')
     True
+## ApplicationInvite
+
+This class implements application invite model for balena python SDK.
+### Function: accept(invite_token)
+
+Accepts an invite.
+
+#### Args:
+    invite_token (str): invitationToken - invite token.
+### Function: create(app_id, invitee, role_name, message)
+
+Creates a new invite for an application.
+
+#### Args:
+    app_id (str): application id.
+    invitee (str): the email/balena_username of the invitee.
+    role_name (Optional[str]): the role name to be granted to the invitee.
+    message (Optional[str]): the message to send along with the invite.
+
+#### Returns:
+    dict: application invite.
+
+#### Examples:
+```python
+>>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
+{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}
+```
+### Function: get_all()
+
+Get all invites.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.application.invite.get_all()
+[{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all invites by application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.application.invite.get_all_by_application(1681618)
+[{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+```
+### Function: revoke(invite_id)
+
+Revoke an invite.
+
+#### Args:
+    invite_id (str): application invite id.
+
+#### Examples:
+```python
+>>> balena.models.application.invite.revoke(5860)
+'OK'
+```
 ## ApiKey
 
 This class implements user API key model for balena python SDK.
