@@ -47,6 +47,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
         - [Organization](#organization)
+        - [OrganizationInvite](#organizationinvite)
         - [Release](#release)
         - [Service](#service)
         - [Tag](#tag)
@@ -1991,6 +1992,72 @@ Remove an organization.
 ```python
 >>> balena.models.organization.remove('148003')
 'OK
+```
+## OrganizationInvite
+
+This class implements organization invite model for balena python SDK.
+### Function: accept(invite_token)
+
+Accepts an invite.
+
+#### Args:
+    invite_token (str): invitation Token - invite token.
+### Function: create(org_id, invitee, role_name, message)
+
+Creates a new invite for an organization.
+
+#### Args:
+    org_id (str): organization id.
+    invitee (str): the email/balena_username of the invitee.
+    role_name (Optional[str]): the role name to be granted to the invitee.
+    message (Optional[str]): the message to send along with the invite.
+
+#### Returns:
+    dict: organization invite.
+
+#### Examples:
+```python
+>>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
+{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}
+```
+### Function: get_all()
+
+Get all invites.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.organization.invite.get_all()
+[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+```
+### Function: get_all_by_organization(org_id)
+
+Get all invites by organization.
+
+#### Args:
+    org_id (str): organization id.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.organization.invite.get_all_by_organization(26474)
+[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+```
+### Function: revoke(invite_id)
+
+Revoke an invite.
+
+#### Args:
+    invite_id (str): organization invite id.
+
+#### Examples:
+```python
+>>> balena.models.organization.invite.revoke(2862)
+'OK'
 ```
 ## Release
 
