@@ -415,6 +415,33 @@ class Application(object):
             'application', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint'), login=True
         )
+        
+    def rename(self, app_id, new_name):
+        """
+        Rename application. This function only works if you log in using credentials or Auth Token.
+
+        Args:
+            app_id (int): application id.
+            new_name (str): new application name.
+
+        Examples:
+            >>> balena.models.application.rename(1681618, 'py-test-app')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': app_id
+        }
+        data = {
+            'app_name': new_name
+        }
+
+        return self.base_request.request(
+            'application', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
 
     def restart(self, name):
         """
