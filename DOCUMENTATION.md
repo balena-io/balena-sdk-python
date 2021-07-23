@@ -34,6 +34,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
     - [Models](#models)
         - [Application](#application)
             - [ApplicationInvite](#applicationinvite)
+            - [ApplicationMembership](#applicationmembership)
         - [ApiKey](#apikey)
         - [Config](#config)
         - [ConfigVariable](#configvariable)
@@ -388,7 +389,7 @@ Remove application. This function only works if you log in using credentials or 
 Rename application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
-    app_id (str): application id.
+    app_id (int): application id.
     new_name (str): new application name.
 
 #### Examples:
@@ -476,8 +477,8 @@ Accepts an invite.
 Creates a new invite for an application.
 
 #### Args:
-    app_id (str): application id.
-    invitee (str): the email/balena_username of the invitee.
+    app_id (int): application id.
+    invitee (str): the email of the invitee.
     role_name (Optional[str]): the role name to be granted to the invitee.
     message (Optional[str]): the message to send along with the invite.
 
@@ -506,7 +507,7 @@ Get all invites.
 Get all invites by application.
 
 #### Args:
-    app_id (str): application id.
+    app_id (int): application id.
 
 #### Returns:
     list: list contains info of invites.
@@ -521,13 +522,94 @@ Get all invites by application.
 Revoke an invite.
 
 #### Args:
-    invite_id (str): application invite id.
+    invite_id (int): application invite id.
 
 #### Examples:
 ```python
 >>> balena.models.application.invite.revoke(5860)
 'OK'
 ```
+## ApplicationMembership
+
+This class implements application membership model for balena python SDK.
+### Function: change_role(membership_id, role_name)
+
+Changes the role of an application member.
+
+#### Args:
+    membership_id (int): the id of the membership that will be changed.
+    role_name (str): the role name to be granted to the membership.
+
+#### Examples:
+```python
+>>> balena.models.application.membership.change_role(55074, 'observer')
+'OK'
+```
+### Function: create(app_id, user_name, role_name)
+
+Creates a new membership for an application.
+
+#### Args:
+    app_id (int): application id.
+    user_name (str): the username of the balena user that will become a member.
+    role_name (Optional[str]): the role name to be granted to the membership.
+
+#### Returns:
+    dict: application invite.
+
+#### Examples:
+```python
+>>> balena.models.application.membership.create(1681618, 'nghiant2710')
+{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+```
+### Function: get(membership_id)
+
+Get a single application membership.
+
+#### Args:
+    membership_id (int): application membership id.
+
+#### Returns:
+    dict: application membership.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get(55074)
+{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+```
+### Function: get_all()
+
+Get all application memberships.
+
+#### Returns:
+    list: list contains info of application memberships.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get_all()
+[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all memberships by application.
+
+#### Args:
+    app_id (int): application id.
+
+#### Returns:
+    list: list contains info of application memberships.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get_all_by_application(1681618)
+[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+```
+### Function: remove(membership_id)
+
+Remove a membership.
+
+#### Args:
+    membership_id (int): application membership id.
 ## ApiKey
 
 This class implements user API key model for balena python SDK.

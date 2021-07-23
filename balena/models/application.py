@@ -16,6 +16,37 @@ import json
 from math import isinf
 from collections import defaultdict
 
+def _get_role_by_name(role_name):
+    """
+
+    Get application membership role
+    
+    Args:
+        role_name (str): role name.
+
+    Returns:
+        int: application membership role id.
+
+    """
+
+    base_request = BaseRequest()
+    settings = Settings()
+
+    params = {
+        'filter': 'name',
+        'eq': role_name
+    }
+
+    roles = base_request.request(
+        'application_membership_role', 'GET', params=params,
+        endpoint=settings.get('pine_endpoint')
+    )['d']
+
+    if not roles:
+        raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name=role_name)
+    else:
+        return roles[0]['id']
+
 
 # TODO: support both app_id and app_name
 class Application(object):
@@ -33,6 +64,7 @@ class Application(object):
         self.auth = Auth()
         self.release = Release()
         self.invite = ApplicationInvite()
+        self.membership = ApplicationMembership()
 
     def __get_single_install_summary(self, raw_data):
         """
@@ -948,7 +980,7 @@ class ApplicationInvite():
         Get all invites by application.
 
         Args:
-            app_id (str): application id.
+            app_id (int): application id.
 
         Returns:
             list: list contains info of invites.
@@ -974,8 +1006,8 @@ class ApplicationInvite():
         Creates a new invite for an application.
 
         Args:
-            app_id (str): application id.
-            invitee (str): the email/balena_username of the invitee.
+            app_id (int): application id.
+            invitee (str): the email of the invitee.
             role_name (Optional[str]): the role name to be granted to the invitee.
             message (Optional[str]): the message to send along with the invite.
 
@@ -995,20 +1027,7 @@ class ApplicationInvite():
         }
 
         if role_name:
-            params = {
-                'filter': 'name',
-                'eq': role_name
-            }
-            
-            roles = self.base_request.request(
-                'application_membership_role', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
-            
-            if not roles:
-                raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name=role_name)
-            else:
-                data['application_membership_role '] = roles[0]['id']
+            data['application_membership_role '] = _get_role_by_name(role_name)
         
         return json.loads(self.base_request.request(
             self.RESOURCE, 'POST', data=data,
@@ -1020,7 +1039,7 @@ class ApplicationInvite():
         Revoke an invite.
 
         Args:
-            invite_id (str): application invite id.
+            invite_id (int): application invite id.
 
         Examples:
             >>> balena.models.application.invite.revoke(5860)
@@ -1050,4 +1069,171 @@ class ApplicationInvite():
         return self.base_request.request(
             '/user/v1/invitation/{0}'.format(invite_token), 'POST',
             endpoint=self.settings.get('api_endpoint'), login=True
+        )
+
+
+class ApplicationMembership():
+    """
+    This class implements application membership model for balena python SDK.
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+        self.config = Config()
+        self.auth = Auth()
+        self.RESOURCE = 'user__is_member_of__application'
+
+    def get_all(self):
+        """
+        Get all application memberships.
+
+        Returns:
+            list: list contains info of application memberships.
+            
+        Examples:
+            >>> balena.models.application.membership.get_all()
+            [{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+
+        """
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def get(self, membership_id):
+        """
+        Get a single application membership.
+
+        Args:
+            membership_id (int): application membership id.
+
+        Returns:
+            dict: application membership.
+            
+        Examples:
+            >>> balena.models.application.membership.get(55074)
+            {u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': membership_id
+        }
+
+        result = self.base_request.request(
+            self.RESOURCE, 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        
+        if not result:
+            raise exceptions.ApplicationMembershipNotFound(membership_id)
+
+        return result[0]
+
+    def get_all_by_application(self, app_id):
+        """
+        Get all memberships by application.
+
+        Args:
+            app_id (int): application id.
+
+        Returns:
+            list: list contains info of application memberships.
+            
+        Examples:
+            >>> balena.models.application.membership.get_all_by_application(1681618)
+            [{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+
+        """
+
+        params = {
+            'filter': 'is_member_of__application',
+            'eq': app_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def create(self, app_id, user_name, role_name=None):
+        """
+        Creates a new membership for an application.
+
+        Args:
+            app_id (int): application id.
+            user_name (str): the username of the balena user that will become a member.
+            role_name (Optional[str]): the role name to be granted to the membership.
+
+        Returns:
+            dict: application invite.
+
+        Examples:
+            >>> balena.models.application.membership.create(1681618, 'nghiant2710')
+            {u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+
+        """
+        
+        data = {
+            'username': user_name,
+            'is_member_of__application': app_id
+        }
+
+        if role_name:
+            data['application_membership_role '] = _get_role_by_name(role_name)
+
+        return json.loads(self.base_request.request(
+            self.RESOURCE, 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        ).decode('utf-8'))
+
+    def change_role(self, membership_id, role_name):
+        """
+        Changes the role of an application member.
+
+        Args:
+            membership_id (int): the id of the membership that will be changed.
+            role_name (str): the role name to be granted to the membership.
+
+        Examples:
+            >>> balena.models.application.membership.change_role(55074, 'observer')
+            'OK'
+
+        """
+
+        role_id = _get_role_by_name(role_name)
+
+        params = {
+            'filter': 'id',
+            'eq': membership_id
+        }
+
+        data = {
+            'application_membership_role': role_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def remove(self, membership_id):
+        """
+        Remove a membership.
+
+        Args:
+            membership_id (int): application membership id.
+
+        """
+        
+        params = {
+            'filter': 'id',
+            'eq': membership_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
         )

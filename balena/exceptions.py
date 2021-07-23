@@ -530,3 +530,21 @@ class BalenaApplicationMembershipRoleNotFound(BalenaException):
     def __init__(self, role_name):
         super(BalenaApplicationMembershipRoleNotFound, self).__init__()
         self.message = Message.BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
+
+
+class ApplicationMembershipNotFound(BalenaException):
+    """
+    Exception type for application membership not found.
+
+    Args:
+        membership (str): application membership id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, membership):
+        super(ApplicationMembershipNotFound, self).__init__()
+        self.message = Message.APPLICATION_MEMBERSHIP_NOT_FOUND.format(
+            membership=membership)
