@@ -26,6 +26,7 @@ from .hup import Hup
 LOCAL_MODE_MIN_OS_VERSION = '2.0.0'
 LOCAL_MODE_MIN_SUPERVISOR_VERSION = '4.0.0'
 LOCAL_MODE_ENV_VAR = 'RESIN_SUPERVISOR_LOCAL_MODE'
+OVERRIDE_LOCK_ENV_VAR = 'RESIN_OVERRIDE_LOCK'
 
 
 # TODO: support both device uuid and device id
@@ -63,6 +64,58 @@ class Device(object):
         self.release = Release()
         self.device_os = DeviceOs()
         self.hup = Hup()
+        
+    def __upsert_device_config_variable(self, device, name, value):
+        try:
+            data = {
+                'device': device['id'],
+                'name': name,
+                'value': value
+            }
+
+            return self.base_request.request(
+                'device_config_variable', 'POST', data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            )
+        except exceptions.RequestError as e:
+            if 'Unique key constraint violated' in e.message or 'must be unique' in e.message:
+                params = {
+                    'filters': {
+                        'device': device['id'],
+                        'name': name
+                    }
+                }
+
+                data = {
+                    'value': value
+                }
+
+                return self.base_request.request(
+                    'device_config_variable', 'PATCH', params=params, data=data,
+                    endpoint=self.settings.get('pine_endpoint')
+                )
+            raise e
+
+    def __get_applied_device_config_variable_value(self, uuid, name):
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=device_config_variable($select=value&$filter=name%20eq%20'{name}'),belongs_to__application($select=id&$expand=application_config_variable($select=value&$filter=name%20eq%20'{name}'))".format(name=name, uuid=uuid)
+
+        raw_data = self.base_request.request(
+            'device', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if len(raw_data) > 0:
+            device_config = raw_data[0]['device_config_variable']
+            app_config = raw_data[0]['belongs_to__application'][0]['application_config_variable']
+            
+            if device_config:
+                return device_config[0]['value']
+            elif app_config:
+                return app_config[0]['value']
+
+            return None
+        else:
+            raise exceptions.DeviceNotFound(uuid)
 
     def get(self, uuid):
         """
@@ -1191,32 +1244,6 @@ class Device(object):
             endpoint=self.settings.get('pine_endpoint')
         )
 
-    def __set_lock_overriden(self, uuid, should_override):
-        """
-        Private method to set lock override.
-
-        Args:
-            uuid (str): device uuid.
-            should_override (bool): lock override status.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
-        """
-
-        device_id = self.get(uuid)['id']
-
-        value = '1' if should_override else '0'
-
-        data = {
-            'value': value
-        }
-
-        return self.base_request.request(
-            'device/{0}/lock-override'.format(device_id), 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint')
-        )
-
     def enable_lock_override(self, uuid):
         """
         Enable lock override.
@@ -1229,7 +1256,8 @@ class Device(object):
 
         """
 
-        return self.__set_lock_overriden(uuid, True)
+        device = self.get(uuid)
+        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, '1')
 
     def disable_lock_override(self, uuid):
         """
@@ -1243,7 +1271,8 @@ class Device(object):
 
         """
 
-        return self.__set_lock_overriden(uuid, False)
+        device = self.get(uuid)
+        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, '0')
 
     def has_lock_override(self, uuid):
         """
@@ -1260,14 +1289,7 @@ class Device(object):
 
         """
 
-        device_id = self.get(uuid)['id']
-
-        res = self.base_request.request(
-            'device/{0}/lock-override'.format(device_id), 'GET',
-            endpoint=self.settings.get('api_endpoint')
-        )
-
-        return res == 1
+        return self.__get_applied_device_config_variable_value(uuid, OVERRIDE_LOCK_ENV_VAR) == '1'
 
     def get_supervisor_state(self, uuid):
         """
@@ -1434,37 +1456,6 @@ class Device(object):
         if device['os_variant'] != 'dev':
             raise exceptions.LocalModeError(Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE)
 
-    def __upsert_device_local_mode(self, device, value):
-        try:
-            data = {
-                'device': device['id'],
-                'name': LOCAL_MODE_ENV_VAR,
-                'value': value
-            }
-
-            return self.base_request.request(
-                'device_config_variable', 'POST', data=data,
-                endpoint=self.settings.get('pine_endpoint')
-            )
-        except exceptions.RequestError as e:
-            if 'Unique key constraint violated' in e.message or 'must be unique' in e.message:
-                params = {
-                    'filters': {
-                        'device': device['id'],
-                        'name': LOCAL_MODE_ENV_VAR
-                    }
-                }
-
-                data = {
-                    'value': value
-                }
-
-                return self.base_request.request(
-                    'device_config_variable', 'PATCH', params=params, data=data,
-                    endpoint=self.settings.get('pine_endpoint')
-                )
-            raise e
-
     def is_in_local_mode(self, uuid):
         """
         Check if local mode is enabled on the device.
@@ -1524,7 +1515,7 @@ class Device(object):
         # this will throw an error if a device doesn't support local mode
         self.__check_local_mode_supported(device)
 
-        self.__upsert_device_local_mode(device, '1')
+        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, '1')
 
     def disable_local_mode(self, uuid):
         """
@@ -1542,7 +1533,7 @@ class Device(object):
         """
 
         device = self.get(uuid)
-        self.__upsert_device_local_mode(device, '0')
+        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, '0')
 
     def get_local_mode_support(self, uuid):
         """

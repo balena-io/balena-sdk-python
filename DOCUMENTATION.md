@@ -1830,7 +1830,7 @@ Get all device service environment variables belong to an application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device_service_environment_variable.get_all_by_application(1043050)
-[{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'BALENA_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/balena/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+[{'id': 566017, 'created_at': '2021-04-23T08:28:08.539Z', 'service_install': {'__id': 1874939, '__deferred': {'uri': '/resin/service_install(@id)?@id=1874939'}}, 'value': '1', 'name': 'testEnv1', '__metadata': {'uri': '/resin/device_service_environment_variable(@id)?@id=566017'}}, {'id': 566015, 'created_at': '2021-04-23T08:17:45.767Z', 'service_install': {'__id': 1874939, '__deferred': {'uri': '/resin/service_install(@id)?@id=1874939'}}, 'value': '12', 'name': 'testEnv2', '__metadata': {'uri': '/resin/device_service_environment_variable(@id)?@id=566015'}}]
 ```
 ### Function: remove(var_id)
 
