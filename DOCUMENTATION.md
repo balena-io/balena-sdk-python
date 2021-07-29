@@ -381,6 +381,19 @@ Remove application. This function only works if you log in using credentials or 
 >>> balena.models.application.remove('Edison')
 'OK'
 ```
+### Function: rename(app_id, new_name)
+
+Rename application. This function only works if you log in using credentials or Auth Token.
+
+#### Args:
+    app_id (str): application id.
+    new_name (str): new application name.
+
+#### Examples:
+```python
+>>> balena.models.application.rename(1681618, 'py-test-app')
+'OK'
+```
 ### Function: restart(name)
 
 Restart application. This function only works if you log in using credentials or Auth Token.
