@@ -197,6 +197,7 @@ Get all applications (including collaborator applications).
 ### Function: get_all_with_device_service_details(expand_release)
 
 Get all applications (including collaborator applications) along with associated services' essential details.
+This method is deprecated and will be removed in next major release.
 
 #### Args:
     expand_release (Optional[bool]): Set this parameter to True then the commit of service details will be included.

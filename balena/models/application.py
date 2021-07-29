@@ -94,6 +94,7 @@ class Application(object):
     def get_all_with_device_service_details(self, expand_release=False):
         """
         Get all applications (including collaborator applications) along with associated services' essential details.
+        This method is deprecated and will be removed in next major release.
 
         Args:
             expand_release (Optional[bool]): Set this parameter to True then the commit of service details will be included.
