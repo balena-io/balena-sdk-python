@@ -28,6 +28,7 @@ Table_Of_Content = [
     ('DeviceServiceEnvVariable', TOC_L3),
     ('Image', TOC_L2),
     ('Organization', TOC_L2),
+    ('OrganizationInvite', TOC_L2),
     ('Release', TOC_L2),
     ('Service', TOC_L2),
     ('Tag', TOC_L2),
@@ -124,6 +125,8 @@ def main():
     print_functions(balena.models.image.Image)
     print(doc2md.doc2md(balena.models.organization.Organization.__doc__, 'Organization', type=0))
     print_functions(balena.models.organization.Organization)
+    print(doc2md.doc2md(balena.models.organization.OrganizationInvite.__doc__, 'OrganizationInvite', type=0))
+    print_functions(balena.models.organization.OrganizationInvite)
     print(doc2md.doc2md(balena.models.release.Release.__doc__, 'Release', type=0))
     print_functions(balena.models.release.Release)
     print(doc2md.doc2md(balena.models.service.Service.__doc__, 'Service', type=0))

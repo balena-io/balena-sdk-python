@@ -499,3 +499,17 @@ class BalenaDiscontinuedDeviceType(BalenaException):
     def __init__(self, commit):
         super(BalenaDiscontinuedDeviceType, self).__init__()
         self.message = Message.BALENA_DISCONTINUE_DEVICE_TYPE.format(type=type)
+
+
+class BalenaOrganizationMembershipRoleNotFound(BalenaException):
+    """
+    Balena organization membership role not found.
+    Args:
+        role_name (str): role name.
+    Attributes:
+        message (str): error message.
+    """
+
+    def __init__(self, role_name):
+        super(BalenaOrganizationMembershipRoleNotFound, self).__init__()
+        self.message = Message.BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
