@@ -434,6 +434,38 @@ class Device(object):
         else:
             raise exceptions.DeviceOffline(uuid)
 
+    def deactivate(self, uuid):
+        """
+        Deactivate a device.
+
+        Args:
+            uuid (str): device uuid.
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+
+        Examples:
+            >>> balena.models.device.deactivate('44cc9d1861b9f992808c506276e5d31c')
+
+        """
+
+        if self.has(uuid):
+            params = {
+                'filter': 'uuid',
+                'eq': uuid
+            }
+
+            data = {
+                'is_active': False
+            }
+
+            return self.base_request.request(
+                'device', 'PATCH', params=params, data=data,
+                endpoint=self.settings.get('pine_endpoint')
+            )
+        else:
+            raise exceptions.DeviceNotFound(uuid)
+
     def remove(self, uuid):
         """
         Remove a device. This function only works if you log in using credentials or Auth Token.

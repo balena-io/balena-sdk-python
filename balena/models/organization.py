@@ -28,6 +28,7 @@ class Organization (object):
         self.settings = Settings()
         self.config = Config()
         self.auth = Auth()
+        self.invite = OrganizationInvite()
         self.membership = OrganizationMembership()
 
     def create(self, name, handle=None):
@@ -163,6 +164,146 @@ class Organization (object):
         return self.base_request.request(
             'organization({org_id})'.format(org_id=org_id), 'DELETE',
             endpoint=self.settings.get('pine_endpoint'), login=True
+        )
+
+
+class OrganizationInvite():
+    """
+    This class implements organization invite model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+        self.config = Config()
+        self.auth = Auth()
+        self.RESOURCE = 'invitee__is_invited_to__organization'
+
+    def get_all(self):
+        """
+        Get all invites.
+
+        Returns:
+            list: list contains info of invites.
+            
+        Examples:
+            >>> balena.models.organization.invite.get_all()
+            [{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+
+        """
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        
+    def get_all_by_organization(self, org_id):
+        """
+        Get all invites by organization.
+
+        Args:
+            org_id (str): organization id.
+
+        Returns:
+            list: list contains info of invites.
+            
+        Examples:
+            >>> balena.models.organization.invite.get_all_by_organization(26474)
+            [{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+
+        """
+
+        params = {
+            'filter': 'is_invited_to__organization',
+            'eq': org_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+        
+    def create(self, org_id, invitee, role_name=None, message=None):
+        """
+        Creates a new invite for an organization.
+
+        Args:
+            org_id (str): organization id.
+            invitee (str): the email/balena_username of the invitee.
+            role_name (Optional[str]): the role name to be granted to the invitee.
+            message (Optional[str]): the message to send along with the invite.
+
+        Returns:
+            dict: organization invite.
+
+        Examples:
+            >>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
+            {'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}
+
+        """
+        
+        data = {
+            'invitee': invitee,
+            'is_invited_to__organization': org_id,
+            'message': message
+        }
+
+        if role_name:
+            params = {
+                'filter': 'name',
+                'eq': role_name
+            }
+            
+            roles = self.base_request.request(
+                'organization_membership_role', 'GET', params=params,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+            
+            if not roles:
+                raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name=role_name)
+            else:
+                data['organization_membership_role '] = roles[0]['id']
+        
+        return json.loads(self.base_request.request(
+            self.RESOURCE, 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        ).decode('utf-8'))
+        
+    def revoke(self, invite_id):
+        """
+        Revoke an invite.
+
+        Args:
+            invite_id (str): organization invite id.
+
+        Examples:
+            >>> balena.models.organization.invite.revoke(2862)
+            'OK'
+
+        """
+        
+        params = {
+            'filter': 'id',
+            'eq': invite_id
+        }
+
+        return self.base_request.request(
+            self.RESOURCE, 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+        
+    def accept(self, invite_token):
+        """
+        Accepts an invite.
+
+        Args:
+            invite_token (str): invitation Token - invite token.
+
+        """
+        
+        return self.base_request.request(
+            '/org/v1/invitation/{0}'.format(invite_token), 'POST',
+            endpoint=self.settings.get('api_endpoint'), login=True
         )
 
 

@@ -15,6 +15,8 @@ Table_Of_Content = [
     ('Balena', TOC_ROOT),
     ('Models', TOC_L1),
     ('Application', TOC_L2),
+    ('ApplicationInvite', TOC_L3),
+    ('ApplicationMembership', TOC_L3),
     ('ApiKey', TOC_L2),
     ('Config', TOC_L2),
     ('ConfigVariable', TOC_L2),
@@ -29,6 +31,7 @@ Table_Of_Content = [
     ('DeviceServiceEnvVariable', TOC_L3),
     ('Image', TOC_L2),
     ('Organization', TOC_L2),
+    ('OrganizationInvite', TOC_L3),
     ('OrganizationMembership', TOC_L3),
     ('OrganizationMembershipTag', TOC_L4),
     ('Release', TOC_L2),
@@ -84,6 +87,14 @@ def main():
         balena.models.application.Application.__doc__, 'Application', type=0))
     print_functions(balena.models.application.Application)
     print(doc2md.doc2md(
+        balena.models.application.ApplicationInvite.__doc__,
+        'ApplicationInvite', type=0))
+    print_functions(balena.models.application.ApplicationInvite)
+    print(doc2md.doc2md(
+        balena.models.application.ApplicationMembership.__doc__,
+        'ApplicationMembership', type=0))
+    print_functions(balena.models.application.ApplicationMembership)
+    print(doc2md.doc2md(
         balena.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
     print_functions(balena.models.api_key.ApiKey)
     print(doc2md.doc2md(balena.models.config.Config.__doc__, 'Config', type=0))
@@ -127,6 +138,8 @@ def main():
     print_functions(balena.models.image.Image)
     print(doc2md.doc2md(balena.models.organization.Organization.__doc__, 'Organization', type=0))
     print_functions(balena.models.organization.Organization)
+    print(doc2md.doc2md(balena.models.organization.OrganizationInvite.__doc__, 'OrganizationInvite', type=0))
+    print_functions(balena.models.organization.OrganizationInvite)
     print(doc2md.doc2md(balena.models.organization.OrganizationMembership.__doc__, 'OrganizationMembership', type=0))
     print_functions(balena.models.organization.OrganizationMembership)
     print(doc2md.doc2md(balena.models.organization.OrganizationMembershipTag.__doc__, 'OrganizationMembershipTag', type=0))

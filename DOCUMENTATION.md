@@ -33,6 +33,8 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
 - [Balena](#balena)
     - [Models](#models)
         - [Application](#application)
+            - [ApplicationInvite](#applicationinvite)
+            - [ApplicationMembership](#applicationmembership)
         - [ApiKey](#apikey)
         - [Config](#config)
         - [ConfigVariable](#configvariable)
@@ -47,6 +49,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
         - [Organization](#organization)
+            - [OrganizationInvite](#organizationinvite)
             - [OrganizationMembership](#organizationmembership)
                 - [OrganizationMembershipTag](#organizationmembershiptag)
         - [Release](#release)
@@ -199,6 +202,7 @@ Get all applications (including collaborator applications).
 ### Function: get_all_with_device_service_details(expand_release)
 
 Get all applications (including collaborator applications) along with associated services' essential details.
+This method is deprecated and will be removed in next major release.
 
 #### Args:
     expand_release (Optional[bool]): Set this parameter to True then the commit of service details will be included.
@@ -382,6 +386,19 @@ Remove application. This function only works if you log in using credentials or 
 >>> balena.models.application.remove('Edison')
 'OK'
 ```
+### Function: rename(app_id, new_name)
+
+Rename application. This function only works if you log in using credentials or Auth Token.
+
+#### Args:
+    app_id (int): application id.
+    new_name (str): new application name.
+
+#### Examples:
+```python
+>>> balena.models.application.rename(1681618, 'py-test-app')
+'OK'
+```
 ### Function: restart(name)
 
 Restart application. This function only works if you log in using credentials or Auth Token.
@@ -448,6 +465,153 @@ Get whether the application is configured to receive updates whenever a new rele
 #### Examples:
     >> > balena.models.application.will_track_new_releases('5685')
     True
+## ApplicationInvite
+
+This class implements application invite model for balena python SDK.
+### Function: accept(invite_token)
+
+Accepts an invite.
+
+#### Args:
+    invite_token (str): invitationToken - invite token.
+### Function: create(app_id, invitee, role_name, message)
+
+Creates a new invite for an application.
+
+#### Args:
+    app_id (int): application id.
+    invitee (str): the email of the invitee.
+    role_name (Optional[str]): the role name to be granted to the invitee.
+    message (Optional[str]): the message to send along with the invite.
+
+#### Returns:
+    dict: application invite.
+
+#### Examples:
+```python
+>>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
+{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}
+```
+### Function: get_all()
+
+Get all invites.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.application.invite.get_all()
+[{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all invites by application.
+
+#### Args:
+    app_id (int): application id.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.application.invite.get_all_by_application(1681618)
+[{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}]
+```
+### Function: revoke(invite_id)
+
+Revoke an invite.
+
+#### Args:
+    invite_id (int): application invite id.
+
+#### Examples:
+```python
+>>> balena.models.application.invite.revoke(5860)
+'OK'
+```
+## ApplicationMembership
+
+This class implements application membership model for balena python SDK.
+### Function: change_role(membership_id, role_name)
+
+Changes the role of an application member.
+
+#### Args:
+    membership_id (int): the id of the membership that will be changed.
+    role_name (str): the role name to be granted to the membership.
+
+#### Examples:
+```python
+>>> balena.models.application.membership.change_role(55074, 'observer')
+'OK'
+```
+### Function: create(app_id, user_name, role_name)
+
+Creates a new membership for an application.
+
+#### Args:
+    app_id (int): application id.
+    user_name (str): the username of the balena user that will become a member.
+    role_name (Optional[str]): the role name to be granted to the membership.
+
+#### Returns:
+    dict: application invite.
+
+#### Examples:
+```python
+>>> balena.models.application.membership.create(1681618, 'nghiant2710')
+{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+```
+### Function: get(membership_id)
+
+Get a single application membership.
+
+#### Args:
+    membership_id (int): application membership id.
+
+#### Returns:
+    dict: application membership.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get(55074)
+{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+```
+### Function: get_all()
+
+Get all application memberships.
+
+#### Returns:
+    list: list contains info of application memberships.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get_all()
+[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+```
+### Function: get_all_by_application(app_id)
+
+Get all memberships by application.
+
+#### Args:
+    app_id (int): application id.
+
+#### Returns:
+    list: list contains info of application memberships.
+    
+#### Examples:
+```python
+>>> balena.models.application.membership.get_all_by_application(1681618)
+[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+```
+### Function: remove(membership_id)
+
+Remove a membership.
+
+#### Args:
+    membership_id (int): application membership id.
 ## ApiKey
 
 This class implements user API key model for balena python SDK.
@@ -683,6 +847,20 @@ Due to API changes, the returned Device object schema has changed. Here are the 
 The old returned object's properties: `__metadata, actor, application, build, commit, created_at, custom_latitude, custom_longitude, device, device_type, download_progress, id, ip_address, is_connected_to_vpn, is_online, is_web_accessible, last_connectivity_event, last_vpn_event, latitude, local_id, location, lock_expiry_date, logs_channel, longitude, name, note, os_variant, os_version, provisioning_progress, provisioning_state, public_address, service_instance, status, supervisor_release, supervisor_version, support_expiry_date, user, uuid, vpn_address`.
 
 The new returned object's properties (since python SDK v2.0.0): `__metadata, actor, belongs_to__application, belongs_to__user, created_at, custom_latitude, custom_longitude, device_type, download_progress, id, ip_address, is_accessible_by_support_until__date, is_connected_to_vpn, is_locked_until__date, is_managed_by__device, is_managed_by__service_instance, is_on__commit, is_online, is_web_accessible, last_connectivity_event, last_vpn_event, latitude, local_id, location, logs_channel, longitude, name, note, os_variant, os_version, provisioning_progress, provisioning_state, public_address, should_be_managed_by__supervisor_release, should_be_running__build, status, supervisor_version, uuid, vpn_address`.
+### Function: deactivate(uuid)
+
+Deactivate a device.
+
+#### Args:
+    uuid (str): device uuid.
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.device.deactivate('44cc9d1861b9f992808c506276e5d31c')
+```
 ### Function: disable_device_url(uuid)
 
 Disable device url for a device.
@@ -1966,6 +2144,72 @@ Remove an organization.
 >>> balena.models.organization.remove('148003')
 'OK
 ```
+## OrganizationInvite
+
+This class implements organization invite model for balena python SDK.
+### Function: accept(invite_token)
+
+Accepts an invite.
+
+#### Args:
+    invite_token (str): invitation Token - invite token.
+### Function: create(org_id, invitee, role_name, message)
+
+Creates a new invite for an organization.
+
+#### Args:
+    org_id (str): organization id.
+    invitee (str): the email/balena_username of the invitee.
+    role_name (Optional[str]): the role name to be granted to the invitee.
+    message (Optional[str]): the message to send along with the invite.
+
+#### Returns:
+    dict: organization invite.
+
+#### Examples:
+```python
+>>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
+{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}
+```
+### Function: get_all()
+
+Get all invites.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.organization.invite.get_all()
+[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+```
+### Function: get_all_by_organization(org_id)
+
+Get all invites by organization.
+
+#### Args:
+    org_id (str): organization id.
+
+#### Returns:
+    list: list contains info of invites.
+    
+#### Examples:
+```python
+>>> balena.models.organization.invite.get_all_by_organization(26474)
+[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+```
+### Function: revoke(invite_id)
+
+Revoke an invite.
+
+#### Args:
+    invite_id (str): organization invite id.
+
+#### Examples:
+```python
+>>> balena.models.organization.invite.revoke(2862)
+'OK'
+```
 ## OrganizationMembership
 
 This class implements organization membership model for balena python SDK.
@@ -1974,7 +2218,7 @@ This class implements organization membership model for balena python SDK.
 Get a single organization membership.
 
 #### Args:
-    membership_id (str): organization id.
+    membership_id (str): membership id.
 
 #### Returns:
     Organization membership.
@@ -1984,7 +2228,7 @@ Get a single organization membership.
 
 #### Examples:
 ```python
->>> balena.models.organization.membership.get(3014)
+>>> balena.models.organization.membership.get(17608)
 '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
 ```
 ### Function: get_all()
@@ -2062,7 +2306,7 @@ Get all organization membership tags for all memberships of an organization.
 
 #### Examples:
 ```python
->>> balena.models.organization.membership.tag.get_all_by_organization_membership(3014)
+>>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
 [{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
 ```
 ### Function: remove(membership_id, tag_key)
@@ -3060,11 +3304,41 @@ If your account has two-factor authentication enabled and logging in using crede
 # Check if two-factor authentication is passed for current session.
 >>> balena.twofactor_auth.is_passed()
 False
->>> secret = balena.twofactor_auth.get_otpauth_secret()
+>>> secret = balena.twofactor_auth.get_setup_key()
 >>> balena.twofactor_auth.challenge(balena.twofactor_auth.generate_code(secret))
 # Check again if two-factor authentication is passed for current session.
 >>> balena.twofactor_auth.is_passed()
 True
+```
+### Function: disable(password)
+
+Disable two factor authentication.
+
+#### Args:
+    password (str): password.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.verify('')
+''
+```
+### Function: enable(code)
+
+Enable two factor authentication.
+
+#### Args:
+    code (str): two-factor authentication code.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.enable('')
+''
 ```
 ### Function: generate_code(secret)
 
@@ -3078,21 +3352,21 @@ Generate two-factor authentication code.
 
 #### Examples:
 ```python
->>> secret = balena.twofactor_auth.get_otpauth_secret()
+>>> secret = balena.twofactor_auth.get_setup_key()
 >>> balena.twofactor_auth.generate_code(secret)
 '259975'
 ```
-### Function: get_otpauth_secret()
+### Function: get_setup_key()
 
-Retrieve one time password authentication secret string.
+Retrieves a setup key for enabling two factor authentication.
 This function only works if you disable two-factor authentication or log in using Auth Token from dashboard.
 
 #### Returns:
-    str: one time password authentication secret string.
+    str: setup key.
 
 #### Examples:
 ```python
->>> balena.twofactor_auth.get_otpauth_secret()
+>>> balena.twofactor_auth.get_setup_key()
 'WGURB3DIUWXTGQDBGFNGKDLV2L3LXOVN'
 ```
 ### Function: is_enabled()
@@ -3118,4 +3392,20 @@ Check if two-factor authentication challenge was passed.
 ```python
 >>> balena.twofactor_auth.is_passed()
 True
+```
+### Function: verify(code)
+
+Verifies two factor authentication.
+Note that this method not update the token automatically. You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
+
+#### Args:
+    code (str): two-factor authentication code.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.verify('123456')
+''
 ```

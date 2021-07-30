@@ -83,6 +83,44 @@ class TestOrganization(unittest.TestCase):
         orgs_count = len(self.balena.models.organization.get_all())
         self.balena.models.organization.remove(org['id'])
         self.assertEqual(len(self.balena.models.organization.get_all()), orgs_count - 1)
+    
+    def test_invite_create(self):
+        org = self.balena.models.organization.create(self.test_org_name)
+
+        # should create and return an organization invite
+        invite = self.balena.models.organization.invite.create(org['id'], 'james@resin.io', 'member', 'Python SDK test invite')
+        self.assertEqual(invite['message'], 'Python SDK test invite')
+        self.assertEqual(invite['is_invited_to__organization']['__id'], org['id'])
+        self.balena.models.organization.invite.revoke(invite['id'])
+
+        # should throw an error when role is not found
+        # raise balena.exceptions.BalenaOrganizationMembershipRoleNotFound if  role is not found.
+        with self.assertRaises(self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound):
+            invite = self.balena.models.organization.invite.create(org['id'], 'james@resin.io', 'member1', 'Python SDK test invite')
+
+    def test_invite_get_all(self):
+        org = self.balena.models.organization.create(self.test_org_name)
+
+        # shoud return an empty list
+        invite_list = self.balena.models.organization.invite.get_all()
+        self.assertEqual(0, len(invite_list))
+
+        # shoud return an invite list with length equals 1.
+        invite = self.balena.models.organization.invite.create(org['id'], 'james@resin.io', 'member', 'Python SDK test invite')
+        invite_list = self.balena.models.organization.invite.get_all()
+        self.assertEqual(1, len(invite_list))
+
+    def test_invite_get_all_by_organization(self):
+        org = self.balena.models.organization.create(self.test_org_name)
+
+        # shoud return an empty list
+        invite_list = self.balena.models.organization.invite.get_all_by_organization(org['id'])
+        self.assertEqual(0, len(invite_list))
+
+        # shoud return an invite list with length equals 1.
+        invite = self.balena.models.organization.invite.create(org['id'], 'james@resin.io', 'member', 'Python SDK test invite')
+        invite_list = self.balena.models.organization.invite.get_all_by_organization(org['id'])
+        self.assertEqual(1, len(invite_list))
 
     def test_membership_get_all_by_organization(self):
         org = self.balena.models.organization.create(self.test_org_name)
