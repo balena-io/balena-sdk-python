@@ -1,7 +1,7 @@
 try:  # Python 3 imports
-    from urllib.parse import urlparse
+    from urllib.parse import parse_qs
 except ImportError:  # Python 2 imports
-    from urlparse import urlparse
+    from urlparse.parse import parse_qs
 
 import pyotp
 import jwt
@@ -76,7 +76,7 @@ class TwoFactorAuth(object):
             # Check if two-factor authentication is passed for current session.
             >>> balena.twofactor_auth.is_passed()
             False
-            >>> secret = balena.twofactor_auth.get_otpauth_secret()
+            >>> secret = balena.twofactor_auth.get_setup_key()
             >>> balena.twofactor_auth.challenge(balena.twofactor_auth.generate_code(secret))
             # Check again if two-factor authentication is passed for current session.
             >>> balena.twofactor_auth.is_passed()
@@ -87,10 +87,12 @@ class TwoFactorAuth(object):
         data = {
             'code': code
         }
+
         token = self.base_request.request(
             'auth/totp/verify', 'POST', data=data,
             endpoint=self.settings.get('api_endpoint'), login=True
         )
+
         self.settings.set(TOKEN_KEY, token)
 
     def generate_code(self, secret):
@@ -104,7 +106,7 @@ class TwoFactorAuth(object):
             str: 6 digit two-factor authentication code.
 
         Examples:
-            >>> secret = balena.twofactor_auth.get_otpauth_secret()
+            >>> secret = balena.twofactor_auth.get_setup_key()
             >>> balena.twofactor_auth.generate_code(secret)
             '259975'
 
@@ -113,16 +115,16 @@ class TwoFactorAuth(object):
         totp = pyotp.TOTP(secret)
         return totp.now()
 
-    def get_otpauth_secret(self):
+    def get_setup_key(self):
         """
-        Retrieve one time password authentication secret string.
+        Retrieves a setup key for enabling two factor authentication.
         This function only works if you disable two-factor authentication or log in using Auth Token from dashboard.
 
         Returns:
-            str: one time password authentication secret string.
+            str: setup key.
 
         Examples:
-            >>> balena.twofactor_auth.get_otpauth_secret()
+            >>> balena.twofactor_auth.get_setup_key()
             'WGURB3DIUWXTGQDBGFNGKDLV2L3LXOVN'
 
         """
@@ -131,5 +133,79 @@ class TwoFactorAuth(object):
             'auth/totp/setup', 'GET',
             endpoint=self.settings.get('api_endpoint'), login=True
         )
-        tmp = urlparse.parse_qs(otp_auth_url)
-        return tmp['secret'][0]
+        tmp = parse_qs(otp_auth_url)
+        return tmp['secret'.encode()][0]
+
+    def verify(self, code):
+        """
+        Verifies two factor authentication.
+        Note that this method not update the token automatically. You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
+
+        Args:
+            code (str): two-factor authentication code.
+
+        Returns:
+            str: session token.
+
+        Examples:
+            >>> balena.twofactor_auth.verify('123456')
+            ''
+
+        """
+
+        data = {
+            'code': code
+        }
+
+        return self.base_request.request(
+            'auth/totp/verify', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint'), login=True
+        )
+
+    def enable(self, code):
+        """
+        Enable two factor authentication.
+
+        Args:
+            code (str): two-factor authentication code.
+
+        Returns:
+            str: session token.
+
+        Examples:
+            >>> balena.twofactor_auth.enable('')
+            ''
+
+        """
+
+        token = self.verify(code)
+        self.settings.set(TOKEN_KEY, token)
+        return token
+
+    def disable(self, password):
+        """
+        Disable two factor authentication.
+
+        Args:
+            password (str): password.
+
+        Returns:
+            str: session token.
+
+        Examples:
+            >>> balena.twofactor_auth.verify('')
+            ''
+
+        """
+
+        data = {
+            'password': password
+        }
+
+        token = self.base_request.request(
+            'auth/totp/disable', 'POST', data=data,
+            endpoint=self.settings.get('api_endpoint'), login=True
+        )
+
+        self.settings.set(TOKEN_KEY, token)
+        return token

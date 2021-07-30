@@ -23,6 +23,7 @@ class TestOrganization(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
+        cls.test_org_admin_role = cls.helper.get_org_admin_role()
 
     def tearDown(self):
         # Wipe all apps after every test case.
@@ -120,6 +121,16 @@ class TestOrganization(unittest.TestCase):
         invite = self.balena.models.organization.invite.create(org['id'], 'james@resin.io', 'member', 'Python SDK test invite')
         invite_list = self.balena.models.organization.invite.get_all_by_organization(org['id'])
         self.assertEqual(1, len(invite_list))
+
+    def test_membership_get_all_by_organization(self):
+        org = self.balena.models.organization.create(self.test_org_name)
+
+        # shoud return only the user's own membership
+        memberships = self.balena.models.organization.membership.get_all_by_organization(org['id'])
+        self.assertEqual(1, len(memberships))
+        self.assertEqual(memberships[0]['user']['__id'], self.balena.auth.get_user_id())
+        self.assertEqual(memberships[0]['is_member_of__organization']['__id'], org['id'])
+        self.assertEqual(memberships[0]['organization_membership_role']['__id'], self.test_org_admin_role['id'])
 
 
 if __name__ == '__main__':

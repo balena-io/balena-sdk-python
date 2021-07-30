@@ -49,7 +49,9 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceServiceEnvVariable](#deviceserviceenvvariable)
         - [Image](#image)
         - [Organization](#organization)
-        - [OrganizationInvite](#organizationinvite)
+            - [OrganizationInvite](#organizationinvite)
+            - [OrganizationMembership](#organizationmembership)
+                - [OrganizationMembershipTag](#organizationmembershiptag)
         - [Release](#release)
         - [Service](#service)
         - [Tag](#tag)
@@ -2208,6 +2210,138 @@ Revoke an invite.
 >>> balena.models.organization.invite.revoke(2862)
 'OK'
 ```
+## OrganizationMembership
+
+This class implements organization membership model for balena python SDK.
+### Function: get(membership_id)
+
+Get a single organization membership.
+
+#### Args:
+    membership_id (str): membership id.
+
+#### Returns:
+    Organization membership.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get(17608)
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
+### Function: get_all()
+
+Get all organization memberships.
+
+#### Returns:
+    list: organization memberships.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get_all()
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
+### Function: get_all_by_organization(handle_or_id)
+
+Get all memberships by organization.
+
+#### Args:
+    handle_or_id (str): organization handle (string) or id (number).
+
+#### Returns:
+    list: organization memberships.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.get_all_by_organization(3014)
+'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+```
+## OrganizationMembershipTag
+
+This class implements organization membership tag model for balena python SDK.
+### Function: get_all()
+
+Get all organization membership tags.
+
+#### Returns:
+    list: organization membership tags.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all()
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: get_all_by_organization(handle_or_id)
+
+Get all organization membership tags for an organization.
+
+#### Args:
+    handle_or_id (str): organization handle (string) or id (number).
+
+#### Returns:
+    list: organization membership tags.
+
+#### Raises:
+    OrganizationNotFound: if organization couldn't be found.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all_by_organization(3014)
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: get_all_by_organization_membership(membership_id)
+
+Get all organization membership tags for all memberships of an organization.
+
+#### Args:
+    membership_id (str): organization membership id.
+
+#### Returns:
+    list: organization membership tags.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
+[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+```
+### Function: remove(membership_id, tag_key)
+
+Remove an organization membership tag.
+
+#### Args:
+    membership_id: organization membership id.
+    tag_key (str): tag key.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.remove(17608, 'mTag1')
+'OK'
+```
+### Function: set(membership_id, tag_key, value)
+
+Set an organization membership tag.
+
+#### Args:
+    membership_id: organization membership id.
+    tag_key (str): tag key.
+    value (str): tag value.
+
+#### Returns:
+    dict: dict contains organization membership tag info if tag doesn't exist.
+    OK: if tag exists.
+
+#### Examples:
+```python
+>>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
+{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}
+>>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK 1')
+'OK'
+```
 ## Release
 
 This class implements release model for balena python SDK.
@@ -3170,11 +3304,41 @@ If your account has two-factor authentication enabled and logging in using crede
 # Check if two-factor authentication is passed for current session.
 >>> balena.twofactor_auth.is_passed()
 False
->>> secret = balena.twofactor_auth.get_otpauth_secret()
+>>> secret = balena.twofactor_auth.get_setup_key()
 >>> balena.twofactor_auth.challenge(balena.twofactor_auth.generate_code(secret))
 # Check again if two-factor authentication is passed for current session.
 >>> balena.twofactor_auth.is_passed()
 True
+```
+### Function: disable(password)
+
+Disable two factor authentication.
+
+#### Args:
+    password (str): password.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.verify('')
+''
+```
+### Function: enable(code)
+
+Enable two factor authentication.
+
+#### Args:
+    code (str): two-factor authentication code.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.enable('')
+''
 ```
 ### Function: generate_code(secret)
 
@@ -3188,21 +3352,21 @@ Generate two-factor authentication code.
 
 #### Examples:
 ```python
->>> secret = balena.twofactor_auth.get_otpauth_secret()
+>>> secret = balena.twofactor_auth.get_setup_key()
 >>> balena.twofactor_auth.generate_code(secret)
 '259975'
 ```
-### Function: get_otpauth_secret()
+### Function: get_setup_key()
 
-Retrieve one time password authentication secret string.
+Retrieves a setup key for enabling two factor authentication.
 This function only works if you disable two-factor authentication or log in using Auth Token from dashboard.
 
 #### Returns:
-    str: one time password authentication secret string.
+    str: setup key.
 
 #### Examples:
 ```python
->>> balena.twofactor_auth.get_otpauth_secret()
+>>> balena.twofactor_auth.get_setup_key()
 'WGURB3DIUWXTGQDBGFNGKDLV2L3LXOVN'
 ```
 ### Function: is_enabled()
@@ -3228,4 +3392,20 @@ Check if two-factor authentication challenge was passed.
 ```python
 >>> balena.twofactor_auth.is_passed()
 True
+```
+### Function: verify(code)
+
+Verifies two factor authentication.
+Note that this method not update the token automatically. You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
+
+#### Args:
+    code (str): two-factor authentication code.
+
+#### Returns:
+    str: session token.
+
+#### Examples:
+```python
+>>> balena.twofactor_auth.verify('123456')
+''
 ```

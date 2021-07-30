@@ -41,6 +41,7 @@ class Message(object):
     DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE = "Device supervisor version does not support local mode"
     DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE = "Local mode is only supported on development OS versions"
     ORGANIZATION_NOT_FOUND = "Organization not found: {organization}"
+    ORGANIZATION_MEMBERSHIP_NOT_FOUND = "Organization membership not found: {org_membership}"
     BALENA_DISCONTINUE_DEVICE_TYPE = "Discontinued device type: {type}"
     BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND = "Organization membership role not found: {role_name}"
     BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"

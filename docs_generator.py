@@ -9,6 +9,7 @@ TOC_ROOT = 0
 TOC_L1 = 1
 TOC_L2 = 2
 TOC_L3 = 3
+TOC_L4 = 4
 
 Table_Of_Content = [
     ('Balena', TOC_ROOT),
@@ -30,7 +31,9 @@ Table_Of_Content = [
     ('DeviceServiceEnvVariable', TOC_L3),
     ('Image', TOC_L2),
     ('Organization', TOC_L2),
-    ('OrganizationInvite', TOC_L2),
+    ('OrganizationInvite', TOC_L3),
+    ('OrganizationMembership', TOC_L3),
+    ('OrganizationMembershipTag', TOC_L4),
     ('Release', TOC_L2),
     ('Service', TOC_L2),
     ('Tag', TOC_L2),
@@ -58,14 +61,14 @@ def print_newline():
 
 def print_functions(baseclass):
     for func_name, blah in inspect.getmembers(
-            baseclass, predicate=inspect.ismethod):
+            baseclass, predicate=inspect.isfunction):
         if func_name is not '__init__' and not func_name.startswith('_'):
             func = getattr(baseclass, func_name)
             print(doc2md.doc2md(func.__doc__, make_function_name(func, func_name), type=1))
 
 
 def make_function_name(func, func_name):
-    args_list = inspect.getargspec(func)[0]
+    args_list = inspect.getfullargspec(func)[0]
     if 'self' in args_list:
         args_list.remove('self')
     return FUNCTION_NAME_TEMPLATE.format(
@@ -137,6 +140,10 @@ def main():
     print_functions(balena.models.organization.Organization)
     print(doc2md.doc2md(balena.models.organization.OrganizationInvite.__doc__, 'OrganizationInvite', type=0))
     print_functions(balena.models.organization.OrganizationInvite)
+    print(doc2md.doc2md(balena.models.organization.OrganizationMembership.__doc__, 'OrganizationMembership', type=0))
+    print_functions(balena.models.organization.OrganizationMembership)
+    print(doc2md.doc2md(balena.models.organization.OrganizationMembershipTag.__doc__, 'OrganizationMembershipTag', type=0))
+    print_functions(balena.models.organization.OrganizationMembershipTag)
     print(doc2md.doc2md(balena.models.release.Release.__doc__, 'Release', type=0))
     print_functions(balena.models.release.Release)
     print(doc2md.doc2md(balena.models.service.Service.__doc__, 'Service', type=0))

@@ -388,3 +388,19 @@ class TestHelper(object):
             'old_release': old_release,
             'current_release': new_release
         }
+
+    def get_org_admin_role(self):
+        """
+        Get organization administrator role.
+
+        """
+
+        params = {
+            'filter': 'name',
+            'eq': 'administrator'
+        }
+
+        return self.balena.models.key.base_request.request(
+            'organization_membership_role', 'GET', params=params,
+            endpoint=self.balena.settings.get('pine_endpoint'), login=True
+        )['d'][0]
