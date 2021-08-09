@@ -17,15 +17,20 @@ Table_Of_Content = [
     ('Application', TOC_L2),
     ('ApplicationInvite', TOC_L3),
     ('ApplicationMembership', TOC_L3),
+    ('Fleet', TOC_L2),
+    ('FleetInvite', TOC_L3),
+    ('FleetMembership', TOC_L3),
     ('ApiKey', TOC_L2),
     ('Config', TOC_L2),
     ('ConfigVariable', TOC_L2),
     ('ApplicationConfigVariable', TOC_L3),
+    ('FleetConfigVariable', TOC_L3),
     ('DeviceConfigVariable', TOC_L3),
     ('Device', TOC_L2),
     ('DeviceOs', TOC_L2),
     ('EnvironmentVariable', TOC_L2),
     ('ApplicationEnvVariable', TOC_L3),
+    ('FleetEnvVariable', TOC_L3),
     ('ServiceEnvVariable', TOC_L3),
     ('DeviceEnvVariable', TOC_L3),
     ('DeviceServiceEnvVariable', TOC_L3),
@@ -38,6 +43,7 @@ Table_Of_Content = [
     ('Service', TOC_L2),
     ('Tag', TOC_L2),
     ('ApplicationTag', TOC_L3),
+    ('FleetTag', TOC_L3),
     ('DeviceTag', TOC_L3),
     ('ReleaseTag', TOC_L3),
     ('Key', TOC_L2),
@@ -95,6 +101,17 @@ def main():
         'ApplicationMembership', type=0))
     print_functions(balena.models.application.ApplicationMembership)
     print(doc2md.doc2md(
+        balena.models.fleet.Fleet.__doc__, 'Fleet', type=0))
+    print_functions(balena.models.fleet.Fleet)
+    print(doc2md.doc2md(
+        balena.models.fleet.FleetInvite.__doc__,
+        'FleetInvite', type=0))
+    print_functions(balena.models.fleet.FleetInvite)
+    print(doc2md.doc2md(
+        balena.models.fleet.FleetMembership.__doc__,
+        'FleetMembership', type=0))
+    print_functions(balena.models.fleet.FleetMembership)
+    print(doc2md.doc2md(
         balena.models.api_key.ApiKey.__doc__, 'ApiKey', type=0))
     print_functions(balena.models.api_key.ApiKey)
     print(doc2md.doc2md(balena.models.config.Config.__doc__, 'Config', type=0))
@@ -106,6 +123,10 @@ def main():
         balena.models.config_variable.ApplicationConfigVariable.__doc__,
         'ApplicationConfigVariable', type=0))
     print_functions(balena.models.config_variable.ApplicationConfigVariable)
+    print(doc2md.doc2md(
+        balena.models.config_variable.FleetConfigVariable.__doc__,
+        'FleetConfigVariable', type=0))
+    print_functions(balena.models.config_variable.FleetConfigVariable)
     print(doc2md.doc2md(
         balena.models.config_variable.DeviceConfigVariable.__doc__,
         'DeviceConfigVariable', type=0))
@@ -122,6 +143,10 @@ def main():
         balena.models.environment_variables.ApplicationEnvVariable.__doc__,
         'ApplicationEnvVariable', type=0))
     print_functions(balena.models.environment_variables.ApplicationEnvVariable)
+    print(doc2md.doc2md(
+        balena.models.environment_variables.FleetEnvVariable.__doc__,
+        'FleetEnvVariable', type=0))
+    print_functions(balena.models.environment_variables.FleetEnvVariable)
     print(doc2md.doc2md(
         balena.models.environment_variables.ServiceEnvVariable.__doc__,
         'ServiceEnvVariable', type=0))
@@ -153,6 +178,8 @@ def main():
     print_functions(balena.models.tag.DeviceTag)
     print(doc2md.doc2md(balena.models.tag.ApplicationTag.__doc__, 'ApplicationTag', type=0))
     print_functions(balena.models.tag.ApplicationTag)
+    print(doc2md.doc2md(balena.models.tag.FleetTag.__doc__, 'FleetTag', type=0))
+    print_functions(balena.models.tag.FleetTag)
     print(doc2md.doc2md(balena.models.tag.ReleaseTag.__doc__, 'ReleaseTag', type=0))
     print_functions(balena.models.tag.ReleaseTag)
     print(doc2md.doc2md(balena.models.key.Key.__doc__, 'Key', type=0))

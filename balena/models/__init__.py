@@ -5,6 +5,7 @@ This module implements all models for balena python SDK.
 
 from .device import Device
 from .application import Application
+from .fleet import Fleet
 from .config import Config
 from .environment_variables import EnvironmentVariable
 from .key import Key
@@ -24,6 +25,7 @@ class Models(object):
     def __init__(self):
         self.device = Device()
         self.application = Application()
+        self.fleet = Fleet()
         self.config = Config()
         self.environment_variables = EnvironmentVariable()
         self.key = Key()

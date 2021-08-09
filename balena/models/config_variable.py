@@ -20,6 +20,7 @@ class ConfigVariable(object):
     def __init__(self):
         self.device_config_variable = DeviceConfigVariable()
         self.application_config_variable = ApplicationConfigVariable()
+        self.fleet_config_variable = FleetConfigVariable()
 
 
 class DeviceConfigVariable(object):
@@ -281,5 +282,120 @@ class ApplicationConfigVariable(object):
         }
         return self.base_request.request(
             'application_config_variable', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+
+class FleetConfigVariable(object):
+    """
+    This class implements fleet config variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+
+    def get_all(self, fleet_id):
+        """
+        Get all fleet config variables belong to an fleet.
+
+        Args:
+            fleet_id (str): fleet id.
+
+        Returns:
+            list: fleet config variables.
+
+        Examples:
+            >>> balena.models.config_variable.fleet_config_variable.get_all('1005160')
+
+        """
+
+        params = {
+            'filter': 'fleet',
+            'eq': fleet_id
+        }
+
+        return self.base_request.request(
+            'fleet_config_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def create(self, fleet_id, config_var_name, value):
+        """
+        Create an fleet config variable.
+
+        Args:
+            fleet_id (str): fleet id.
+            config_var_name (str): fleet config variable name.
+            value (str): fleet config variable value.
+
+        Returns:
+            dict: new fleet config variable info.
+
+        Examples:
+            >>> print(balena.models.config_variable.fleet_config_variable.create('1005160', 'BALENA_TEST_FLEET_CONFIG_VAR', 'test value'))
+
+        """
+
+        if not _is_valid_config_var_name(config_var_name):
+            raise exceptions.InvalidParameter('config_var_name', config_var_name)
+
+        data = {
+            'fleet': fleet_id,
+            'name': config_var_name,
+            'value': value
+        }
+
+        return json.loads(self.base_request.request(
+            'fleet_config_variable', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        ).decode('utf-8'))
+
+    def update(self, var_id, value):
+        """
+        Update an fleet config variable.
+
+        Args:
+            var_id (str): fleet config variable id.
+            value (str): new fleet config variable value.
+
+        Examples:
+            >>> balena.models.config_variable.fleet_config_variable.update('117738', 'new test value')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+        data = {
+            'value': value
+        }
+        return self.base_request.request(
+            'fleet_config_variable', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def remove(self, var_id):
+        """
+        Remove a fleet config environment variable.
+
+        Args:
+            var_id (str): fleet config environment variable id.
+
+        Examples:
+            >>> balena.models.config_variable.fleet_config_variable.remove('117738')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+        return self.base_request.request(
+            'fleet_config_variable', 'DELETE', params=params,
             endpoint=self.settings.get('pine_endpoint')
         )

@@ -120,6 +120,24 @@ class ApplicationNotFound(BalenaException):
             application=application)
 
 
+class FleetNotFound(BalenaException):
+    """
+    Exception type for fleet not found.
+
+    Args:
+        fleet (str): fleet detail (fleet name or id).
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, fleet):
+        super(FleetNotFound, self).__init__()
+        self.message = Message.FLEET_NOT_FOUND.format(
+            fleet=fleet)
+
+
 class DeviceNotFound(BalenaException):
     """
     Exception type for device not found.
@@ -266,6 +284,23 @@ class IncompatibleApplication(BalenaException):
         self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
 
 
+class IncompatibleFleet(BalenaException):
+    """
+    Exception when moving a device to an fleet with different device-type.
+
+    Args:
+        fleet (str): fleet name.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, fleet):
+        super(IncompatibleFleet, self).__init__()
+        self.message = Message.INCOMPATIBLE_FLEET.format(fleet=fleet)
+
+
 class UnsupportedFunction(BalenaException):
     """
     Exception when invoking an unsupported function in a specific supervisor version.
@@ -297,6 +332,21 @@ class AmbiguousApplication(BalenaException):
     def __init__(self, application):
         super(AmbiguousApplication, self).__init__()
         self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
+
+
+class AmbiguousFleet(BalenaException):
+    """
+    Args:
+        fleet (str): fleet name.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, fleet):
+        super(AmbiguousFleet, self).__init__()
+        self.message = Message.AMBIGUOUS_FLEET.format(fleet=fleet)
 
 
 class AmbiguousDevice(BalenaException):
@@ -405,6 +455,21 @@ class InvalidApplicationType(BalenaException):
     def __init__(self, app_type):
         super(InvalidApplicationType, self).__init__()
         self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)
+
+
+class InvalidFleetType(BalenaException):
+    """
+    Args:
+        fleet_type (str): fleet type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, fleet_type):
+        super(InvalidFleetType, self).__init__()
+        self.message = Message.INVALID_FLEET_TYPE.format(fleet_type=fleet_type)
 
 
 class UnsupportedFeature(BalenaException):
@@ -550,6 +615,24 @@ class BalenaApplicationMembershipRoleNotFound(BalenaException):
         self.message = Message.BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
 
 
+class BalenaFleetMembershipRoleNotFound(BalenaException):
+    """
+    Balena fleet membership role not found.
+
+    Args:
+        role_name (str): role name.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, role_name):
+        super(BalenaFleetMembershipRoleNotFound, self).__init__()
+        self.message = Message.BALENA_FLEET_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
+
+
+
 class ApplicationMembershipNotFound(BalenaException):
     """
     Exception type for application membership not found.
@@ -565,4 +648,22 @@ class ApplicationMembershipNotFound(BalenaException):
     def __init__(self, membership):
         super(ApplicationMembershipNotFound, self).__init__()
         self.message = Message.APPLICATION_MEMBERSHIP_NOT_FOUND.format(
+            membership=membership)
+
+
+class FleetMembershipNotFound(BalenaException):
+    """
+    Exception type for fleet membership not found.
+
+    Args:
+        membership (str): fleet membership id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, membership):
+        super(FleetMembershipNotFound, self).__init__()
+        self.message = Message.FLEET_MEMBERSHIP_NOT_FOUND.format(
             membership=membership)

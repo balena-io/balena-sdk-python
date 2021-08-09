@@ -91,6 +91,21 @@ class TestHelper(object):
             'application', 'DELETE', params=params,
             endpoint=self.balena.settings.get('pine_endpoint'), login=True
         )
+    
+    def wipe_fleet(self):
+        """
+        Wipe all user's fleets
+        """
+
+        params = {
+            'filter': '1',
+            'eq': 1
+        }
+
+        self.balena.models.application.base_request.request(
+            'fleet', 'DELETE', params=params,
+            endpoint=self.balena.settings.get('pine_endpoint'), login=True
+        )
 
     def wipe_organization(self):
         """
@@ -112,6 +127,7 @@ class TestHelper(object):
 
         if self.balena.auth.is_logged_in():
             self.wipe_application()
+            self.wipe_fleet()
             self.balena.models.key.base_request.request(
                 'user__has__public_key', 'DELETE', params=params,
                 endpoint=self.balena.settings.get('pine_endpoint'), login=True

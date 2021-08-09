@@ -16,6 +16,7 @@ class Tag(object):
     def __init__(self):
         self.device = DeviceTag()
         self.application = ApplicationTag()
+        self.fleet = FleetTag()
         self.release = ReleaseTag()
 
 
@@ -308,6 +309,90 @@ class ApplicationTag(BaseTag):
         """
 
         return super(ApplicationTag, self).remove(app_id, tag_key)
+
+
+class FleetTag(BaseTag):
+    """
+    This class implements fleet tag model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(FleetTag, self).__init__('fleet')
+
+    def get_all_by_fleet(self, fleet_id):
+        """
+        Get all fleet tags for an fleet.
+
+        Args:
+            fleet_id (str): fleet id .
+
+        Returns:
+            list: list contains fleet tags.
+
+        Examples:
+            >>> balena.models.tag.fleet.get_all_by_fleet('1005767')
+
+        """
+
+        params = {
+            'filter': 'fleet',
+            'eq': fleet_id
+        }
+
+        return super(FleetTag, self).get_all(params=params)
+
+    def get_all(self):
+        """
+        Get all fleet tags.
+
+        Returns:
+            list: list contains fleet tags.
+
+        Examples:
+            >>> balena.models.tag.fleet.get_all()
+
+        """
+
+        return super(FleetTag, self).get_all()
+
+    def set(self, fleet_id, tag_key, value):
+        """
+        Set an fleet tag (update tag value if it exists).
+
+        Args:
+            fleet_id (str): fleet id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            dict: dict contains fleet tag info if tag doesn't exist.
+            OK: if tag exists.
+
+        Examples:
+            >>> balena.models.tag.fleet.set('1005767', 'tag1', 'Python SDK')
+            >>> balena.models.tag.fleet.set('1005767', 'tag1','Balena Python SDK')
+            OK
+
+        """
+
+        return super(FleetTag, self).set(fleet_id, tag_key, value)
+
+    def remove(self, fleet_id, tag_key):
+        """
+        Remove an fleet tag.
+
+        Args:
+            fleet_id (str): fleet id.
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.tag.fleet.remove('1005767', 'tag1')
+            OK
+
+        """
+
+        return super(FleetTag, self).remove(fleet_id, tag_key)
 
 
 class ReleaseTag(BaseTag):

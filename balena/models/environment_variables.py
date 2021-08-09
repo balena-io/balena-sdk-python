@@ -21,6 +21,7 @@ class EnvironmentVariable(object):
 
     def __init__(self):
         self.application = ApplicationEnvVariable()
+        self.fleet = FleetEnvVariable()
         self.service_environment_variable = ServiceEnvVariable()
         self.device = DeviceEnvVariable()
         self.device_service_environment_variable = DeviceServiceEnvVariable()
@@ -468,6 +469,152 @@ class ApplicationEnvVariable(object):
             >>> balena.models.environment_variables.application.is_system_variable('BALENA_API_KEY')
             True
             >>> balena.models.environment_variables.application.is_system_variable('APPLICATION_API_KEY')
+            False
+
+        """
+
+        if variable in self.SYSTEM_VARIABLE_RESERVED_NAMES:
+            return True
+
+        return any(
+            True for prefix in self.OTHER_RESERVED_NAMES_START
+            if variable.startswith(prefix)
+        )
+
+
+class FleetEnvVariable(object):
+    """
+    This class implements fleet environment variable model for balena python SDK.
+
+    Attributes:
+        SYSTEM_VARIABLE_RESERVED_NAMES (list): list of reserved system variable names.
+        OTHER_RESERVED_NAMES_START (list): list of prefix for system variable.
+
+    """
+
+    SYSTEM_VARIABLE_RESERVED_NAMES = ['BALENA', 'RESIN', 'USER']
+    OTHER_RESERVED_NAMES_START = ['BALENA_', 'RESIN_']
+
+    def __init__(self):
+        self.base_request = BaseRequest()
+        self.settings = Settings()
+
+    def get_all(self, fleet_id):
+        """
+        Get all environment variables by fleet.
+
+        Args:
+            fleet_id (str): fleet id.
+
+        Returns:
+            list: fleet environment variables.
+
+        Examples:
+            >>> balena.models.environment_variables.fleet.get_all(9020)
+
+        """
+
+        params = {
+            'filter': 'fleet',
+            'eq': fleet_id
+        }
+        return self.base_request.request(
+            'fleet_environment_variable', 'GET', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def create(self, fleet_id, env_var_name, value):
+        """
+        Create an environment variable for fleet.
+
+        Args:
+            fleet_id (str): fleet id.
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Returns:
+            dict: new fleet environment info.
+
+        Examples:
+            >>> balena.models.environment_variables.fleet.create('978062', 'test2', '123')
+
+        """
+
+        if not _is_valid_env_var_name(env_var_name):
+            raise exceptions.InvalidParameter('env_var_name', env_var_name)
+        data = {
+            'name': env_var_name,
+            'value': value,
+            'fleet': fleet_id
+        }
+        return json.loads(self.base_request.request(
+            'fleet_environment_variable', 'POST', data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        ).decode('utf-8'))
+
+    def update(self, var_id, value):
+        """
+        Update an environment variable value for fleet.
+
+        Args:
+            var_id (str): environment variable id.
+            value (str): new environment variable value.
+
+        Examples:
+            >>> balena.models.environment_variables.fleet.update(5652, 'new value')
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+
+        data = {
+            'value': value
+        }
+        return self.base_request.request(
+            'fleet_environment_variable', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def remove(self, var_id):
+        """
+        Remove fleet environment variable.
+
+        Args:
+            var_id (str): environment variable id.
+
+        Examples:
+            >>> balena.models.environment_variables.fleet.remove(5652)
+            'OK'
+
+        """
+
+        params = {
+            'filter': 'id',
+            'eq': var_id
+        }
+        return self.base_request.request(
+            'fleet_environment_variable', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def is_system_variable(self, variable):
+        """
+        Check if a variable is system specific.
+
+        Args:
+            variable (str): environment variable name.
+
+        Returns:
+            bool: True if system variable, False otherwise.
+
+        Examples:
+            >>> balena.models.environment_variables.fleet.is_system_variable('BALENA_API_KEY')
+            True
+            >>> balena.models.environment_variables.fleet.is_system_variable('FLEET_API_KEY')
             False
 
         """
