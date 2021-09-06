@@ -38,7 +38,7 @@ class TwoFactorAuth(object):
 
         try:
             token = self.settings.get(TOKEN_KEY)
-            token_data = jwt.decode(token, verify=False)
+            token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             if 'twoFactorRequired' in token_data:
                 return True
             return False

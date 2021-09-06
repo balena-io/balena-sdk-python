@@ -75,7 +75,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['PyJWT==1.7.1', 'requests>=2.19.1', 'pyotp>=2.2.5', 'pyOpenSSL==18.0.0', 'Twisted>=18.7.0', 'service-identity', 'semver'],
+    install_requires=['PyJWT>=2.0.0', 'requests>=2.19.1', 'pyotp>=2.2.5', 'pyOpenSSL==18.0.0', 'Twisted>=18.7.0', 'service-identity', 'semver'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
