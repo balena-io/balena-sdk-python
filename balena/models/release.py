@@ -262,3 +262,34 @@ class Release:
             return response['releaseId']
 
         raise exceptions.BuilderRequestError(response['message'])
+
+    def finalize(self, commit_or_id):
+        """
+        Finalizes a draft release.
+
+        Args:
+            commit_or_id: release commit (str) or id (int).
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'is_final': True
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )

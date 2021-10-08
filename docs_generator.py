@@ -62,7 +62,7 @@ def print_newline():
 def print_functions(baseclass):
     for func_name, blah in inspect.getmembers(
             baseclass, predicate=inspect.isfunction):
-        if func_name is not '__init__' and not func_name.startswith('_'):
+        if func_name != '__init__' and not func_name.startswith('_'):
             func = getattr(baseclass, func_name)
             print(doc2md.doc2md(func.__doc__, make_function_name(func, func_name), type=1))
 
