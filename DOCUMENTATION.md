@@ -2691,7 +2691,7 @@ This class implements supervisor model for balena python SDK.
     SUPERVISOR_API_KEY (str): supervisor API key on device.
     _on_device (bool): API endpoint flag.
         If True then all commands will be sent to the API on device.
-        If False then all command will be sent to the balena API proxy endpoint (api.balena.io/supervisor/<url>).
+        If False then all command will be sent to the balena API proxy endpoint (api.balena-cloud.com/supervisor/<url>).
         If SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY are available, _on_device will be set to True by default. Otherwise, it's False.
 ### Function: blink(device_uuid, app_id)
 
@@ -3226,7 +3226,7 @@ Get a setting value.
 #### Examples:
 ```python
 >>> balena.settings.get('api_endpoint')
-'https://api.balena.io/'
+'https://api.balena-cloud.com/'
 ```
 ### Function: get_all()
 
@@ -3238,7 +3238,7 @@ Get all settings.
 #### Examples:
 ```python
 >>> balena.settings.get_all()
-{'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena.io/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena.io/ewa/'}
+{'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena-cloud.com/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena-cloud.com/ewa/'}
 ```
 ### Function: has(key)
 

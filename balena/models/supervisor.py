@@ -21,7 +21,7 @@ class Supervisor(object):
         SUPERVISOR_API_KEY (str): supervisor API key on device.
         _on_device (bool): API endpoint flag.
             If True then all commands will be sent to the API on device.
-            If False then all command will be sent to the balena API proxy endpoint (api.balena.io/supervisor/<url>).
+            If False then all command will be sent to the balena API proxy endpoint (api.balena-cloud.com/supervisor/<url>).
             If SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY are available, _on_device will be set to True by default. Otherwise, it's False.
 
     """
