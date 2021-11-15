@@ -145,7 +145,7 @@ class Settings(object):
 
         Examples:
             >>> balena.settings.get('api_endpoint')
-            'https://api.balena.io/'
+            'https://api.balena-cloud.com/'
 
         """
 
@@ -164,7 +164,7 @@ class Settings(object):
 
         Examples:
             >>> balena.settings.get_all()
-            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena.io/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena.io/ewa/'}
+            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena-cloud.com/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena-cloud.com/ewa/'}
 
 
         """
