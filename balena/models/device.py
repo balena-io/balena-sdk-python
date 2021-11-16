@@ -1088,7 +1088,7 @@ class Device(object):
 
         Examples:
             >>> balena.models.device.get_dashboard_url('19619a6317072b65a240b451f45f855d')
-            https://dashboard.balena.io/devices/19619a6317072b65a240b451f45f855d/summary
+            https://dashboard.balena-cloud.com/devices/19619a6317072b65a240b451f45f855d/summary
 
         """
 
