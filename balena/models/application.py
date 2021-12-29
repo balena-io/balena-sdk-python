@@ -727,12 +727,15 @@ class Application:
             endpoint=self.settings.get('pine_endpoint')
         )
 
-    def generate_provisioning_key(self, app_id):
+    def generate_provisioning_key(self, app_id, key_name=None, description=None, expiry_date=None):
         """
         Generate a device provisioning key for a specific application.
 
         Args:
             app_id (str): application id.
+            key_name (Optional[str]): provisioning key name.
+            description (Optional[str]): description for provisioning key.
+            expiry_date (Optional[str]): expiry date for provisioning key, for example: `2030-01-01T00:00:00Z`.
 
         Returns:
             str: device provisioning key.
@@ -746,9 +749,18 @@ class Application:
         # Make sure user has access to the app_id
         self.get_by_id(app_id)
 
+        data = {
+            'actorType': 'application',
+            'actorTypeId': app_id,
+            'roles': ['provisioning-api-key'],
+            'name': key_name,
+            'description': description,
+            'expiryDate': expiry_date
+        }
+
         return self.base_request.request(
-            '/api-key/application/{}/provisioning'.format(app_id),
-            'POST',
+            '/api-key/v1/'.format(app_id),
+            'POST', data=data,
             endpoint=self.settings.get('api_endpoint')
         )
 
