@@ -1,5 +1,6 @@
 from ..base_request import BaseRequest
 from ..settings import Settings
+from ..auth import Auth
 from .. import exceptions
 from .application import Application
 from .device import Device
@@ -12,10 +13,11 @@ class ApiKey:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
         self.application = Application()
+        self.auth = Auth()
+        self.base_request = BaseRequest()
         self.device = Device()
+        self.settings = Settings()
 
     def __get_all_with_filter(self, filters):
 
@@ -162,3 +164,24 @@ class ApiKey:
         }
 
         return self.__get_all_with_filter(params)
+
+    def get_all_named_user_api_keys(self):
+        """
+        Get all named user API keys of the current user.
+
+        Examples:
+            >>> balena.models.api_key.get_all_named_user_api_keys()
+            [{'id': 2452013, 'created_at': '2019-11-12T09:48:42.437Z', 'is_of__actor': {'__id': 113809, '__deferred': {'uri': '/resin/actor(@id)?@id=113809'}}, 'name': 'test', 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=2452013'}}]
+
+        """
+        
+        if self.auth.is_logged_in():
+            user = self.auth._Auth__get_full_user_data()
+            raw_query = "$filter=is_of__actor%20eq%20'{actor}'%20and%20name%20ne%20null".format(actor=user['actor'])
+
+            return self.base_request.request(
+                'api_key', 'GET', raw_query=raw_query,
+                endpoint=self.settings.get('pine_endpoint')
+            )['d']
+        else:
+            raise exceptions.NotLoggedIn()
