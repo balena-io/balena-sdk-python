@@ -2,6 +2,7 @@ from ..base_request import BaseRequest
 from ..settings import Settings
 from .. import exceptions
 from .application import Application
+from .device import Device
 
 
 class ApiKey:
@@ -14,6 +15,14 @@ class ApiKey:
         self.base_request = BaseRequest()
         self.settings = Settings()
         self.application = Application()
+        self.device = Device()
+
+    def __get_all_with_filter(self, filters):
+
+        return self.base_request.request(
+            'api_key', 'GET', params=filters,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
 
     def create_api_key(self, name, description=None):
         """
@@ -130,7 +139,26 @@ class ApiKey:
             'eq': app['actor']
         }
 
-        return self.base_request.request(
-            'api_key', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        return self.__get_all_with_filter(params)
+
+    def get_device_api_keys_by_device(self, device_uuid):
+        """
+        Get all API keys for a device.
+
+        Args:
+            device_uuid (str): device uuid.
+
+        Examples:
+            >>> balena.models.api_key.get_device_api_keys_by_device('44cc9d1861b9f992808c506276e5d31d')
+            [{'id': 3111484, 'created_at': '2020-06-25T04:33:33.069Z', 'is_of__actor': {'__id': 6444456, '__deferred': {'uri': '/resin/actor(@id)?@id=6444456'}}, 'name': None, 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=3111484'}}]
+
+        """
+
+        device = self.device.get(device_uuid)
+
+        params = {
+            'filter': 'is_of__actor',
+            'eq': device['actor']
+        }
+
+        return self.__get_all_with_filter(params)
