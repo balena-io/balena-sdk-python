@@ -385,20 +385,24 @@ class Application(object):
         device_manifest = [device for device in device_types if device['name'] == device_type]
 
         if device_manifest:
-            if device_manifest[0]['state'] == 'DISCONTINUED':
-                raise exceptions.BalenaDiscontinuedDeviceType(device_type)
-
-            params = {
-                'filter': 'slug',
-                'eq': device_manifest[0]['slug']
-            }
+            raw_query = "$filter=(slug%20eq%20'{slug}')%20or%20(name%20eq%20'{slug}')&$select=id,name&$expand=is_default_for__application($select=is_archived&$filter=is_host%20eq%20true)".format(slug=device_manifest[0]['slug'])
 
             device_type_detail = self.base_request.request(
-                'device_type', 'GET', params=params,
+                'device_type', 'GET', raw_query=raw_query,
                 endpoint=self.settings.get('pine_endpoint'), login=True
             )['d'][0]
+            
+            if not device_type_detail:
+                raise exceptions.InvalidDeviceType(device_type)
+
         else:
             raise exceptions.InvalidDeviceType(device_type)
+
+        host_apps = device_type_detail['is_default_for__application']
+        # TODO: We are now checking whether all returned hostApps are marked as archived so that we
+		# do not break open-balena. Once open-balena gets hostApps, we can change this to just a $filter on is_archived.
+        if (len(host_apps) > 0 and all([dt['is_archived'] for dt in host_apps])):
+            raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
         data = {
             'app_name': name,
