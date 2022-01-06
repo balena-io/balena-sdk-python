@@ -12,9 +12,7 @@ def _normalize_device_type(dev_type):
         dev_type['state'] = 'ALPHA'
         dev_type['name'] = dev_type['name'].replace('(PREVIEW)', '(ALPHA)')
     if dev_type['state'] == 'EXPERIMENTAL':
-        # Keep 'BETA' as the state until the next major, just in case someone is using this
-        # TODO: In the next major change it to 'NEW'
-        dev_type['state'] = 'BETA'
+        dev_type['state'] = 'NEW'
         dev_type['name'] = dev_type['name'].replace('(EXPERIMENTAL)', ('NEW'))
     if dev_type['slug'] == 'raspberry-pi':
         dev_type['name'] = 'Raspberry Pi (v1 or Zero)'
