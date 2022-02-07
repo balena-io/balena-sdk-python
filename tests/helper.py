@@ -39,7 +39,7 @@ class TestHelper(object):
             )
 
         # Stop the test if it's run by an admin user account.
-        token_data = jwt.decode(self.balena.settings.get('token'), verify=False)
+        token_data = jwt.decode(self.balena.settings.get('token'), algorithms=["HS256"], options={"verify_signature": False})
         if any('admin' in s for s in token_data['permissions']):
             raise Exception('The test is run with an admin user account. Cancelled, please try again with a normal account!')
 
