@@ -218,7 +218,7 @@ class Util(object):
     def should_update_token(self, token, token_fresh_interval):
         try:
             # Auth token
-            token_data = jwt.decode(token, verify=False)
+            token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             # dt will be the same as Date.now() in Javascript but converted to
             # milliseconds for consistency with js/sc sdk
             dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()

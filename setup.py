@@ -54,14 +54,13 @@ setup(
         'License :: OSI Approved :: MIT License',
 
         # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        # that you indicate whether you support Python 3.
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 
     # What does your project relate to?
@@ -75,7 +74,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['PyJWT==1.7.1', 'requests>=2.19.1', 'pyotp>=2.2.5', 'pyOpenSSL==18.0.0', 'Twisted>=18.7.0', 'service-identity', 'semver'],
+    install_requires=['PyJWT>=2.0.0', 'requests>=2.19.1', 'pyotp>=2.2.5', 'pyOpenSSL>=18.0.0', 'Twisted>=18.7.0', 'service-identity', 'semver'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
