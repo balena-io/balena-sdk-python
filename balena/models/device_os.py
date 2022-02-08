@@ -20,6 +20,40 @@ ARCH_COMPATIBILITY_MAP = {
     'armv7hf': ['rpi']
 }
 
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K:
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
+def sort_version(x, y):
+    if semver.VersionInfo.isvalid(x['raw_version']) and semver.VersionInfo.isvalid(y['raw_version']):
+        return semver.compare(x['raw_version'], y['raw_version'])
+    else:
+        # return 0 if they are not valid semver
+        return 0
+
+def bsemver_match_range(version, version_range):
+    if semver.VersionInfo.isvalid(version):
+        try:
+            if version_range and semver.match(version, ">{version_range}".format(version_range=version_range)):
+                return True
+        except:
+            return False
+    return False
 
 # TODO: https://github.com/balena-io/balena-sdk/pull/288
 class DeviceOs:
@@ -29,6 +63,22 @@ class DeviceOs:
     """
 
     OS_UPDATE_ACTION_NAME = 'resinhup'
+    RELEASE_POLICY_TAG_NAME = 'release-policy'
+    ESR_NEXT_TAG_NAME = 'esr-next'
+    ESR_CURRENT_TAG_NAME = 'esr-current'
+    ESR_SUNSET_TAG_NAME = 'esr-sunset'
+    VARIANT_TAG_NAME = 'variant'
+    VERSION_TAG_NAME = 'version'
+    BASED_ON_VERSION_TAG_NAME = 'meta-balena-base'
+    OS_TYPES = {
+        'default': 'default',
+        'esr': 'esr'
+    }
+    OS_VARIANTS = {
+        'production': 'prod',
+        'development': 'dev'
+    }
+    
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -259,7 +309,130 @@ class DeviceOs:
             xstr(version_info.build) + '.' + os_variant if os_variant and os_variant not in tmp else version_info.build
         )
 
-    def get_supported_versions(self, device_type, auth=True):
+    def __get_os_app_tag(self, app_tags):
+        tag_map = {}
+        
+        for app_tag in app_tags:
+            tag_map[app_tag['tag_key']] = app_tag['value']
+
+        return {
+            'os_type': tag_map[self.RELEASE_POLICY_TAG_NAME] if self.RELEASE_POLICY_TAG_NAME in tag_map else self.OS_TYPES['default'],
+            'next_line_version_range': tag_map[self.ESR_NEXT_TAG_NAME] if self.ESR_NEXT_TAG_NAME in tag_map else '',
+            'current_line_version_range': tag_map[self.ESR_CURRENT_TAG_NAME] if self.ESR_CURRENT_TAG_NAME in tag_map else '',
+            'sunset_line_version_range': tag_map[self.ESR_SUNSET_TAG_NAME] if self.ESR_SUNSET_TAG_NAME in tag_map else ''
+        }
+
+    def __get_os_versions(self, device_type):
+        raw_query = "$select=is_for__device_type&$expand=application_tag($select=tag_key,value),is_for__device_type($select=slug)"
+        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag)"
+        raw_query += "&$filter=is_host%20eq%20true&$filter=is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))".format(device_type=device_type)
+
+        return self.base_request.request(
+            'application', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+    def __get_os_version_release_line(self, version, app_tags):
+        # All patches belong to the same line.
+        if bsemver_match_range(version, app_tags['next_line_version_range']):
+            return 'next'
+        
+        if bsemver_match_range(version, app_tags['current_line_version_range']):
+            return 'current'
+        
+        if bsemver_match_range(version, app_tags['sunset_line_version_range']):
+            return 'sunset'
+
+        if app_tags['os_type'].lower() == self.OS_TYPES['esr']:
+            return 'outdated'
+
+    def __get_os_versions_from_releases(self, releases, app_tags):
+        os_variant_names = self.OS_VARIANTS.keys()
+        os_variant_keywords = (self.OS_VARIANTS.values())
+        releases_with_os_versions = []
+
+        for release in releases:
+            tag_map = {}
+            
+            for release_tag in release['release_tag']:
+                tag_map[release_tag['tag_key']] = release_tag['value']
+
+            if release['raw_version'].startswith('0.0.0'):
+                # TODO: Drop this `else` once we migrate all version & variant tags to release.semver field
+				# Ideally 'production' | 'development' | None.
+                full_variant_name = tag_map[self.VARIANT_TAG_NAME] if self.VARIANT_TAG_NAME in tag_map else None
+                if full_variant_name:
+                    if full_variant_name in os_variant_names:
+                        variant = self.OS_VARIANTS[full_variant_name]
+                    else:
+                        variant = full_variant_name
+                else:
+                    variant = None
+
+                version = tag_map[self.VERSION_TAG_NAME] if self.VERSION_TAG_NAME in tag_map else ''
+                # Backfill the native rel
+                # TODO: This potentially generates an invalid semver and we should be doing
+                # something like `.join(!version.includes('+') ? '+' : '.')`,  but this needs
+                # discussion since otherwise it will break all ESR released as of writing this.
+                release['raw_version'] = '.'.join([x for x in [version, variant] if x])
+            else:
+                # Use the returned version object from API so we do not need to manually parse raw_version with semver
+                version = release['version']['version']
+                non_variant_build_parts = [build for build in release['version']['build'] if build not in os_variant_keywords]
+
+                if len(non_variant_build_parts) > 0:
+                    version = '{version}+{non_variant_builds}'.format(
+                        version=version,
+                        non_variant_builds='.'.join(non_variant_build_parts)
+                    )
+
+                variant = next((variant for variant in release['version']['build'] if variant in os_variant_keywords) , None)
+
+            based_on_version = tag_map[self.BASED_ON_VERSION_TAG_NAME] if self.BASED_ON_VERSION_TAG_NAME in tag_map else version
+            line = self.__get_os_version_release_line(version, app_tags)
+
+            release.update({
+                'os_type': app_tags['os_type'],
+                'line': line,
+                'stripped_version': version,
+                'based_on_version': based_on_version,
+                'variant': variant,
+                'formatted_version': 'v{version}{line}'.format(version=version,line=f' ({line})' if line else '')
+            })
+            releases_with_os_versions.append(release)
+
+        return releases_with_os_versions
+                    
+    def __transform_host_apps(self, host_apps):
+        os_versions_by_device_type = {}
+
+        for host_app in host_apps:
+            host_app_device_type = host_app['is_for__device_type'][0]['slug'] if len(host_app['is_for__device_type']) > 0 else None
+
+            if not host_app_device_type:
+                return {}
+            
+            if host_app_device_type not in os_versions_by_device_type:
+                os_versions_by_device_type[host_app_device_type] = []            
+
+            app_tags = self.__get_os_app_tag(host_app['application_tag'])
+            os_versions_by_device_type[host_app_device_type].extend(self.__get_os_versions_from_releases(host_app['owns__release'], app_tags))
+
+        for device_type in os_versions_by_device_type:
+            os_versions_by_device_type[device_type].sort(reverse=True, key=cmp_to_key(sort_version))
+            recommended_per_os_type = {}
+            
+            for version in os_versions_by_device_type[device_type]:
+                if version['os_type'] not in recommended_per_os_type:
+                    if version['variant'] != 'dev' and not version['known_issue_list'] and not version['version']['prerelease']:
+                        additional_format = ' ({line}, recommended)'.format(line=version['line']) if version['line'] else ' (recommended)'
+                        version['is_recommended'] = True
+                        version['formatted_version'] = 'v{version}{additional_format}'.format(version=version['stripped_version'], additional_format=additional_format)
+                        recommended_per_os_type[version['os_type']] = True
+
+        return os_versions_by_device_type
+
+    def get_supported_versions(self, device_type):
         """
         Get OS supported versions.
 
@@ -267,30 +440,21 @@ class DeviceOs:
             device_type (str): device type slug.
             auth (Optional[bool]): if auth is True then auth header will be added to the request (to get private device types) otherwise no auth header and only public device types returned. Default to True.
 
-        Returns:
-            dict: the versions information, of the following structure:
-                * versions - an array of strings, containing exact version numbers supported by the current environment.
-                * recommended - the recommended version, i.e. the most recent version that is _not_ pre-release, can be `None`.
-                * latest - the most recent version, including pre-releases.
-                * default - recommended (if available) or latest otherwise.
-
         """
 
-        response = self.base_request.request(
-            '/device-types/v1/{device_type}/images'.format(device_type=device_type), 'GET',
-            endpoint=self.settings.get('api_endpoint'), auth=auth
-        )
+        host_apps = self.__get_os_versions(device_type)
+        versions_by_dt = self.__transform_host_apps(host_apps)
 
-        potential_recommended_versions = [i for i in response['versions'] if not re.search(r'(\.|\+|-)dev', i)]
-        potential_recommended_versions = [i for i in potential_recommended_versions if not semver.parse(i)['prerelease']]
-        recommended = potential_recommended_versions[0] if potential_recommended_versions else None
-
-        return {
-            'versions': response['versions'],
-            'recommended': recommended,
-            'latest': response['latest'],
-            'default': recommended if recommended else response['latest']
-        }
+        if device_type in versions_by_dt:
+            # TODO: returns only `versions_by_dt[device_type]` in next major release
+            return {
+                'versions': versions_by_dt[device_type],
+                'recommended': versions_by_dt[device_type][0],
+                'latest': versions_by_dt[device_type][0],
+                'default': versions_by_dt[device_type][0]
+            }
+        
+        return {}
 
     def is_architecture_compatible_with(self, os_architecture, application_architecture):
         """
