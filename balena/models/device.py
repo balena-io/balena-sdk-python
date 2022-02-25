@@ -64,7 +64,7 @@ class Device(object):
         self.release = Release()
         self.device_os = DeviceOs()
         self.hup = Hup()
-        
+
     def __upsert_device_config_variable(self, device, name, value):
         try:
             data = {
@@ -107,7 +107,7 @@ class Device(object):
         if len(raw_data) > 0:
             device_config = raw_data[0]['device_config_variable']
             app_config = raw_data[0]['belongs_to__application'][0]['application_config_variable']
-            
+
             if device_config:
                 return device_config[0]['value']
             elif app_config:
@@ -429,8 +429,7 @@ class Device(object):
 
         if self.is_online(uuid):
             device = self.get(uuid)
-            return list(set(device['ip_address'].split()) -
-                        set(device['vpn_address'].split()))
+            return list(set(device['ip_address'].split()))
         else:
             raise exceptions.DeviceOffline(uuid)
 
