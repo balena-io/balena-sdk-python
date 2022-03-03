@@ -163,7 +163,7 @@ class BaseRequest(object):
                     self.settings.get(TOKEN_KEY),
                     self.settings.get('token_refresh_interval')
                 ):
-                    self.settings.set(TOKEN_KEY, self._request_new_token())
+                    self.settings.set(TOKEN_KEY, self._request_new_token().decode())
             else:
                 # Auth Token not found
                 # Raise exception if this request requires logging in using credentials or Auth Token
