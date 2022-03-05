@@ -9,6 +9,7 @@ from .config import Config
 from .environment_variables import EnvironmentVariable
 from .key import Key
 from .device_os import DeviceOs
+from .device_type import DeviceType
 from .supervisor import Supervisor
 from .image import Image
 from .service import Service
@@ -28,6 +29,7 @@ class Models:
         self.environment_variables = EnvironmentVariable()
         self.key = Key()
         self.device_os = DeviceOs()
+        self.device_type = DeviceType()
         self.supervisor = Supervisor()
         self.image = Image()
         self.service = Service()

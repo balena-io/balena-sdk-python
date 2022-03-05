@@ -6,7 +6,7 @@ except ImportError:  # Python 2 imports
 from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .config import Config
+from .device_type import DeviceType
 from .release import Release
 from .. import exceptions
 from ..utils import is_id
@@ -60,8 +60,8 @@ class Application:
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.config = Config()
         self.auth = Auth()
+        self.device_type = DeviceType()
         self.release = Release()
         self.invite = ApplicationInvite()
         self.membership = ApplicationMembership()
@@ -381,7 +381,7 @@ class Application:
             if not org:
                 raise exceptions.OrganizationNotFound(organization)
 
-        device_types = self.config.get_device_types()
+        device_types = self.device_type.get_all_supported()
         device_manifest = [device for device in device_types if device['name'] == device_type]
 
         if device_manifest:
@@ -957,7 +957,6 @@ class ApplicationInvite():
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.config = Config()
         self.auth = Auth()
         self.release = Release()
         self.RESOURCE = 'invitee__is_invited_to__application'
@@ -1084,7 +1083,6 @@ class ApplicationMembership():
     def __init__(self):
         self.base_request = BaseRequest()
         self.settings = Settings()
-        self.config = Config()
         self.auth = Auth()
         self.RESOURCE = 'user__is_member_of__application'
 

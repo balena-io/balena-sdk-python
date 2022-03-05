@@ -42,6 +42,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [DeviceConfigVariable](#deviceconfigvariable)
         - [Device](#device)
         - [DeviceOs](#deviceos)
+        - [DeviceType](#devicetype)
         - [EnvironmentVariable](#environmentvariable)
             - [ApplicationEnvVariable](#applicationenvvariable)
             - [ServiceEnvVariable](#serviceenvvariable)
@@ -690,6 +691,9 @@ Get all configuration.
 ```
 ### Function: get_device_types()
 
+***Deprecated***
+This method is deprecated and will be removed in next major release.
+
 Get device types configuration.
 
 #### Returns:
@@ -1075,6 +1079,10 @@ https://dashboard.balena-cloud.com/devices/19619a6317072b65a240b451f45f855d/summ
 ```
 ### Function: get_device_slug(device_type_name)
 
+***Deprecated***
+This method is deprecated and will be removed in next major release.
+Please use the DeviceType model instead.
+
 Get device slug.
 
 #### Args:
@@ -1109,6 +1117,10 @@ Get a device url for a device.
 'https://8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143.balenadevice.io'
 ```
 ### Function: get_display_name(device_type_slug)
+
+***Deprecated***
+This method is deprecated and will be removed in next major release.
+Please use the DeviceType model instead.
 
 Get display name for a device.
 
@@ -1279,6 +1291,10 @@ Get the supervisor target state on a device
 {u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
 ```
 ### Function: get_supported_device_types()
+
+***Deprecated***
+This method is deprecated and will be removed in next major release.
+Please use the DeviceType model instead.
 
 Get device slug.
 
@@ -1739,6 +1755,45 @@ Validate parameters for downloading device OS image.
 #### Raises:
     MissingOption: if mandatory option are missing.
     InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
+## DeviceType
+
+This class implements user API key model for balena python SDK.
+### Function: get(id_or_slug)
+
+Get a single device type.
+
+#### Args:
+    id_or_slug (str): device type slug or alias (string) or id (number).
+### Function: get_all()
+
+Get all device types.
+
+#### Returns:
+    list: list contains info of device types.
+### Function: get_all_supported()
+
+Get all supported device types.
+
+#### Returns:
+    list: list contains info of all supported device types.
+### Function: get_by_slug_or_name(slug_or_name)
+
+Get a single device type by slug or name.
+
+#### Args:
+    slug_or_name (str): device type slug or name.
+### Function: get_name(slug)
+
+Get display name for a device.
+
+#### Args:
+    slug (str): device type slug.
+### Function: get_slug_by_name(name)
+
+Get device slug.
+
+#### Args:
+    name (str): device type name.
 ## EnvironmentVariable
 
 This class is a wrapper for environment variable models.

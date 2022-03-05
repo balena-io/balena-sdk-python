@@ -23,6 +23,7 @@ Table_Of_Content = [
     ('DeviceConfigVariable', TOC_L3),
     ('Device', TOC_L2),
     ('DeviceOs', TOC_L2),
+    ('DeviceType', TOC_L2),
     ('EnvironmentVariable', TOC_L2),
     ('ApplicationEnvVariable', TOC_L3),
     ('ServiceEnvVariable', TOC_L3),
@@ -114,6 +115,9 @@ def main():
     print(doc2md.doc2md(
         balena.models.device_os.DeviceOs.__doc__, 'DeviceOs', type=0))
     print_functions(balena.models.device_os.DeviceOs)
+    print(doc2md.doc2md(
+        balena.models.device_type.DeviceType.__doc__, 'DeviceType', type=0))
+    print_functions(balena.models.device_type.DeviceType)
     print(doc2md.doc2md(
         balena.models.environment_variables.EnvironmentVariable.__doc__,
         'EnvironmentVariable', type=0))
