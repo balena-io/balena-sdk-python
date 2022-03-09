@@ -1,5 +1,4 @@
-from __future__ import print_function
-
+import configparser
 import os.path as Path
 import os
 import shutil
@@ -7,11 +6,6 @@ import sys
 
 from . import exceptions
 from .resources import Message
-
-try:  # Python 3 imports
-    import configparser
-except ImportError:  # Python 2 imports
-    import ConfigParser as configparser
 
 
 class Settings(object):
