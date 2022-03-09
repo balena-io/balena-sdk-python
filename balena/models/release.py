@@ -8,7 +8,7 @@ from .service import Service
 from ..utils import is_id
 
 
-class Release(object):
+class Release:
     """
     This class implements release model for balena python SDK.
 

@@ -22,7 +22,7 @@ ARCH_COMPATIBILITY_MAP = {
 
 
 # TODO: https://github.com/balena-io/balena-sdk/pull/288
-class DeviceOs(object):
+class DeviceOs:
     """
     This class implements device os model for balena python SDK.
 

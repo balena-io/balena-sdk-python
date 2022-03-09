@@ -13,7 +13,7 @@ def _is_valid_env_var_name(env_var_name):
     return re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$', env_var_name)
 
 
-class EnvironmentVariable(object):
+class EnvironmentVariable:
     """
     This class is a wrapper for environment variable models.
 
@@ -26,7 +26,7 @@ class EnvironmentVariable(object):
         self.device_service_environment_variable = DeviceServiceEnvVariable()
 
 
-class DeviceEnvVariable(object):
+class DeviceEnvVariable:
     """
     This class implements device environment variable model for balena python SDK.
 
@@ -180,7 +180,7 @@ class DeviceEnvVariable(object):
         return list(map(self._fix_device_env_var_name_key, env_list['d']))
 
 
-class DeviceServiceEnvVariable(object):
+class DeviceServiceEnvVariable:
     """
     This class implements device service variable model for balena python SDK.
 
@@ -333,7 +333,7 @@ class DeviceServiceEnvVariable(object):
         )['d']
 
 
-class ApplicationEnvVariable(object):
+class ApplicationEnvVariable:
     """
     This class implements application environment variable model for balena python SDK.
 
@@ -481,7 +481,7 @@ class ApplicationEnvVariable(object):
         )
 
 
-class ServiceEnvVariable(object):
+class ServiceEnvVariable:
     """
     This class implements service environment variable model for balena python SDK.
 

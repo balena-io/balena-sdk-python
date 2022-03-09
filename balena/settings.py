@@ -8,7 +8,7 @@ from . import exceptions
 from .resources import Message
 
 
-class Settings(object):
+class Settings:
     """
     This class handles settings for balena python SDK.
 

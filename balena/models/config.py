@@ -19,7 +19,7 @@ def _normalize_device_type(dev_type):
     return dev_type
 
 
-class Config(object):
+class Config:
     """
     This class implements configuration model for balena python SDK.
 

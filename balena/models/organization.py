@@ -17,7 +17,7 @@ from math import isinf
 from collections import defaultdict
 
 
-class Organization (object):
+class Organization:
     """
     This class implements organization model for balena python SDK.
 
@@ -307,7 +307,7 @@ class OrganizationInvite():
         )
 
 
-class OrganizationMembership (object):
+class OrganizationMembership:
     """
     This class implements organization membership model for balena python SDK.
 

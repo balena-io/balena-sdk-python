@@ -11,7 +11,7 @@ def _print_deprecation_warning():
     print("This is not supported on multicontainer devices, and will be removed in future")
 
 
-class Supervisor(object):
+class Supervisor:
     """
     This class implements supervisor model for balena python SDK.
 

@@ -6,7 +6,7 @@ from ..auth import Auth
 from .. import exceptions
 
 
-class Key(object):
+class Key:
     """
     This class implements ssh key model for balena python SDK.
 

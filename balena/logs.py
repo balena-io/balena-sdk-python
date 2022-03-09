@@ -75,7 +75,7 @@ def cbDrop(protocol):
     protocol.transport.loseConnection()
 
 
-class Subscription(object):
+class Subscription:
     """
     This is low level class and is not meant to be used by end users directly.
     """
@@ -111,7 +111,7 @@ class Subscription(object):
         reactor.callFromThread(d.addCallback, cbDrop)
 
 
-class Logs(object):
+class Logs:
     """
     This class implements functions that allow processing logs from device.
 

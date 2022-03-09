@@ -3,7 +3,7 @@ This is a python library for resources like message templates etc.
 """
 
 
-class Message(object):
+class Message:
     """
     Message templates
     """

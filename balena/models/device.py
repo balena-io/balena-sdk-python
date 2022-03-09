@@ -30,7 +30,7 @@ OVERRIDE_LOCK_ENV_VAR = 'RESIN_OVERRIDE_LOCK'
 
 
 # TODO: support both device uuid and device id
-class DeviceStatus(object):
+class DeviceStatus:
     """
     Balena device statuses.
     """
@@ -43,7 +43,7 @@ class DeviceStatus(object):
     INACTIVE = "Inactive"
 
 
-class Device(object):
+class Device:
     """
     This class implements device model for balena python SDK.
 

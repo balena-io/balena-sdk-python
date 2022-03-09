@@ -5,7 +5,7 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class Service(object):
+class Service:
     """
     This class implements service model for balena python SDK.
 

@@ -3,7 +3,7 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class ApiKey(object):
+class ApiKey:
     """
     This class implements user API key model for balena python SDK.
 

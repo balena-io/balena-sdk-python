@@ -49,7 +49,7 @@ def _get_role_by_name(role_name):
 
 
 # TODO: support both app_id and app_name
-class Application(object):
+class Application:
     """
     This class implements application model for balena python SDK.
 
