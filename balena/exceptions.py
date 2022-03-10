@@ -566,3 +566,21 @@ class ApplicationMembershipNotFound(BalenaException):
         super(ApplicationMembershipNotFound, self).__init__()
         self.message = Message.APPLICATION_MEMBERSHIP_NOT_FOUND.format(
             membership=membership)
+
+
+class BalenaInvalidDeviceType(BalenaException):
+    """
+    Exception type for invalid device type.
+
+    Args:
+        device_type (str): device type.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, device_type):
+        super(BalenaInvalidDeviceType, self).__init__()
+        self.message = Message.BALENA_INVALID_DEVICE_TYPE.format(
+            device_type=device_type)

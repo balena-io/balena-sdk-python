@@ -46,3 +46,4 @@ class Message:
     BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND = "Organization membership role not found: {role_name}"
     BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"
     APPLICATION_MEMBERSHIP_NOT_FOUND = "Application membership not found: {membership}"
+    BALENA_INVALID_DEVICE_TYPE = "Invalid device type: ${device_type}"

@@ -61,6 +61,9 @@ class Config:
 
     def get_device_types(self):
         """
+        ***Deprecated***
+        This method is deprecated and will be removed in next major release.
+
         Get device types configuration.
 
         Returns:

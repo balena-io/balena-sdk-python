@@ -14,6 +14,7 @@ except ImportError:  # Python 2 imports
 from ..base_request import BaseRequest
 from .config import Config
 from .device_os import DeviceOs
+from .device_type import DeviceType
 from ..settings import Settings
 from ..auth import Auth
 from .. import exceptions
@@ -63,6 +64,7 @@ class Device:
         self.auth = Auth()
         self.release = Release()
         self.device_os = DeviceOs()
+        self.device_type = DeviceType()
         self.hup = Hup()
 
     def __upsert_device_config_variable(self, device, name, value):
@@ -573,6 +575,10 @@ class Device:
 
     def get_display_name(self, device_type_slug):
         """
+        ***Deprecated***
+        This method is deprecated and will be removed in next major release.
+        Please use the DeviceType model instead.
+
         Get display name for a device.
 
         Args:
@@ -592,7 +598,7 @@ class Device:
 
         """
 
-        device_types = self.config.get_device_types()
+        device_types = self.device_type.get_all_supported()
         display_name = [device['name'] for device in device_types
                         if device['slug'] == device_type_slug]
         if display_name:
@@ -602,6 +608,10 @@ class Device:
 
     def get_device_slug(self, device_type_name):
         """
+        ***Deprecated***
+        This method is deprecated and will be removed in next major release.
+        Please use the DeviceType model instead.
+
         Get device slug.
 
         Args:
@@ -621,7 +631,7 @@ class Device:
 
         """
 
-        device_types = self.config.get_device_types()
+        device_types = self.device_type.get_all_supported()
         slug_name = [device['slug'] for device in device_types
                      if device['name'] == device_type_name]
         if slug_name:
@@ -631,6 +641,10 @@ class Device:
 
     def get_supported_device_types(self):
         """
+        ***Deprecated***
+        This method is deprecated and will be removed in next major release.
+        Please use the DeviceType model instead.
+        
         Get device slug.
 
         Returns:
@@ -638,7 +652,7 @@ class Device:
 
         """
 
-        device_types = self.config.get_device_types()
+        device_types = self.device_type.get_all_supported()
         supported_device = [device['name'] for device in device_types]
         return supported_device
 
@@ -657,7 +671,7 @@ class Device:
 
         """
 
-        device_types = self.config.get_device_types()
+        device_types = self.device_type.get_all_supported()
         manifest = [device for device in device_types
                     if device['slug'] == slug]
         if manifest:
@@ -930,8 +944,9 @@ class Device:
             raise exceptions.ApplicationNotFound(app_name)
         application = application[0]
 
-        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['is_of__device_type'][0]['slug'], self.config.get_device_types()))[0]
-        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['is_for__device_type'][0]['slug'], self.config.get_device_types()))[0]
+        all_device_types = self.device_type.get_all_supported()
+        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['is_of__device_type'][0]['slug'], all_device_types))[0]
+        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['is_for__device_type'][0]['slug'], all_device_types))[0]
 
         if not self.device_os.is_architecture_compatible_with(device_dev_type['arch'], app_dev_type['arch']):
             raise exceptions.IncompatibleApplication(app_name)
