@@ -11,7 +11,7 @@ def _is_valid_config_var_name(config_var_name):
     return config_var_name.startswith('RESIN_') or config_var_name.startswith('BALENA_')
 
 
-class ConfigVariable(object):
+class ConfigVariable:
     """
     This class is a wrapper for config variable models.
 
@@ -22,7 +22,7 @@ class ConfigVariable(object):
         self.application_config_variable = ApplicationConfigVariable()
 
 
-class DeviceConfigVariable(object):
+class DeviceConfigVariable:
     """
     This class implements device config variable model for balena python SDK.
 
@@ -168,7 +168,7 @@ class DeviceConfigVariable(object):
         )
 
 
-class ApplicationConfigVariable(object):
+class ApplicationConfigVariable:
     """
     This class implements application config variable model for balena python SDK.
 

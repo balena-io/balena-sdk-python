@@ -16,7 +16,7 @@ from . import exceptions
 TOKEN_KEY = 'token'
 
 
-class BaseRequest(object):
+class BaseRequest:
     """
     This class provides an exclusive client to make HTTP requests to balena servers.
     This is low level class and is not meant to be used by end users directly.
@@ -213,7 +213,7 @@ class BaseRequest(object):
         return response.content
 
 
-class Util(object):
+class Util:
 
     def should_update_token(self, token, token_fresh_interval):
         try:

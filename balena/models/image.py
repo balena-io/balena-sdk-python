@@ -5,7 +5,7 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class Image(object):
+class Image:
     """
     This class implements image model for balena python SDK.
 

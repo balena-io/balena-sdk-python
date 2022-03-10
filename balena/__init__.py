@@ -39,7 +39,7 @@ from .twofactor_auth import TwoFactorAuth
 __version__ = '11.1.3'
 
 
-class Balena(object):
+class Balena:
     """
     This class implements all functions supported by the python SDK.
     Attributes:

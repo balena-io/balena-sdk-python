@@ -19,7 +19,7 @@ from .tag import Tag
 from .organization import Organization
 
 
-class Models(object):
+class Models:
 
     def __init__(self):
         self.device = Device()

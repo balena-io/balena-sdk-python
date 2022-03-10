@@ -3,7 +3,7 @@ import semver
 from .. import exceptions
 
 
-class Hup(object):
+class Hup:
     """
     """
 

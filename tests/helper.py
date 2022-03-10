@@ -14,7 +14,7 @@ from balena.base_request import BaseRequest
 from balena.settings import Settings
 
 
-class TestHelper(object):
+class TestHelper:
 
     credentials = {}
 

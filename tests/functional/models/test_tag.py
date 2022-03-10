@@ -12,7 +12,7 @@ def find_with_tag_key(tag_list, tag_key):
     return None
 
 
-class BaseTagTest(object):
+class BaseTagTest:
 
     def __init__(self, test_obj):
         self.test_obj = test_obj

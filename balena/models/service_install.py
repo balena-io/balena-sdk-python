@@ -5,7 +5,7 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class ServiceInstall(object):
+class ServiceInstall:
     """
     This class implements service_install model for balena python SDK.
     This is low level class and is not meant to be used by end users directly.

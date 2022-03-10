@@ -13,7 +13,7 @@ from . import exceptions
 TOKEN_KEY = 'token'
 
 
-class TwoFactorAuth(object):
+class TwoFactorAuth:
     """
     This class implements basic 2FA functionalities for balena python SDK.
 

@@ -5,7 +5,7 @@ from . import exceptions
 TOKEN_KEY = 'token'
 
 
-class Auth(object):
+class Auth:
     """
     This class implements all authentication functions for balena python SDK.
 

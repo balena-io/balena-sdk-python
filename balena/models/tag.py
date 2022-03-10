@@ -7,7 +7,7 @@ from ..settings import Settings
 from .. import exceptions
 
 
-class Tag(object):
+class Tag:
     """
     This class is a wrapper for Tag models.
 
@@ -19,7 +19,7 @@ class Tag(object):
         self.release = ReleaseTag()
 
 
-class BaseTag(object):
+class BaseTag:
     """
     an abstract implementation for resource tags. This class won't be included in the docs.
 
