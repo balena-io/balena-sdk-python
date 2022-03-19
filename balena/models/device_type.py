@@ -37,7 +37,7 @@ class DeviceType(object):
 
         """
         
-        raw_query = '$filter=is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)'
+        raw_query = '$expand=is_of__cpu_architecture($select=slug)&$filter=is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)'
 
         return self.base_request.request(
             'device_type', 'GET', raw_query=raw_query,

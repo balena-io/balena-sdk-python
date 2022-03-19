@@ -948,7 +948,7 @@ class Device:
         device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['is_of__device_type'][0]['slug'], all_device_types))[0]
         app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['is_for__device_type'][0]['slug'], all_device_types))[0]
 
-        if not self.device_os.is_architecture_compatible_with(device_dev_type['arch'], app_dev_type['arch']):
+        if not self.device_os.is_architecture_compatible_with(device_dev_type['is_of__cpu_architecture'][0]['slug'], app_dev_type['is_of__cpu_architecture'][0]['slug']):
             raise exceptions.IncompatibleApplication(app_name)
 
         if bool(device_dev_type.get('isDependent', None)) != bool(app_dev_type.get('isDependent', None)):
