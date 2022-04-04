@@ -1719,12 +1719,13 @@ Get current device os semver with variant.
 >>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
 '2.29.2+rev1.prod'
 ```
-### Function: get_supported_versions(device_type)
+### Function: get_supported_versions(device_type, auth)
 
 Get OS supported versions.
 
 #### Args:
-    device_type (str): device type slug
+    device_type (str): device type slug.
+    auth (Optional[bool]): if auth is True then auth header will be added to the request (to get private device types) otherwise no auth header and only public device types returned. Default to True.
 
 #### Returns:
     dict: the versions information, of the following structure:

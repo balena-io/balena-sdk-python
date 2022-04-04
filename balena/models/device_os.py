@@ -259,12 +259,13 @@ class DeviceOs:
             xstr(version_info.build) + '.' + os_variant if os_variant and os_variant not in tmp else version_info.build
         )
 
-    def get_supported_versions(self, device_type):
+    def get_supported_versions(self, device_type, auth=True):
         """
         Get OS supported versions.
 
         Args:
-            device_type (str): device type slug
+            device_type (str): device type slug.
+            auth (Optional[bool]): if auth is True then auth header will be added to the request (to get private device types) otherwise no auth header and only public device types returned. Default to True.
 
         Returns:
             dict: the versions information, of the following structure:
@@ -277,7 +278,7 @@ class DeviceOs:
 
         response = self.base_request.request(
             '/device-types/v1/{device_type}/images'.format(device_type=device_type), 'GET',
-            endpoint=self.settings.get('api_endpoint')
+            endpoint=self.settings.get('api_endpoint'), auth=auth
         )
 
         potential_recommended_versions = [i for i in response['versions'] if not re.search(r'(\.|\+|-)dev', i)]
