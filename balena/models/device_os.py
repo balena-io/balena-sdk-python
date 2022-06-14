@@ -324,7 +324,7 @@ class DeviceOs:
 
     def __get_os_versions(self, device_type):
         raw_query = "$select=is_for__device_type&$expand=application_tag($select=tag_key,value),is_for__device_type($select=slug)"
-        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list,variant&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag($select=tag_key,value))"
+        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list,variant,phase&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag($select=tag_key,value))"
         raw_query += "&$filter=is_host%20eq%20true&$filter=is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))".format(device_type=device_type)
 
         return self.base_request.request(
@@ -332,19 +332,26 @@ class DeviceOs:
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
-    def __get_os_version_release_line(self, version, app_tags):
-        # All patches belong to the same line.
-        if bsemver_match_range(version, app_tags['next_line_version_range']):
-            return 'next'
-        
-        if bsemver_match_range(version, app_tags['current_line_version_range']):
-            return 'current'
-        
-        if bsemver_match_range(version, app_tags['sunset_line_version_range']):
-            return 'sunset'
+    # TODO: Drop this method & just use `release.phase` in the next major
+    def __get_os_version_release_line(self, phase, version, app_tags):
+        if not phase:
+            # All patches belong to the same line.
+            if bsemver_match_range(version, app_tags['next_line_version_range']):
+                return 'next'
 
-        if app_tags['os_type'].lower() == self.OS_TYPES['esr']:
+            if bsemver_match_range(version, app_tags['current_line_version_range']):
+                return 'current'
+
+            if bsemver_match_range(version, app_tags['sunset_line_version_range']):
+                return 'sunset'
+
+            if app_tags['os_type'].lower() == self.OS_TYPES['esr']:
+                return 'outdated'
+
+        if phase == 'end-of-life':
             return 'outdated'
+
+        return phase
 
     def __get_os_versions_from_releases(self, releases, app_tags):
         os_variant_names = self.OS_VARIANTS.keys()
@@ -384,7 +391,8 @@ class DeviceOs:
                 stripped_version = '+'.join([x for x in [version, non_variant_build_parts] if x])
 
             based_on_version = tag_map[self.BASED_ON_VERSION_TAG_NAME] if self.BASED_ON_VERSION_TAG_NAME in tag_map else stripped_version
-            line = self.__get_os_version_release_line(stripped_version, app_tags)
+            # TODO: Drop this call & just use `release.phase` in the next major
+            line = self.__get_os_version_release_line(release['phase'], stripped_version, app_tags)
 
             release.update({
                 'os_type': app_tags['os_type'],
