@@ -324,7 +324,7 @@ class DeviceOs:
 
     def __get_os_versions(self, device_type):
         raw_query = "$select=is_for__device_type&$expand=application_tag($select=tag_key,value),is_for__device_type($select=slug)"
-        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag)"
+        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list,variant&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag($select=tag_key,value))"
         raw_query += "&$filter=is_host%20eq%20true&$filter=is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))".format(device_type=device_type)
 
         return self.base_request.request(
@@ -348,7 +348,6 @@ class DeviceOs:
 
     def __get_os_versions_from_releases(self, releases, app_tags):
         os_variant_names = self.OS_VARIANTS.keys()
-        os_variant_keywords = (self.OS_VARIANTS.values())
         releases_with_os_versions = []
 
         for release in releases:
@@ -356,6 +355,8 @@ class DeviceOs:
             
             for release_tag in release['release_tag']:
                 tag_map[release_tag['tag_key']] = release_tag['value']
+
+            variant = release['variant']
 
             if release['raw_version'].startswith('0.0.0'):
                 # TODO: Drop this `else` once we migrate all version & variant tags to release.semver field
@@ -369,35 +370,29 @@ class DeviceOs:
                 else:
                     variant = None
 
-                version = tag_map[self.VERSION_TAG_NAME] if self.VERSION_TAG_NAME in tag_map else ''
-                # Backfill the native rel
+                stripped_version  = tag_map[self.VERSION_TAG_NAME] if self.VERSION_TAG_NAME in tag_map else ''
+                # Backfill the native release_version field
                 # TODO: This potentially generates an invalid semver and we should be doing
                 # something like `.join(!version.includes('+') ? '+' : '.')`,  but this needs
                 # discussion since otherwise it will break all ESR released as of writing this.
-                release['raw_version'] = '.'.join([x for x in [version, variant] if x])
+                release['raw_version'] = '.'.join([x for x in [stripped_version, variant] if x])
             else:
                 # Use the returned version object from API so we do not need to manually parse raw_version with semver
                 version = release['version']['version']
-                non_variant_build_parts = [build for build in release['version']['build'] if build not in os_variant_keywords]
+                non_variant_build_parts = '.'.join([build for build in release['version']['build'] if build != release['variant']])
 
-                if len(non_variant_build_parts) > 0:
-                    version = '{version}+{non_variant_builds}'.format(
-                        version=version,
-                        non_variant_builds='.'.join(non_variant_build_parts)
-                    )
+                stripped_version = '+'.join([x for x in [version, non_variant_build_parts] if x])
 
-                variant = next((variant for variant in release['version']['build'] if variant in os_variant_keywords) , None)
-
-            based_on_version = tag_map[self.BASED_ON_VERSION_TAG_NAME] if self.BASED_ON_VERSION_TAG_NAME in tag_map else version
-            line = self.__get_os_version_release_line(version, app_tags)
+            based_on_version = tag_map[self.BASED_ON_VERSION_TAG_NAME] if self.BASED_ON_VERSION_TAG_NAME in tag_map else stripped_version
+            line = self.__get_os_version_release_line(stripped_version, app_tags)
 
             release.update({
                 'os_type': app_tags['os_type'],
                 'line': line,
-                'stripped_version': version,
+                'stripped_version': stripped_version,
                 'based_on_version': based_on_version,
                 'variant': variant,
-                'formatted_version': 'v{version}{line}'.format(version=version,line=f' ({line})' if line else '')
+                'formatted_version': 'v{version}{line}'.format(version=stripped_version,line=f' ({line})' if line else '')
             })
             releases_with_os_versions.append(release)
 
