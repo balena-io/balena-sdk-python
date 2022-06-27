@@ -136,6 +136,24 @@ class Release:
         except exceptions.ReleaseNotFound:
             raise exceptions.ReleaseNotFound(app_id)
 
+    def remove(self, release_id):
+        """
+        Remove a release. This function only works if you log in using credentials or Auth Token.
+
+        Args:
+            id (str): The id of the release.
+
+        """
+        params = {
+            'filters': {
+                'id': release_id
+            }
+        }
+
+        return self.base_request.request(
+            'release', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint'))
+
     def get_with_image_details(self, commit_or_id):
         """
         Get a specific release with the details of the images built.
