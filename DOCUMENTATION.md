@@ -1719,20 +1719,13 @@ Get current device os semver with variant.
 >>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
 '2.29.2+rev1.prod'
 ```
-### Function: get_supported_versions(device_type, auth)
+### Function: get_supported_versions(device_type)
 
 Get OS supported versions.
 
 #### Args:
     device_type (str): device type slug.
     auth (Optional[bool]): if auth is True then auth header will be added to the request (to get private device types) otherwise no auth header and only public device types returned. Default to True.
-
-#### Returns:
-    dict: the versions information, of the following structure:
-        * versions - an array of strings, containing exact version numbers supported by the current environment.
-        * recommended - the recommended version, i.e. the most recent version that is _not_ pre-release, can be `None`.
-        * latest - the most recent version, including pre-releases.
-        * default - recommended (if available) or latest otherwise.
 ### Function: is_architecture_compatible_with(os_architecture, application_architecture)
 
 Returns whether the specified OS architecture is compatible with the target architecture.
@@ -2457,6 +2450,16 @@ Get a specific release with the details of the images built.
 
 #### Raises:
     ReleaseNotFound: if release couldn't be found.
+### Function: remove(commit_or_id)
+
+Remove a specific release. This function only works if you log in using credentials or Auth Token.
+
+#### Args:
+    commit_or_id: release commit (str) or id (int).
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
+    AmbiguousRelease: if release commit is ambiguous.
 ## Service
 
 This class implements service model for balena python SDK.

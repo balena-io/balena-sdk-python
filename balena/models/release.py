@@ -135,6 +135,47 @@ class Release:
             return self.__get_by_raw_query(raw_query)[0]
         except exceptions.ReleaseNotFound:
             raise exceptions.ReleaseNotFound(app_id)
+        
+    def remove(self, commit_or_id):
+        """
+        Remove a specific release. This function only works if you log in using credentials or Auth Token.
+
+        Args:
+            commit_or_id: release commit (str) or id (int).
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+            AmbiguousRelease: if release commit is ambiguous.
+
+        """
+
+        if is_id(commit_or_id):
+            params = {
+                'filters': {
+                    'id': commit_or_id
+                }
+            }
+        else:
+            raw_query = "$filter=startswith(commit, '{}')".format(commit_or_id)
+
+            try:
+                rt = self.__get_by_raw_query(raw_query)
+
+                if len(rt) > 1:
+                    raise exceptions.AmbiguousRelease(commit_or_id)
+
+                params = {
+                    'filters': {
+                        'id': rt[0]['id']
+                    }
+                }
+            except exceptions.ReleaseNotFound:
+                raise exceptions.ReleaseNotFound(commit_or_id)
+
+        return self.base_request.request(
+            'release', 'DELETE', params=params,
+            endpoint=self.settings.get('pine_endpoint')
+        )
 
     def get_with_image_details(self, commit_or_id):
         """
