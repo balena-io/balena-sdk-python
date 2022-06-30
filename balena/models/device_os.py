@@ -6,6 +6,7 @@ import semver
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .. import exceptions
+from ..utils import compare
 
 NETWORK_WIFI = 'wifi'
 NETWORK_ETHERNET = 'ethernet'
@@ -39,12 +40,107 @@ def cmp_to_key(mycmp):
             return mycmp(self.obj, other.obj) != 0
     return K
 
+def normalize_balena_semver(os_version):
+        """
+        safeSemver and trimOsText from resin-semver in Python.
+        ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
+
+        """
+
+        # fix major.minor.patch.rev to use rev as build metadata
+        version = re.sub(r'(\.[0-9]+)\.rev', r'\1+rev', os_version)
+        # fix major.minor.patch.prod to be treat .dev & .prod as build metadata
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+)\.(dev|prod)', r'\1+\2', version)
+        # if there are no build metadata, then treat the parenthesized value as one
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1+\2', version)
+        # if there are build metadata, then treat the parenthesized value as point value
+        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\+\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1.\2', version)
+        # Remove "Resin OS" and "Balena OS" text
+        version = re.sub(r'(resin|balena)\s*os\s*', '', version, flags=re.IGNORECASE)
+        # remove optional versioning, eg "(prod)", "(dev)"
+        version = re.sub(r'\s+\(\w+\)$', '', version)
+        # remove "v" prefix
+        version = re.sub(r'^v', '', version)
+        return version
+
+def get_rev_version(semver_version):
+    if semver_version and semver_version.build:
+        rev = 0
+
+        for metadata_part in semver_version.build.split('.'):
+            match = re.match('rev(\d+)', metadata_part)
+            if match:
+                rev = int(match.groups()[0])
+                break
+
+        return rev
+
+    return 0
+
+def is_development_version(semver_version):
+    if semver_version and semver_version.build:
+        return ('dev' in semver_version.build)
+        
+    return False
+    
+def compare_balena_version(version_a, version_b):
+    """
+        Based on https://github.com/balena-io-modules/balena-semver#compare
+
+    """
+    
+    if not version_a:
+        return 0 if not version_b else -1
+
+    if not version_b:
+        return 1
+
+    normalized_version_a = normalize_balena_semver(version_a)
+    normalized_version_b = normalize_balena_semver(version_b)
+    
+    is_valid_semver_version_a = semver.VersionInfo.isvalid(normalized_version_a)
+    is_valid_semver_version_b = semver.VersionInfo.isvalid(normalized_version_b)
+    
+    if not is_valid_semver_version_a or not is_valid_semver_version_b:
+
+        if is_valid_semver_version_a:
+            # verison b not valid semver
+            return 1
+
+        if is_valid_semver_version_b:
+            # version a not valid semver
+            return -1
+        
+        return compare(is_valid_semver_version_a, is_valid_semver_version_b)
+
+    version_a_semver_obj = semver.VersionInfo.parse(normalized_version_a)
+    version_b_semver_obj = semver.VersionInfo.parse(normalized_version_b)
+
+    semver_compare_result = version_a_semver_obj.compare(version_b_semver_obj)
+
+    if semver_compare_result != 0:
+        return semver_compare_result
+
+    rev_result = compare(get_rev_version(version_a_semver_obj), get_rev_version(version_b_semver_obj))
+
+    if rev_result != 0:
+        return rev_result
+
+    dev_result = compare(is_development_version(version_a_semver_obj), is_development_version(version_b_semver_obj))
+
+    if dev_result != 0:
+        return dev_result
+
+    # We can ignore the localeCompare since this is only for balena OS version.
+    return compare(normalized_version_a, normalized_version_b)
+
 def sort_version(x, y):
-    if semver.VersionInfo.isvalid(x['raw_version']) and semver.VersionInfo.isvalid(y['raw_version']):
-        return semver.compare(x['raw_version'], y['raw_version'])
-    else:
-        # return 0 if they are not valid semver
-        return 0
+    """
+        Sort returned objects from device_os.get_supported_versions method.
+    """
+
+    return compare_balena_version(x['raw_version'], y['raw_version'])
+    
 
 def bsemver_match_range(version, version_range):
     if semver.VersionInfo.isvalid(version):
@@ -249,29 +345,6 @@ class DeviceOs:
             #    raise exceptions.MissingOption('wifiKey')
         return params
 
-    def __normalize_balena_semver(self, os_version):
-        """
-        safeSemver and trimOsText from resin-semver in Python.
-        ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
-
-        """
-
-        # fix major.minor.patch.rev to use rev as build metadata
-        version = re.sub(r'(\.[0-9]+)\.rev', r'\1+rev', os_version)
-        # fix major.minor.patch.prod to be treat .dev & .prod as build metadata
-        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+)\.(dev|prod)', r'\1+\2', version)
-        # if there are no build metadata, then treat the parenthesized value as one
-        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1+\2', version)
-        # if there are build metadata, then treat the parenthesized value as point value
-        version = re.sub(r'([0-9]+\.[0-9]+\.[0-9]+(?:[-\+\.][0-9a-z]+)*) \(([0-9a-z]+)\)', r'\1.\2', version)
-        # Remove "Resin OS" and "Balena OS" text
-        version = re.sub(r'(resin|balena)\s*os\s*', '', version, flags=re.IGNORECASE)
-        # remove optional versioning, eg "(prod)", "(dev)"
-        version = re.sub(r'\s+\(\w+\)$', '', version)
-        # remove "v" prefix
-        version = re.sub(r'^v', '', version)
-        return version
-
     def get_device_os_semver_with_variant(self, os_version, os_variant=None):
         """
         Get current device os semver with variant.
@@ -289,7 +362,7 @@ class DeviceOs:
         if not os_version:
             return None
 
-        version_info = semver.VersionInfo.parse(self.__normalize_balena_semver(os_version))
+        version_info = semver.VersionInfo.parse(normalize_balena_semver(os_version))
 
         if not version_info:
             return os_version
@@ -300,13 +373,24 @@ class DeviceOs:
         if version_info.build:
             tmp = tmp + version_info.build.split('.')
 
-        xstr = lambda s: '' if s is None else str(s)
+        builds = []
+        pre_releases = []
+
+        if version_info.build:
+            builds = version_info.build.split('.')
+            
+        if version_info.prerelease:
+            pre_releases = version_info.prerelease.split('.')
+
+        if os_variant and os_variant not in pre_releases and os_variant not in builds:
+            builds.append(os_variant)
+
         return semver.format_version(
             version_info.major,
             version_info.minor,
             version_info.patch,
             version_info.prerelease,
-            xstr(version_info.build) + '.' + os_variant if os_variant and os_variant not in tmp else version_info.build
+            '.'.join(builds)
         )
 
     def __get_os_app_tag(self, app_tags):
@@ -323,9 +407,10 @@ class DeviceOs:
         }
 
     def __get_os_versions(self, device_type):
-        raw_query = "$select=is_for__device_type&$expand=application_tag($select=tag_key,value),is_for__device_type($select=slug)"
-        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list,variant,phase&$filter=is_final%20eq%20true&$filter=is_invalidated%20eq%20false&$filter=status%20eq%20'success'&$expand=release_tag($select=tag_key,value))"
-        raw_query += "&$filter=is_host%20eq%20true&$filter=is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))".format(device_type=device_type)
+
+        raw_query = "$select=is_for__device_type,is_host&$expand=application_tag($select=tag_key,value),is_for__device_type($select=slug)"
+        raw_query += ",owns__release($select=id,raw_version,version,is_final,release_tag,known_issue_list,variant,phase&$filter=is_final%20eq%20true%20and%20is_invalidated%20eq%20false%20and%20status%20eq%20'success'&$expand=release_tag($select=tag_key,value))"
+        raw_query += "&$filter=is_host%20eq%20true%20and%20is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))".format(device_type=device_type)
 
         return self.base_request.request(
             'application', 'GET', raw_query=raw_query,
@@ -410,16 +495,17 @@ class DeviceOs:
         os_versions_by_device_type = {}
 
         for host_app in host_apps:
-            host_app_device_type = host_app['is_for__device_type'][0]['slug'] if len(host_app['is_for__device_type']) > 0 else None
+            if host_app['is_host']:
+                host_app_device_type = host_app['is_for__device_type'][0]['slug'] if len(host_app['is_for__device_type']) > 0 else None
 
-            if not host_app_device_type:
-                return {}
-            
-            if host_app_device_type not in os_versions_by_device_type:
-                os_versions_by_device_type[host_app_device_type] = []            
+                if not host_app_device_type:
+                    return {}
+                
+                if host_app_device_type not in os_versions_by_device_type:
+                    os_versions_by_device_type[host_app_device_type] = []            
 
-            app_tags = self.__get_os_app_tag(host_app['application_tag'])
-            os_versions_by_device_type[host_app_device_type].extend(self.__get_os_versions_from_releases(host_app['owns__release'], app_tags))
+                app_tags = self.__get_os_app_tag(host_app['application_tag'])
+                os_versions_by_device_type[host_app_device_type].extend(self.__get_os_versions_from_releases(host_app['owns__release'], app_tags))
 
         for device_type in os_versions_by_device_type:
             os_versions_by_device_type[device_type].sort(reverse=True, key=cmp_to_key(sort_version))

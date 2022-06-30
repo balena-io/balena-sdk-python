@@ -13,7 +13,7 @@ except ImportError:  # Python 2 imports
 
 from ..base_request import BaseRequest
 from .config import Config
-from .device_os import DeviceOs
+from .device_os import DeviceOs, normalize_balena_semver
 from .device_type import DeviceType
 from ..settings import Settings
 from ..auth import Auth
@@ -1401,16 +1401,16 @@ class Device:
             raise exceptions.OsUpdateError('The uuid of the device is not available')
 
         if 'is_online' not in device_info or not device_info['is_online']:
-            raise exceptions.OsUpdateError('The device is offline: {uuid}'.format(uuid=uuid))
+            raise exceptions.OsUpdateError('The device is offline: {uuid}'.format(uuid=device_info['uuid']))
 
         if 'os_version' not in device_info or not device_info['os_version']:
-            raise exceptions.OsUpdateError('The current os version of the device is not available: {uuid}'.format(uuid=uuid))
+            raise exceptions.OsUpdateError('The current os version of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
 
         if 'is_of__device_type' not in device_info or not device_info['is_of__device_type']:
-            raise exceptions.OsUpdateError('The device type of the device is not available: {uuid}'.format(uuid=uuid))
+            raise exceptions.OsUpdateError('The device type of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
 
         if 'os_variant' not in device_info:
-            raise exceptions.OsUpdateError('The os variant of the device is not available: {uuid}'.format(uuid=uuid))
+            raise exceptions.OsUpdateError('The os variant of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
 
         current_os_version = self.device_os.get_device_os_semver_with_variant(device_info['os_version'], device_info['os_variant'])
         self.hup.get_hup_action_type(device_info['is_of__device_type'][0]['slug'], current_os_version, target_os_version)
@@ -1434,7 +1434,8 @@ class Device:
 
         Examples:
             >>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.29.2+rev1.prod')
-            {u'status': u'in_progress', u'action': u'resinhup', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'last_run': 1554490809219L}
+            >>> # or for unified OS releases
+            >>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.89.0+rev1')
         """
 
         raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=is_of__device_type($select=slug)".format(uuid=uuid)
@@ -1452,7 +1453,7 @@ class Device:
         self.__check_os_update_target(device, target_os_version)
 
         all_versions = self.device_os.get_supported_versions(device['is_of__device_type'][0]['slug'])['versions']
-        if not [v for v in all_versions if semver.compare(target_os_version, v) == 0]:
+        if not [v for v in all_versions if target_os_version == v['raw_version']]:
             raise exceptions.InvalidParameter('target_os_version', target_os_version)
 
         data = {
@@ -1502,10 +1503,10 @@ class Device:
         if not self.__is_provisioned_device(device):
             raise exceptions.LocalModeError(Message.DEVICE_NOT_PROVISIONED)
 
-        if semver.compare(self.device_os._DeviceOs__normalize_balena_semver(device['os_version']), LOCAL_MODE_MIN_OS_VERSION) < 0:
+        if semver.compare(normalize_balena_semver(device['os_version']), LOCAL_MODE_MIN_OS_VERSION) < 0:
             raise exceptions.LocalModeError(Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE)
 
-        if semver.compare(self.device_os._DeviceOs__normalize_balena_semver(device['supervisor_version']), LOCAL_MODE_MIN_SUPERVISOR_VERSION) < 0:
+        if semver.compare(normalize_balena_semver(device['supervisor_version']), LOCAL_MODE_MIN_SUPERVISOR_VERSION) < 0:
             raise exceptions.LocalModeError(Message.DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE)
 
         if device['os_variant'] != 'dev':
