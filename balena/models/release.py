@@ -195,7 +195,7 @@ class Release:
         id = self.get(commit_or_id)['id']
 
         # TODO: pine client for python
-        raw_query = '$expand=contains__image($select=id&$expand=image($select=id&$expand=is_a_build_of__service($select=service_name))),is_created_by__user($select=id,username)'
+        raw_query = '$expand=release_image($select=id&$expand=image($select=id&$expand=is_a_build_of__service($select=service_name))),is_created_by__user($select=id,username)'
 
         raw_release = self.base_request.request(
             'release({id})'.format(id=id), 'GET', raw_query=raw_query,
@@ -207,11 +207,11 @@ class Release:
             raw_release = raw_release['d'][0]
             release = {
                 'user': raw_release['is_created_by__user'][0],
-                'images': [{'id': i['id'], 'service_name': i['image'][0]['is_a_build_of__service'][0]['service_name']} for i in raw_release['contains__image']]
+                'images': [{'id': i['id'], 'service_name': i['image'][0]['is_a_build_of__service'][0]['service_name']} for i in raw_release['release_image']]
             }
 
             raw_release.pop('is_created_by__user', None)
-            raw_release.pop('contains__image', None)
+            raw_release.pop('release_image', None)
             release.update(raw_release)
             return release
         else:
