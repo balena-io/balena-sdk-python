@@ -647,6 +647,39 @@ This function gets all API keys.
 >>> balena.models.api_key.get_all()
 [{u'description': None, u'created_at': u'2018-04-06T03:53:34.189Z', u'__metadata': {u'type': u'', u'uri': u'/balena/api_key(1296047)'}, u'is_of__actor': {u'__deferred': {u'uri': u'/balena/actor(2454095)'}, u'__id': 2454095}, u'id': 1296047, u'name': u'myApiKey'}]
 ```
+### Function: get_all_named_user_api_keys()
+
+Get all named user API keys of the current user.
+
+#### Examples:
+```python
+>>> balena.models.api_key.get_all_named_user_api_keys()
+[{'id': 2452013, 'created_at': '2019-11-12T09:48:42.437Z', 'is_of__actor': {'__id': 113809, '__deferred': {'uri': '/resin/actor(@id)?@id=113809'}}, 'name': 'test', 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=2452013'}}]
+```
+### Function: get_device_api_keys_by_device(device_uuid)
+
+Get all API keys for a device.
+
+#### Args:
+    device_uuid (str): device uuid.
+
+#### Examples:
+```python
+>>> balena.models.api_key.get_device_api_keys_by_device('44cc9d1861b9f992808c506276e5d31d')
+[{'id': 3111484, 'created_at': '2020-06-25T04:33:33.069Z', 'is_of__actor': {'__id': 6444456, '__deferred': {'uri': '/resin/actor(@id)?@id=6444456'}}, 'name': None, 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=3111484'}}]
+```
+### Function: get_provisioning_api_keys_by_application(app_id)
+
+Get all provisioning API keys for an application.
+
+#### Args:
+    app_id (str): application id.
+
+#### Examples:
+```python
+>>> balena.models.api_key.get_provisioning_api_keys_by_application(1296047)
+[{'id': 5492033, 'created_at': '2021-12-29T03:38:04.470Z', 'is_of__actor': {'__id': 6444453, '__deferred': {'uri': '/resin/actor(@id)?@id=6444453'}}, 'name': None, 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=5492033'}}, {'id': 5492044, 'created_at': '2021-12-29T03:41:04.441Z', 'is_of__actor': {'__id': 6444453, '__deferred': {'uri': '/resin/actor(@id)?@id=6444453'}}, 'name': 'key p1', 'description': 'key desc', '__metadata': {'uri': '/resin/api_key(@id)?@id=5492044'}}, {'id': 3111481, 'created_at': '2020-06-25T04:24:53.621Z', 'is_of__actor': {'__id': 6444453, '__deferred': {'uri': '/resin/actor(@id)?@id=6444453'}}, 'name': None, 'description': None, '__metadata': {'uri': '/resin/api_key(@id)?@id=3111481'}}]
+```
 ### Function: revoke(id)
 
 This function revokes an API key.
@@ -954,12 +987,15 @@ Enable lock override.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
-### Function: generate_device_key(uuid)
+### Function: generate_device_key(uuid, key_name, key_description, expiry_date)
 
 Generate a device key.
 
 #### Args:
     uuid (str): device uuid.
+    key_name (Optional[str]): device key name.
+    key_description (Optional[str]): description for device key.
+    expiry_date (Optional[str]): expiry date for device key, for example: `2030-01-01T00:00:00Z`.
 
 #### Raises:
     DeviceNotFound: if device couldn't be found.
