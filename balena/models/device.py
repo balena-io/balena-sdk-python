@@ -573,23 +573,6 @@ class Device:
         else:
             raise exceptions.DeviceNotFound(uuid)
 
-    def get_supported_device_types(self):
-        """
-        ***Deprecated***
-        This method is deprecated and will be removed in next major release.
-        Please use the DeviceType model instead.
-        
-        Get device slug.
-
-        Returns:
-            list: list of supported device types.
-
-        """
-
-        device_types = self.device_type.get_all_supported()
-        supported_device = [device['name'] for device in device_types]
-        return supported_device
-
     def get_manifest_by_slug(self, slug):
         """
         Get a device manifest by slug.
