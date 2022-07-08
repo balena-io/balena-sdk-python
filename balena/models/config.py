@@ -58,25 +58,3 @@ class Config:
             self._config = self.base_request.request(
                 'config', 'GET', endpoint=self.settings.get('api_endpoint'))
         return self._config
-
-    def get_device_types(self):
-        """
-        ***Deprecated***
-        This method is deprecated and will be removed in next major release.
-
-        Get device types configuration.
-
-        Returns:
-            list: device types information.
-
-        Examples:
-            >>> balena.models.config.get_device_types()
-            [ all configuration details ]
-
-        """
-
-        if not self._device_types:
-            self._device_types = self.base_request.request(
-                'device-types/v1', 'GET', endpoint=self.settings.get('api_endpoint'), auth=False)
-            self._device_types = list(map(_normalize_device_type, self._device_types))
-        return self._device_types
