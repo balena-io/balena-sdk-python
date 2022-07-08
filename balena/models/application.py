@@ -840,7 +840,7 @@ class Application:
 
         """
 
-        raw_query = "$filter=id%20eq%20'{app_id}'&$select=should_track_latest_release&$expand=should_be_running__release($select=id),owns__release($select=id&$top=1&$filter=status%20eq%20'success'&$orderby=created_at%20desc)".format(app_id=app_id)
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=should_track_latest_release&$expand=should_be_running__release($select=id),owns__release($select=id&$top=1&$filter=status%20eq%20'success'%20and%20is_final%20eq%20true%20and%20is_passing_tests%20eq%20true%20and%20is_invalidated%20eq%20false&$orderby=created_at%20desc)".format(app_id=app_id)
 
         app = self.base_request.request(
             'application', 'GET', raw_query=raw_query,
