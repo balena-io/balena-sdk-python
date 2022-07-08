@@ -203,16 +203,7 @@ Get all applications (including collaborator applications).
 >>> balena.models.application.get_all()
 '[{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}, {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'bar', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12346)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12346, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/bar'}]'
 ```
-### Function: get_all_with_device_service_details(expand_release)
 
-Get all applications (including collaborator applications) along with associated services' essential details.
-This method is deprecated and will be removed in next major release.
-
-#### Args:
-    expand_release (Optional[bool]): Set this parameter to True then the commit of service details will be included.
-
-#### Returns:
-    list: list contains info of applications.
 ### Function: get_by_id(app_id)
 
 Get a single application by application id.

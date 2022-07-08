@@ -124,35 +124,6 @@ class Application:
             'my_application', 'GET', endpoint=self.settings.get('pine_endpoint')
         )['d']
 
-    def get_all_with_device_service_details(self, expand_release=False):
-        """
-        Get all applications (including collaborator applications) along with associated services' essential details.
-        This method is deprecated and will be removed in next major release.
-
-        Args:
-            expand_release (Optional[bool]): Set this parameter to True then the commit of service details will be included.
-
-        Returns:
-            list: list contains info of applications.
-
-        """
-
-        release = ''
-        if expand_release:
-            release = ",is_provided_by__release($select=id,commit)"
-
-        raw_query = "$expand=owns__device($expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release}),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name))))".format(release=release)
-
-        raw_data = self.base_request.request(
-            'my_application', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
-
-        for app in raw_data:
-            map(self.__generate_current_service_details, app['owns__device'])
-
-        return raw_data
-
     def get(self, name):
         """
         Get a single application.
