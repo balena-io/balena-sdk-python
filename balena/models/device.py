@@ -606,39 +606,6 @@ class Device:
         else:
             raise exceptions.InvalidDeviceType(device_type_slug)
 
-    def get_device_slug(self, device_type_name):
-        """
-        ***Deprecated***
-        This method is deprecated and will be removed in next major release.
-        Please use the DeviceType model instead.
-
-        Get device slug.
-
-        Args:
-            device_type_name (str): device type name.
-
-        Returns:
-            str: device slug name.
-
-        Raises:
-            InvalidDeviceType: if device type name is not supported.
-
-        Examples:
-            >>> balena.models.device.get_device_slug('Intel Edison')
-            u'intel-edison'
-            >>> balena.models.device.get_device_slug('Raspberry Pi')
-            u'raspberry-pi'
-
-        """
-
-        device_types = self.device_type.get_all_supported()
-        slug_name = [device['slug'] for device in device_types
-                     if device['name'] == device_type_name]
-        if slug_name:
-            return slug_name[0]
-        else:
-            raise exceptions.InvalidDeviceType(device_type_name)
-
     def get_supported_device_types(self):
         """
         ***Deprecated***
