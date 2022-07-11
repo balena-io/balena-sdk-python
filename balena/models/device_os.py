@@ -446,15 +446,10 @@ class DeviceOs:
         versions_by_dt = self.__transform_host_apps(host_apps)
 
         if device_type in versions_by_dt:
-            # TODO: returns only `versions_by_dt[device_type]` in next major release
-            return {
-                'versions': versions_by_dt[device_type],
-                'recommended': versions_by_dt[device_type][0],
-                'latest': versions_by_dt[device_type][0],
-                'default': versions_by_dt[device_type][0]
-            }
+            versions = [ x['raw_version'] for x in versions_by_dt[device_type] if x['os_type'] == self.OS_TYPES['default'] ]
+            return versions
         
-        return {}
+        return []
 
     def is_architecture_compatible_with(self, os_architecture, application_architecture):
         """
