@@ -109,29 +109,29 @@ class Supervisor:
 
         self._on_device = bool(endpoint)
 
-    def ping(self, device_uuid=None, app_id=None):
+    def ping(self, device_uuid=None):
         """
         Check that the supervisor is alive and well.
-        No need to set device uuid and app_id if command is sent to the API on device.
+        No need to set device uuid if command is sent to the API on device.
 
         Args:
             device_uuid (Optional[str]): device uuid.
-            app_id (Optional[str]): application id.
 
         Returns:
             str: `OK` signals that the supervisor is alive and well.
 
         Raises:
-            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid or app_id is not set.
+            InvalidOption: if the endpoint is balena API proxy endpoint and device_uuid is not set.
 
         Examples:
-            >>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+            >>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3')
             'OK'
 
         """
 
         if not self._on_device:
-            self._check_args(device_uuid, app_id)
+            if device_uuid is None:
+                raise exceptions.MissingOption('device_uuid')
 
             if (self._last_device and self._last_device['uuid'] != device_uuid) or not self._last_device:
                 self._last_device = self.device.get(device_uuid)
@@ -140,7 +140,6 @@ class Supervisor:
 
             data = {
                 'deviceId': device_id,
-                'appId': app_id,
                 'method': 'GET'
             }
 
