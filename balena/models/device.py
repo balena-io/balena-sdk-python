@@ -573,39 +573,6 @@ class Device:
         else:
             raise exceptions.DeviceNotFound(uuid)
 
-    def get_display_name(self, device_type_slug):
-        """
-        ***Deprecated***
-        This method is deprecated and will be removed in next major release.
-        Please use the DeviceType model instead.
-
-        Get display name for a device.
-
-        Args:
-            device_type_slug (str): device type slug.
-
-        Returns:
-            str: device display name.
-
-        Raises:
-            InvalidDeviceType: if device type slug is not supported.
-
-        Examples:
-            >>> balena.models.device.get_display_name('intel-edison')
-            u'Intel Edison'
-            >>> balena.models.device.get_display_name('raspberry-pi')
-            u'Raspberry Pi'
-
-        """
-
-        device_types = self.device_type.get_all_supported()
-        display_name = [device['name'] for device in device_types
-                        if device['slug'] == device_type_slug]
-        if display_name:
-            return display_name[0]
-        else:
-            raise exceptions.InvalidDeviceType(device_type_slug)
-
     def get_supported_device_types(self):
         """
         ***Deprecated***
