@@ -115,6 +115,10 @@ class TestApplication(unittest.TestCase):
         key = self.balena.models.application.generate_provisioning_key(app['id'])
         self.assertEqual(len(key), 32)
 
+        # should be able to generate a provisioning key with key name and description by app id.
+        key = self.balena.models.application.generate_provisioning_key(app['id'], 'FooBar Key', 'FooBar Key Description')
+        self.assertEqual(len(key), 32)
+
     def test_enable_rolling_updates(self):
         # should enable rolling update for the applications devices.
         app = self.balena.models.application.create('FooBar', 'Raspberry Pi 2', self.helper.default_organization['id'])

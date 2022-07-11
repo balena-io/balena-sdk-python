@@ -156,12 +156,15 @@ Enable Rolling update on application.
 #### Examples:
     >> > balena.models.application.enable_rolling_updates('106640')
     'OK'
-### Function: generate_provisioning_key(app_id)
+### Function: generate_provisioning_key(app_id, key_name, description, expiry_date)
 
 Generate a device provisioning key for a specific application.
 
 #### Args:
     app_id (str): application id.
+    key_name (Optional[str]): provisioning key name.
+    description (Optional[str]): description for provisioning key.
+    expiry_date (Optional[str]): expiry date for provisioning key, for example: `2030-01-01T00:00:00Z`.
 
 #### Returns:
     str: device provisioning key.
