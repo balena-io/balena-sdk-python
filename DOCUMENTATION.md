@@ -1639,7 +1639,8 @@ Start an OS update on a device.
 #### Examples:
 ```python
 >>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.29.2+rev1.prod')
-{u'status': u'in_progress', u'action': u'resinhup', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'last_run': 1554490809219L}
+>>> # or for unified OS releases
+>>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.89.0+rev1')
 ```
 ### Function: track_application_release(uuid)
 
@@ -2877,7 +2878,7 @@ Check that the supervisor is alive and well.
 No need to set device uuid and app_id if command is sent to the API on device.
 
 #### Args:
-    device_uuid (Optional[str]): device uuid.
+    device_uuid (Optional[str]): device uuid, mandatory if not calling this method from the service container on balena device.
     app_id (Optional[str]): application id.
 
 #### Returns:
@@ -2888,7 +2889,7 @@ No need to set device uuid and app_id if command is sent to the API on device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
+>>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3')
 'OK'
 ```
 ### Function: purge(app_id, device_uuid)
