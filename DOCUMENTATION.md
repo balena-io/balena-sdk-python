@@ -203,7 +203,6 @@ Get all applications (including collaborator applications).
 >>> balena.models.application.get_all()
 '[{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}, {u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'bar', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12346)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12346, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/bar'}]'
 ```
-
 ### Function: get_by_id(app_id)
 
 Get a single application by application id.
@@ -716,21 +715,6 @@ Get all configuration.
 >>> balena.models.config.get_all()
 { all configuration details }
 ```
-### Function: get_device_types()
-
-***Deprecated***
-This method is deprecated and will be removed in next major release.
-
-Get device types configuration.
-
-#### Returns:
-    list: device types information.
-
-#### Examples:
-```python
->>> balena.models.config.get_device_types()
-[ all configuration details ]
-```
 ## ConfigVariable
 
 This class is a wrapper for config variable models.
@@ -1107,30 +1091,6 @@ Get balena Dashboard URL for a specific device.
 >>> balena.models.device.get_dashboard_url('19619a6317072b65a240b451f45f855d')
 https://dashboard.balena-cloud.com/devices/19619a6317072b65a240b451f45f855d/summary
 ```
-### Function: get_device_slug(device_type_name)
-
-***Deprecated***
-This method is deprecated and will be removed in next major release.
-Please use the DeviceType model instead.
-
-Get device slug.
-
-#### Args:
-    device_type_name (str): device type name.
-
-#### Returns:
-    str: device slug name.
-
-#### Raises:
-    InvalidDeviceType: if device type name is not supported.
-
-#### Examples:
-```python
->>> balena.models.device.get_device_slug('Intel Edison')
-u'intel-edison'
->>> balena.models.device.get_device_slug('Raspberry Pi')
-u'raspberry-pi'
-```
 ### Function: get_device_url(uuid)
 
 Get a device url for a device.
@@ -1145,30 +1105,6 @@ Get a device url for a device.
 ```python
 >>> balena.models.device.get_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
 'https://8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143.balenadevice.io'
-```
-### Function: get_display_name(device_type_slug)
-
-***Deprecated***
-This method is deprecated and will be removed in next major release.
-Please use the DeviceType model instead.
-
-Get display name for a device.
-
-#### Args:
-    device_type_slug (str): device type slug.
-
-#### Returns:
-    str: device display name.
-
-#### Raises:
-    InvalidDeviceType: if device type slug is not supported.
-
-#### Examples:
-```python
->>> balena.models.device.get_display_name('intel-edison')
-u'Intel Edison'
->>> balena.models.device.get_display_name('raspberry-pi')
-u'Raspberry Pi'
 ```
 ### Function: get_local_ip_address(uuid)
 
@@ -1320,16 +1256,6 @@ Get the supervisor target state on a device
 >>> balena.models.device.get_supervisor_target_state('b6070f4fea5edf808b576123157fe5ec')
 {u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
 ```
-### Function: get_supported_device_types()
-
-***Deprecated***
-This method is deprecated and will be removed in next major release.
-Please use the DeviceType model instead.
-
-Get device slug.
-
-#### Returns:
-    list: list of supported device types.
 ### Function: get_with_service_details(uuid, expand_release)
 
 Get a single device along with its associated services' essential details.
@@ -2863,14 +2789,13 @@ No need to set device_uuid and app_id if command is sent to the API on device.
 >>> balena.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 {u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Balena OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
 ```
-### Function: ping(device_uuid, app_id)
+### Function: ping(device_uuid)
 
 Check that the supervisor is alive and well.
-No need to set device uuid and app_id if command is sent to the API on device.
+No need to set device uuid if command is sent to the API on device.
 
 #### Args:
     device_uuid (Optional[str]): device uuid, mandatory if not calling this method from the service container on balena device.
-    app_id (Optional[str]): application id.
 
 #### Returns:
     str: `OK` signals that the supervisor is alive and well.
