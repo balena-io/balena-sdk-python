@@ -109,14 +109,13 @@ class Supervisor:
 
         self._on_device = bool(endpoint)
 
-    def ping(self, device_uuid=None, app_id=None):
+    def ping(self, device_uuid=None):
         """
         Check that the supervisor is alive and well.
-        No need to set device uuid and app_id if command is sent to the API on device.
+        No need to set device uuid if command is sent to the API on device.
 
         Args:
             device_uuid (Optional[str]): device uuid, mandatory if not calling this method from the service container on balena device.
-            app_id (Optional[str]): application id.
 
         Returns:
             str: `OK` signals that the supervisor is alive and well.
