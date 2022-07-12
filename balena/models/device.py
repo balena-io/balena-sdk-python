@@ -1070,12 +1070,15 @@ class Device:
 
         return self.set_custom_location(uuid, {'latitude': '', 'longitude': ''})
 
-    def generate_device_key(self, uuid):
+    def generate_device_key(self, uuid, key_name=None, key_description=None, expiry_date=None):
         """
         Generate a device key.
 
         Args:
             uuid (str): device uuid.
+            key_name (Optional[str]): device key name.
+            key_description (Optional[str]): description for device key.
+            expiry_date (Optional[str]): expiry date for device key, for example: `2030-01-01T00:00:00Z`.
 
         Raises:
             DeviceNotFound: if device couldn't be found.
@@ -1087,9 +1090,15 @@ class Device:
         """
 
         device_id = self.get(uuid)['id']
+        
+        data = {
+            'name': key_name,
+            'description': key_description,
+            'expiryDate': expiry_date
+        }
 
         return self.base_request.request(
-            '/api-key/device/{id}/device-key'.format(id=device_id), 'POST',
+            '/api-key/device/{id}/device-key'.format(id=device_id), 'POST', data=data,
             endpoint=self.settings.get('api_endpoint')
         )
 
