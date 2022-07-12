@@ -2411,6 +2411,18 @@ Create a new release built from the source in the provided url.
 
 #### Raises:
     BuilderRequestError: if builder returns any errors.
+### Function: finalize(commit_or_id)
+
+Finalizes a draft release.
+
+#### Args:
+    commit_or_id: release commit (str) or id (int).
+
+#### Returns:
+    OK
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
 ### Function: get(commit_or_id)
 
 Get a specific release.
