@@ -1310,6 +1310,66 @@ class Device:
             endpoint=self.settings.get('api_endpoint')
         )
 
+    def set_supervisor_release(self, device_uuid, supervisor_version):
+        """
+        Set a specific device to run a particular supervisor release.
+
+        Args:
+            device_uuid (str): device uuid.
+            supervisor_version (str): the version of a released supervisor
+
+        Raises:
+            DeviceNotFound: if device couldn't be found.
+            ReleaseNotFound: if supervisor version couldn't be found
+
+        Examples:
+            >>> balena.models.device.set_supervisor_release('f55dcdd9ad2ab0c1d59c316961268a48', 'v13.0.0')
+            OK
+
+        """
+
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=id&$expand=is_of__device_type($select=slug)".format(uuid=device_uuid)
+
+        device = self.base_request.request(
+            'device', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint')
+        )['d']
+
+        if not device:
+            raise exceptions.DeviceNotFound(device_uuid)
+
+        device = device[0]
+        device_type_slug = device['is_of__device_type'][0]['slug']
+
+        raw_query = "$top=1&$select=id&$filter=supervisor_version%20eq%20'{version}'%20and%20is_for__device_type/any(dt:dt/slug%20eq%20'{slug}')".format(
+            version=supervisor_version,
+            slug=device_type_slug
+        )
+
+        supervisor = self.base_request.request(
+            'supervisor_release', 'GET', raw_query=raw_query,
+            endpoint=self.settings.get('pine_endpoint'), login=True
+        )['d']
+
+        if not supervisor:
+            raise exceptions.ReleaseNotFound(supervisor_version)
+
+        supervisor = supervisor[0]
+
+        params = {
+            'filter': 'id',
+            'eq': device['id']
+        }
+
+        data = {
+            'should_be_managed_by__supervisor_release': supervisor['id']
+        }
+
+        return self.base_request.request(
+            'device', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
     def __check_os_update_target(self, device_info, target_os_version):
         """
         """
