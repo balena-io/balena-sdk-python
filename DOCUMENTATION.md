@@ -1500,6 +1500,23 @@ Set a custom location for a device.
 >>> balena.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
 OK
 ```
+### Function: set_supervisor_release(device_uuid, supervisor_version)
+
+Set a specific device to run a particular supervisor release.
+
+#### Args:
+    device_uuid (str): device uuid.
+    supervisor_version (str): the version of a released supervisor
+
+#### Raises:
+    DeviceNotFound: if device couldn't be found.
+    ReleaseNotFound: if supervisor version couldn't be found
+
+#### Examples:
+```python
+>>> balena.models.device.set_supervisor_release('f55dcdd9ad2ab0c1d59c316961268a48', 'v13.0.0')
+OK
+```
 ### Function: set_to_release(uuid, commit_id)
 
 Set device to a specific release.
