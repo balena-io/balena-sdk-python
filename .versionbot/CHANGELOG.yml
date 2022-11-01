@@ -1,0 +1,3612 @@
+- commits:
+    - subject: Switch from balenaCI to flowzone
+      hash: 05e84c041cd62f405e02324bfc665d8e9ab3fc0c
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.1.1
+  title: ""
+  date: 2022-11-01T04:12:29.780Z
+- version: 12.1.0
+  date: 2022-08-26T09:02:28Z
+  commits:
+    - hash: 4b230d237d5de46f5612bf4d79d9bc70e47a90e9
+      author: Trong Nghia Nguyen
+      footers:
+        resolves: "#268"
+        change-type: minor
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      subject: "device: Add set_supervisor_release() method"
+      body: To set a particular supervisor release for a device.
+- version: 12.0.0
+- date: 2022-07-12T08:41:48Z
+- commits:
+    - hash: d6c03b5a6daf16e5a60c247d8381ca5702954ab2
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Drop application.get_all_with_device_service_details"
+- commits:
+    - body: null
+- commits:
+    - hash: 96268275a7fe5adeb6e4d0988b9e058b8587da30
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Remove deprecated models.device.get_device_slug"
+- commits:
+    - body: Remove deprecated models.device.get_device_slug in favour of
+        models.device_type.get_slug_by_name
+- commits:
+    - hash: 6528cbe6875cb2164a452330fd51fad3514f5b96
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Remove deprecated models.config.get_device_types"
+- commits:
+    - body: In favour Device Type model
+- commits:
+    - hash: c87c2210dbe6b6e4465dc894ae719cc8a4c0c6e3
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Change return value of device_os.get_supported_versions"
+- commits:
+    - body: The new return value will be a list of exact version numbers that OS
+        update is supported.
+- commits:
+    - hash: b272e257e54be6cb6ac3dbcbb9869db363e4b6ee
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Remove deprecated models.device.get_display_name"
+- commits:
+    - body: Remove deprecated models.device.get_display_name in favour of
+        models.device_type.get_name
+- commits:
+    - hash: ff3ddbe8e049b4a15f160d9c45dd67e56cb3b579
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Remove deprecated device.get_supported_device_type"
+- commits:
+    - body: Remove deprecated models.device.get_supported_device_types in favour of
+        models.deviceType.get_all
+- commits:
+    - hash: c6ed836434ed4efe169b23e6b04ea7247a43e881
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Drop unnecessary parameter (app_id) from supervisor.ping
+        method"
+- commits:
+    - body: null
+- commits:
+    - hash: c6b5df21daa13ea11f4f129479c95b268fa6549a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: "docs: Update documentation"
+- commits:
+    - body: null
+- version: 11.11.3
+- date: 2022-07-12T07:50:52Z
+- commits:
+    - hash: 399a7f735bb2bcef17420291321ae734dc2be2bc
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update documentation"
+- commits:
+    - body: null
+- version: 11.11.2
+- date: 2022-07-12T07:41:31Z
+- commits:
+    - hash: 959173f77a293db0a5e998564eff47e9d1af0e59
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "supervisor: Make app_id optional parameter when calling
+        supervisor.ping from outside balena device"
+- commits:
+    - body: app_id can be read from device information so only device_uuid is needed.
+- version: 11.11.1
+- date: 2022-07-12T07:22:35Z
+- commits:
+    - hash: b86b2504a9006999b591a1378ac17f2027f72a74
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "application.is_tracking_latest_release: fix using draft/invalidated
+        releases"
+- commits:
+    - body: null
+- version: 11.11.0
+- date: 2022-07-12T04:25:58Z
+- commits:
+    - hash: 81750ad3e00d02dedfc68b97ec511442bd3547f6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Fix error when parsing balenaOS version before updating OS"
+- commits:
+    - body: |-
+        There is a change in output of device_os.get_supported_versions method
+        so device.start_os_update fails to parse current balena OS version
+        correctly.
+- version: 11.10.0
+- date: 2022-07-12T02:29:49Z
+- commits:
+    - hash: eb97e403e36bee63ca978e9639e00b7c87e6c8e6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add name and description field to device.generate_device_key method
+- commits:
+    - body: null
+- version: 11.9.0
+- date: 2022-07-12T00:58:51Z
+- commits:
+    - hash: b1ef67c8d6b2d71781198f5501a0192a66bd087d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add api_key.get_provisioning_api_keys_by_application method
+- commits:
+    - body: null
+- commits:
+    - hash: e511f74e90216d59e8296640409cdc7eaeed4f6b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add api_key.get_device_api_keys_by_device method
+- commits:
+    - body: null
+- commits:
+    - hash: 231194518a44b4e69d4f6cae27a97871d3e52bc6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Implement api_key.get_all_named_user_api_keys method
+- commits:
+    - body: null
+- version: 11.8.0
+- date: 2022-07-12T00:39:31Z
+- commits:
+    - hash: 20a7306292b3888e968154c472cc02f178b4d6f2
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add release.finalize to promote draft releases to final
+- commits:
+    - body: null
+- version: 11.7.0
+- date: 2022-07-11T18:27:29Z
+- commits:
+    - hash: 45e13c691f29bde817cd1302f3a80e200230d145
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update application.generate_provisioning_key to include key name and
+        description
+- commits:
+    - body: null
+- version: 11.6.0
+- date: 2022-07-08T13:22:04Z
+- commits:
+    - hash: 2d5b8c46fe0b0439208ac6397c2e5b3493a026d9
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Start using the model's release variant"
+- commits:
+    - body: null
+- commits:
+    - hash: 586be7142a2e9fc1179392fe8f4019d0d43491be
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Start using the release.phase field in the available versions"
+- commits:
+    - body: null
+- version: 11.5.1
+- date: 2022-07-08T12:22:30Z
+- commits:
+    - hash: 18bca4314519ac79232e04311bb5bf0b36e54880
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        connects-to: https://github.com/balena-io/balena-sdk/pull/1187
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Replace internal use of release.contains__image with release_image
+- commits:
+    - body: null
+- version: 11.5.0
+- date: 2022-07-04T07:53:31Z
+- commits:
+    - hash: ded64e63966db7f1a669f6e7f811de7c957e246f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release: Add method to remove release"
+- commits:
+    - body: null
+- version: 11.4.0
+- date: 2022-05-03T10:10:25Z
+- commits:
+    - hash: b088eb7a1dee520a3cbca8f556c09842d5f4e946
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix invalid semver string when parsing balena os version
+- commits:
+    - body: null
+- version: 11.3.2
+- date: 2022-04-04T01:15:18Z
+- commits:
+    - hash: f18f50e2079c8ac494d54d16a37703ad3e5e5610
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add auth as an optional arg for device_os.get_supported_versions
+- commits:
+    - body: null
+- version: 11.3.1
+- date: 2022-03-19T04:48:34Z
+- commits:
+    - hash: 2286055e18f67dfb9532792f6fc33a77a65525b0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix missing arch in device type information
+- commits:
+    - body: arch information now returned as slug in is_of__cpu_architecture
+- version: 11.3.0
+- date: 2022-03-17T09:48:35Z
+- commits:
+    - hash: 3065fe7cef7dc3ef6a6c66a6b13b0f3cb3712d5f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Require authentication for device_os.get_supported_version
+- commits:
+    - body: So the SDK can query private device types
+- version: 11.2.0
+- date: 2022-03-10T18:24:40Z
+- commits:
+    - hash: bfcc3bb64c6a097d2236a5890c22734898462f25
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add device type model
+- commits:
+    - body: Change the device type in all models to the new resource references
+- version: 11.1.4
+- date: 2022-03-10T18:09:41Z
+- commits:
+    - hash: e64e52bff4c2aa33b29faaa8d857822de53dd8ba
+- commits:
+    - author: Cody Scott
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Use Python3 class definitions
+- commits:
+    - body: null
+- version: 11.1.3
+- date: 2022-03-09T08:36:42Z
+- commits:
+    - hash: d2ceee795f69caa8644dfa79f677d3ada550e4c0
+- commits:
+    - author: Cody Scott
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Remove __future__ imports
+- commits:
+    - body: These imports were for supporting Python2
+- version: 11.1.2
+- date: 2022-03-08T02:18:16Z
+- commits:
+    - hash: d1276016f528316a1bd1ec2ddc4b5619d3184dde
+- commits:
+    - author: Thomas Sieren
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Fix issue refreshed token is not decoded from bytes to string
+- commits:
+    - body: null
+- version: 11.1.1
+- date: 2022-02-25T03:45:31Z
+- commits:
+    - hash: f3e701bb270764f68767207d8f3ede3f775bb3de
+- commits:
+    - author: Pagan Gazzard
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Remove unnecessary vpn address filtering when fetching local addresses
+- commits:
+    - body: |-
+        This has been handled by the supervisor since v2.2.0 / balenaOS v1.14
+        from 2016-09-23 and is not relevant for any supported devices
+- version: 11.1.0
+- date: 2022-02-07T11:31:01Z
+- commits:
+    - hash: ac9be4ab3c0a9c5c31d774096ed65a6aa0b4b6c3
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Upgrade pyJWT and pyOpenSSL
+- commits:
+    - body: |-
+        Fix issues with dependencies on newer versions of pyJWT and pyOpenSSL
+        Remove Python 2 from supported list.
+- version: 11.0.3
+- date: 2022-01-06T10:02:08Z
+- commits:
+    - hash: c3d947c1c1b7cc891495c68ce74a7adb61af031e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "application.create: Rely on the hostApps for detecting discontinued DTs"
+- commits:
+    - body: null
+- version: 11.0.2
+- date: 2021-11-16T13:56:05Z
+- commits:
+    - hash: a3c0a1539245a467d03d0e7131a68423da290b07
+- commits:
+    - author: Kyle Harding
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Kyle Harding <kyle@balena.io>
+- commits:
+    - subject: Update balena dashboard URL in docs
+- commits:
+    - body: null
+- version: 11.0.1
+- date: 2021-11-15T21:03:53Z
+- commits:
+    - hash: 5703b903d3bf70cc7b4b77ae4b7b0649f7cb6289
+- commits:
+    - author: Kyle Harding
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Kyle Harding <kyle@balena.io>
+- commits:
+    - subject: Update balena API url
+- commits:
+    - body: null
+- version: 11.0.0
+- date: 2021-07-30T09:23:33Z
+- commits:
+    - hash: 143c6939448f2a20b05e96e859dc21dc65c0f1f5
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods for retrieving organization memberships
+- commits:
+    - body: null
+- commits:
+    - hash: c929a267cd04d1a08fe7d9c5647f4ce9e3e5a09b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods for managing organization membership tags
+- commits:
+    - body: null
+- commits:
+    - hash: 2c98049d3fc330950c797e6a7066b995855151fd
+- commits:
+    - author: Pascal
+- commits:
+    - subject: Home directory can be overriden using environment variable
+- commits:
+    - body: null
+- commits:
+    - hash: 84acb9a85eb9cd576a7c0ac98e443bd1fcd039e1
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods to enable, verify and disable 2fa
+- commits:
+    - body: null
+- commits:
+    - hash: 6c3c38364712f9280d28a4f99fb07bae47329e9b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update error message in test case for Tag
+- commits:
+    - body: null
+- commits:
+    - hash: 21f29280c26ba65a5d9eeff201c394708cfd5dd4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Pin PyJWT to v1.7.1
+- commits:
+    - body: Latest PyJWT has a breaking change so pinning to v1.7.1
+- commits:
+    - hash: 6fbbced5f7cb11d167a20271d5d75b363cef3af6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Merge pull request #195 from balena-io/more-2fa"
+- commits:
+    - body: Add methods to enable, verify and disable 2fa
+- commits:
+    - hash: 98cee05f74367680ab52e458b5057a6018f023c5
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Merge pull request #196 from balena-io/read-org-memberships"
+- commits:
+    - body: Add methods for retrieving organization memberships and organization
+        membership tags
+- commits:
+    - hash: d028486035cc0bb9e38406975570b1aeec209c52
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Merge pull request #200 from pascal-hwky/master"
+- commits:
+    - body: Add compatibility with AWS Lambda
+- commits:
+    - hash: b7a211fece5cdaa8caf11edb5711015b0f806f97
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into v11
+- commits:
+    - body: null
+- commits:
+    - hash: f89a12194b1ce0e2d20cfe0bcea6b36de96791eb
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into v11
+- commits:
+    - body: null
+- commits:
+    - hash: 2c98049d3fc330950c797e6a7066b995855151fd
+- commits:
+    - author: Pascal
+- commits:
+    - subject: Home directory can be overriden using environment variable
+- commits:
+    - body: null
+- commits:
+    - hash: 143c6939448f2a20b05e96e859dc21dc65c0f1f5
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods for retrieving organization memberships
+- commits:
+    - body: null
+- commits:
+    - hash: c929a267cd04d1a08fe7d9c5647f4ce9e3e5a09b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods for managing organization membership tags
+- commits:
+    - body: null
+- commits:
+    - hash: 84acb9a85eb9cd576a7c0ac98e443bd1fcd039e1
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods to enable, verify and disable 2fa
+- commits:
+    - body: null
+- commits:
+    - hash: 6c3c38364712f9280d28a4f99fb07bae47329e9b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update error message in test case for Tag
+- commits:
+    - body: null
+- commits:
+    - hash: 21f29280c26ba65a5d9eeff201c394708cfd5dd4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Pin PyJWT to v1.7.1
+- commits:
+    - body: Latest PyJWT has a breaking change so pinning to v1.7.1
+- version: 10.6.0
+- date: 2021-07-30T08:16:01Z
+- commits:
+    - hash: 5e6c29e9c9564199304ca48455d41e9d6dd967d8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add SDK methods to invite application member
+- commits:
+    - body: null
+- commits:
+    - hash: f4fac008bbbbf6622f8ce870c4ae5c48cdafb159
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add application.membership methods
+- commits:
+    - body: null
+- version: 10.5.0
+- date: 2021-07-29T19:23:03Z
+- commits:
+    - hash: 35fa645dfe0471bef5b58d72cdc67a21b03346cf
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add SDK methods for org invite
+- commits:
+    - body: null
+- version: 10.4.0
+- date: 2021-07-29T18:16:46Z
+- commits:
+    - hash: 927a10b103f085e6fb6e20a7c753d640ae261ae4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add application.rename method
+- commits:
+    - body: null
+- version: 10.3.0
+- date: 2021-07-29T17:25:10Z
+- commits:
+    - hash: 0f5c4f41ab6937c22a5d25a1db8b82bceece6a0b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add device.deactivate method
+- commits:
+    - body: null
+- version: 10.2.2
+- date: 2021-07-29T07:33:08Z
+- commits:
+    - hash: 866d8644182eb24c95312bfd6cd935300441dbb7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Deprecate application.get_all_with_device_service_details()
+- commits:
+    - body: null
+- version: 10.2.1
+- date: 2021-06-30T17:05:21Z
+- commits:
+    - hash: d914a64c0508a0f07fe66548e1e8d69b90dcf09b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Delete CODEOWNERS
+- commits:
+    - body: null
+- version: 10.2.0
+- date: 2021-04-28T12:19:14Z
+- commits:
+    - hash: d8f9ae7f2484113ca13a2a33aba3d11af7c8ac53
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Manage lock overrides using the config variables instead of the endpoint
+- commits:
+    - body: This also allows the device lock override methods to work on open-balena
+- version: 10.1.3
+- date: 2021-04-23T15:33:27Z
+- commits:
+    - hash: 0aa00380929d063de77a84bad0445cdec8e8f48f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix wrong example for DeviceServiceEnvVar method
+- commits:
+    - body: null
+- version: 10.1.2
+- date: 2021-04-23T15:24:55Z
+- commits:
+    - hash: 8c9f66628c7aebcea6b2ce85b13cf35bb41cfdb7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update error message in test case for Tag
+- commits:
+    - body: null
+- commits:
+    - hash: 0732d157007a7fc706a514afe07825bcb3e1c192
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Pin PyJWT to v1.7.1
+- commits:
+    - body: Latest PyJWT has a breaking change so pinning to v1.7.1
+- version: 10.1.1
+- date: 2020-09-03T23:36:33Z
+- commits:
+    - hash: a9803aea26576c1b1311451155e024fee107b356
+- commits:
+    - author: Vipul Gupta (@vipulgupta2048)
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Vipul Gupta (@vipulgupta2048) <vipul@balena.io>
+- commits:
+    - subject: Patch get_metrics() return
+- commits:
+    - body: null
+- version: 10.1.0
+- date: 2020-09-03T16:01:08Z
+- commits:
+    - hash: 48d41d96cf93d23a818c66cbd119d91176afd0fb
+- commits:
+    - author: Vipul Gupta (@vipulgupta2048)
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Vipul Gupta (@vipulgupta2048) <vipul@balena.io>
+- commits:
+    - subject: Implement device.get_metrics()
+- commits:
+    - body: null
+- commits:
+    - hash: 6785c75666c91007ca642131880053ec89dae92f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update documentation
+- commits:
+    - body: null
+- commits:
+    - hash: 58149260989ac967a119753aeef2bfb2dc8882c0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update test case for application.create
+- commits:
+    - body: Drop automation test for Python 2.7
+- version: 10.0.0
+- date: 2020-06-26T13:07:32Z
+- commits:
+    - hash: fed3a70290ff55df6b1465f9a0ec296cdaa970aa
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Add support for the v6 orgs model"
+- commits:
+    - body: null
+- commits:
+    - hash: d5acc7e37697bbda2e6972f0db442aa007f7e3c5
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add methods for the organization model
+- commits:
+    - body: null
+- commits:
+    - hash: a32c64ed197ad5dbe3a67f1d83d275dcb0bcb8cb
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Require an organization when creating applications"
+- commits:
+    - body: null
+- commits:
+    - hash: af3b4257b786aed33c1f6e5139acf7b8f199b017
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Clarify that application.get_by_owner now accepts organization handles
+- commits:
+    - body: null
+- commits:
+    - hash: 3f95af828fa3641be1417bb8d4dcb14325f71449
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Change application and device commit to release references"
+- commits:
+    - body: null
+- commits:
+    - hash: b8b7ff7727be58dc17e1070a13b49ec70e49008c
+- commits:
+    - author: bulldozer-balena[bot]
+- commits:
+    - subject: "Merge pull request #187 from balena-io/742-app-device-commit-to-release"
+- commits:
+    - body: "**BREAKING** Change application and device commit to release references"
+- commits:
+    - hash: f38c0bc3489c1968c622d765d65660b8112697cc
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Change the device_type of all models to resource
+        references"
+- commits:
+    - body: The affected models are the Application and the Device.
+- commits:
+    - hash: e9b6077af3d3e718dfbc78289f6825ebb0642bfe
+- commits:
+    - author: bulldozer-balena[bot]
+- commits:
+    - subject: "Merge pull request #188 from
+        balena-io/754-app-device-device_type-resource"
+- commits:
+    - body: "**BREAKING** Change the device_type of all models to resource references"
+- commits:
+    - hash: 7fee41473e1c020a5f987ac5d1c93f04b00c4861
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update release.create_from_url() to support orgs model
+- commits:
+    - body: null
+- commits:
+    - hash: 01f6afaab102ba2beaae9444ed87fd1c298bf724
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update tests to support orgs model
+- commits:
+    - body: null
+- commits:
+    - hash: a256f2f947afd00868b9cd1c52d763789970ee38
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add python v3.7 and v3.8 to travis.yml
+- commits:
+    - body: null
+- commits:
+    - hash: 291543268079a7d19bcd94fd2d78c94152094658
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- commits:
+    - hash: f38c0bc3489c1968c622d765d65660b8112697cc
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Change the device_type of all models to resource
+        references"
+- commits:
+    - body: The affected models are the Application and the Device.
+- commits:
+    - hash: 3f95af828fa3641be1417bb8d4dcb14325f71449
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "**BREAKING** Change application and device commit to release references"
+- commits:
+    - body: null
+- version: 9.5.0
+- date: 2020-06-19T06:18:35Z
+- commits:
+    - hash: ff9f2598efdc0298f4d1ca48fdfa8739bc6f31c4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add device.get_mac_address()
+- commits:
+    - body: null
+- version: 9.4.1
+- date: 2020-05-10T17:22:21Z
+- commits:
+    - hash: 9a2616a0a94260732692a5e32b04fd69b726e722
+- commits:
+    - author: Thodoris Greasidis
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        see: https://www.flowdock.com/app/rulemotion/r-product/threads/A6-bJBldfUFnhG9vixTz-DLz9iB
+- commits:
+    - footers:
+        hq: https://github.com/balena-io/balena/issues/2032
+- commits:
+    - footers:
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+- commits:
+    - subject: "README: Clarify the deprecation policy"
+- commits:
+    - body: "Updating to mirror what the respective js SDK & CLI PR.\r
+
+        \r"
+- version: 9.4.0
+- date: 2020-04-30T11:23:38Z
+- commits:
+    - hash: 03c086ac83195b5bb172e62f65737865939df8a6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Add a deprecation policy
+- commits:
+    - body: null
+- version: 9.3.0
+- date: 2020-03-13T19:01:56Z
+- commits:
+    - hash: cc4bc2a9db9bcacd36f06bcbd643a5d1fc494b74
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Implement application.get_dashboard_url()
+- commits:
+    - body: null
+- commits:
+    - hash: 48bc77f0ff9bb2af36a2040fd215cb96a7ebf1bf
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into application-get-dashboard-url
+- commits:
+    - body: null
+- commits:
+    - hash: 815995e8f076657cec767cd945c6c0ccb2282f36
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into application-get-dashboard-url
+- commits:
+    - body: null
+- version: 9.2.1
+- date: 2020-03-12T12:02:37Z
+- commits:
+    - hash: 2d1b745c984af680846de81020c24f74a218af57
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix application.has_any() method
+- commits:
+    - body: Check length of result from application.get_all() instead of getting
+        application from `application` endpoint since it returns esr
+        applications as well.
+- commits:
+    - hash: fbfa52844279606760008c897b517b2070a39299
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix tag.get_all() test
+- commits:
+    - body: Remove the check for empty tag list by default since user should be able
+        to see tag from public application (ESR apps)
+- commits:
+    - hash: a41d98ddf09096784cdcef1b1cac9ab185c4214a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Update tag.set() and tag.remove() test
+- commits:
+    - body: To make sure these tests work fine when returned result from tag.get_all()
+        contains release_tag from public apps
+- commits:
+    - hash: f67175fb3849261660fdeb84049cc6367c4458ed
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into fix-release-tag-test
+- commits:
+    - body: null
+- version: 9.2.0
+- date: 2020-02-04T12:34:22Z
+- commits:
+    - hash: 310a4847480d4a599175c3eb5f686a522c515f3a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Fix device_os.download() method"
+- commits:
+    - body: |-
+        Add more details about mandatory parameters.
+        Properly parse version into semver-compatible version.
+        Add is_dev_image optional parameter to select development balenaOS.
+- commits:
+    - hash: 65826605f5513e1db728a469471c51eba8749be6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Add device_os.download_unconfigured_image() method"
+- commits:
+    - body: Support downloading unconfigured device type images (private device type
+        included)
+- commits:
+    - hash: 2cc4a1454b6c8c258aa33a43b2916873c7a5ee44
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into 173-fix-os-image-download
+- commits:
+    - body: null
+- version: 9.1.0
+- date: 2020-02-03T15:52:20Z
+- commits:
+    - hash: fd0457619e7a43c3e70123ee4575bfd815763ecf
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device-type: Change EXPERIMENTAL device type name normalization to NEW"
+- commits:
+    - body: null
+- version: 9.0.1
+- date: 2019-12-04T02:58:34Z
+- commits:
+    - hash: f0fb894aa28d5af8cf03d644c3785f97352d364c
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "docs: minor fixes to docstrings"
+- commits:
+    - body: null
+- version: 9.0.0
+- date: 2019-11-20T15:35:52Z
+- commits:
+    - hash: 23c1886ff7f30d2e6687577aed9cd5967ac895c8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "auth: Stop sending api key in query string"
+- commits:
+    - body: The SDK should never send the api key as query string and only via http
+        headers
+- commits:
+    - hash: 885807037f7252d349091593e65a453ccbb82e5a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release: Support retrieving releases & managing release tags by commit"
+- commits:
+    - body: null
+- commits:
+    - hash: 69f3c7ec5211ffe0dce90476e827d8d894cb76ca
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Allow mixing armv7 and aarch64 devices in RPI 1/zero apps"
+- commits:
+    - body: null
+- commits:
+    - hash: 425c5c66850d32b8aa1c9225f27e92c208f4b29a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        release: Support retrieving releases & managing release tags by commit
+- commits:
+    - subject: "Merge pull request #154 from balena-io/release-by-commit"
+- commits:
+    - body: null
+- commits:
+    - hash: af42417f5eae5a768c5c1cad35ac7a2d0dade5b2
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        os: Allow mixing armv7 and aarch64 devices in RPI 1/zero apps
+- commits:
+    - subject: "Merge pull request #162 from balena-io/mix-rpi-to-armv7-aarch64"
+- commits:
+    - body: null
+- commits:
+    - hash: 556ad20a2175dc7d4984cd49888a484d32c301e2
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release: Add release.create_from_url method"
+- commits:
+    - body: null
+- commits:
+    - hash: 947f5bcd922e7ec3bb055c20a2cb79f83678ae41
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Add local mode related methods"
+- commits:
+    - body: null
+- commits:
+    - hash: 452ad95aff21825e6f0b9d68b00d9c8b9a9a578b
+- commits:
+    - author: Thomas Cahill
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Fix using python logging BasicConfig
+- commits:
+    - body: >-
+        Using logging.basicConfig(...) forces all applications that have:
+
+        from balena import Balena
+
+        to output all logging messages to stdout, which overrides all logging settings in the application and fills the logs with double printed messages.
+- commits:
+    - hash: ac7bccdd234f6a7e14c6130b7433d9478fd45a4c
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "auth: Prioritize auth token over API_KEY"
+- commits:
+    - body: If auth token found, the SDK will always use it even if
+        BALENA_API_KEY/RESIN_API_KEY is set
+- commits:
+    - hash: bff47d9deecc78d78e0823c428cd63467302e8eb
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update documentation"
+- commits:
+    - body: null
+- commits:
+    - hash: 23c1886ff7f30d2e6687577aed9cd5967ac895c8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "auth: Stop sending api key in query string"
+- commits:
+    - body: The SDK should never send the api key as query string and only via http
+        headers
+- commits:
+    - hash: 9eff98789d2316af1f2a2e7df14ba04760fb411f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        auth: Stop sending api key in query string
+- commits:
+    - subject: "Merge pull request #170 from balena-io/fix-auth-by-api-key"
+- commits:
+    - body: null
+- commits:
+    - hash: 69f3c7ec5211ffe0dce90476e827d8d894cb76ca
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Allow mixing armv7 and aarch64 devices in RPI 1/zero apps"
+- commits:
+    - body: null
+- commits:
+    - hash: 885807037f7252d349091593e65a453ccbb82e5a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release: Support retrieving releases & managing release tags by commit"
+- commits:
+    - body: null
+- version: 8.1.1
+- date: 2019-09-17T10:49:43Z
+- commits:
+    - hash: 96df985f51ef199170236cc9a8dab08cefcc5f61
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "supervisor: Fix wrong SUPERVISOR_API_KEY env var name"
+- commits:
+    - body: null
+- version: 8.1.0
+- date: 2019-08-12T16:46:36Z
+- commits:
+    - hash: 487e88473f52e92450578fe24cc638049f98cc51
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "os: Add device_os.is_architecture_compatible_with method"
+- commits:
+    - body: null
+- commits:
+    - hash: c8c856befd93a86d782685ae182df8999a493a34
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Allow moving aarch64 devices to armv7hf applications"
+- commits:
+    - body: null
+- commits:
+    - hash: bd410a350adbcae803a474c9d5fadde8f950a3fd
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update docs"
+- commits:
+    - body: null
+- commits:
+    - hash: 0d1cdb0cc8144b5e07081810dc323c4f6c3f24e3
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into mix-arm64-devices-in-armv7-apps
+- commits:
+    - body: null
+- commits:
+    - hash: d4a771e012db5a28f865425ef55db0f3d6539b81
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into mix-arm64-devices-in-armv7-apps
+- commits:
+    - body: null
+- version: 8.0.1
+- date: 2019-08-12T15:31:28Z
+- commits:
+    - hash: 49031521b1a05469e99ab53b178c9c35c98f564e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release: Fix commit returned by release.get_latest_by_application()"
+- commits:
+    - body: Orderby was missing from the query so a random commit was returned.
+- version: 8.0.0
+- date: 2019-06-13T10:48:56Z
+- commits:
+    - hash: 4ae71b2c83f32c2b820ef4a8d84c0d2c0edee743
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Drop $tolower in get_with_service_details() to make it faster"
+- commits:
+    - body: null
+- commits:
+    - hash: 033b1faef30b1bced2deb52df9a16aa3f5116d18
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "sdk: Update service details related methods based on latest SDK changes"
+- commits:
+    - body: >-
+        - Implement get_all_with_device_service_details() and
+        get_with_device_service_details() for Application.
+
+        - Update device.get_with_service_details() logic so the SDK can send lighter requests to the API.
+- commits:
+    - hash: 73e53e879f9d091fa8aebb1d343965b1d3b2288b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update DOCUMENTATION"
+- commits:
+    - body: null
+- commits:
+    - hash: 273727725434fc686e0d72cd03dfc11d6157cf61
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into get-with-service-details-diet
+- commits:
+    - body: null
+- version: 7.9.0
+- date: 2019-06-13T10:05:59Z
+- commits:
+    - hash: 0633ca96856a579e21c63b15cd95ec9c6481f38c
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Update get_status method based on latest JS SDK changes"
+- commits:
+    - body: null
+- commits:
+    - hash: 714d1a3965025dc1a962681dcf74ec419f38e2ff
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update DOCUMENTATION"
+- commits:
+    - body: null
+- version: 7.8.1
+- date: 2019-05-29T15:53:59Z
+- commits:
+    - hash: 704ce4bb07a8551c21c7f89119fdc16bac87ce38
+- commits:
+    - author: Pagan Gazzard
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Fix `deleted` status casing in tests
+- commits:
+    - body: null
+- version: 7.8.0
+- date: 2019-05-24T03:52:33Z
+- commits:
+    - hash: 8d966e9fe7182ec3d8861436834950f74ae7dc05
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "endpoint: Use open-balena-api endpoints for device type & version info"
+- commits:
+    - body: |-
+        Remove image maker endpoint in settings since the SDK should only use
+        the API endpoints as the source of truth for device types.
+- version: 7.7.2
+- date: 2019-05-06T10:28:53Z
+- commits:
+    - hash: fc4710ba0e36cac35b63b26bd8d2136b1b394c15
+- commits:
+    - author: eugenefab
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "env_var: Fix POST parameter name"
+- commits:
+    - body: "In the `create` method the POST parameter for the environment variable
+        name is currently incorrect. It's changed to the value described in the
+        API documentation: `name`."
+- version: 7.7.1
+- date: 2019-04-29T08:48:34Z
+- commits:
+    - hash: 94b93db66b6057d4490d7a7768ffd419cfed0d0f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Add installation guide for Python SDK"
+- commits:
+    - body: Add installation guide on Debian and Alpine Linux container so user can
+        find an example of which dependencies that are necessary to install the
+        SDK.
+- version: 7.7.0
+- date: 2019-04-22T07:02:37Z
+- commits:
+    - hash: 52b90a2e6216162b6b26a10cd1346f8a7dd8da5d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "hup: Add device OS update methods"
+- commits:
+    - body: "HQ: balena-io/balena#1215"
+- version: 7.6.0
+- date: 2019-04-16T12:57:24Z
+- commits:
+    - hash: 003ed76195704c7aa605f21a968a141ed354f9f7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Fix issue with device.set_to_release()"
+- commits:
+    - body: This method does not filter on release status so it can fail in case one
+        commit hash has success and failed releases. Fix the issue by filtering
+        only success release when set a device to a release.
+- commits:
+    - hash: 4cefe913ffb8fa174631e70d0ad4656f7ba13ebe
+- commits:
+    - author: Amir Fuhrmann
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Add method to set device to specific release_id"
+- commits:
+    - body: null
+- commits:
+    - hash: 71e1688d1d50891b63f6a2dd7bdecb5785f7c9f6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into 125-fix-set-to-release
+- commits:
+    - body: null
+- commits:
+    - hash: 76a5d728679f6bfea3ca529d40d66133f7e93d1c
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into 125-fix-set-to-release
+- commits:
+    - body: null
+- commits:
+    - hash: 28b7178b64fcb8b5817c323e7209759c5255d8af
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into 125-fix-set-to-release
+- commits:
+    - body: null
+- version: 7.5.0
+- date: 2019-04-16T11:58:27Z
+- commits:
+    - hash: 60eb9799211c66bd94476c4ca4b3320036602cef
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        connects-to: https://github.com/balena-io/balena-sdk/pull/653
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <mamcgi@gmail.com>
+- commits:
+    - subject: "device: Add support for get_supervisor_target_state device method"
+- commits:
+    - body: null
+- commits:
+    - hash: 860600ff8ac671119d794aba038f8732db2509aa
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into get_supervisor_target_state
+- commits:
+    - body: null
+- version: 7.4.2
+- date: 2019-04-16T11:19:59Z
+- commits:
+    - hash: 79669c39def543aeb197dfca02dcd48de80ebac8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "serviceEnvVar: Fix bug in service_env_var.create()"
+- commits:
+    - body: null
+- commits:
+    - hash: a02d8b9f9912a58b2ed2f115d6f7289bb80897c5
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'master' into 131-fix-service-env
+- commits:
+    - body: null
+- version: 7.4.1
+- date: 2019-04-13T12:34:35Z
+- commits:
+    - hash: d9d74b79f0e726c290e82504def5d32bd03ce5c9
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "device: replace 'last_seen_time' with 'last_vpn_event', add unit test"
+- commits:
+    - body: null
+- version: 7.4.0
+- date: 2019-04-12T19:55:14Z
+- commits:
+    - hash: 62b9565fb157bf1daea5eaab561d60aad43277cf
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "codeowners: add codeowners as myself and nghiant2710"
+- commits:
+    - body: null
+- version: 7.3.1
+- date: 2019-04-12T19:25:01Z
+- commits:
+    - hash: 3bd5d20a14daebe88a85a726248ae68086080fe5
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "git: gitignore build output dir"
+- commits:
+    - body: null
+- version: 7.3.0
+- date: 2019-04-09T17:41:12Z
+- commits:
+    - hash: b1c41f3c7a3e67416cd4425a88117a90ef4ba4fd
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Add get_supervisor_state device method"
+- commits:
+    - body: null
+- version: 7.2.1
+- date: 2019-03-08T17:43:23Z
+- commits:
+    - hash: e55a3c81d62a5eb47734b4e92c1e7b641321403c
+- commits:
+    - author: Lucian
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Lucian <lucian.buzzo@gmail.com>
+- commits:
+    - subject: Update documentation for application methods
+- commits:
+    - body: "Fixes #123"
+- version: 7.2.0
+- date: 2019-02-23T03:50:23Z
+- commits:
+    - hash: b9da0b783b195f9a8e1515c24ca075790561e79a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device: Implement device lock override methods"
+- commits:
+    - body: null
+- commits:
+    - hash: 39acf0352dcb0b17ae6913e618a358b50c31d7cb
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update docs"
+- commits:
+    - body: null
+- version: 7.1.0
+- date: 2018-12-13T10:21:58Z
+- commits:
+    - hash: 29a9330f54909b1e36adfbfc5051c3dc38dc60d4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "application: Add options parameter to application.get_config()"
+- commits:
+    - body: the version option is required in options parameter
+- version: 7.0.0
+- date: 2018-11-22T04:09:36Z
+- commits:
+    - hash: d1258315b2090aa4ea799978a91c7c5eb43ec36e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "config: Use Opensource API endpoint for fetching device types"
+- commits:
+    - body: null
+- commits:
+    - hash: 66cbba1e32a364b200aac5d9c49b8c948f48ff0a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: "application.get_all: use the my_application endpoint"
+- commits:
+    - body: Application.get_all() will use the my_application endpoints instead of
+        defining pine filters. This will also stop it from returning dependent
+        application
+- commits:
+    - hash: 496844eb2aec4831d1d6ba43329b6cf92af91fff
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "api: Use the v5 api endpoint"
+- commits:
+    - body: null
+- commits:
+    - hash: 3156123f6dcf611aa78009f92c6814be93440f7a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "application: Implement application.get_by_owner()"
+- commits:
+    - body: null
+- commits:
+    - hash: 23bd7eca412b6fcfc848b9041bcb424e3dae7d82
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "stageRelease: Add release tracking methods"
+- commits:
+    - body: null
+- commits:
+    - hash: 75e9c2d6756a7ecceb4aeb3358cde768fee3440b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "docs: Update documentation"
+- commits:
+    - body: null
+- version: 6.0.1
+- date: 2018-11-08T20:33:59Z
+- commits:
+    - hash: fa9cd7c548568ec0b24ed1f1715b4acafbd02722
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <mamcgi@gmail.com>
+- commits:
+    - subject: Fix up documentation examples
+- commits:
+    - body: null
+- commits:
+    - hash: 251edde5c7924fc4ff0635ff634fa93c1ad5cd81
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <mamcgi@gmail.com>
+- commits:
+    - subject: Make docs_generator.py work with Python2/3
+- commits:
+    - body: null
+- version: 6.0.0
+- date: 2018-10-30T15:17:08Z
+- commits:
+    - hash: 3f0b2532514bc1cf98332e6a18abd608e29278fc
+- commits:
+    - author: Tim Perry
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Tim Perry <tim@balena.io>
+- commits:
+    - subject: "*BREAKING*: Rename everything that references 'resin' to 'balena'"
+- commits:
+    - body: null
+- commits:
+    - hash: a8f98ae035862bd244ef7792d3dbbd5b8190c3ba
+- commits:
+    - author: Tim Perry
+- commits:
+    - footers:
+        signed-off-by: Tim Perry <tim@balena.io>
+- commits:
+    - subject: Make BaseTag.get internal to fix docs generation
+- commits:
+    - body: null
+- commits:
+    - hash: 63a58ce272d53698dc80334f280edf5eb1af629a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "namechange: Remove old resin stuff"
+- commits:
+    - body: null
+- commits:
+    - hash: 86ed1e303a7b02dc4c7552bd95b7f089f729da95
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "api: Change api endpoint to api.balena-cloud.com"
+- commits:
+    - body: null
+- version: 5.1.3
+- date: 2018-10-30T08:17:36Z
+- commits:
+    - hash: a53d37d9ee395017f7c98d9e3b8435db66ecacb4
+- commits:
+    - author: Tim Perry
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tim Perry <tim@resin.io>
+- commits:
+    - subject: Print a deprecation warning message when using the unrenamed SDK
+- commits:
+    - body: null
+- version: 5.1.2
+- date: 2018-10-23T04:29:47Z
+- commits:
+    - hash: 106c76f2c6b236b671b3391e5d0ba2750acbf1e9
+- commits:
+    - author: Juan Cruz Viotti
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Juan Cruz Viotti <juan@balena.io>
+- commits:
+    - subject: Don't mention our production Mixpanel token in examples/docs
+- commits:
+    - body: null
+- version: 5.1.1
+- date: 2018-10-16T15:10:01Z
+- commits:
+    - hash: 6efc400410522807003de6a6897405c3eefbfdab
+- commits:
+    - author: Tim Perry
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tim Perry <tim@resin.io>
+- commits:
+    - subject: Document how to setup & run the SDK tests
+- commits:
+    - body: null
+- commits:
+    - hash: edf4e07eb2996075d67f4ac23c8d9e70b4817265
+- commits:
+    - author: Tim Perry
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tim Perry <tim@resin.io>
+- commits:
+    - subject: Allow overriding the API endpoint for testing
+- commits:
+    - body: null
+- commits:
+    - hash: 5682afcee67c82201794544e9e5a2371d7c6f823
+- commits:
+    - author: Tim Perry
+- commits:
+    - subject: Fix app name test, as API changes have changed the error
+- commits:
+    - body: null
+- version: 5.1.0
+- date: 2018-09-13T15:48:52Z
+- commits:
+    - hash: d26f6ddf08530d3187d570ce5e432a091768fc82
+- commits:
+    - author: Antonio Gutierrez
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Antonio Gutierrez <chibby0ne@gmail.com>
+- commits:
+    - subject: "resin/__init__: Remove unused import"
+- commits:
+    - body: null
+- commits:
+    - hash: 8d5f5bf4438a63a26a66c4490bdc7bb23bad3b6d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "test: Update error message in application test"
+- commits:
+    - body: Since the API returns different error message
+- commits:
+    - hash: 1e710c3667ccb55756bcfa9b6502c0f4aa08b7ae
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "tag: Fix incorrect behavior when updating tag"
+- commits:
+    - body: |-
+        currently all tags with same tag key are updated together
+        this bug caused by an error when parsing multiple filters
+        when making requests
+- commits:
+    - hash: f34186e8e61c520e927654a90da64a74a81db4f0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "release-tag: Fix wrong filter in get_all_by_release()"
+- commits:
+    - body: null
+- commits:
+    - hash: 2f452682eaed4a445924fa43e8012fff97aca013
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "test: Add test cases for tag models"
+- commits:
+    - body: null
+- version: 5.0.0
+- date: 2018-08-08T15:33:40Z
+- commits:
+    - hash: ffb3af48e78ac0671dccbe35b28f2b029c85bb98
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "device_os: The version option in device_os.get_config() is now required"
+- commits:
+    - body: null
+- commits:
+    - hash: 83615dc3f08c55f8dc06542f90ac46251fdfd846
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "config_var: Add get_all_by_application() to device config variable"
+- commits:
+    - body: null
+- commits:
+    - hash: 530f7f8a615d9c940408a9e52dc52a7ef4b45e25
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "env_var: Add get_all_by_application() to device service env var"
+- commits:
+    - body: null
+- commits:
+    - hash: 02ded6096e5dec277e464941d5a1af16fe06c00a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "serivce_env_var: Rename get_all() to get_all_by_application()"
+- commits:
+    - body: null
+- commits:
+    - hash: 5875d4acc1b9a8ed13d713d6dbb3b135a282e53a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "supervisor: Remove enable/disable_tcp_ping"
+- commits:
+    - body: It is not supported in recent supervisors (>= 7.0.0)
+- commits:
+    - hash: 715fd666f7db942fa08fd6a2dba76fd40ad3e3f3
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "supervisor: Deprecate some old methods"
+- commits:
+    - body: |-
+        supervisor.stop/start_application & get_application_info will be
+        deprecated since they are not supported on multicontainer devices.
+- commits:
+    - hash: 3485cf070cc8b24342b5fd47006a91e4a1113a57
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "supervisor: Implement supervisor.start/stop/restart_service methods"
+- commits:
+    - body: null
+- commits:
+    - hash: a91a54fc92def7d637542b4437537d0f810413ad
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "application: Return collaborator app application.get_all()"
+- commits:
+    - body: null
+- commits:
+    - hash: 094cbfe0359ca652b444526bedbd51f4e7976ed2
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "logging: Add support for new logging endpoint"
+- commits:
+    - body: |-
+        Pubnub will be removed and new logging enpoint will be used to handle
+        device logs.
+- commits:
+    - hash: 364f8f22ce20bff05f0d2097fd238cf25e8c2776
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "deps: Update dependencies"
+- commits:
+    - body: Remove pubnub and add new dependencies for new logging
+- commits:
+    - hash: 3b6bc968197926af468e42966a355f73d4bac61b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: Tidy up and update docs
+- commits:
+    - body: null
+- version: 4.7.1
+- date: 2018-07-20T13:38:32Z
+- commits:
+    - hash: 1715e4f220614740c395b5d89ce5e27444848ad8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+- commits:
+    - subject: "logging: Print deprecation warning for all legacy logs methods"
+- commits:
+    - body: As they will be removed soon.
+- version: 4.7.0
+- date: 2018-06-12T15:28:15Z
+- commits:
+    - hash: 6bb58fe76ad67dc9f724fab41177dc61490aee77
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Implement resin.models.application.set_to_release() to set an
+        application to a specific commit.
+- commits:
+    - body: null
+- commits:
+    - hash: 48c247999983725cf498e1139d773adb1a3f2c53
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Implement resin.models.device.set_to_release() to set device to a
+        specific commit.
+- commits:
+    - body: null
+- commits:
+    - hash: df1cb853965ce92748c1f9056617d92b898c4739
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- commits:
+    - hash: c26e04b1e361e38aeb4190e14768bb0b90315345
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update LICENSE
+- commits:
+    - body: null
+- version: 4.6.0
+- date: 2018-06-09T06:14:00Z
+- commits:
+    - hash: e656dbc0cd46adff95b89b185d643471b7f52eae
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Allow moving devices to applications of the same arch type.
+- commits:
+    - body: null
+- version: 4.5.0
+- date: 2018-06-08T15:16:30Z
+- commits:
+    - hash: daebff5ae1f75672373ab299936be928db003595
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.device.get_with_service_details() to get device
+        information with associated services details
+- commits:
+    - body: null
+- commits:
+    - hash: 7aa4c9d866cdb7526e86bd7ab21b737321480db6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Update docs.
+- commits:
+    - body: null
+- version: 4.4.1
+- date: 2018-05-09T17:31:33Z
+- commits:
+    - hash: bb14d53e8db76686a3a93a814b1258933083dc0b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add getting started section to the docs.
+- commits:
+    - body: null
+- commits:
+    - hash: 61cde4a6843c6f313f7e39d62b6a82db9242eb7b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Fix a wrong example for
+        resin.models.config_variable.device_config_variable.create().
+- commits:
+    - body: null
+- commits:
+    - hash: 20ce5c59a4c11206c18764b931fb9d060d8cfc5d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- version: 4.4.0
+- date: 2018-05-03T01:03:20Z
+- commits:
+    - hash: 4f114ee89f06227c8419c71bd4efc79218c28b0e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.model.tag.ReleaseTag that implements release tag model for
+        Resin Python SDK.
+- commits:
+    - body: null
+- commits:
+    - hash: 6b7eda7e73d143e1a0295c0ba323603fcba5ecce
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- version: 4.3.0
+- date: 2018-05-03T00:41:02Z
+- commits:
+    - hash: 925c6ea160493729e93a25113d40057b06b07838
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Re-add resin.models.environment_variables.DeviceEnvVariable model.
+- commits:
+    - body: null
+- commits:
+    - hash: fee33931dd4eb6f600a9763a7153157492707517
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Re-add resin.models.environment_variables.ApplicationEnvVariable model.
+- commits:
+    - body: null
+- commits:
+    - hash: 15eb2e7cecf97ceaad39dd5b40ee87da72a4dbf8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- version: 4.2.1
+- date: 2018-05-01T03:27:35Z
+- commits:
+    - hash: 8327c2c495d21401b8abfb8a025e2dc0c1704841
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Add unit test for device class.
+- commits:
+    - body: null
+- version: 4.2.0
+- date: 2018-04-12T14:55:11Z
+- commits:
+    - hash: 56c5a734c4a365a8780637d95fe13f03a338ee11
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.model.tag.DeviceTag that implements device tag model for
+        Resin Python SDK.
+- commits:
+    - body: null
+- commits:
+    - hash: 4c37f3d05f012b7175d9daa8a2d2a75de9dcb7ea
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.model.tag.ApplicationTag that implements Application tag
+        model for Resin Python SDK.
+- commits:
+    - body: null
+- commits:
+    - hash: b86ecd238d41930d08ae4cd8776c620011f67440
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update Docs
+- commits:
+    - body: null
+- version: 4.1.0
+- date: 2018-04-08T18:18:32Z
+- commits:
+    - hash: 77b927aff3787e7525248f341a26900313d816e1
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.models.api_key.ApiKey class that implements user API key
+        model for Resin Python SDK.
+- commits:
+    - body: null
+- commits:
+    - hash: f34b82748d2f5ff4c923c139680a98ac12a4b3cc
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Revamp resin.Auth model to work with Auth Token and API token.
+- commits:
+    - body: null
+- commits:
+    - hash: e57c1979aa2aca394467186827c64d911cdd65e6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Remove low level class resin.Token since all features are now merged
+        into resin.Auth
+- commits:
+    - body: null
+- commits:
+    - hash: bd15a1b85b1f9bec1caee7587a167b7100bee551
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update Docs
+- commits:
+    - body: null
+- version: 4.0.0
+- date: 2018-03-22T19:04:01Z
+- commits:
+    - hash: 1d3f3b8ca0782a3c268f029b5e46fc9863970674
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*Breaking*: Move to API v4 (Multicontainer support)."
+- commits:
+    - body: null
+- commits:
+    - hash: eb2746d51cf17330773d7c9ad1492ba39525d262
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.models.image to look up individual image build.
+- commits:
+    - body: null
+- commits:
+    - hash: bf5ee31a179a73d205db72840e92db8058c83891
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Add resin.models.service model to lookup for services.
+- commits:
+    - body: null
+- commits:
+    - hash: c3738959602d6e6881b5053e35f7b2d99fc2833a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add resin.models.release to look up releases
+- commits:
+    - body: null
+- commits:
+    - hash: eed511725340870bd4bb920868d98f934dfb19bc
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*BREAKING*: Remove resin.models.DeviceEnvVariable since it no longer
+        exist in the model."
+- commits:
+    - body: Implement resin.models.DeviceServiceEnvVariable model to work with Device
+        Service Variables.
+- commits:
+    - hash: 44b6a78b798c75f262499274536bf56b0e63cb90
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*BREAKING* Remove
+        resin.models.environment_variables.ApplicationEnvVariable since it no
+        longer exists in the model."
+- commits:
+    - body: Implement resin.models.environment_variables.ServiceEnvVariable model
+- commits:
+    - hash: 078261e7513115aabfda3fe634cd903c9c890457
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Implement resin.models.config_variable.DeviceConfigVariable model.
+- commits:
+    - body: null
+- commits:
+    - hash: 1ca63d561819b76b16ed8a145a0b1b5c6f16de95
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Implement resin.models.config_variable.ApplicationConfigVariable model.
+- commits:
+    - body: null
+- commits:
+    - hash: 58743931204613894c8bddbc4fb4d8080448de35
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*BREAKING* Remove resin.models.build model which is replaced by
+        release model."
+- commits:
+    - body: Remove resin.models.device.set_to_build() function.
+- commits:
+    - hash: 7f40edd822346647f4a34eb89f8800283d74f158
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*BREAKING* Change device.name to device.device_name everywhere."
+- commits:
+    - body: null
+- commits:
+    - hash: 2d4e77801095b00474923843035a5cd0b2f9baa6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: "*BREAKING* Change application.create() to support application types."
+- commits:
+    - body: null
+- commits:
+    - hash: 4f8ee25299be357102d50af9b5e13c099dd59911
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Allow passing raw query string to base_request as a temporary solution
+        for expensive query
+- commits:
+    - body: null
+- commits:
+    - hash: 6705163f124d480afc473b08d8581e461b62ea84
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update some functions to use raw query string
+- commits:
+    - body: null
+- commits:
+    - hash: 84b7c2cd3aad0bc7de62ff6265b4ae7c66742787
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs_generator script with new models
+- commits:
+    - body: null
+- commits:
+    - hash: 253bbea658857a815f94b7787d03720fa2b211d1
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- version: 3.0.0
+- date: 2018-03-21T12:23:32Z
+- commits:
+    - hash: 74ebb3857424ea2505d84c0d56f79ce847371ea0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.build.get_by_commit()
+- commits:
+    - body: null
+- commits:
+    - hash: 1971c9180d783a70a62c55f8bf8067c107916c2b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Update device.set_to_build() to work with latest API.
+- commits:
+    - body: Change the argument from build id to build commit hash since build id is
+        not available on the dashboard.
+- commits:
+    - hash: 10d16c7ff33915e885299bc2e4f39fcaf5e9f9b0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Merge pull request #60 from nghiant2710/api-v3-support"
+- commits:
+    - body: Update device.set_to_build() to work with latest API.
+- commits:
+    - hash: d61e589b7ea116f3cbdaa5932edc9a6c8ef607f7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Fix resin.models.application.create() return object.
+- commits:
+    - body: null
+- commits:
+    - hash: 9c4bf20cd940eb36c026c9c9c505cfcf09be360f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Fix return object of `create` functions to ensure they return a dict.
+- commits:
+    - body: null
+- commits:
+    - hash: 59e7699bc4d5f1790c2499f6d12631ec81831324
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Merge pull request #70 from nghiant2710/60-fix-application-create"
+- commits:
+    - body: Fix return object of `create` functions to ensure they return a dict.
+- commits:
+    - hash: 21f0430ba6bec8fd0afb368c6715275b1de13b0e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Merge branch 'python-sdk-v3' into master
+- commits:
+    - body: null
+- commits:
+    - hash: 0dbd270b578ec84ed26c4164d609d87a0d7ee065
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Fix device.get_status() function, use `last_vpn_event` field instead of
+        `last_seen_time` since it no longer exists.
+- commits:
+    - body: null
+- commits:
+    - hash: bb4c43975e5dcd6f8ac9016f1eceb07fbf4d8ba4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update test cases
+- commits:
+    - body: null
+- commits:
+    - hash: e970243cf76c0f3594726d45f342202cb190fade
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update docs
+- commits:
+    - body: null
+- commits:
+    - hash: d61e589b7ea116f3cbdaa5932edc9a6c8ef607f7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Fix resin.models.application.create() return object.
+- commits:
+    - body: null
+- commits:
+    - hash: 9c4bf20cd940eb36c026c9c9c505cfcf09be360f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Fix return object of `create` functions to ensure they return a dict.
+- commits:
+    - body: null
+- commits:
+    - hash: 74ebb3857424ea2505d84c0d56f79ce847371ea0
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.build.get_by_commit()
+- commits:
+    - body: null
+- commits:
+    - hash: 1971c9180d783a70a62c55f8bf8067c107916c2b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - subject: Update device.set_to_build() to work with latest API.
+- commits:
+    - body: Change the argument from build id to build commit hash since build id is
+        not available on the dashboard.
+- version: 2.2.0
+- date: 2018-03-02T16:58:06Z
+- commits:
+    - hash: cc89bae08bec0c3ff8a044e230314516af1a23d6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Implement unit test for application class.
+- commits:
+    - body: null
+- commits:
+    - hash: 9a5948f3582dc56cf4518d2fc9922a61c4e4d335
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Ensure the test suite refuses to run with an admin user account.
+- commits:
+    - body: We should never run the test suite with an admin creds.
+- commits:
+    - hash: 287aacdd95d6c1c8a940a8c5c1ca5c4b5ae27e0e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Add the test suite to Travis.
+- commits:
+    - body: null
+- commits:
+    - hash: 6bfffdbfcac45dec8c4ac77baeaf46b8d692e905
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Properly parse request data before sending.
+- commits:
+    - body: null
+- commits:
+    - hash: 51c5ded6e008e03e1d27bead89d436b7b5c9f9ad
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - subject: Drop support for Python 2.6
+- commits:
+    - body: Python 2.6 is pretty old and has been EOL since 2013. It is also not
+        compatible with current test suite.
+- commits:
+    - hash: 629f378861d6a8546acbd3401db41b9f8b95a1ea
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update comments
+- commits:
+    - body: null
+- version: 2.1.1
+- date: 2018-02-28T19:33:06Z
+- commits:
+    - hash: 6c1e77a8922a366ac47a7fa014f9255a5326f027
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        connects-to: "#56"
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Add VersionBot changes to repository.
+- commits:
+    - body: null
+- commits:
+    - hash: 39d251a151e8f8effe235fd6f5b91f7e266d000b
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Automatically update package version in __init__ file
+- commits:
+    - body: null
+- version: 2.1.0
+- date: 2018-01-25T11:07:27Z
+- commits:
+    - hash: 3813ded2897afde050e679a3a779ab0f1fb7ebea
+- commits:
+    - author: Alexis Svinartchouk
+- commits:
+    - subject: Each request times out after 30 seconds
+- commits:
+    - body: null
+- commits:
+    - hash: 4108da868c440b576a0d93a817c0b67e23624638
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Adding a new class to the docs generating script.
+- commits:
+    - body: null
+- commits:
+    - hash: a78b7955d3928f54b6fe70ea2c6b11ec4ba4b6c6
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Update the SDK docs.
+- commits:
+    - body: Adding the diff between old and new returned object after changing to new
+        API.
+- version: 2.0.0
+- date: 2017-12-12T02:35:44Z
+- commits:
+    - hash: 80bbb9f05b70650b0887176355be9e0596393a81
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add Python 3 support.
+- commits:
+    - body: >-
+        This PR contains some changes to make sure the right libraries and
+
+        dependencies are loaded for Python 3. There is no big change in the source code since most of the code is Python 3 compatible.
+
+        Apart from that there are some improments and bug fixes included:
+
+        - Implement base class for resin exceptions.
+
+        - Fix a bug in `resin.models.device.get_all_by_application()` to make it
+
+        works with API v3.
+- version: 1.7.0
+- date: 2017-12-02T04:43:55Z
+- commits:
+    - hash: 5d5f06b4564eecff9541c8674df4c4f7d952dc7a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Fixes #51. Upgrade Pine endpoint to API v3. Main change is that all
+        relationships and result properties now include verbs"
+- commits:
+    - body: null
+- commits:
+    - hash: 91f21fd9b7e15e55cbba7f2f356fa8795c72a07e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement device.get_dashboard_url that return the Resin Dashboard URL
+        for a specific device
+- commits:
+    - body: null
+- commits:
+    - hash: 51879e78ae60735fb022f3f7498670ef33617181
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement device_os.get_config() that retrieves an application
+        config.json.
+- commits:
+    - body: null
+- commits:
+    - hash: 1e9d00d7c1a8c91168937a0dc93cdcb8261694e7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement application.enable_device_urls() and
+        application.disable_device_urls() that enable/disable the URL for all
+        devices belong to an application
+- commits:
+    - body: null
+- commits:
+    - hash: 34385c6689c461a7cb885b94138b4afc05970b4c
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement methods at device and application level for granting and
+        revoking support access
+- commits:
+    - body: null
+- commits:
+    - hash: 10f5357db87733c31d1e90b38275bb5bfed4649a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add validation for environment variable name
+- commits:
+    - body: null
+- commits:
+    - hash: c5922655b9f3c0dd5d26cf85d0bb23d978ed9498
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement `application.generate_provisioning_key()` that generates a
+        device provisioning key for a specific application
+- commits:
+    - body: null
+- commits:
+    - hash: ddeee35e8763bef242350b02a269a338d35f1384
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update `device.register()`, device registration now uses provisioning
+        key.
+- commits:
+    - body: null
+- commits:
+    - hash: f225cb1aad779e07ac89ecf078be2088607665de
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update `models.application.grant_support_access()` and
+        `models.device.grant_support_access()` to use timestamp instead of
+        hours.
+- commits:
+    - body: null
+- version: 1.6.3
+- date: 2017-11-10T02:34:35Z
+- commits:
+    - hash: 9a7c03a9f0709af17990b0f3ed4c51f2b55bfc2c
+- commits:
+    - author: Amir Fuhrmann
+- commits:
+    - subject: Added additional API endpoints
+- commits:
+    - body: |-
+        Code cleanup
+        cleaned up code style issues
+- version: 1.6.2
+- date: 2017-06-15T10:14:59Z
+- commits:
+    - hash: 0210a222df589dacd185b524bff0c0c2f5549440
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Fix #46, Fix issue with auth.is_logged_in() raises Unauthorized
+        exception."
+- commits:
+    - body: Since the request builder class checks the token before sending request,
+        we need to add unauthorized exception here to handle the case when there
+        is no auth token.
+- version: 1.6.0
+- date: 2017-06-06T08:23:28Z
+- commits:
+    - hash: 003741f5720df8a0e166b43c454acf5789dfd4c8
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Deprecated `resin.models.application.get_api_key()` (use
+        `.generate_api_key()` instead).
+- commits:
+    - body: null
+- commits:
+    - hash: c76fc2b71f007cbe2f481218782ce9a214df83ab
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement
+        resin.models.environment_variables.device.get_all_by_application()
+- commits:
+    - body: null
+- commits:
+    - hash: 59a3cc1ec29c71656deb346f27ed6dea47f3ef7a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Make all device env vars consistently return names as .name.
+- commits:
+    - body: null
+- commits:
+    - hash: 2cf9f42a3ed23981556a8c929503990fec10199f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Ensure application and device .get handle arguments clearly
+- commits:
+    - body: null
+- commits:
+    - hash: c59a004093d4469513b0972c4c4dab6dbda216cb
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement Build class.
+- commits:
+    - body: null
+- commits:
+    - hash: e78327942ecc069c649c2bfc03b273dde8fc54a7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement device.set_custom_location and device.unset_customer_location
+- commits:
+    - body: null
+- commits:
+    - hash: 407f2689405b965946d88f7dc7bcdb7cf34bcbbd
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add device.generate_device_key that can generate a device specific key
+        for use by a device
+- commits:
+    - body: null
+- commits:
+    - hash: ce32ea4b0b773270330f1532cced3a2c053e5c8d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Add application.get_config for downloading an application config.json
+        file
+- commits:
+    - body: null
+- commits:
+    - hash: 9c1463e104ecf2010630a6b22b51516a3e1fd19e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Deprecate application.generate_api_key and cleaning up.
+- commits:
+    - body: null
+- version: 1.5.4
+- date: 2016-11-08T07:46:18Z
+- commits:
+    - hash: 2258efdf6c5230dd1b2f6e26c32cdb8583dae92f
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Allow passing option to force device reboot and shutdown
+- commits:
+    - body: null
+- commits:
+    - hash: f5dd7a8d4abc7fcc523178b95548e656a9d3a382
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Specify version of pubnub lib since pubnub v4 is not supported yet
+- commits:
+    - body: null
+- commits:
+    - hash: 95cade4e3c767b7eaa5b6cf3a16cd3a525373b27
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update Docs
+- commits:
+    - body: null
+- commits:
+    - hash: e7c131d951d4ae2f83b4c29a3a01130c7d436ea1
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Fix #41, remove unused import"
+- commits:
+    - body: null
+- commits:
+    - hash: d426ce1a4c00abe08444efcf330f12ebc2571271
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: "Fix #36, Import print_function to support python3 print syntax"
+- commits:
+    - body: null
+- version: 1.5.2
+- date: 2016-08-30T07:31:24Z
+- commits:
+    - hash: 38156a6d3d086a0d8a6151fce0118dc68e7570f9
+- commits:
+    - author: Gergely Imreh
+- commits:
+    - subject: print invalid settings error message to STDERR
+- commits:
+    - body: null
+- commits:
+    - hash: ae619488cc5493efaf4cb6ddc067aee3975cc077
+- commits:
+    - author: Gergely Imreh
+- commits:
+    - subject: add CHANGELOG entry
+- commits:
+    - body: null
+- version: 1.5.1
+- date: 2016-07-05T05:31:48Z
+- commits:
+    - hash: 92adf8e6922c8d9ad06776fc35f1a0ed07326e66
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Fix issue with PubNub logs channel. If available, use
+        device.logs_channel for PubNub channel names
+- commits:
+    - body: null
+- version: 1.5.0
+- date: 2016-04-28T09:13:44Z
+- commits:
+    - hash: 83589161bb6a29195650232830f1d86142b4a24d
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Using device_uuid instead of device_id in all supervisor functions for
+        ease of use
+- commits:
+    - body: null
+- commits:
+    - hash: 9fa99c4317bbd6cb1442bbbb374b9d81e64e851a
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.enable_tcp_ping()
+- commits:
+    - body: null
+- commits:
+    - hash: 36d793fd8cc2dfb4498507f9311e54189c43c078
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.disable_tcp_ping()
+- commits:
+    - body: null
+- commits:
+    - hash: 599a4184af63b79d7f37b3ba01e416eb82de9203
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.regenerate_supervisor_api_key()
+- commits:
+    - body: null
+- commits:
+    - hash: 9c925cc11fd8b8c9dbd116abcdbf516c704b1f20
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Improve request builder function in supervisor to support supervisor
+        version checking and send customizable HTTP methods
+- commits:
+    - body: null
+- commits:
+    - hash: 646b02c3483f8e25cde5e415baf9d5b3ddd170c4
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.get_device_state()
+- commits:
+    - body: null
+- commits:
+    - hash: 1435e96aade891459fe097dbe47431b7acb96b13
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.stop_application()
+- commits:
+    - body: null
+- commits:
+    - hash: 97c3eaacd77e69a3f0783eec25ddbcd91004b45e
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Implement resin.models.supervisor.get_application_info().
+- commits:
+    - body: |-
+        Implement resin.models.supervisor.start_application().
+        Fix #30.
+- commits:
+    - hash: 49aad5e084d965233c5061c3a91e73a899ff3cf7
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: Update message content and function description
+- commits:
+    - body: null
+- commits:
+    - hash: 7baa68691b7b40cdf440bfae91f36d4e24b1a7aa
+- commits:
+    - author: Trong Nghia Nguyen
+- commits:
+    - subject: regenerate documentation
+- commits:
+    - body: null
