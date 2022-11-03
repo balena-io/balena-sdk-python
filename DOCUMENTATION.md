@@ -1636,14 +1636,15 @@ Download an OS image. This function only works if you log in using credentials o
 >>> response.headers
 {'Content-Length': '134445838', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client', 'content-disposition': 'attachment; filename="balena-cloud-FooBar4-raspberry-pi2-2.43.0+rev1-v10.2.2.img.zip"', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Max-Age': '86400', 'x-powered-by': 'Express', 'Vary': 'X-HTTP-Method-Override', 'x-transfer-length': '134445838', 'Connection': 'keep-alive', 'Access-Control-Allow-Credentials': 'true', 'Date': 'Tue, 07 Jan 2020 17:40:52 GMT', 'X-Frame-Options': 'DENY', 'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'Content-Type': 'application/zip', 'Access-Control-Allow-Origin': '*'}
 ```
-### Function: download_unconfigured_image(device_type, version, raw)
+### Function: download_unconfigured_image(device_type, version, login, raw)
 
 Download an unconfigured OS image.
 
 #### Args:
     device_type (str): device type slug.
     version (str): the balenaOS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
-    raw (bool): determining function return value.
+    login (bool): include authentication information in the request or not. Must be set to True to download private device type. Default to False.
+    raw (bool): determining method returned value. Default to False.
 
 #### Returns:
     object:
@@ -1655,12 +1656,11 @@ Download an unconfigured OS image.
 
 #### Examples:
 ```python
->>> response = balena.models.device_os.download_unconfigured_image('raspberry-pi2', 'latest')
+>>> response = balena.models.device_os.download_unconfigured_image('raspberrypi4-64', 'latest', login=True)
 >>> type(response)
 <class 'requests.models.Response'>
->>> response['headers']
 >>> response.headers
-{'Access-Control-Allow-Headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client', 'content-disposition': 'attachment; filename="balena-cloud-raspberry-pi2-2.43.0+rev1-v10.2.2.img"', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Max-Age': '86400', 'Transfer-Encoding': 'chunked', 'x-powered-by': 'Express', 'content-encoding': 'gzip', 'x-transfer-length': '134445269', 'last-modified': 'Mon, 23 Sep 2019 15:21:33 GMT', 'Connection': 'keep-alive', 'Access-Control-Allow-Credentials': 'true', 'Date': 'Tue, 07 Jan 2020 18:14:47 GMT', 'X-Frame-Options': 'DENY', 'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'Content-Type': 'application/octet-stream', 'Access-Control-Allow-Origin': '*'}
+{'Date': 'Tue, 01 Nov 2022 11:47:52 GMT', 'Content-Type': 'application/octet-stream', 'Transfer-Encoding': 'chunked', 'Connection': 'keep-alive', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'access-control-max-age': '86400', 'content-encoding': 'gzip', 'content-disposition': 'attachment; filename="raspberrypi4-64-2.105.21-v14.2.10.img"', 'x-transfer-length': '173390850'}
 ```
 ### Function: get_config(app_id, options)
 
