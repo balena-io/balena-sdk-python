@@ -1,4 +1,18 @@
 - commits:
+    - subject: Support downloading unconfigured private device type images
+      hash: ca3b082aae06bf04dfd106882fca0cea36c34490
+      body: |
+        Fixes #271
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.2.0
+  title: ""
+  date: 2022-11-03T03:01:37.874Z
+- commits:
     - subject: Switch from balenaCI to flowzone
       hash: 05e84c041cd62f405e02324bfc665d8e9ab3fc0c
       body: ""
