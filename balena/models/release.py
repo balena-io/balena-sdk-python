@@ -268,7 +268,7 @@ class Release:
         Finalizes a draft release.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id (str): release commit (str) or id (int).
 
         Returns:
             OK
@@ -287,6 +287,38 @@ class Release:
         
         data = {
             'is_final': True
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_is_invalidated(self, commit_or_id, is_invalidated):
+        """
+        Set the is_invalidated property of a release to True or False.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            is_invalidated (bool): True for invalidated, False for validated.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'is_invalidated': is_invalidated
         }
 
         return self.base_request.request(
