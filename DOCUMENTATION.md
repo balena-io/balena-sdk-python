@@ -2387,7 +2387,7 @@ Create a new release built from the source in the provided url.
 Finalizes a draft release.
 
 #### Args:
-    commit_or_id: release commit (str) or id (int).
+    commit_or_id (str): release commit (str) or id (int).
 
 #### Returns:
     OK
@@ -2446,6 +2446,58 @@ Remove a specific release. This function only works if you log in using credenti
 #### Raises:
     ReleaseNotFound: if release couldn't be found.
     AmbiguousRelease: if release commit is ambiguous.
+### Function: set_is_invalidated(commit_or_id, is_invalidated)
+
+Set the is_invalidated property of a release to True or False.
+
+#### Args:
+    commit_or_id (str): release commit (str) or id (int).
+    is_invalidated (bool): True for invalidated, False for validated.
+
+#### Returns:
+    OK
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
+### Function: set_known_issue_list(commit_or_id, known_issue_list)
+
+Set a known issue list for a release.
+
+#### Args:
+    commit_or_id (str): release commit (str) or id (int).
+    known_issue_list (str): the known issue list.
+
+#### Returns:
+    OK
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
+### Function: set_note(commit_or_id, note)
+
+Set a note for a release.
+
+#### Args:
+    commit_or_id (str): release commit (str) or id (int).
+    note (str): the note.
+
+#### Returns:
+    OK
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
+### Function: set_release_version(commit_or_id, semver)
+
+Set a version for a release.
+
+#### Args:
+    commit_or_id (str): release commit (str) or id (int).
+    semver (str): the release version, only supports semver compliant values.
+
+#### Returns:
+    OK
+
+#### Raises:
+    ReleaseNotFound: if release couldn't be found.
 ## Service
 
 This class implements service model for balena python SDK.

@@ -389,3 +389,35 @@ class Release:
             'release', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def set_release_version(self, commit_or_id, semver):
+        """
+        Set a version for a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            semver (str): the release version, only supports semver compliant values.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'semver': semver
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
