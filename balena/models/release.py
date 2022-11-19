@@ -325,3 +325,35 @@ class Release:
             'release', 'PATCH', params=params, data=data,
             endpoint=self.settings.get('pine_endpoint')
         )
+
+    def set_note(self, commit_or_id, note):
+        """
+        Set a note to a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            note (str): the note.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'note': note
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
