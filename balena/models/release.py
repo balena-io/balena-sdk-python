@@ -328,7 +328,7 @@ class Release:
 
     def set_note(self, commit_or_id, note):
         """
-        Set a note to a release.
+        Set a note for a release.
 
         Args:
             commit_or_id (str): release commit (str) or id (int).
@@ -351,6 +351,38 @@ class Release:
         
         data = {
             'note': note
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_known_issue_list(self, commit_or_id, known_issue_list):
+        """
+        Set a known issue list for a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            known_issue_list (str): the known issue list.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'known_issue_list': known_issue_list
         }
 
         return self.base_request.request(
