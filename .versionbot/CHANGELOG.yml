@@ -1,4 +1,48 @@
 - commits:
+    - subject: Add release.set_release_version() method
+      hash: 0ba61a7888b6d6b5696cbb2afa76f6fef5d2210d
+      body: |
+        To set a version for a release
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+    - subject: Add release.set_known_issue_list() method
+      hash: 0565d57841bbf3dcfe3e49c67e97aac1cc040586
+      body: |
+        To set a known issue list for a release
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+    - subject: Add release.set_note() method
+      hash: 67b97432a7051b75eeed95f5b5e703fd6484a432
+      body: |
+        To set a note to a release
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+    - subject: Add release.set_is_invalidated() method
+      hash: b4f5ec9e09d3a6744daa39cd023d96fcf560e1b4
+      body: |
+        To set the is_invalidated property of a release to True or False
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.3.0
+  title: ""
+  date: 2022-11-23T12:21:26.738Z
+- commits:
     - subject: Support downloading unconfigured private device type images
       hash: ca3b082aae06bf04dfd106882fca0cea36c34490
       body: |
