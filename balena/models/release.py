@@ -268,7 +268,7 @@ class Release:
         Finalizes a draft release.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id (str): release commit (str) or id (int).
 
         Returns:
             OK
@@ -287,6 +287,134 @@ class Release:
         
         data = {
             'is_final': True
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_is_invalidated(self, commit_or_id, is_invalidated):
+        """
+        Set the is_invalidated property of a release to True or False.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            is_invalidated (bool): True for invalidated, False for validated.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'is_invalidated': is_invalidated
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_note(self, commit_or_id, note):
+        """
+        Set a note for a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            note (str): the note.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'note': note
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_known_issue_list(self, commit_or_id, known_issue_list):
+        """
+        Set a known issue list for a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            known_issue_list (str): the known issue list.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'known_issue_list': known_issue_list
+        }
+
+        return self.base_request.request(
+            'release', 'PATCH', params=params, data=data,
+            endpoint=self.settings.get('pine_endpoint')
+        )
+
+    def set_release_version(self, commit_or_id, semver):
+        """
+        Set a version for a release.
+
+        Args:
+            commit_or_id (str): release commit (str) or id (int).
+            semver (str): the release version, only supports semver compliant values.
+
+        Returns:
+            OK
+
+        Raises:
+            ReleaseNotFound: if release couldn't be found.
+
+        """
+
+        id = self.get(commit_or_id)['id']
+
+        params = {
+            'filter': 'id',
+            'eq': id
+        }
+        
+        data = {
+            'semver': semver
         }
 
         return self.base_request.request(
