@@ -1,4 +1,18 @@
 - commits:
+    - subject: "device.get_with_service_details: Stop auto-expanding the
+        gateway_downloads"
+      hash: f8733da5605983c4992ffb3466c42715259d8a50
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.3.1
+  title: ""
+  date: 2022-11-29T09:56:39.301Z
+- commits:
     - subject: Add release.set_release_version() method
       hash: 0ba61a7888b6d6b5696cbb2afa76f6fef5d2210d
       body: |
