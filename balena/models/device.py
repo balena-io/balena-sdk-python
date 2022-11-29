@@ -306,7 +306,7 @@ class Device:
         if expand_release:
             release = ",is_provided_by__release($select=id,commit)"
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release}),gateway_download($select=id,download_progress,status&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)))".format(uuid=uuid, release=release)
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release})".format(uuid=uuid, release=release)
 
         raw_data = self.base_request.request(
             'device', 'GET', raw_query=raw_query,
@@ -323,8 +323,10 @@ class Device:
         for obj in [self.__get_single_install_summary(i) for i in raw_data['image_install']]:
             groupedServices[obj.pop('service_name', None)].append(obj)
 
+        # TODO: Remove the current_gateway_downloads property in the next major.
+        # For backwards compatibility we default it to an empty list.
         raw_data['current_services'] = dict(groupedServices)
-        raw_data['current_gateway_downloads'] = [self.__get_single_install_summary(i) for i in raw_data['gateway_download']]
+        raw_data['current_gateway_downloads'] = []
         raw_data.pop('image_install', None)
         raw_data.pop('gateway_download', None)
 
