@@ -841,7 +841,7 @@ class Device:
 
         """
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=uuid&$expand=is_of__device_type($select=slug)".format(uuid=uuid)
+        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=uuid&$expand=is_of__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(uuid=uuid)
 
         device = self.base_request.request(
             'device', 'GET', raw_query=raw_query,
@@ -852,7 +852,7 @@ class Device:
             raise exceptions.DeviceNotFound(uuid)
         device = device[0]
 
-        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_name=app_name)
+        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(app_name=app_name)
 
         application = self.base_request.request(
             'application', 'GET', raw_query=raw_query,
@@ -863,14 +863,10 @@ class Device:
             raise exceptions.ApplicationNotFound(app_name)
         application = application[0]
 
-        all_device_types = self.device_type.get_all_supported()
-        device_dev_type = list(filter(lambda dev_type: dev_type['slug'] == device['is_of__device_type'][0]['slug'], all_device_types))[0]
-        app_dev_type = list(filter(lambda dev_type: dev_type['slug'] == application['is_for__device_type'][0]['slug'], all_device_types))[0]
+        device_dev_type = device['is_of__device_type'][0]
+        app_dev_type = application['is_for__device_type'][0]
 
         if not self.device_os.is_architecture_compatible_with(device_dev_type['is_of__cpu_architecture'][0]['slug'], app_dev_type['is_of__cpu_architecture'][0]['slug']):
-            raise exceptions.IncompatibleApplication(app_name)
-
-        if bool(device_dev_type.get('isDependent', None)) != bool(app_dev_type.get('isDependent', None)):
             raise exceptions.IncompatibleApplication(app_name)
 
         params = {
