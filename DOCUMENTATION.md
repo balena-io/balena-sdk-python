@@ -1410,13 +1410,14 @@ Note a device.
 >>> balena.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test device')
 'OK'
 ```
-### Function: register(app_id, uuid)
+### Function: register(app_id, uuid, device_type_slug)
 
 Register a new device with a balena application. This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     app_id (str): application id.
     uuid (str): device uuid.
+    device_type_slug (Optional[str]): device type slug or alias.
 
 #### Returns:
     dict: dictionary contains device info.

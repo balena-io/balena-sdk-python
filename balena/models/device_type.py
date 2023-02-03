@@ -37,7 +37,7 @@ class DeviceType(object):
 
         """
         
-        raw_query = '$expand=is_of__cpu_architecture($select=slug)&$filter=is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)'
+        raw_query = '$expand=is_of__cpu_architecture($select=slug,id)&$filter=is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)'
 
         return self.base_request.request(
             'device_type', 'GET', raw_query=raw_query,
@@ -70,7 +70,7 @@ class DeviceType(object):
         else:
             # Slug or alias
             
-            raw_query = "$top=1&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{slug}')".format(slug=id_or_slug)
+            raw_query = "$top=1&$expand=is_of__cpu_architecture($select=slug,id)&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{slug}')".format(slug=id_or_slug)
 
             device_type = self.base_request.request(
                 'device_type', 'GET', raw_query=raw_query,
@@ -91,7 +91,7 @@ class DeviceType(object):
 
         """
         
-        raw_query = "$top=1&$filter=name%20eq%20'{slug_or_name}'%20or%20slug%20eq%20'{slug_or_name}'".format(slug_or_name=slug_or_name)
+        raw_query = "$top=1&$expand=is_of__cpu_architecture($select=slug,id)&$filter=name%20eq%20'{slug_or_name}'%20or%20slug%20eq%20'{slug_or_name}'".format(slug_or_name=slug_or_name)
 
         device_type = self.base_request.request(
             'device_type', 'GET', raw_query=raw_query,

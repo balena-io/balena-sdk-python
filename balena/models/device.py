@@ -645,13 +645,14 @@ class Device:
         # OpenVPN/OpenSSL implementation has a bug.
         return binascii.hexlify(os.urandom(31))
 
-    def register(self, app_id, uuid):
+    def register(self, app_id, uuid, device_type_slug=None):
         """
         Register a new device with a balena application. This function only works if you log in using credentials or Auth Token.
 
         Args:
             app_id (str): application id.
             uuid (str): device uuid.
+            device_type_slug (Optional[str]): device type slug or alias.
 
         Returns:
             dict: dictionary contains device info.
@@ -665,7 +666,7 @@ class Device:
 
         user_id = self.auth.get_user_id()
 
-        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_id=app_id)
+        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=is_for__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(app_id=app_id)
 
         application = self.base_request.request(
             'application', 'GET', raw_query=raw_query,
@@ -676,14 +677,24 @@ class Device:
             raise exceptions.ApplicationNotFound(app_id)
         application = application[0]
 
-        api_key = self.application.generate_provisioning_key(app_id)
         data = {
             'user': user_id,
             'application': app_id,
             'device_type': application['is_for__device_type'][0]['slug'],
-            'uuid': uuid,
-            'apikey': api_key
+            'uuid': uuid
         }
+
+        if device_type_slug:
+            device_type = self.device_type.get(device_type_slug)
+            if not self.device_os.is_architecture_compatible_with(
+                device_type['is_of__cpu_architecture'][0]['slug'],
+                application['is_for__device_type'][0]['is_of__cpu_architecture'][0]['slug']
+            ):
+                raise exceptions.InvalidDeviceType(device_type_slug)
+            data['device_type'] = device_type['slug']
+
+        api_key = self.application.generate_provisioning_key(app_id)
+        data['apikey'] = api_key
 
         return json.loads(self.base_request.request(
             'device/register', 'POST', data=data,
