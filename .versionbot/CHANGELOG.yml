@@ -1,4 +1,17 @@
 - commits:
+    - subject: Simplify checks in device.move()
+      hash: bd2ab67d3269afa57602fcebacd70c64657f0217
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.3.2
+  title: ""
+  date: 2023-02-03T11:46:46.431Z
+- commits:
     - subject: "device.get_with_service_details: Stop auto-expanding the
         gateway_downloads"
       hash: f8733da5605983c4992ffb3466c42715259d8a50
