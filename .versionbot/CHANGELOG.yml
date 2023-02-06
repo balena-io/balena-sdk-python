@@ -1,4 +1,18 @@
 - commits:
+    - subject: "device.register: Allow providing a device type for the registered
+        device"
+      hash: 449c93bd6e7e92c4658981b8052c3279b8864241
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.4.0
+  title: ""
+  date: 2023-02-06T05:27:31.651Z
+- commits:
     - subject: Simplify checks in device.move()
       hash: bd2ab67d3269afa57602fcebacd70c64657f0217
       body: ""
