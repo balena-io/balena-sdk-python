@@ -93,9 +93,25 @@ class TestDevice(unittest.TestCase):
             uuid.decode('utf-8')
         )
 
+        # should be able to register a device with a valid device type.
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(app['id'], uuid, 'raspberrypi2')
+        self.assertEqual(
+            device['uuid'],
+            uuid.decode('utf-8')
+        )
+
         # should be rejected if the application id does not exist.
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
             self.balena.models.device.register('999999', self.balena.models.device.generate_uuid())
+
+        # should be rejected if the provided device type does not exist.
+        with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
+            self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid(), 'foobarbaz')
+
+        # should be rejected when providing a device type incompatible with the application.
+        with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
+            self.balena.models.device.register(app['id'], self.balena.models.device.generate_uuid(), 'intel-nuc')
 
     def test_get_all(self):
         # should return empty list.
