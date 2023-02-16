@@ -21,6 +21,8 @@ ARCH_COMPATIBILITY_MAP = {
     'armv7hf': ['rpi']
 }
 
+VERSION_RANGE_CHAR_LIST = ['x', 'X', '*']
+
 def cmp_to_key(mycmp):
     'Convert a cmp= function into a key= function'
     class K:
@@ -145,8 +147,16 @@ def sort_version(x, y):
 def bsemver_match_range(version, version_range):
     if semver.VersionInfo.isvalid(version):
         try:
-            if version_range and semver.match(version, ">{version_range}".format(version_range=version_range)):
-                return True
+            if semver.VersionInfo.isvalid(version_range):
+                if version_range and semver.match(version, f">={version_range}"):
+                    return True
+            else:
+                if version_range[-1] in VERSION_RANGE_CHAR_LIST:
+                    # version range contains 'x', 'X' or '*'
+                    min_ver = f'{version_range[:-1]}0'
+                    max_ver = str(semver.VersionInfo.parse(min_ver).next_version('minor'))
+                    if semver.match(version, f">={min_ver}") and semver.match(version, f"<{max_ver}"):
+                        return True
         except:
             return False
     return False
@@ -538,6 +548,26 @@ class DeviceOs:
             versions = [ x['raw_version'] for x in versions_by_dt[device_type] if x['os_type'] == self.OS_TYPES['default'] ]
             return versions
         
+        return []
+
+    def get_available_os_versions(self, device_type):
+        """
+        Get the supported balenaOS versions (ESR included) for the provided device type.
+
+        Args:
+            device_type (str): device type slug.
+
+        Returns:
+            list: balenaOS versions.
+
+        """
+
+        host_apps = self.__get_os_versions(device_type)
+        versions_by_dt = self.__transform_host_apps(host_apps)
+
+        if device_type in versions_by_dt:
+            return versions_by_dt[device_type]
+
         return []
 
     def is_architecture_compatible_with(self, os_architecture, application_architecture):
