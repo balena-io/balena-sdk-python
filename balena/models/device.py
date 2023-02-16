@@ -1438,7 +1438,7 @@ class Device:
         # this will throw an error if the action is not available
         self.__check_os_update_target(device, target_os_version)
 
-        all_versions = self.device_os.get_supported_versions(device['is_of__device_type'][0]['slug'])['versions']
+        all_versions = self.device_os.get_available_os_versions(device['is_of__device_type'][0]['slug'])
         if not [v for v in all_versions if target_os_version == v['raw_version']]:
             raise exceptions.InvalidParameter('target_os_version', target_os_version)
 
