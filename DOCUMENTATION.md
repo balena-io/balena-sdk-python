@@ -1663,6 +1663,15 @@ Download an unconfigured OS image.
 >>> response.headers
 {'Date': 'Tue, 01 Nov 2022 11:47:52 GMT', 'Content-Type': 'application/octet-stream', 'Transfer-Encoding': 'chunked', 'Connection': 'keep-alive', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'access-control-max-age': '86400', 'content-encoding': 'gzip', 'content-disposition': 'attachment; filename="raspberrypi4-64-2.105.21-v14.2.10.img"', 'x-transfer-length': '173390850'}
 ```
+### Function: get_available_os_versions(device_type)
+
+Get the supported balenaOS versions (ESR included) for the provided device type.
+
+#### Args:
+    device_type (str): device type slug.
+
+#### Returns:
+    list: balenaOS versions.
 ### Function: get_config(app_id, options)
 
 Get an application config.json.
