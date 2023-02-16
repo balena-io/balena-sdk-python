@@ -1,4 +1,19 @@
 - commits:
+    - subject: Add device_os.get_available_os_versions()
+      hash: 2590e20d89315d8d1ff7c3e2db6868773e1f60d7
+      body: >
+        This method returns list of the supported balenaOS versions (ESR included)
+        for the provided device type.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.4.1
+  title: ""
+  date: 2023-02-16T10:29:47.573Z
+- commits:
     - subject: "device.register: Allow providing a device type for the registered
         device"
       hash: 449c93bd6e7e92c4658981b8052c3279b8864241
