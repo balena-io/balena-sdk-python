@@ -1,4 +1,17 @@
 - commits:
+    - subject: Support ESR version in device.start_os_update()
+      hash: 42269081f3c9a686b59682772388081e07bd9b41
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+        signed-off-by: Trong Nghia Nguyen <nghiant2710@gmail.com>
+      author: Trong Nghia Nguyen
+  version: 12.5.0
+  title: ""
+  date: 2023-02-16T16:30:36.341Z
+- commits:
     - subject: Add device_os.get_available_os_versions()
       hash: 2590e20d89315d8d1ff7c3e2db6868773e1f60d7
       body: >
