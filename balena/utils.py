@@ -15,6 +15,23 @@ def is_id(value):
             return False
     return False
 
+
+def is_full_uuid(value):
+    """
+    Return True, if the input value is a valid UUID. False otherwise.
+
+    """
+
+    if isinstance(value, str):
+        if len(value) == 32 or len(value) == 62:
+            try:
+                str(value)
+                return True
+            except ValueError:
+                return False
+    return False
+
+
 def compare(a, b):
     """
 
