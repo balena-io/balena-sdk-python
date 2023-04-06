@@ -24,16 +24,19 @@ class Supervisor:
             If False then all command will be sent to the balena API proxy endpoint (api.balena-cloud.com/supervisor/<url>).
             If SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY are available, _on_device will be set to True by default. Otherwise, it's False.
 
-    """
+    """  # noqa: E501
 
-    SUPERVISOR_API_VERSION = 'v1'
-    MIN_SUPERVISOR_MC_API = '7.0.0'
+    SUPERVISOR_API_VERSION = "v1"
+    MIN_SUPERVISOR_MC_API = "7.0.0"
 
-    SUPERVISOR_ADDRESS = os.environ.get('BALENA_SUPERVISOR_ADDRESS') or os.environ.get('RESIN_SUPERVISOR_ADDRESS')
-    SUPERVISOR_API_KEY = os.environ.get('BALENA_SUPERVISOR_API_KEY') or os.environ.get('RESIN_SUPERVISOR_API_KEY')
+    SUPERVISOR_ADDRESS = os.environ.get("BALENA_SUPERVISOR_ADDRESS") or os.environ.get("RESIN_SUPERVISOR_ADDRESS")
+    SUPERVISOR_API_KEY = os.environ.get("BALENA_SUPERVISOR_API_KEY") or os.environ.get("RESIN_SUPERVISOR_API_KEY")
 
-    # _on_device = True, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are avaiable => can communicate with both supervisor API endpoints on device or balena API endpoints.
-    # _on_device = False, if UPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are not avaiable => can only communicate with balena API endpoints.
+    # _on_device = True, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are avaiable
+    # => can communicate with both supervisor API endpoints on device or balena API endpoints.
+
+    # _on_device = False, if SUPERVISOR_ADDRESS and SUPERVISOR_API_KEY env vars are not avaiable
+    # => can only communicate with balena API endpoints.
     _on_device = all([SUPERVISOR_ADDRESS, SUPERVISOR_API_KEY])
 
     def __init__(self):
@@ -44,46 +47,55 @@ class Supervisor:
 
     def _check_args(self, device_uuid, app_id):
         if device_uuid is None:
-            raise exceptions.MissingOption('device_uuid')
+            raise exceptions.MissingOption("device_uuid")
 
         if app_id is None:
-            raise exceptions.MissingOption('app_id')
+            raise exceptions.MissingOption("app_id")
 
-    def _do_command(self, endpoint, req_data={}, device_uuid=None, app_id=None,
-                    method=None, required_version=None, on_device_method=None):
+    def _do_command(
+        self,
+        endpoint,
+        req_data={},
+        device_uuid=None,
+        app_id=None,
+        method=None,
+        required_version=None,
+        on_device_method=None,
+    ):
         if not self._on_device:
             self._check_args(device_uuid, app_id)
 
-            if (self._last_device and self._last_device['uuid'] != device_uuid) or not self._last_device:
+            if (self._last_device and self._last_device["uuid"] != device_uuid) or not self._last_device:
                 self._last_device = self.device.get(device_uuid)
 
             if required_version:
-                if not self._last_device['supervisor_version'] or (parse_version(required_version) > parse_version(self._last_device['supervisor_version'])):
-                    raise exceptions.UnsupportedFunction(required_version, self._last_device['supervisor_version'])
+                if not self._last_device["supervisor_version"] or (
+                    parse_version(required_version) > parse_version(self._last_device["supervisor_version"])
+                ):
+                    raise exceptions.UnsupportedFunction(required_version, self._last_device["supervisor_version"])
 
-            device_id = self._last_device['id']
+            device_id = self._last_device["id"]
 
-            data = {
-                'deviceId': device_id,
-                'appId': app_id
-            }
+            data = {"deviceId": device_id, "appId": app_id}
 
             if req_data:
-                data['data'] = req_data
+                data["data"] = req_data
 
             if on_device_method:
-                data['method'] = on_device_method
+                data["method"] = on_device_method
 
             return self.base_request.request(
-                'supervisor/{0}'.format(endpoint),
-                'POST',
+                "supervisor/{0}".format(endpoint),
+                "POST",
                 data=data,
-                endpoint=self.settings.get('api_endpoint'),
-                login=True
+                endpoint=self.settings.get("api_endpoint"),
+                login=True,
             )
         else:
             if required_version:
-                current_version = os.environ.get('BALENA_SUPERVISOR_VERSION') or os.environ.get('RESIN_SUPERVISOR_VERSION')
+                current_version = os.environ.get("BALENA_SUPERVISOR_VERSION") or os.environ.get(
+                    "RESIN_SUPERVISOR_VERSION"
+                )
                 if not current_version or (parse_version(required_version) > parse_version(current_version)):
                     raise exceptions.UnsupportedFunction(required_version, current_version)
 
@@ -92,7 +104,7 @@ class Supervisor:
                 method,
                 data=req_data,
                 endpoint=self.SUPERVISOR_ADDRESS,
-                api_key=self.SUPERVISOR_API_KEY
+                api_key=self.SUPERVISOR_API_KEY,
             )
 
     def force_api_endpoint(self, endpoint):
@@ -127,34 +139,34 @@ class Supervisor:
             >>> balena.models.supervisor.ping(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3')
             'OK'
 
-        """
+        """  # noqa: E501
 
         if not self._on_device:
             if device_uuid is None:
-                raise exceptions.MissingOption('device_uuid')
+                raise exceptions.MissingOption("device_uuid")
 
-            if (self._last_device and self._last_device['uuid'] != device_uuid) or not self._last_device:
+            if (self._last_device and self._last_device["uuid"] != device_uuid) or not self._last_device:
                 self._last_device = self.device.get(device_uuid)
 
             data = {
-                'deviceId': self._last_device['id'],
-                'appId': self._last_device['belongs_to__application']['__id'],
-                'method': 'GET'
+                "deviceId": self._last_device["id"],
+                "appId": self._last_device["belongs_to__application"]["__id"],
+                "method": "GET",
             }
 
             return self.base_request.request(
-                'supervisor/ping',
-                'POST',
+                "supervisor/ping",
+                "POST",
                 data=data,
-                endpoint=self.settings.get('api_endpoint'),
-                login=True
+                endpoint=self.settings.get("api_endpoint"),
+                login=True,
             )
         else:
             return self.base_request.request(
-                'ping',
-                'GET',
+                "ping",
+                "GET",
                 endpoint=self.SUPERVISOR_ADDRESS,
-                api_key=self.SUPERVISOR_API_KEY
+                api_key=self.SUPERVISOR_API_KEY,
             )
 
     def blink(self, device_uuid=None, app_id=None):
@@ -173,13 +185,13 @@ class Supervisor:
             >>> balena.models.supervisor.blink(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             'OK'
 
-        """
+        """  # noqa: E501
 
         return self._do_command(
-            '{0}/blink'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/blink".format(self.SUPERVISOR_API_VERSION),
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def update(self, device_uuid=None, app_id=None, force=False):
@@ -203,21 +215,19 @@ class Supervisor:
             >>> balena.models.supervisor.update(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020', force=True)
             (Empty Response)
 
-        """
+        """  # noqa: E501
 
         if force:
-            data = {
-                'force': force
-            }
+            data = {"force": force}
         else:
             data = {}
 
         return self._do_command(
-            '{0}/update'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/update".format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def reboot(self, device_uuid=None, app_id=None, force=False):
@@ -240,21 +250,19 @@ class Supervisor:
             >>> balena.models.supervisor.reboot(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             {u'Data': u'OK', u'Error': u''}
 
-        """
+        """  # noqa: E501
 
         if force:
-            data = {
-                'force': force
-            }
+            data = {"force": force}
         else:
             data = {}
 
         return self._do_command(
-            '{0}/reboot'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/reboot".format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def shutdown(self, device_uuid=None, app_id=None, force=False):
@@ -277,21 +285,19 @@ class Supervisor:
             >>> balena.models.supervisor.shutdown(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='8362')
             {u'Data': u'OK', u'Error': u''}
 
-        """
+        """  # noqa: E501
 
         if force:
-            data = {
-                'force': force
-            }
+            data = {"force": force}
         else:
             data = {}
 
         return self._do_command(
-            '{0}/shutdown'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/shutdown".format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def purge(self, app_id, device_uuid=None):
@@ -313,18 +319,16 @@ class Supervisor:
             >>> balena.models.supervisor.purge(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             {u'Data': u'OK', u'Error': u''}
 
-        """
+        """  # noqa: E501
 
-        data = {
-            'appId': app_id
-        }
+        data = {"appId": app_id}
 
         return self._do_command(
-            '{0}/purge'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/purge".format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def restart(self, app_id, device_uuid=None):
@@ -346,18 +350,16 @@ class Supervisor:
             >>> balena.models.supervisor.restart(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             'OK'
 
-        """
+        """  # noqa: E501
 
-        data = {
-            'appId': app_id
-        }
+        data = {"appId": app_id}
 
         return self._do_command(
-            '{0}/restart'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/restart".format(self.SUPERVISOR_API_VERSION),
             req_data=data,
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def regenerate_supervisor_api_key(self, app_id=None, device_uuid=None):
@@ -380,13 +382,13 @@ class Supervisor:
             >>> balena.models.supervisor.regenerate_supervisor_api_key(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
             '480af7bb8a9cf56de8a1e295f0d50e6b3bb46676aaddbf4103aa43cb57039364'
 
-        """
+        """  # noqa: E501
 
         return self._do_command(
-            '{0}/regenerate-api-key'.format(self.SUPERVISOR_API_VERSION),
+            "{0}/regenerate-api-key".format(self.SUPERVISOR_API_VERSION),
             device_uuid=device_uuid,
             app_id=app_id,
-            method='POST'
+            method="POST",
         )
 
     def get_device_state(self, app_id=None, device_uuid=None):
@@ -407,28 +409,39 @@ class Supervisor:
 
         Examples:
             >>> balena.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
-            {u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Balena OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
+            {
+                "status": "Idle",
+                "update_failed": False,
+                "update_pending": False,
+                "download_progress": None,
+                "os_version": "Balena OS 1.1.1",
+                "api_port": 48484,
+                "commit": "ff812b9a5f82d9661fb23c24aa86dce9425f1112",
+                "update_downloaded": False,
+                "supervisor_version": "1.7.0",
+                "ip_address": "192.168.0.102",
+            }
 
-        """
+        """  # noqa: E501
 
-        required_version = '1.6'
+        required_version = "1.6"
 
-        on_device_method = 'GET'
+        on_device_method = "GET"
 
         if not self._on_device:
             return self._do_command(
-                '{0}/device'.format(self.SUPERVISOR_API_VERSION),
+                "{0}/device".format(self.SUPERVISOR_API_VERSION),
                 on_device_method=on_device_method,
                 device_uuid=device_uuid,
                 app_id=app_id,
                 required_version=required_version,
-                method='POST'
+                method="POST",
             )
         else:
             return self._do_command(
-                '{0}/device'.format(self.SUPERVISOR_API_VERSION),
+                "{0}/device".format(self.SUPERVISOR_API_VERSION),
                 required_version,
-                method=on_device_method
+                method=on_device_method,
             )
 
     def stop_application(self, app_id, device_uuid=None):
@@ -451,17 +464,17 @@ class Supervisor:
         Examples:
             >>> balena.models.supervisor.stop_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
-        """
+        """  # noqa: E501
 
         _print_deprecation_warning()
-        required_version = '1.8'
+        required_version = "1.8"
 
         return self._do_command(
-            '{0}/apps/{1}/stop'.format(self.SUPERVISOR_API_VERSION, app_id),
+            "{0}/apps/{1}/stop".format(self.SUPERVISOR_API_VERSION, app_id),
             device_uuid=device_uuid,
             app_id=app_id,
             required_version=required_version,
-            method='POST'
+            method="POST",
         )
 
     def start_application(self, app_id, device_uuid=None):
@@ -484,17 +497,17 @@ class Supervisor:
         Examples:
             >>> balena.models.supervisor.start_application(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
-        """
+        """  # noqa: E501
 
         _print_deprecation_warning()
-        required_version = '1.8'
+        required_version = "1.8"
 
         return self._do_command(
-            '{0}/apps/{1}/start'.format(self.SUPERVISOR_API_VERSION, app_id),
+            "{0}/apps/{1}/start".format(self.SUPERVISOR_API_VERSION, app_id),
             device_uuid=device_uuid,
             app_id=app_id,
             required_version=required_version,
-            method='POST'
+            method="POST",
         )
 
     def get_application_info(self, app_id, device_uuid=None):
@@ -517,27 +530,27 @@ class Supervisor:
         Examples:
             >>> balena.models.supervisor.get_application_info(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
 
-        """
+        """  # noqa: E501
 
         _print_deprecation_warning()
-        required_version = '1.8'
+        required_version = "1.8"
 
-        on_device_method = 'GET'
+        on_device_method = "GET"
 
         if not self._on_device:
             return self._do_command(
-                '{0}/apps/{1}'.format(self.SUPERVISOR_API_VERSION, app_id),
+                "{0}/apps/{1}".format(self.SUPERVISOR_API_VERSION, app_id),
                 on_device_method=on_device_method,
                 device_uuid=device_uuid,
                 app_id=app_id,
                 required_version=required_version,
-                method='POST'
+                method="POST",
             )
         else:
             return self._do_command(
-                '{0}/apps/{1}'.format(self.SUPERVISOR_API_VERSION, app_id),
+                "{0}/apps/{1}".format(self.SUPERVISOR_API_VERSION, app_id),
                 required_version,
-                method='GET'
+                method="GET",
             )
 
     def __service_request(self, endpoint, device_uuid, image_id):
@@ -552,23 +565,22 @@ class Supervisor:
         """
 
         device = self.device.get(device_uuid)
-        app_id = device['belongs_to__application']['__id']
+        app_id = device["belongs_to__application"]["__id"]
 
-        if (parse_version(self.MIN_SUPERVISOR_MC_API) > parse_version(device['supervisor_version'])):
-            raise exceptions.UnsupportedFunction(self.MIN_SUPERVISOR_MC_API, device['supervisor_version'])
+        if parse_version(self.MIN_SUPERVISOR_MC_API) > parse_version(device["supervisor_version"]):
+            raise exceptions.UnsupportedFunction(self.MIN_SUPERVISOR_MC_API, device["supervisor_version"])
 
         data = {
-            'deviceId': device['id'],
-            'appId': app_id,
-            'data': {
-                'appId': app_id,
-                'imageId': image_id
-            }
+            "deviceId": device["id"],
+            "appId": app_id,
+            "data": {"appId": app_id, "imageId": image_id},
         }
 
         return self.base_request.request(
-            '/supervisor/v2/applications/{app_id}/{endpoint}'.format(app_id=app_id, endpoint=endpoint), 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint')
+            "/supervisor/v2/applications/{app_id}/{endpoint}".format(app_id=app_id, endpoint=endpoint),
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
         )
 
     def start_service(self, device_uuid, image_id):
@@ -585,7 +597,7 @@ class Supervisor:
 
         """
 
-        return self.__service_request('start-service', device_uuid, image_id)
+        return self.__service_request("start-service", device_uuid, image_id)
 
     def stop_service(self, device_uuid, image_id):
         """
@@ -601,7 +613,7 @@ class Supervisor:
 
         """
 
-        return self.__service_request('stop-service', device_uuid, image_id)
+        return self.__service_request("stop-service", device_uuid, image_id)
 
     def restart_service(self, device_uuid, image_id):
         """
@@ -617,4 +629,4 @@ class Supervisor:
 
         """
 
-        return self.__service_request('restart-service', device_uuid, image_id)
+        return self.__service_request("restart-service", device_uuid, image_id)

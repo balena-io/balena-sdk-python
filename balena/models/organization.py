@@ -1,8 +1,3 @@
-try:  # Python 3 imports
-    from urllib.parse import urljoin
-except ImportError:  # Python 2 imports
-    from urlparse import urljoin
-
 from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
@@ -11,10 +6,7 @@ from ..utils import is_id
 from .tag import BaseTag
 from .. import exceptions
 
-from datetime import datetime
 import json
-from math import isinf
-from collections import defaultdict
 
 
 class Organization:
@@ -44,21 +36,30 @@ class Organization:
 
         Examples:
             >>> balena.models.organization.create('My Org', 'test_org')
-            '{'id': 147950, 'created_at': '2020-06-23T09:33:25.187Z', 'name': 'My Org', 'handle': 'test_org', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=147950'}}'
-
+            {
+                "id": 147950,
+                "created_at": "2020-06-23T09:33:25.187Z",
+                "name": "My Org",
+                "handle": "test_org",
+                "billing_account_code": None,
+                "__metadata": {"uri": "/resin/organization(@id)?@id=147950"},
+            }
         """
 
-        data = {
-            'name': name
-        }
+        data = {"name": name}
 
         if handle:
-            data['handle'] = handle
+            data["handle"] = handle
 
-        return json.loads(self.base_request.request(
-            'organization', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        ).decode('utf-8'))
+        return json.loads(
+            self.base_request.request(
+                "organization",
+                "POST",
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
+                login=True,
+            ).decode("utf-8")
+        )
 
     def get_all(self):
         """
@@ -69,13 +70,25 @@ class Organization:
 
         Examples:
             >>> balena.models.organization.get_all()
-            '[{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}]'
+            [
+                {
+                    "id": 26474,
+                    "created_at": "2018-08-14T00:24:33.144Z",
+                    "name": "test_account1",
+                    "handle": "test_account1",
+                    "billing_account_code": None,
+                    "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+                }
+            ]
 
         """
 
         return self.base_request.request(
-            'organization', 'GET', endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization",
+            "GET",
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
     def get(self, org_id):
         """
@@ -92,19 +105,26 @@ class Organization:
 
         Examples:
             >>> balena.models.organization.get('26474')
-            '{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}'
+            {
+                "id": 26474,
+                "created_at": "2018-08-14T00:24:33.144Z",
+                "name": "test_account1",
+                "handle": "test_account1",
+                "billing_account_code": None,
+                "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+            }
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': org_id
-        }
+        params = {"filter": "id", "eq": org_id}
 
         org = self.base_request.request(
-            'organization', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
         if not org:
             raise exceptions.OrganizationNotFound(org_id)
@@ -126,19 +146,26 @@ class Organization:
 
         Examples:
             >>> balena.models.organization.get_by_handle('test_account1')
-            ''{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}''
+            {
+                "id": 26474,
+                "created_at": "2018-08-14T00:24:33.144Z",
+                "name": "test_account1",
+                "handle": "test_account1",
+                "billing_account_code": None,
+                "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+            }
 
         """
 
-        params = {
-            'filter': 'handle',
-            'eq': handle
-        }
+        params = {"filter": "handle", "eq": handle}
 
         org = self.base_request.request(
-            'organization', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
         if not org:
             raise exceptions.OrganizationNotFound(handle)
@@ -162,12 +189,14 @@ class Organization:
         """
 
         return self.base_request.request(
-            'organization({org_id})'.format(org_id=org_id), 'DELETE',
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            "organization({org_id})".format(org_id=org_id),
+            "DELETE",
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
         )
 
 
-class OrganizationInvite():
+class OrganizationInvite:
     """
     This class implements organization invite model for balena python SDK.
 
@@ -178,7 +207,7 @@ class OrganizationInvite():
         self.settings = Settings()
         self.config = Config()
         self.auth = Auth()
-        self.RESOURCE = 'invitee__is_invited_to__organization'
+        self.RESOURCE = "invitee__is_invited_to__organization"
 
     def get_all(self):
         """
@@ -186,17 +215,39 @@ class OrganizationInvite():
 
         Returns:
             list: list contains info of invites.
-            
+
         Examples:
             >>> balena.models.organization.invite.get_all()
-            [{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+            [
+                {
+                    "id": 2862,
+                    "message": "Test invite",
+                    "invitee": {
+                        "__id": 2965,
+                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
+                    },
+                    "is_invited_to__organization": {
+                        "__id": 26474,
+                        "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+                    },
+                    "is_created_by__user": {
+                        "__id": 5227,
+                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+                    },
+                    "organization_membership_role": {
+                        "__id": 2,
+                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+                    },
+                    "__metadata": {
+                        "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
+                    },
+                }
+            ]
 
         """
 
-        return self.base_request.request(
-            self.RESOURCE, 'GET', endpoint=self.settings.get('pine_endpoint')
-        )['d']
-        
+        return self.base_request.request(self.RESOURCE, "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
+
     def get_all_by_organization(self, org_id):
         """
         Get all invites by organization.
@@ -206,23 +257,46 @@ class OrganizationInvite():
 
         Returns:
             list: list contains info of invites.
-            
+
         Examples:
             >>> balena.models.organization.invite.get_all_by_organization(26474)
-            [{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+            [
+                {
+                    "id": 2862,
+                    "message": "Test invite",
+                    "invitee": {
+                        "__id": 2965,
+                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
+                    },
+                    "is_invited_to__organization": {
+                        "__id": 26474,
+                        "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+                    },
+                    "is_created_by__user": {
+                        "__id": 5227,
+                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+                    },
+                    "organization_membership_role": {
+                        "__id": 2,
+                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+                    },
+                    "__metadata": {
+                        "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
+                    },
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'is_invited_to__organization',
-            'eq': org_id
-        }
+        params = {"filter": "is_invited_to__organization", "eq": org_id}
 
         return self.base_request.request(
-            self.RESOURCE, 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
-        
+            self.RESOURCE,
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
+
     def create(self, org_id, invitee, role_name=None, message=None):
         """
         Creates a new invite for an organization.
@@ -238,37 +312,58 @@ class OrganizationInvite():
 
         Examples:
             >>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
-            {'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}
+            {
+                "id": 2862,
+                "message": "Test invite",
+                "invitee": {"__id": 2965, "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"}},
+                "is_invited_to__organization": {
+                    "__id": 26474,
+                    "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+                },
+                "is_created_by__user": {
+                    "__id": 5227,
+                    "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+                },
+                "organization_membership_role": {
+                    "__id": 2,
+                    "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+                },
+                "__metadata": {"uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"},
+            }
 
         """
-        
+
         data = {
-            'invitee': invitee,
-            'is_invited_to__organization': org_id,
-            'message': message
+            "invitee": invitee,
+            "is_invited_to__organization": org_id,
+            "message": message,
         }
 
         if role_name:
-            params = {
-                'filter': 'name',
-                'eq': role_name
-            }
-            
+            params = {"filter": "name", "eq": role_name}
+
             roles = self.base_request.request(
-                'organization_membership_role', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
-            
+                "organization_membership_role",
+                "GET",
+                params=params,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"]
+
             if not roles:
                 raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name=role_name)
             else:
-                data['organization_membership_role '] = roles[0]['id']
-        
-        return json.loads(self.base_request.request(
-            self.RESOURCE, 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        ).decode('utf-8'))
-        
+                data["organization_membership_role "] = roles[0]["id"]
+
+        return json.loads(
+            self.base_request.request(
+                self.RESOURCE,
+                "POST",
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
+                login=True,
+            ).decode("utf-8")
+        )
+
     def revoke(self, invite_id):
         """
         Revoke an invite.
@@ -281,17 +376,16 @@ class OrganizationInvite():
             'OK'
 
         """
-        
-        params = {
-            'filter': 'id',
-            'eq': invite_id
-        }
+
+        params = {"filter": "id", "eq": invite_id}
 
         return self.base_request.request(
-            self.RESOURCE, 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            self.RESOURCE,
+            "DELETE",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
         )
-        
+
     def accept(self, invite_token):
         """
         Accepts an invite.
@@ -300,10 +394,12 @@ class OrganizationInvite():
             invite_token (str): invitation Token - invite token.
 
         """
-        
+
         return self.base_request.request(
-            '/org/v1/invitation/{0}'.format(invite_token), 'POST',
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "/org/v1/invitation/{0}".format(invite_token),
+            "POST",
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
 
@@ -329,13 +425,31 @@ class OrganizationMembership:
 
         Examples:
             >>> balena.models.organization.membership.get_all()
-            '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+            [
+                {
+                    "id": 17608,
+                    "created_at": "2017-08-03T11:16:03.022Z",
+                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+                    "is_member_of__organization": {
+                        "__id": 3014,
+                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+                    },
+                    "organization_membership_role": {
+                        "__id": 3,
+                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+                    },
+                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                }
+            ]
 
         """
 
         return self.base_request.request(
-            'organization_membership', 'GET', endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization_membership",
+            "GET",
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
     def get_all_by_organization(self, handle_or_id):
         """
@@ -352,35 +466,50 @@ class OrganizationMembership:
 
         Examples:
             >>> balena.models.organization.membership.get_all_by_organization(3014)
-            '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+            [
+                {
+                    "id": 17608,
+                    "created_at": "2017-08-03T11:16:03.022Z",
+                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+                    "is_member_of__organization": {
+                        "__id": 3014,
+                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+                    },
+                    "organization_membership_role": {
+                        "__id": 3,
+                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+                    },
+                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'is_member_of__organization',
-            'eq': handle_or_id
-        }
+        params = {"filter": "is_member_of__organization", "eq": handle_or_id}
 
         if not is_id(handle_or_id):
-            params1 = {
-                'filter': 'handle',
-                'eq': handle_or_id
-            }
+            params1 = {"filter": "handle", "eq": handle_or_id}
 
             org = self.base_request.request(
-                'organization', 'GET', params=params1,
-                endpoint=self.settings.get('pine_endpoint'), login=True
-            )['d']
+                "organization",
+                "GET",
+                params=params1,
+                endpoint=self.settings.get("pine_endpoint"),
+                login=True,
+            )["d"]
 
             if not org:
                 raise exceptions.OrganizationNotFound(handle_or_id)
 
-            params['eq'] = org['id']
+            params["eq"] = org["id"]
 
         return self.base_request.request(
-            'organization_membership', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization_membership",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
     def get(self, membership_id):
         """
@@ -397,19 +526,34 @@ class OrganizationMembership:
 
         Examples:
             >>> balena.models.organization.membership.get(17608)
-            '[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+            [
+                {
+                    "id": 17608,
+                    "created_at": "2017-08-03T11:16:03.022Z",
+                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+                    "is_member_of__organization": {
+                        "__id": 3014,
+                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+                    },
+                    "organization_membership_role": {
+                        "__id": 3,
+                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+                    },
+                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': membership_id
-        }
+        params = {"filter": "id", "eq": membership_id}
 
         org_membership = self.base_request.request(
-            'organization_membership', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "organization_membership",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
         if len(org_membership) > 0:
             return org_membership[0]
@@ -424,7 +568,7 @@ class OrganizationMembershipTag(BaseTag):
     """
 
     def __init__(self):
-        super(OrganizationMembershipTag, self).__init__('organization_membership')
+        super(OrganizationMembershipTag, self).__init__("organization_membership")
 
     def get_all_by_organization(self, handle_or_id):
         """
@@ -441,29 +585,40 @@ class OrganizationMembershipTag(BaseTag):
 
         Examples:
             >>> balena.models.organization.membership.tag.get_all_by_organization(3014)
-            [{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+            [
+                {
+                    "id": 991,
+                    "organization_membership": {
+                        "__id": 17608,
+                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                    },
+                    "tag_key": "mTag1",
+                    "value": "Python SDK 1",
+                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+                }
+            ]
 
         """
 
         org_id = handle_or_id
 
         if not is_id(handle_or_id):
-            params1 = {
-                'filter': 'handle',
-                'eq': handle_or_id
-            }
+            params1 = {"filter": "handle", "eq": handle_or_id}
 
             org = self.base_request.request(
-                'organization', 'GET', params=params1,
-                endpoint=self.settings.get('pine_endpoint'), login=True
-            )['d']
+                "organization",
+                "GET",
+                params=params1,
+                endpoint=self.settings.get("pine_endpoint"),
+                login=True,
+            )["d"]
 
             if not org:
                 raise exceptions.OrganizationNotFound(handle_or_id)
 
-            org_id = org['id']
+            org_id = org["id"]
 
-        query = '$filter=organization_membership/any(d:d/is_member_of__organization%20eq%20{org_id})'.format(org_id=org_id)
+        query = f"$filter=organization_membership/any(d:d/is_member_of__organization%20eq%20{org_id})"
 
         return super(OrganizationMembershipTag, self).get_all(raw_query=query)
 
@@ -479,14 +634,22 @@ class OrganizationMembershipTag(BaseTag):
 
         Examples:
             >>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
-            [{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+            [
+                {
+                    "id": 991,
+                    "organization_membership": {
+                        "__id": 17608,
+                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                    },
+                    "tag_key": "mTag1",
+                    "value": "Python SDK 1",
+                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'organization_membership',
-            'eq': membership_id
-        }
+        params = {"filter": "organization_membership", "eq": membership_id}
 
         return super(OrganizationMembershipTag, self).get_all(params=params)
 
@@ -499,7 +662,18 @@ class OrganizationMembershipTag(BaseTag):
 
         Examples:
             >>> balena.models.organization.membership.tag.get_all()
-            [{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+            [
+                {
+                    "id": 991,
+                    "organization_membership": {
+                        "__id": 17608,
+                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                    },
+                    "tag_key": "mTag1",
+                    "value": "Python SDK 1",
+                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+                }
+            ]
 
         """
 
@@ -520,7 +694,16 @@ class OrganizationMembershipTag(BaseTag):
 
         Examples:
             >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
-            {'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}
+            {
+                "id": 991,
+                "organization_membership": {
+                    "__id": 17608,
+                    "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+                },
+                "tag_key": "mTag1",
+                "value": "Python SDK",
+                "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+            }
             >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK 1')
             'OK'
 

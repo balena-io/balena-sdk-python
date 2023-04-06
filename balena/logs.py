@@ -1,21 +1,16 @@
-from functools import wraps
 import json
-try:  # Python 3 imports
-    from urllib.parse import urljoin
-except ImportError:  # Python 2 imports
-    from urlparse import urljoin
+
+from urllib.parse import urljoin
 from collections import defaultdict
 from threading import Thread
 
-from twisted.internet import reactor, ssl
-from twisted.internet.defer import Deferred
+from twisted.internet import reactor
 from twisted.internet.protocol import Protocol
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.internet.ssl import ClientContextFactory
 
 from .base_request import BaseRequest
-from . import exceptions
 from .models.config import Config
 from .models.device import Device
 from .settings import Settings
@@ -38,13 +33,13 @@ class StreamingParser(Protocol):
     def __init__(self, callback, error):
         self.callback = callback
         self.error = error
-        self.pending = b''
+        self.pending = b""
 
     def dataReceived(self, data):
         obj = {}
         self.pending += data
 
-        lines = self.pending.split(b'\n')
+        lines = self.pending.split(b"\n")
         self.pending = lines.pop()
 
         for line in lines:
@@ -85,19 +80,19 @@ class Subscription:
         self.settings = Settings()
 
     def add(self, uuid, callback, error=None, count=None):
-        query = 'stream=1'
+        query = "stream=1"
         if count:
-            query = 'stream=1&count={}'.format(count)
+            query = "stream=1&count={}".format(count)
 
         url = urljoin(
-            self.settings.get('api_endpoint'),
-            '/device/v2/{uuid}/logs?{query}'.format(uuid=uuid, query=query)
+            self.settings.get("api_endpoint"),
+            "/device/v2/{uuid}/logs?{query}".format(uuid=uuid, query=query),
         )
         headers = {}
-        headers[b'Authorization'] = ['Bearer {:s}'.format(self.settings.get('token')).encode()]
+        headers[b"Authorization"] = ["Bearer {:s}".format(self.settings.get("token")).encode()]
 
         agent = Agent(reactor, self.context_factory)
-        d = agent.request(b'GET', url.encode(), Headers(headers), None)
+        d = agent.request(b"GET", url.encode(), Headers(headers), None)
         d.addCallback(cbRequest, callback, error)
         self.run()
 
@@ -157,14 +152,16 @@ class Logs:
 
         """
 
-        raw_query = ''
+        raw_query = ""
 
         if count:
-            raw_query = 'count={}'.format(count)
+            raw_query = "count={}".format(count)
 
         return self.base_request.request(
-            '/device/v2/{uuid}/logs'.format(uuid=uuid), 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('api_endpoint')
+            "/device/v2/{uuid}/logs".format(uuid=uuid),
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("api_endpoint"),
         )
 
     def unsubscribe(self, uuid):

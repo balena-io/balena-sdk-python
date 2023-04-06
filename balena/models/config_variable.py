@@ -1,4 +1,3 @@
-import re
 import json
 
 from ..base_request import BaseRequest
@@ -8,7 +7,7 @@ from .. import exceptions
 
 
 def _is_valid_config_var_name(config_var_name):
-    return config_var_name.startswith('RESIN_') or config_var_name.startswith('BALENA_')
+    return config_var_name.startswith("RESIN_") or config_var_name.startswith("BALENA_")
 
 
 class ConfigVariable:
@@ -45,16 +44,31 @@ class DeviceConfigVariable:
 
         Examples:
             >>> balena.models.config_variable.device_config_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
+            [
+                {
+                    "id": 1234567,
+                    "device": {"__id": 7654321},
+                    "value": "test",
+                    "name": "MODE",
+                },
+                {
+                    "id": 7890123,
+                    "device": {"__id": 3210987},
+                    "value": "true",
+                    "name": "IS_TESTING",
+                },
+            ]
 
         """
 
         raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)
 
         return self.base_request.request(
-            'device_config_variable', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device_config_variable",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
     def get_all_by_application(self, app_id):
         """
@@ -68,16 +82,31 @@ class DeviceConfigVariable:
 
         Examples:
             >>> balena.models.config_variable.device_config_variable.get_all_by_application(1043050)
-            [{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
+            [
+                {
+                    "id": 1234567,
+                    "device": {"__id": 7654321},
+                    "value": "test_app",
+                    "name": "MODE_APPLICATION",
+                },
+                {
+                    "id": 7890123,
+                    "device": {"__id": 3210987},
+                    "value": "true",
+                    "name": "IS_TESTING",
+                },
+            ]
 
         """
 
-        raw_query = '$filter=device/any(d:d/belongs_to__application%20eq%20{app_id})'.format(app_id=app_id)
+        raw_query = f"$filter=device/any(d:d/belongs_to__application%20eq%20{app_id})"
 
         return self.base_request.request(
-            'device_config_variable', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device_config_variable",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
     def create(self, uuid, config_var_name, value):
         """
@@ -93,25 +122,31 @@ class DeviceConfigVariable:
 
         Examples:
             >>> balena.models.config_variable.device_config_variable.create('f14a73b3a762396f7bfeacf5d530c316aa8cfeff307bea93422f71a106c344','BALENA_TEST_DEVICE_CONFIG_VAR','test value')
-            {u'device': {u'__deferred': {u'uri': u'/balena/device(1083716)'}, u'__id': 1083716}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variable(163985)'}, u'id': 163985, u'value': u'test value', u'name': u'BALENA_TEST_DEVICE_CONFIG_VAR'}
+            {
+                "device": {"__deferred": {"uri": "/balena/device(1083716)"}, "__id": 1083716},
+                "__metadata": {"type": "", "uri": "/balena/device_config_variable(163985)"},
+                "id": 163985,
+                "value": "test value",
+                "name": "BALENA_TEST_DEVICE_CONFIG_VAR",
+            }
 
-        """
+        """  # noqa: E501
 
         if not _is_valid_config_var_name(config_var_name):
-            raise exceptions.InvalidParameter('config_var_name', config_var_name)
+            raise exceptions.InvalidParameter("config_var_name", config_var_name)
 
         device = self.device.get(uuid)
 
-        data = {
-            'device': device['id'],
-            'name': config_var_name,
-            'value': value
-        }
+        data = {"device": device["id"], "name": config_var_name, "value": value}
 
-        return json.loads(self.base_request.request(
-            'device_config_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
-        ).decode('utf-8'))
+        return json.loads(
+            self.base_request.request(
+                "device_config_variable",
+                "POST",
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
+            ).decode("utf-8")
+        )
 
     def update(self, var_id, value):
         """
@@ -127,16 +162,14 @@ class DeviceConfigVariable:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': var_id
-        }
-        data = {
-            'value': value
-        }
+        params = {"filter": "id", "eq": var_id}
+        data = {"value": value}
         return self.base_request.request(
-            'device_config_variable', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device_config_variable",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def remove(self, var_id):
@@ -152,13 +185,12 @@ class DeviceConfigVariable:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': var_id
-        }
+        params = {"filter": "id", "eq": var_id}
         return self.base_request.request(
-            'device_config_variable', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            "device_config_variable",
+            "DELETE",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
 
@@ -184,19 +216,32 @@ class ApplicationConfigVariable:
 
         Examples:
             >>> balena.models.config_variable.application_config_variable.get_all('1005160')
-            [{u'application': {u'__deferred': {u'uri': u'/balena/application(1005160)'}, u'__id': 1005160}, u'__metadata': {u'type': u'', u'uri': u'/balena/application_config_variable(116965)'}, u'id': 116965, u'value': u'false', u'name': u'BALENA_SUPERVISOR_NATIVE_LOGGER'}]
+            [
+                {
+                    "application": {
+                        "__deferred": {"uri": "/balena/application(1005160)"},
+                        "__id": 1005160,
+                    },
+                    "__metadata": {
+                        "type": "",
+                        "uri": "/balena/application_config_variable(116965)",
+                    },
+                    "id": 116965,
+                    "value": "false",
+                    "name": "BALENA_SUPERVISOR_NATIVE_LOGGER",
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'application',
-            'eq': app_id
-        }
+        params = {"filter": "application", "eq": app_id}
 
         return self.base_request.request(
-            'application_config_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "application_config_variable",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
     def create(self, app_id, config_var_name, value):
         """
@@ -211,24 +256,33 @@ class ApplicationConfigVariable:
             dict: new application config variable info.
 
         Examples:
-            >>> print(balena.models.config_variable.application_config_variable.create('1005160', 'BALENA_TEST_APP_CONFIG_VAR', 'test value'))
-            {"id":117738,"application":{"__deferred":{"uri":"/balena/application(1005160)"},"__id":1005160},"name":"BALENA_TEST_APP_CONFIG_VAR","value":"test value","__metadata":{"uri":"/balena/application_config_variable(117738)","type":""}}
+            >>> balena.models.config_variable.application_config_variable.create('1005160', 'BALENA_TEST_APP_CONFIG_VAR', 'test value')
+            {
+                "id": 117738,
+                "application": {
+                    "__deferred": {"uri": "/balena/application(1005160)"},
+                    "__id": 1005160,
+                },
+                "name": "BALENA_TEST_APP_CONFIG_VAR",
+                "value": "test value",
+                "__metadata": {"uri": "/balena/application_config_variable(117738)", "type": ""},
+            }
 
-        """
+        """  # noqa: E501
 
         if not _is_valid_config_var_name(config_var_name):
-            raise exceptions.InvalidParameter('config_var_name', config_var_name)
+            raise exceptions.InvalidParameter("config_var_name", config_var_name)
 
-        data = {
-            'application': app_id,
-            'name': config_var_name,
-            'value': value
-        }
+        data = {"application": app_id, "name": config_var_name, "value": value}
 
-        return json.loads(self.base_request.request(
-            'application_config_variable', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint')
-        ).decode('utf-8'))
+        return json.loads(
+            self.base_request.request(
+                "application_config_variable",
+                "POST",
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
+            ).decode("utf-8")
+        )
 
     def update(self, var_id, value):
         """
@@ -244,16 +298,14 @@ class ApplicationConfigVariable:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': var_id
-        }
-        data = {
-            'value': value
-        }
+        params = {"filter": "id", "eq": var_id}
+        data = {"value": value}
         return self.base_request.request(
-            'application_config_variable', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "application_config_variable",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def remove(self, var_id):
@@ -269,11 +321,10 @@ class ApplicationConfigVariable:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': var_id
-        }
+        params = {"filter": "id", "eq": var_id}
         return self.base_request.request(
-            'application_config_variable', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            "application_config_variable",
+            "DELETE",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
         )

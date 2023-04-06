@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "balena-sdk-python"
+version = "12.5.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+license = "Apache License 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+PyJWT = ">=2.0.0"
+requests = ">=2.19.1"
+pyotp = ">=2.2.5"
+pyOpenSSL = ">=18.0.0"
+Twisted = ">=18.7.0"
+service-identity = "*"
+semver = "*"
+
+[tool.poetry.dev-dependencies]
+black = {version = "^22.12", python = ">=3.8.1"}
+pydocstyle = "^6.3.0"
+flake8 = "^6.0.0"
+
+[tool.pytest.ini_options]
+# Tests are run via the custom action in .github/actions/test/action.yml
+addopts = "-s"
+python_files = ["skip.py"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

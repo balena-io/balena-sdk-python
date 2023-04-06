@@ -1,22 +1,5 @@
-import sys
-import re
-
 from ..base_request import BaseRequest
 from ..settings import Settings
-
-
-def _normalize_device_type(dev_type):
-    if dev_type['state'] is 'DISCONTINUED':
-        dev_type['name'] = re.sub(r'\((PREVIEW|EXPERIMENTAL)\)', '(DISCONTINUED)', dev_type['name'])
-    if dev_type['state'] == 'PREVIEW':
-        dev_type['state'] = 'ALPHA'
-        dev_type['name'] = dev_type['name'].replace('(PREVIEW)', '(ALPHA)')
-    if dev_type['state'] == 'EXPERIMENTAL':
-        dev_type['state'] = 'NEW'
-        dev_type['name'] = dev_type['name'].replace('(EXPERIMENTAL)', ('NEW'))
-    if dev_type['slug'] == 'raspberry-pi':
-        dev_type['name'] = 'Raspberry Pi (v1 or Zero)'
-    return dev_type
 
 
 class Config:
@@ -55,6 +38,5 @@ class Config:
         """
 
         if not self._config:
-            self._config = self.base_request.request(
-                'config', 'GET', endpoint=self.settings.get('api_endpoint'))
+            self._config = self.base_request.request("config", "GET", endpoint=self.settings.get("api_endpoint"))
         return self._config

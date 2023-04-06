@@ -28,9 +28,7 @@ class TestHistory(unittest.TestCase):
             self.assertIsNone(device_history[0]["end_timestamp"])
             # now check
             for history_entry in device_history:
-                self.assertEqual(
-                    history_entry["tracks__device"]["__id"], app_info["device"]["id"]
-                )
+                self.assertEqual(history_entry["tracks__device"]["__id"], app_info["device"]["id"])
                 self.assertEqual(history_entry["uuid"], app_info["device"]["uuid"])
                 self.assertEqual(
                     history_entry["belongs_to__application"]["__id"],
@@ -38,9 +36,7 @@ class TestHistory(unittest.TestCase):
                 )
 
         # should set the device to track the current application release.
-        self.balena.models.device.set_to_release(
-            app_info["device"]["uuid"], app_info["old_release"]["commit"]
-        )
+        self.balena.models.device.set_to_release(app_info["device"]["uuid"], app_info["old_release"]["commit"])
 
         # get by device uuid
         device_history = test_model.get_all_by_device(app_info["device"]["uuid"])
@@ -85,15 +81,11 @@ class TestHistory(unittest.TestCase):
 
             for invalidParameter in [[], {}, "invalid", 1]:
                 with self.assertRaises(Exception) as cm:
-                    device_history = method_under_test(
-                        app_info[test_set["by"]]["id"], fromDate=invalidParameter
-                    )
+                    device_history = method_under_test(app_info[test_set["by"]]["id"], fromDate=invalidParameter)
                 self.assertIn("Invalid parameter:", cm.exception.message)
 
                 with self.assertRaises(Exception) as cm:
-                    device_history = method_under_test(
-                        app_info[test_set["by"]]["id"], toDate=invalidParameter
-                    )
+                    device_history = method_under_test(app_info[test_set["by"]]["id"], toDate=invalidParameter)
                 self.assertIn("Invalid parameter:", cm.exception.message)
 
     def test_device_model_get_device_history(self):

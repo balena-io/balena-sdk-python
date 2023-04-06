@@ -1,8 +1,5 @@
-import sys
-
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .. import exceptions
 
 
 class ServiceInstall:
@@ -29,15 +26,14 @@ class ServiceInstall:
 
         """
 
-        params = {
-            'filter': key,
-            'eq': value
-        }
+        params = {"filter": key, "eq": value}
 
         return self.base_request.request(
-            'service_install', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "service_install",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
     def get_all_by_device(self, device_id):
         """
@@ -51,4 +47,4 @@ class ServiceInstall:
 
         """
 
-        return self.__get_by_option('device', device_id)
+        return self.__get_by_option("device", device_id)
