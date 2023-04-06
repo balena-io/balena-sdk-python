@@ -49,15 +49,10 @@ class DeviceConfigVariable:
 
         """
 
-        device = self.device.get(uuid)
-
-        params = {
-            'filter': 'device',
-            'eq': device['id']
-        }
+        raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)
 
         return self.base_request.request(
-            'device_config_variable', 'GET', params=params,
+            'device_config_variable', 'GET', raw_query=raw_query,
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
