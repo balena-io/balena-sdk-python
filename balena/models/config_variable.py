@@ -109,7 +109,6 @@ class DeviceConfigVariable:
 
         data = {
             'device': device['id'],
-            'application': device['belongs_to__application']['__id'],
             'name': config_var_name,
             'value': value
         }
