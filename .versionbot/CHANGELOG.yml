@@ -1,4 +1,21 @@
 - commits:
+    - subject: Add device history model
+      hash: 99a711edc09bd95654b5c917cf7e5c6d06ce73d6
+      body: |
+        - models.device.history.get_all_by_device
+        - models.device.history.get_all_by_application
+        - models.history.device_history.get_all_by_device
+        - models.history.device_history.get_all_by_application
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+  version: 12.6.0
+  title: ""
+  date: 2023-04-07T07:16:55.820Z
+- commits:
     - subject: Support ESR version in device.start_os_update()
       hash: 42269081f3c9a686b59682772388081e07bd9b41
       body: ""
