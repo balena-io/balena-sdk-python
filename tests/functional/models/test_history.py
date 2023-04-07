@@ -5,7 +5,6 @@ from tests.helper import TestHelper
 
 
 class TestHistory(unittest.TestCase):
-
     helper = None
     balena = None
 
@@ -61,13 +60,13 @@ class TestHistory(unittest.TestCase):
             {"method": "get_all_by_device", "by": "device"},
             {"method": "get_all_by_application", "by": "app"},
         ]:
-            device_history = test_model[test_set["method"]](
-                app_info[test_set["by"]]["id"]
-            )
+            method_under_test = getattr(test_model, test_set["method"])
+            device_history = method_under_test(app_info[test_set["by"]]["id"])
+
             check_device_history(device_history)
 
             # set time range to return device history entries
-            device_history = test_model[test_set["method"]](
+            device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
                 fromDate=datetime.utcnow() + timedelta(days=-10),
                 toDate=datetime.utcnow() + timedelta(days=+1),
@@ -75,7 +74,7 @@ class TestHistory(unittest.TestCase):
             check_device_history(device_history)
 
             # set time range to return now data
-            device_history = test_model[test_set["method"]](
+            device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
                 fromDate=datetime.utcnow() + timedelta(days=-3000),
                 toDate=datetime.utcnow() + timedelta(days=-2000),
@@ -84,13 +83,13 @@ class TestHistory(unittest.TestCase):
 
             for invalidParameter in [[], {}, "invalid", 1]:
                 with self.assertRaises(Exception) as cm:
-                    device_history = test_model[test_set["method"]](
+                    device_history = method_under_test(
                         app_info[test_set["by"]]["id"], fromDate=invalidParameter
                     )
                 self.assertIn("Invalid parameter:", cm.exception.message)
 
                 with self.assertRaises(Exception) as cm:
-                    device_history = test_model[test_set["method"]](
+                    device_history = method_under_test(
                         app_info[test_set["by"]]["id"], toDate=invalidParameter
                     )
                 self.assertIn("Invalid parameter:", cm.exception.message)
