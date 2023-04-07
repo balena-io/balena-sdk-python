@@ -37,8 +37,13 @@ class TestApplication(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.InvalidApplicationType):
             self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', self.helper.default_organization['id'], 'microservices-starterrrrrr')
 
-        # should be able to create an application with a specific application type
-        app = self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', self.helper.default_organization['id'], 'microservices-starter')
+        # should be rejected if the application type is legacy
+        with self.assertRaises(Exception) as cm:
+            self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', self.helper.default_organization['id'], 'microservices-starter')
+        self.assertIn('The provided application type is not valid.', cm.exception.message)
+
+        # should be able to create an application with a application type
+        app = self.balena.models.application.create('FooBar1', 'Raspberry Pi 3', self.helper.default_organization['id'], 'microservices')
         self.assertEqual(app['app_name'], 'FooBar1')
 
     def test_get_all(self):
