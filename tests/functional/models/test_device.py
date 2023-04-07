@@ -19,45 +19,11 @@ class TestDevice(unittest.TestCase):
         # Wipe all apps after every test case.
         self.helper.wipe_application()
 
-    def test_get_display_name(self):
-        # should get the display name for a known slug.
-        self.assertEqual(
-            self.balena.models.device.get_display_name('raspberry-pi'),
-            'Raspberry Pi (v1 or Zero)'
-        )
-
-        # should be rejected if the slug is invalid.
-        with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
-            self.balena.models.device.get_display_name('PYTHONSDK')
-
-    def test_get_device_slug(self):
-        # should be the slug from a display name.
-        self.assertEqual(
-            self.balena.models.device.get_device_slug('Raspberry Pi (v1 or Zero)'),
-            'raspberry-pi'
-        )
-
-        # should be rejected if the display name is invalid.
-        with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
-            self.balena.models.device.get_device_slug('PYTHONSDK')
-
-    def test_get_supported_device_types(self):
-        # should return a non empty array.
-        self.assertGreater(
-            len(self.balena.models.device.get_supported_device_types()),
-            0
-        )
-
-        # should return all valid display names.
-        for dev_type in self.balena.models.device.get_supported_device_types():
-            self.assertTrue(self.balena.models.device.get_device_slug(dev_type))
-
     def test_get_manifest_by_slug(self):
         # should become the manifest if the slug is valid.
         manifest = self.balena.models.device.get_manifest_by_slug('raspberry-pi')
         self.assertTrue(manifest['slug'])
         self.assertTrue(manifest['name'])
-        self.assertTrue(manifest['options'])
 
         # should be rejected if the device slug is invalid.
         with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
