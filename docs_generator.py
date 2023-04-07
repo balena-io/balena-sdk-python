@@ -42,6 +42,8 @@ Table_Of_Content = [
     ('ReleaseTag', TOC_L3),
     ('Key', TOC_L2),
     ('Supervisor', TOC_L2),
+    ('History', TOC_L2),
+    ('DeviceHistory', TOC_L3),
     ('Auth', TOC_L1),
     ('Logs', TOC_L1),
     ('Settings', TOC_L1),
@@ -162,6 +164,13 @@ def main():
     print_functions(balena.models.key.Key)
     print(doc2md.doc2md(balena.models.supervisor.Supervisor.__doc__, 'Supervisor', type=0))
     print_functions(balena.models.supervisor.Supervisor)
+    print(doc2md.doc2md(
+        balena.models.history.History.__doc__,
+        'History', type=0))
+    print(doc2md.doc2md(
+        balena.models.history.DeviceHistory.__doc__,
+        'DeviceHistory', type=0))
+    print_functions(balena.models.history.DeviceHistory)
     print(doc2md.doc2md(balena.auth.Auth.__doc__, 'Auth', type=0))
     print_functions(balena.auth.Auth)
     print(doc2md.doc2md(balena.logs.Logs.__doc__, 'Logs', type=0))

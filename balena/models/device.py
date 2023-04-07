@@ -22,6 +22,7 @@ from ..resources import Message
 from .application import Application
 from .release import Release
 from .hup import Hup
+from .history import DeviceHistory
 
 
 LOCAL_MODE_MIN_OS_VERSION = '2.0.0'
@@ -66,6 +67,7 @@ class Device:
         self.device_os = DeviceOs()
         self.device_type = DeviceType()
         self.hup = Hup()
+        self.history = DeviceHistory()
 
     def __upsert_device_config_variable(self, device, name, value):
         try:
@@ -1647,3 +1649,4 @@ class Device:
             return {k: device.get(k, "") for k in metrics}
         else:
             return {}
+    

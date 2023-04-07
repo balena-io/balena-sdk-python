@@ -18,6 +18,7 @@ from .config_variable import ConfigVariable
 from .api_key import ApiKey
 from .tag import Tag
 from .organization import Organization
+from .history import History
 
 
 class Models:
@@ -38,3 +39,4 @@ class Models:
         self.api_key = ApiKey()
         self.tag = Tag()
         self.organization = Organization()
+        self.history = History()
