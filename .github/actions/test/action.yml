@@ -1,0 +1,33 @@
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+name: "Test custom"
+description: "Custom test step to run during a pull request"
+# this inputs are always provided by flowzone, so they must always be defined on the composite action
+inputs:
+  json:
+    description: "JSON stringified object containing all the inputs from the calling workflow"
+    required: true
+  secrets:
+    description: "JSON stringified object containing all the secrets from the calling workflow"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3.10
+      if: steps.python_poetry.outputs.enabled == 'true'
+      uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run custom node tests
+      shell: bash
+      run: |
+        export TEST_ENV_EMAIL=${{ fromJSON(inputs.secrets).TEST_ENV_EMAIL }}
+        export TEST_ENV_USER_ID=${{ fromJSON(inputs.secrets).TEST_ENV_USER_ID }}
+        export TEST_ENV_PASSWORD=${{ fromJSON(inputs.secrets).TEST_ENV_PASSWORD }}
+
+        python3 -m unittest discover tests -v

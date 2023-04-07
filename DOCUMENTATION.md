@@ -97,7 +97,7 @@ Create an application. This function only works if you log in using credentials 
 
 #### Examples:
 ```python
->>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices-starter')
+>>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices')
 '{u'depends_on__application': None, u'should_track_latest_release': True, u'app_name': u'foo', u'application_type': {u'__deferred': {u'uri': u'/resin/application_type(5)'}, u'__id': 5}, u'__metadata': {u'type': u'', u'uri': u'/resin/application(12345)'}, u'is_accessible_by_support_until__date': None, u'actor': 12345, u'id': 12345, u'user': {u'__deferred': {u'uri': u'/resin/user(12345)'}, u'__id': 12345}, u'device_type': u'raspberrypi3', u'commit': None, u'slug': u'my_user/foo'}'
 ```
 ### Function: disable_device_urls(app_id)

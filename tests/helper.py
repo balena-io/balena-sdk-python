@@ -354,7 +354,7 @@ class TestHelper:
         Create a multicontainer application with  two releases.
         """
 
-        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices-starter')
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization['id'], 'microservices')
         user_id = self.balena.auth.get_user_id()
 
         # Register an old & new release of this application
