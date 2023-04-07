@@ -1,4 +1,36 @@
 - commits:
+    - subject: Reuse created orgs across all organization tests to avoid ratelimiting
+      hash: 7d7d51b0c63044b8c3bad5a96459d9a6d2089ea4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+    - subject: Update the tests for the new device_type model
+      hash: 193b39a1260f00fe2c2dcbe58ae78d8a1d66a3e2
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+    - subject: Fix the tests that use the now legacy Starer app type
+      hash: 435c571383bd5fc03cd1b772b690b7ba02663025
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+    - subject: Run the test suite with flowzone ci
+      hash: 45159d0682a1756b63bb5187945147c5eaa6182f
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 12.6.2
+  title: ""
+  date: 2023-04-07T10:47:26.938Z
+- commits:
     - subject: Fix device history tests
       hash: 4ee857be2ffba8a31131b4918bc9e2558b6fd276
       body: ""
