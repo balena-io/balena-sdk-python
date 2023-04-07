@@ -1,4 +1,17 @@
 - commits:
+    - subject: Fix device history tests
+      hash: 4ee857be2ffba8a31131b4918bc9e2558b6fd276
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+  version: 12.6.1
+  title: ""
+  date: 2023-04-07T10:17:30.606Z
+- commits:
     - subject: Add device history model
       hash: 99a711edc09bd95654b5c917cf7e5c6d06ce73d6
       body: |
