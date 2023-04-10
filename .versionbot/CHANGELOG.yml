@@ -1,4 +1,15 @@
 - commits:
+    - subject: Remove unused application parameter when creating device config vars
+      hash: 4708e03fa971e75eff5d6569bbf586ecae27bafd
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 12.6.3
+  title: ""
+  date: 2023-04-10T12:19:37.003Z
+- commits:
     - subject: Reuse created orgs across all organization tests to avoid ratelimiting
       hash: 7d7d51b0c63044b8c3bad5a96459d9a6d2089ea4
       body: ""
