@@ -1,4 +1,15 @@
 - commits:
+    - subject: Avoid device id lookups where possible by querying with uuid directly
+      hash: 38fd2d9741665aadde9a2971cfe8dda4f1752283
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 12.6.4
+  title: ""
+  date: 2023-04-10T17:20:03.320Z
+- commits:
     - subject: Remove unused application parameter when creating device config vars
       hash: 4708e03fa971e75eff5d6569bbf586ecae27bafd
       body: ""
