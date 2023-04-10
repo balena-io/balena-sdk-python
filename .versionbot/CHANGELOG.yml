@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add device_tag tests
+      hash: c4cec75af09f2a35fab464233aa7f3ae87645c3d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 12.6.5
+  title: ""
+  date: 2023-04-10T18:16:25.337Z
+- commits:
     - subject: Avoid device id lookups where possible by querying with uuid directly
       hash: 38fd2d9741665aadde9a2971cfe8dda4f1752283
       body: ""
