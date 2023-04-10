@@ -14,8 +14,9 @@ def find_with_tag_key(tag_list, tag_key):
 
 class BaseTagTest:
 
-    def __init__(self, test_obj):
+    def __init__(self, test_obj, associated_resource_name, ):
         self.test_obj = test_obj
+        self.associated_resource_name = associated_resource_name
 
     def test_get_all_by_application(self, test_runner, resource_id, app_id):
         # should become an empty array by default
@@ -83,7 +84,7 @@ class BaseTagTest:
         # should be rejected if the tag_key is empty
         with test_runner.assertRaises(Exception) as cm:
             self.test_obj.set(resource_id, '', 'not allowed')
-        test_runner.assertIn('It is necessary that each release tag has a tag key that has a Length (Type) that is greater than 0.', cm.exception.message)
+        test_runner.assertIn('It is necessary that each {associated_resource_name} tag has a tag key that has a Length (Type) that is greater than 0.'.format(associated_resource_name=self.associated_resource_name), cm.exception.message)
 
         # given 2 tags, should be able to update a tag without affecting the rest
         self.test_obj.set(resource_id, 'Foo2', 'Bar')
@@ -106,6 +107,66 @@ class BaseTagTest:
         # after removing a tag, current_length should be reduced by 1
         test_runner.assertEqual(len(self.test_obj.get_all()), (current_length - 1))
 
+class TestDeviceTag(unittest.TestCase):
+
+    helper = None
+    balena = None
+    device_tag = None
+    base_tag_test = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.helper = TestHelper()
+        cls.balena = cls.helper.balena
+        cls.device_tag = cls.balena.models.tag.device
+        cls.base_tag_test = BaseTagTest(cls.device_tag, 'device')
+
+    def tearDown(self):
+        # Wipe all apps after every test case.
+        self.helper.wipe_application()
+
+    def test_get_all_by_application(self):
+        app, device = self.helper.create_device()
+        self.base_tag_test.test_get_all_by_application(self, device['uuid'], app['id'])
+
+    def test_get_all(self):
+        app, device = self.helper.create_device()
+        self.base_tag_test.test_get_all(self, device['uuid'])
+
+    def test_set(self):
+        app, device = self.helper.create_device()
+        self.base_tag_test.test_set(self, device['uuid'])
+
+    def test_remove(self):
+        app, device = self.helper.create_device()
+        self.base_tag_test.test_remove(self, device['uuid'])
+
+    def test_get_all_by_device(self):
+        app, device = self.helper.create_device()
+        device_id = device['uuid']
+        # should become an empty array by default
+        self.assertEqual(self.device_tag.get_all_by_device(device_id), [])
+
+        # given a tag
+        self.device_tag.set(device_id, 'Foo', 'Bar')
+
+        # should retrieve the tag by uuid
+        tags = self.device_tag.get_all_by_device(device_id)
+        self.assertEqual(len(tags), 1)
+        self.assertEqual(tags[0]['tag_key'], 'Foo')
+        self.assertEqual(tags[0]['value'], 'Bar')
+
+        # given 2 tags
+        self.device_tag.set(device_id, 'Foo1', 'Bar1')
+
+        # should retrieve all the tags by uuid
+        tags = self.device_tag.get_all_by_device(device_id)
+        tags = sorted(tags, key=lambda k: k['tag_key'])
+        self.assertEqual(len(tags), 2)
+        self.assertEqual(tags[0]['tag_key'], 'Foo')
+        self.assertEqual(tags[0]['value'], 'Bar')
+        self.assertEqual(tags[1]['tag_key'], 'Foo1')
+        self.assertEqual(tags[1]['value'], 'Bar1')
 
 class TestReleaseTag(unittest.TestCase):
 
@@ -119,7 +180,7 @@ class TestReleaseTag(unittest.TestCase):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
         cls.release_tag = cls.balena.models.tag.release
-        cls.base_tag_test = BaseTagTest(cls.release_tag)
+        cls.base_tag_test = BaseTagTest(cls.release_tag, 'release')
 
     def tearDown(self):
         # Wipe all apps after every test case.
