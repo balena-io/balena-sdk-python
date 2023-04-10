@@ -13,7 +13,6 @@ from balena import exceptions as balena_exceptions
 from balena.base_request import BaseRequest
 from balena.settings import Settings
 
-
 class TestHelper:
 
     credentials = {}
