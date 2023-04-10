@@ -64,13 +64,9 @@ class DeviceEnvVariable:
 
         """
 
-        device = self.device.get(uuid)
-        params = {
-            'filter': 'device',
-            'eq': device['id']
-        }
+        raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)
         return self.base_request.request(
-            'device_environment_variable', 'GET', params=params,
+            'device_environment_variable', 'GET', raw_query=raw_query,
             endpoint=self.settings.get('pine_endpoint')
         )['d']
 
@@ -209,10 +205,7 @@ class DeviceServiceEnvVariable:
 
         """
 
-        # TODO: pine client for python
-        device = self.device.get(uuid)
-
-        query = '$expand=service_install($select=id&$expand=service($select=service_name))&$filter=service_install/any(d:d/device%20eq%20{device_id})'.format(device_id=device['id'])
+        query = "$expand=service_install($select=id&$expand=service($select=service_name))&$filter=service_install/any(si:si/device/any(d:d/uuid%20eq%20'{uuid}'))".format(uuid=uuid)
 
         return self.base_request.request(
             'device_service_environment_variable', 'GET', raw_query=query,

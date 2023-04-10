@@ -148,14 +148,9 @@ class DeviceTag(BaseTag):
 
         """
 
-        device = self.device.get(uuid)
+        raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)
 
-        params = {
-            'filter': 'device',
-            'eq': device['id']
-        }
-
-        return super(DeviceTag, self).get_all(params=params)
+        return super(DeviceTag, self).get_all(raw_query=raw_query)
 
     def get_all(self):
         """
