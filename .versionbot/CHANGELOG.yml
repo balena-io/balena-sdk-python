@@ -1,4 +1,15 @@
 - commits:
+    - subject: Make the tests faster by re-using created resources
+      hash: 818e26a0095eb6387293d6d7ff2b186dae1de66e
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 12.6.6
+  title: ""
+  date: 2023-04-10T19:37:09.509Z
+- commits:
     - subject: Add device_tag tests
       hash: c4cec75af09f2a35fab464233aa7f3ae87645c3d
       body: ""
