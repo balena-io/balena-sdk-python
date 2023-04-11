@@ -16,6 +16,8 @@ class TestDevice(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
+        # Wipe all apps before the tests run.
+        cls.helper.wipe_application()
         cls.app = cls.balena.models.application.create('FooBar', 'Raspberry Pi 2', cls.helper.default_organization['id'])
 
     @classmethod
