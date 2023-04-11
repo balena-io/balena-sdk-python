@@ -12,6 +12,8 @@ class TestHistory(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
+        # Wipe all apps before the tests run.
+        cls.helper.wipe_application()
 
     def tearDown(self):
         # Wipe all apps after every test case.

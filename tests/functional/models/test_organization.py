@@ -29,6 +29,8 @@ class TestOrganization(unittest.TestCase):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
         cls.test_org_admin_role = cls.helper.get_org_admin_role()
+        # Wipe all apps before the tests run.
+        cls.helper.wipe_organization()
 
     @classmethod
     def tearDownClass(cls):

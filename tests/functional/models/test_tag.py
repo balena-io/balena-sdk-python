@@ -132,6 +132,8 @@ class TestDeviceTag(unittest.TestCase):
         cls.balena = cls.helper.balena
         cls.device_tag = cls.balena.models.tag.device
         cls.base_tag_test = BaseTagTest(cls.device_tag, 'device')
+        # Wipe all apps before every test case.
+        cls.helper.wipe_application()
         app, device = cls.helper.create_device()
         cls.app = app
         cls.device = device
@@ -174,6 +176,8 @@ class TestReleaseTag(unittest.TestCase):
         cls.balena = cls.helper.balena
         cls.release_tag = cls.balena.models.tag.release
         cls.base_tag_test = BaseTagTest(cls.release_tag, 'release')
+        # Wipe all apps before every test case.
+        cls.helper.wipe_application()
         cls.app_info = cls.helper.create_multicontainer_app()
 
     @classmethod
