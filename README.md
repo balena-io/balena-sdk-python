@@ -83,6 +83,17 @@ For example, balena SDK v8.1.1, as the latest v8 release, would remain compatibl
 At the end of this period, the older major version is considered deprecated and some of the functionality that depends on balenaCloud services may stop working at any time.
 Users are encouraged to regularly update the balena SDK to the latest version.
 
+Developing locally
+-----
+This project uses [poetry](https://python-poetry.org/) for dependency management. In order to install all the needed dependencies please run `poetry install`.
+
+Linting and Formatting
+-----
+This project uses [black](https://pypi.org/project/black/) for code formatting and [flake8](https://flake8.pycqa.org/en/latest/) for linting.
+
+To format this project please use `poetry run black . -l 120`
+To verify linting you can run `poetry run flake8 --max-line-length=120`
+
 Tests
 -----
 

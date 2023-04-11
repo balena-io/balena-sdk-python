@@ -20,49 +20,60 @@ class Settings:
 
     """
 
-    HOME_DIRECTORY = os.getenv('BALENA_SETTINGS_HOME_DIRECTORY', default=Path.expanduser('~'))
-    CONFIG_SECTION = os.getenv('BALENA_SETTINGS_CONFIG_SECTION', default='Settings')
-    CONFIG_FILENAME = os.getenv('BALENA_SETTINGS_CONFIG_FILENAME', default='balena.cfg')
-    DEFAULT_SETTING_KEYS = set(['builder_url', 'pine_endpoint', 'api_endpoint', 'api_version',
-                                'data_directory', 'image_cache_time',
-                                'token_refresh_interval', 'cache_directory', 'timeout',
-                                'device_actions_endpoint_version'])
+    HOME_DIRECTORY = os.getenv("BALENA_SETTINGS_HOME_DIRECTORY", default=Path.expanduser("~"))
+    CONFIG_SECTION = os.getenv("BALENA_SETTINGS_CONFIG_SECTION", default="Settings")
+    CONFIG_FILENAME = os.getenv("BALENA_SETTINGS_CONFIG_FILENAME", default="balena.cfg")
+    DEFAULT_SETTING_KEYS = set(
+        [
+            "builder_url",
+            "pine_endpoint",
+            "api_endpoint",
+            "api_version",
+            "data_directory",
+            "image_cache_time",
+            "token_refresh_interval",
+            "cache_directory",
+            "timeout",
+            "device_actions_endpoint_version",
+        ]
+    )
 
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        'pine_endpoint': 'https://api.balena-cloud.com/v6/',
-        'api_endpoint': 'https://api.balena-cloud.com/',
-        'builder_url': 'https://builder.balena-cloud.com/',
-        'api_version': 'v6',
-        'device_actions_endpoint_version': 'v1',
-        'data_directory': Path.join(HOME_DIRECTORY, '.balena'),
+        "pine_endpoint": "https://api.balena-cloud.com/v6/",
+        "api_endpoint": "https://api.balena-cloud.com/",
+        "builder_url": "https://builder.balena-cloud.com/",
+        "api_version": "v6",
+        "device_actions_endpoint_version": "v1",
+        "data_directory": Path.join(HOME_DIRECTORY, ".balena"),
         # cache time : 1 week in milliseconds
-        'image_cache_time': str(1 * 1000 * 60 * 60 * 24 * 7),
+        "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7),
         # token refresh interval: 1 hour in milliseconds
-        'token_refresh_interval': str(1 * 1000 * 60 * 60),
+        "token_refresh_interval": str(1 * 1000 * 60 * 60),
         # requests timeout: 30 seconds in milliseconds
-        'timeout': str(30 * 1000),
+        "timeout": str(30 * 1000),
     }
 
-    _setting['cache_directory'] = Path.join(_setting['data_directory'],
-                                            'cache')
+    _setting["cache_directory"] = Path.join(_setting["data_directory"], "cache")
 
     def __init__(self):
-        config_file_path = Path.join(self._setting['data_directory'],
-                                     self.CONFIG_FILENAME)
+        config_file_path = Path.join(self._setting["data_directory"], self.CONFIG_FILENAME)
         try:
             self.__read_settings()
             if not self.DEFAULT_SETTING_KEYS.issubset(set(self._setting)):
                 raise
-        except:
+        except Exception:
             # Backup old settings file if it exists.
             try:
                 if Path.isfile(config_file_path):
-                    shutil.move(config_file_path,
-                                Path.join(self._setting['data_directory'],
-                                          "{0}.{1}".format(self.CONFIG_FILENAME,
-                                                           'old')))
+                    shutil.move(
+                        config_file_path,
+                        Path.join(
+                            self._setting["data_directory"],
+                            "{0}.{1}".format(self.CONFIG_FILENAME, "old"),
+                        ),
+                    )
             except OSError:
                 pass
             self.__write_settings(default=True)
@@ -83,23 +94,20 @@ class Settings:
         config.add_section(self.CONFIG_SECTION)
         for key in self._setting:
             config.set(self.CONFIG_SECTION, key, self._setting[key])
-        if not Path.isdir(self._setting['data_directory']):
-            os.makedirs(self._setting['data_directory'])
-        with open(Path.join(self._setting['data_directory'],
-                            self.CONFIG_FILENAME), 'w') as config_file:
+        if not Path.isdir(self._setting["data_directory"]):
+            os.makedirs(self._setting["data_directory"])
+        with open(Path.join(self._setting["data_directory"], self.CONFIG_FILENAME), "w") as config_file:
             config.write(config_file)
 
     def __read_settings(self):
         config_reader = configparser.ConfigParser()
-        config_reader.read(Path.join(self._setting['data_directory'],
-                                     self.CONFIG_FILENAME))
+        config_reader.read(Path.join(self._setting["data_directory"], self.CONFIG_FILENAME))
         config_data = {}
         options = config_reader.options(self.CONFIG_SECTION)
         for option in options:
             try:
-                config_data[option] = config_reader.get(self.CONFIG_SECTION,
-                                                        option)
-            except:
+                config_data[option] = config_reader.get(self.CONFIG_SECTION, option)
+            except Exception:
                 config_data[option] = None
         self._setting = config_data
 
@@ -158,8 +166,14 @@ class Settings:
 
         Examples:
             >>> balena.settings.get_all()
-            {'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena-cloud.com/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena-cloud.com/ewa/'}
-
+            {
+                "image_cache_time": "604800000",
+                "api_endpoint": "https://api.balena-cloud.com/",
+                "data_directory": "/root/.balena",
+                "token_refresh_interval": "3600000",
+                "cache_directory": "/root/.balena/cache",
+                "pine_endpoint": "https://api.balena-cloud.com/ewa/",
+            }
 
         """
 

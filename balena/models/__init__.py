@@ -22,7 +22,6 @@ from .history import History
 
 
 class Models:
-
     def __init__(self):
         self.device = Device()
         self.application = Application()

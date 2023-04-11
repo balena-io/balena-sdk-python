@@ -2,7 +2,7 @@ from .base_request import BaseRequest
 from .settings import Settings
 from . import exceptions
 
-TOKEN_KEY = 'token'
+TOKEN_KEY = "token"
 
 
 class Auth:
@@ -32,8 +32,7 @@ class Auth:
 
         if not self._user_detail_cache:
             self._user_detail_cache = self.base_request.request(
-                'user/v1/whoami', 'get',
-                endpoint=self.settings.get('api_endpoint')
+                "user/v1/whoami", "get", endpoint=self.settings.get("api_endpoint")
             )
 
         return self._user_detail_cache
@@ -52,15 +51,14 @@ class Auth:
 
         if not self._user_full_detail_cache:
 
-            params = {
-                'filter': 'id',
-                'eq': self.get_user_id()
-            }
+            params = {"filter": "id", "eq": self.get_user_id()}
 
             self._user_full_detail_cache = self.base_request.request(
-                'user', 'get', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d'][0]
+                "user",
+                "get",
+                params=params,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"][0]
 
         return self._user_full_detail_cache
 
@@ -156,7 +154,7 @@ class Auth:
 
         """
 
-        return self.__get_property('username')
+        return self.__get_property("username")
 
     def authenticate(self, **credentials):
         """
@@ -181,8 +179,11 @@ class Auth:
         """
 
         return self.base_request.request(
-            'login_', 'POST', data=credentials,
-            endpoint=self.settings.get('api_endpoint'), auth=False
+            "login_",
+            "POST",
+            data=credentials,
+            endpoint=self.settings.get("api_endpoint"),
+            auth=False,
         )
 
     def is_logged_in(self):
@@ -244,7 +245,7 @@ class Auth:
 
         """
 
-        return self.__get_property('id')
+        return self.__get_property("id")
 
     def get_email(self):
         """
@@ -263,7 +264,7 @@ class Auth:
 
         """
 
-        return self.__get_property('email')
+        return self.__get_property("email")
 
     def log_out(self):
         """
@@ -306,6 +307,9 @@ class Auth:
         """
 
         return self.base_request.request(
-            'user/register', 'POST', data=credentials,
-            endpoint=self.settings.get('api_endpoint'), auth=False
+            "user/register",
+            "POST",
+            data=credentials,
+            endpoint=self.settings.get("api_endpoint"),
+            auth=False,
         )

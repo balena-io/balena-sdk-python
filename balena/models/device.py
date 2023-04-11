@@ -1,4 +1,3 @@
-import sys
 import binascii
 import os
 from datetime import datetime
@@ -25,10 +24,10 @@ from .hup import Hup
 from .history import DeviceHistory
 
 
-LOCAL_MODE_MIN_OS_VERSION = '2.0.0'
-LOCAL_MODE_MIN_SUPERVISOR_VERSION = '4.0.0'
-LOCAL_MODE_ENV_VAR = 'RESIN_SUPERVISOR_LOCAL_MODE'
-OVERRIDE_LOCK_ENV_VAR = 'RESIN_OVERRIDE_LOCK'
+LOCAL_MODE_MIN_OS_VERSION = "2.0.0"
+LOCAL_MODE_MIN_SUPERVISOR_VERSION = "4.0.0"
+LOCAL_MODE_ENV_VAR = "RESIN_SUPERVISOR_LOCAL_MODE"
+OVERRIDE_LOCK_ENV_VAR = "RESIN_OVERRIDE_LOCK"
 
 
 # TODO: support both device uuid and device id
@@ -55,7 +54,7 @@ class Device:
 
     The new returned object's properties (since python SDK v2.0.0): `__metadata, actor, belongs_to__application, belongs_to__user, created_at, custom_latitude, custom_longitude, device_type, download_progress, id, ip_address, is_accessible_by_support_until__date, is_connected_to_vpn, is_locked_until__date, is_managed_by__device, is_managed_by__service_instance, is_on__commit, is_online, is_web_accessible, last_connectivity_event, last_vpn_event, latitude, local_id, location, logs_channel, longitude, name, note, os_variant, os_version, provisioning_progress, provisioning_state, public_address, should_be_managed_by__supervisor_release, should_be_running__build, status, supervisor_version, uuid, vpn_address`.
 
-    """
+    """  # noqa: E501
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -71,51 +70,60 @@ class Device:
 
     def __upsert_device_config_variable(self, device, name, value):
         try:
-            data = {
-                'device': device['id'],
-                'name': name,
-                'value': value
-            }
+            data = {"device": device["id"], "name": name, "value": value}
 
             return self.base_request.request(
-                'device_config_variable', 'POST', data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                "device_config_variable",
+                "POST",
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
             )
         except exceptions.RequestError as e:
-            if 'Unique key constraint violated' in e.message or 'must be unique' in e.message:
-                params = {
-                    'filters': {
-                        'device': device['id'],
-                        'name': name
-                    }
-                }
+            if "Unique key constraint violated" in e.message or "must be unique" in e.message:
+                params = {"filters": {"device": device["id"], "name": name}}
 
-                data = {
-                    'value': value
-                }
+                data = {"value": value}
 
                 return self.base_request.request(
-                    'device_config_variable', 'PATCH', params=params, data=data,
-                    endpoint=self.settings.get('pine_endpoint')
+                    "device_config_variable",
+                    "PATCH",
+                    params=params,
+                    data=data,
+                    endpoint=self.settings.get("pine_endpoint"),
                 )
             raise e
 
     def __get_applied_device_config_variable_value(self, uuid, name):
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=device_config_variable($select=value&$filter=name%20eq%20'{name}'),belongs_to__application($select=id&$expand=application_config_variable($select=value&$filter=name%20eq%20'{name}'))".format(name=name, uuid=uuid)
+        # fmt: off
+        raw_query = (
+            f"$filter=uuid%20eq%20'{uuid}'"
+            "&$expand=device_config_variable("
+                f"$select=value&$filter=name%20eq%20'{name}'"
+            "),"
+            "belongs_to__application("
+                "$select=id"
+                "&$expand=application_config_variable("
+                    f"$select=value&$filter=name%20eq%20'{name}'"
+                ")"
+            ")"
+        )
+        # fmt: on
 
         raw_data = self.base_request.request(
-            'device', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if len(raw_data) > 0:
-            device_config = raw_data[0]['device_config_variable']
-            app_config = raw_data[0]['belongs_to__application'][0]['application_config_variable']
+            device_config = raw_data[0]["device_config_variable"]
+            app_config = raw_data[0]["belongs_to__application"][0]["application_config_variable"]
 
             if device_config:
-                return device_config[0]['value']
+                return device_config[0]["value"]
             elif app_config:
-                return app_config[0]['value']
+                return app_config[0]["value"]
 
             return None
         else:
@@ -136,19 +144,45 @@ class Device:
 
         Examples:
             >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-            {u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}
+            {
+                "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+                "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                "is_web_accessible": False,
+                "device_type": "raspberry-pi",
+                "id": 122950,
+                "logs_channel": None,
+                "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                "note": None,
+                "os_version": None,
+                "location": "",
+                "latitude": "",
+                "status": None,
+                "public_address": "",
+                "provisioning_state": None,
+                "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                "is_online": False,
+                "supervisor_version": None,
+                "ip_address": None,
+                "vpn_address": None,
+                "name": "floral-mountain",
+                "download_progress": None,
+                "longitude": "",
+                "commit": None,
+                "provisioning_progress": None,
+                "supervisor_release": None,
+            }
 
         """
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
+        params = {"filter": "uuid", "eq": uuid}
         try:
             devices = self.base_request.request(
-                'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
+                "device",
+                "GET",
+                params=params,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"]
             if len(devices) > 1:
                 raise exceptions.AmbiguousDevice(uuid)
             return devices[0]
@@ -164,12 +198,40 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_all()
-            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+            [
+                {
+                    "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+                    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                    "is_web_accessible": False,
+                    "device_type": "raspberry-pi",
+                    "id": 122950,
+                    "logs_channel": None,
+                    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                    "note": None,
+                    "os_version": None,
+                    "location": "",
+                    "latitude": "",
+                    "status": None,
+                    "public_address": "",
+                    "provisioning_state": None,
+                    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                    "is_online": False,
+                    "supervisor_version": None,
+                    "ip_address": None,
+                    "vpn_address": None,
+                    "name": "floral-mountain",
+                    "download_progress": None,
+                    "longitude": "",
+                    "commit": None,
+                    "provisioning_progress": None,
+                    "supervisor_release": None,
+                }
+            ]
 
         """
 
-        return self.base_request.request(
-            'device', 'GET', endpoint=self.settings.get('pine_endpoint'))['d']
+        return self.base_request.request("device", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
 
     def get_all_by_application(self, name):
         """
@@ -183,29 +245,56 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_all_by_application('RPI1')
-            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+            [
+                {
+                    "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+                    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                    "is_web_accessible": False,
+                    "device_type": "raspberry-pi",
+                    "id": 122950,
+                    "logs_channel": None,
+                    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                    "note": None,
+                    "os_version": None,
+                    "location": "",
+                    "latitude": "",
+                    "status": None,
+                    "public_address": "",
+                    "provisioning_state": None,
+                    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                    "is_online": False,
+                    "supervisor_version": None,
+                    "ip_address": None,
+                    "vpn_address": None,
+                    "name": "floral-mountain",
+                    "download_progress": None,
+                    "longitude": "",
+                    "commit": None,
+                    "provisioning_progress": None,
+                    "supervisor_release": None,
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'app_name',
-            'eq': name
-        }
+        params = {"filter": "app_name", "eq": name}
 
         app = self.base_request.request(
-            'application', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "application",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if app:
-            params = {
-                'filter': 'belongs_to__application',
-                'eq': app[0]['id']
-            }
+            params = {"filter": "belongs_to__application", "eq": app[0]["id"]}
             return self.base_request.request(
-                'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
+                "device",
+                "GET",
+                params=params,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"]
 
     def get_all_by_application_id(self, appid):
         """
@@ -219,17 +308,42 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_all_by_application_id(1234)
-            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+            [
+                {
+                    "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+                    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                    "is_web_accessible": False,
+                    "device_type": "raspberry-pi",
+                    "id": 122950,
+                    "logs_channel": None,
+                    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                    "note": None,
+                    "os_version": None,
+                    "location": "",
+                    "latitude": "",
+                    "status": None,
+                    "public_address": "",
+                    "provisioning_state": None,
+                    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                    "is_online": False,
+                    "supervisor_version": None,
+                    "ip_address": None,
+                    "vpn_address": None,
+                    "name": "floral-mountain",
+                    "download_progress": None,
+                    "longitude": "",
+                    "commit": None,
+                    "provisioning_progress": None,
+                    "supervisor_release": None,
+                }
+            ]
 
         """
-        params = {
-            'filter': 'belongs_to__application',
-            'eq': appid
-        }
-        return self.base_request.request(
-            'device', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        params = {"filter": "belongs_to__application", "eq": appid}
+        return self.base_request.request("device", "GET", params=params, endpoint=self.settings.get("pine_endpoint"))[
+            "d"
+        ]
 
     def get_by_name(self, name):
         """
@@ -243,18 +357,43 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_by_name('floral-mountain')
-            [{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+            [
+                {
+                    "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+                    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                    "is_web_accessible": False,
+                    "device_type": "raspberry-pi",
+                    "id": 122950,
+                    "logs_channel": None,
+                    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                    "note": None,
+                    "os_version": None,
+                    "location": "",
+                    "latitude": "",
+                    "status": None,
+                    "public_address": "",
+                    "provisioning_state": None,
+                    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                    "is_online": False,
+                    "supervisor_version": None,
+                    "ip_address": None,
+                    "vpn_address": None,
+                    "name": "floral-mountain",
+                    "download_progress": None,
+                    "longitude": "",
+                    "commit": None,
+                    "provisioning_progress": None,
+                    "supervisor_release": None,
+                }
+            ]
 
         """
 
-        params = {
-            'filter': 'device_name',
-            'eq': name
-        }
-        return self.base_request.request(
-            'device', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        params = {"filter": "device_name", "eq": name}
+        return self.base_request.request("device", "GET", params=params, endpoint=self.settings.get("pine_endpoint"))[
+            "d"
+        ]
 
     def __get_single_install_summary(self, raw_data):
         """
@@ -262,24 +401,24 @@ class Device:
 
         """
 
-        image = raw_data['image'][0]
-        service = image['is_a_build_of__service'][0]
+        image = raw_data["image"][0]
+        service = image["is_a_build_of__service"][0]
         release = None
 
-        if 'is_provided_by__release' in raw_data:
-            release = raw_data['is_provided_by__release'][0]
+        if "is_provided_by__release" in raw_data:
+            release = raw_data["is_provided_by__release"][0]
 
         install = {
-            'service_name': service['service_name'],
-            'image_id': image['id'],
-            'service_id': service['id'],
+            "service_name": service["service_name"],
+            "image_id": image["id"],
+            "service_id": service["id"],
         }
 
         if release:
-            install['commit'] = release['commit']
+            install["commit"] = release["commit"]
 
-        raw_data.pop('is_provided_by__release', None)
-        raw_data.pop('image', None)
+        raw_data.pop("is_provided_by__release", None)
+        raw_data.pop("image", None)
         install.update(raw_data)
 
         return install
@@ -290,7 +429,7 @@ class Device:
 
         Args:
             uuid (str): device uuid.
-            expand_release (Optional[bool]): Set this parameter to False then the commit of service details will not be included.
+            expand_release (Optional[bool]): Set this to False and the commit of service details will not be included.
 
         Returns:
             dict: device info with associated services details.
@@ -300,20 +439,125 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_with_service_details('0fcd753af396247e035de53b4e43eec3')
-            {u'os_variant': u'prod', u'__metadata': {u'type': u'', u'uri': u'/balena/device(1136312)'}, u'is_managed_by__service_instance': {u'__deferred': {u'uri': u'/balena/service_instance(182)'}, u'__id': 182}, u'should_be_running__release': None, u'belongs_to__user': {u'__deferred': {u'uri': u'/balena/user(32986)'}, u'__id': 32986}, u'is_web_accessible': False, u'device_type': u'raspberrypi3', u'belongs_to__application': {u'__deferred': {u'uri': u'/balena/application(1116729)'}, u'__id': 1116729}, u'id': 1136312, u'is_locked_until__date': None, u'logs_channel': u'1da2f8db7c5edbf268ba6c34d91974de8e910eef0033a1172386ad27807552', u'uuid': u'0fcd753af396247e035de53b4e43eec3', u'is_managed_by__device': None, u'should_be_managed_by__supervisor_release': None, u'is_accessible_by_support_until__date': None, u'actor': 2895243, u'note': None, u'os_version': u'Balena OS 2.12.7+rev1', u'longitude': u'105.85', u'last_connectivity_event': u'2018-05-27T05:43:54.027Z', u'is_on__commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', u'location': u'Hanoi, Thanh Pho Ha Noi, Vietnam', u'status': u'Idle', u'public_address': u'14.231.243.124', u'is_connected_to_vpn': False, u'custom_latitude': u'', u'is_active': True, u'provisioning_state': u'', u'latitude': u'21.0333', u'custom_longitude': u'', 'current_services': {u'frontend': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952657)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296863, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52327, u'id': 8952657}], u'data': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952656)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296864, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52329, u'id': 8952656}], u'proxy': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952655)'}, u'install_date': u'2018-05-25T19:00:12.985Z', 'image_id': 296862, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52328, u'id': 8952655}]}, u'is_online': False, u'supervisor_version': u'7.4.3', u'ip_address': u'192.168.0.102', u'provisioning_progress': None, u'owns__device_log': {u'__deferred': {u'uri': u'/balena/device_log(1136312)'}, u'__id': 1136312}, u'created_at': u'2018-05-25T10:55:47.825Z', u'download_progress': None, u'last_vpn_event': u'2018-05-27T05:43:54.027Z', u'device_name': u'billowing-night', u'local_id': None, u'vpn_address': None, 'current_gateway_downloads': []}
+            {
+                "os_variant": "prod",
+                "__metadata": {"type": "", "uri": "/balena/device(1136312)"},
+                "is_managed_by__service_instance": {
+                    "__deferred": {"uri": "/balena/service_instance(182)"},
+                    "__id": 182,
+                },
+                "should_be_running__release": None,
+                "belongs_to__user": {"__deferred": {"uri": "/balena/user(32986)"}, "__id": 32986},
+                "is_web_accessible": False,
+                "device_type": "raspberrypi3",
+                "belongs_to__application": {
+                    "__deferred": {"uri": "/balena/application(1116729)"},
+                    "__id": 1116729,
+                },
+                "id": 1136312,
+                "is_locked_until__date": None,
+                "logs_channel": "1da2f8db7c5edbf268ba6c34d91974de8e910eef0033a1172386ad27807552",
+                "uuid": "0fcd753af396247e035de53b4e43eec3",
+                "is_managed_by__device": None,
+                "should_be_managed_by__supervisor_release": None,
+                "is_accessible_by_support_until__date": None,
+                "actor": 2895243,
+                "note": None,
+                "os_version": "Balena OS 2.12.7+rev1",
+                "longitude": "105.85",
+                "last_connectivity_event": "2018-05-27T05:43:54.027Z",
+                "is_on__commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                "location": "Hanoi, Thanh Pho Ha Noi, Vietnam",
+                "status": "Idle",
+                "public_address": "14.231.243.124",
+                "is_connected_to_vpn": False,
+                "custom_latitude": "",
+                "is_active": True,
+                "provisioning_state": "",
+                "latitude": "21.0333",
+                "custom_longitude": "",
+                "current_services": {
+                    "frontend": [
+                        {
+                            "status": "Running",
+                            "download_progress": None,
+                            "__metadata": {"type": "", "uri": "/balena/image_install(8952657)"},
+                            "install_date": "2018-05-25T19:00:12.989Z",
+                            "image_id": 296863,
+                            "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                            "service_id": 52327,
+                            "id": 8952657,
+                        }
+                    ],
+                    "data": [
+                        {
+                            "status": "Running",
+                            "download_progress": None,
+                            "__metadata": {"type": "", "uri": "/balena/image_install(8952656)"},
+                            "install_date": "2018-05-25T19:00:12.989Z",
+                            "image_id": 296864,
+                            "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                            "service_id": 52329,
+                            "id": 8952656,
+                        }
+                    ],
+                    "proxy": [
+                        {
+                            "status": "Running",
+                            "download_progress": None,
+                            "__metadata": {"type": "", "uri": "/balena/image_install(8952655)"},
+                            "install_date": "2018-05-25T19:00:12.985Z",
+                            "image_id": 296862,
+                            "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                            "service_id": 52328,
+                            "id": 8952655,
+                        }
+                    ],
+                },
+                "is_online": False,
+                "supervisor_version": "7.4.3",
+                "ip_address": "192.168.0.102",
+                "provisioning_progress": None,
+                "owns__device_log": {
+                    "__deferred": {"uri": "/balena/device_log(1136312)"},
+                    "__id": 1136312,
+                },
+                "created_at": "2018-05-25T10:55:47.825Z",
+                "download_progress": None,
+                "last_vpn_event": "2018-05-27T05:43:54.027Z",
+                "device_name": "billowing-night",
+                "local_id": None,
+                "vpn_address": None,
+                "current_gateway_downloads": [],
+            }
 
         """
 
-        release = ''
+        release = ""
         if expand_release:
             release = ",is_provided_by__release($select=id,commit)"
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=image_install($select=id,download_progress,status,install_date&$filter=status%20ne%20'deleted'&$expand=image($select=id&$expand=is_a_build_of__service($select=id,service_name)){release})".format(uuid=uuid, release=release)
+        # fmt: off
+        raw_query = (
+            f"$filter=uuid%20eq%20'{uuid}'"
+            "&$expand=image_install("
+                "$select=id,download_progress,status,install_date"
+                "&$filter=status%20ne%20'deleted'"
+                "&$expand=image("
+                    "$select=id"
+                    "&$expand=is_a_build_of__service($select=id,service_name)"
+                ")"
+                f"{release}"
+            ")"
+        )
+        # fmt: on
 
         raw_data = self.base_request.request(
-            'device', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if len(raw_data) == 0:
             raise exceptions.DeviceNotFound(uuid)
@@ -322,15 +566,15 @@ class Device:
 
         groupedServices = defaultdict(list)
 
-        for obj in [self.__get_single_install_summary(i) for i in raw_data['image_install']]:
-            groupedServices[obj.pop('service_name', None)].append(obj)
+        for obj in [self.__get_single_install_summary(i) for i in raw_data["image_install"]]:
+            groupedServices[obj.pop("service_name", None)].append(obj)
 
         # TODO: Remove the current_gateway_downloads property in the next major.
         # For backwards compatibility we default it to an empty list.
-        raw_data['current_services'] = dict(groupedServices)
-        raw_data['current_gateway_downloads'] = []
-        raw_data.pop('image_install', None)
-        raw_data.pop('gateway_download', None)
+        raw_data["current_services"] = dict(groupedServices)
+        raw_data["current_gateway_downloads"] = []
+        raw_data.pop("image_install", None)
+        raw_data.pop("gateway_download", None)
 
         return raw_data
 
@@ -349,7 +593,7 @@ class Device:
 
         """
 
-        return self.get(uuid)['device_name']
+        return self.get(uuid)["device_name"]
 
     def get_application_name(self, uuid):
         """
@@ -366,15 +610,14 @@ class Device:
 
         """
 
-        app_id = self.get(uuid)['belongs_to__application']['__id']
-        params = {
-            'filter': 'id',
-            'eq': app_id
-        }
+        app_id = self.get(uuid)["belongs_to__application"]["__id"]
+        params = {"filter": "id", "eq": app_id}
         return self.base_request.request(
-            'application', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d'][0]['app_name']
+            "application",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"][0]["app_name"]
 
     def has(self, uuid):
         """
@@ -388,17 +631,19 @@ class Device:
 
         """
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
+        params = {"filter": "uuid", "eq": uuid}
 
-        return len(
-            self.base_request.request(
-                'device', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
-        ) > 0
+        return (
+            len(
+                self.base_request.request(
+                    "device",
+                    "GET",
+                    params=params,
+                    endpoint=self.settings.get("pine_endpoint"),
+                )["d"]
+            )
+            > 0
+        )
 
     def is_online(self, uuid):
         """
@@ -415,7 +660,7 @@ class Device:
 
         """
 
-        return self.get(uuid)['is_online']
+        return self.get(uuid)["is_online"]
 
     def get_local_ip_address(self, uuid):
         """
@@ -435,7 +680,7 @@ class Device:
 
         if self.is_online(uuid):
             device = self.get(uuid)
-            return list(set(device['ip_address'].split()))
+            return list(set(device["ip_address"].split()))
         else:
             raise exceptions.DeviceOffline(uuid)
 
@@ -455,18 +700,16 @@ class Device:
         """
 
         if self.has(uuid):
-            params = {
-                'filter': 'uuid',
-                'eq': uuid
-            }
+            params = {"filter": "uuid", "eq": uuid}
 
-            data = {
-                'is_active': False
-            }
+            data = {"is_active": False}
 
             return self.base_request.request(
-                'device', 'PATCH', params=params, data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                "device",
+                "PATCH",
+                params=params,
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
             )
         else:
             raise exceptions.DeviceNotFound(uuid)
@@ -480,13 +723,13 @@ class Device:
 
         """
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
+        params = {"filter": "uuid", "eq": uuid}
         return self.base_request.request(
-            'device', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            "device",
+            "DELETE",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
         )
 
     def identify(self, uuid):
@@ -502,12 +745,13 @@ class Device:
 
         """
 
-        data = {
-            'uuid': uuid
-        }
+        data = {"uuid": uuid}
         return self.base_request.request(
-            'blink', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "blink",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
     def rename(self, uuid, new_name):
@@ -528,19 +772,17 @@ class Device:
             >>> balena.models.device.get_name('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
             u'python-sdk-test-device'
 
-        """
+        """  # noqa: E501
 
         if self.has(uuid):
-            params = {
-                'filter': 'uuid',
-                'eq': uuid
-            }
-            data = {
-                'device_name': new_name
-            }
+            params = {"filter": "uuid", "eq": uuid}
+            data = {"device_name": new_name}
             return self.base_request.request(
-                'device', 'PATCH', params=params, data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                "device",
+                "PATCH",
+                params=params,
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
             )
         else:
             raise exceptions.DeviceNotFound(uuid)
@@ -557,22 +799,20 @@ class Device:
             DeviceNotFound: if device couldn't be found.
 
         Examples:
-            >>> balena.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test device')
+            >>> balena.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test note')
             'OK'
 
         """
 
         if self.has(uuid):
-            params = {
-                'filter': 'uuid',
-                'eq': uuid
-            }
-            data = {
-                'note': note
-            }
+            params = {"filter": "uuid", "eq": uuid}
+            data = {"note": note}
             return self.base_request.request(
-                'device', 'PATCH', params=params, data=data,
-                endpoint=self.settings.get('pine_endpoint')
+                "device",
+                "PATCH",
+                params=params,
+                data=data,
+                endpoint=self.settings.get("pine_endpoint"),
             )
         else:
             raise exceptions.DeviceNotFound(uuid)
@@ -593,8 +833,7 @@ class Device:
         """
 
         device_types = self.device_type.get_all_supported()
-        manifest = [device for device in device_types
-                    if device['slug'] == slug]
+        manifest = [device for device in device_types if device["slug"] == slug]
         if manifest:
             return manifest[0]
         else:
@@ -612,18 +851,22 @@ class Device:
 
         """
 
-        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug)".format(app_name=app_name)
+        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug)".format(
+            app_name=app_name
+        )
 
         application = self.base_request.request(
-            'application', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "application",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not application:
             raise exceptions.ApplicationNotFound(app_name)
         application = application[0]
 
-        return self.get_manifest_by_slug(application['is_for__device_type'][0]['slug'])
+        return self.get_manifest_by_slug(application["is_for__device_type"][0]["slug"])
 
     def generate_uuid(self):
         """
@@ -649,7 +892,8 @@ class Device:
 
     def register(self, app_id, uuid, device_type_slug=None):
         """
-        Register a new device with a balena application. This function only works if you log in using credentials or Auth Token.
+        Register a new device with a balena application.
+        This function only works if you log in using credentials or Auth Token.
 
         Args:
             app_id (str): application id.
@@ -662,50 +906,94 @@ class Device:
         Examples:
             >>> device_uuid = balena.models.device.generate_uuid()
             >>> balena.models.device.register('RPI1',device_uuid)
-            {'id':122950,'application':{'__deferred':{'uri':'/ewa/application(9020)'},'__id':9020},'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'name':'floral-mountain','device_type':'raspberry-pi','uuid':'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','commit':null,'note':null,'status':null,'is_online':false,'last_connectivity_event':'1970-01-01T00:00:00.000Z','ip_address':null,'vpn_address':null,'public_address':'','os_version':null,'supervisor_version':null,'supervisor_release':null,'provisioning_progress':null,'provisioning_state':null,'download_progress':null,'is_web_accessible':false,'longitude':'','latitude':'','location':'','logs_channel':null,'__metadata':{'uri':'/ewa/device(122950)','type':''}}
+            {
+                "id": 122950,
+                "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+                "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+                "name": "floral-mountain",
+                "device_type": "raspberry-pi",
+                "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+                "commit": null,
+                "note": null,
+                "status": null,
+                "is_online": false,
+                "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+                "ip_address": null,
+                "vpn_address": null,
+                "public_address": "",
+                "os_version": null,
+                "supervisor_version": null,
+                "supervisor_release": null,
+                "provisioning_progress": null,
+                "provisioning_state": null,
+                "download_progress": null,
+                "is_web_accessible": false,
+                "longitude": "",
+                "latitude": "",
+                "location": "",
+                "logs_channel": null,
+                "__metadata": {"uri": "/ewa/device(122950)", "type": ""},
+            }
 
         """
 
         user_id = self.auth.get_user_id()
 
-        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=is_for__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(app_id=app_id)
+        # fmt: off
+        raw_query = (
+            f"$filter=id%20eq%20'{app_id}'"
+            "&$select=id"
+            "&$expand=is_for__device_type("
+                "$select=slug"
+                "&$expand=is_of__cpu_architecture($select=slug)"
+            ")"
+        )
+        # fmt: on
 
         application = self.base_request.request(
-            'application', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "application",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not application:
             raise exceptions.ApplicationNotFound(app_id)
         application = application[0]
 
         data = {
-            'user': user_id,
-            'application': app_id,
-            'device_type': application['is_for__device_type'][0]['slug'],
-            'uuid': uuid
+            "user": user_id,
+            "application": app_id,
+            "device_type": application["is_for__device_type"][0]["slug"],
+            "uuid": uuid,
         }
 
         if device_type_slug:
             device_type = self.device_type.get(device_type_slug)
             if not self.device_os.is_architecture_compatible_with(
-                device_type['is_of__cpu_architecture'][0]['slug'],
-                application['is_for__device_type'][0]['is_of__cpu_architecture'][0]['slug']
+                device_type["is_of__cpu_architecture"][0]["slug"],
+                application["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"],
             ):
                 raise exceptions.InvalidDeviceType(device_type_slug)
-            data['device_type'] = device_type['slug']
+            data["device_type"] = device_type["slug"]
 
         api_key = self.application.generate_provisioning_key(app_id)
-        data['apikey'] = api_key
+        data["apikey"] = api_key
 
-        return json.loads(self.base_request.request(
-            'device/register', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
-        ).decode('utf-8'))
+        return json.loads(
+            self.base_request.request(
+                "device/register",
+                "POST",
+                data=data,
+                endpoint=self.settings.get("api_endpoint"),
+                login=True,
+            ).decode("utf-8")
+        )
 
     def restart(self, uuid):
         """
-        Restart a user application container on device. This function only works if you log in using credentials or Auth Token.
+        Restart a user application container on device.
+        This function only works if you log in using credentials or Auth Token.
 
         Args:
             uuid (str): device uuid.
@@ -721,8 +1009,10 @@ class Device:
 
         device = self.get(uuid)
         return self.base_request.request(
-            'device/{0}/restart'.format(device['id']),
-            'POST', endpoint=self.settings.get('api_endpoint'), login=True
+            "device/{0}/restart".format(device["id"]),
+            "POST",
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
     def has_device_url(self, uuid):
@@ -741,7 +1031,7 @@ class Device:
 
         """
 
-        return self.get(uuid)['is_web_accessible']
+        return self.get(uuid)["is_web_accessible"]
 
     def get_device_url(self, uuid):
         """
@@ -761,8 +1051,8 @@ class Device:
         if not self.has_device_url:
             raise exceptions.DeviceNotWebAccessible(uuid)
 
-        device_url_base = self.config.get_all()['deviceUrlsBase']
-        return 'https://{uuid}.{base_url}'.format(uuid=uuid, base_url=device_url_base)
+        device_url_base = self.config.get_all()["deviceUrlsBase"]
+        return "https://{uuid}.{base_url}".format(uuid=uuid, base_url=device_url_base)
 
     def enable_device_url(self, uuid):
         """
@@ -790,17 +1080,15 @@ class Device:
         if not self.has(uuid):
             raise exceptions.DeviceNotFound(uuid)
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
-        data = {
-            'is_web_accessible': True
-        }
+        params = {"filter": "uuid", "eq": uuid}
+        data = {"is_web_accessible": True}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def disable_device_url(self, uuid):
@@ -817,22 +1105,20 @@ class Device:
             >>> balena.models.device.disable_device_url('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
             'OK'
 
-        """
+        """  # noqa: E501
 
         if not self.has(uuid):
             raise exceptions.DeviceNotFound(uuid)
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
-        data = {
-            'is_web_accessible': False
-        }
+        params = {"filter": "uuid", "eq": uuid}
+        data = {"is_web_accessible": False}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def move(self, uuid, app_name):
@@ -854,45 +1140,68 @@ class Device:
 
         """
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=uuid&$expand=is_of__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(uuid=uuid)
+        # fmt: off
+        raw_query = (
+            f"$filter=uuid%20eq%20'{uuid}'"
+            "&$select=uuid"
+            "&$expand=is_of__device_type("
+                "$select=slug"
+                "&$expand=is_of__cpu_architecture($select=slug)"
+            ")"
+        )
+        # fmt: on
 
         device = self.base_request.request(
-            'device', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not device:
             raise exceptions.DeviceNotFound(uuid)
         device = device[0]
 
-        raw_query = "$filter=app_name%20eq%20'{app_name}'&$select=id&$expand=is_for__device_type($select=slug&$expand=is_of__cpu_architecture($select=slug))".format(app_name=app_name)
+        # fmt: off
+        raw_query = (
+            f"$filter=app_name%20eq%20'{app_name}'"
+            "&$select=id"
+            "&$expand=is_for__device_type("
+                "$select=slug"
+                "&$expand=is_of__cpu_architecture($select=slug)"
+            ")"
+        )
+        # fmt: on
 
         application = self.base_request.request(
-            'application', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "application",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not application:
             raise exceptions.ApplicationNotFound(app_name)
         application = application[0]
 
-        device_dev_type = device['is_of__device_type'][0]
-        app_dev_type = application['is_for__device_type'][0]
+        device_dev_type = device["is_of__device_type"][0]
+        app_dev_type = application["is_for__device_type"][0]
 
-        if not self.device_os.is_architecture_compatible_with(device_dev_type['is_of__cpu_architecture'][0]['slug'], app_dev_type['is_of__cpu_architecture'][0]['slug']):
+        if not self.device_os.is_architecture_compatible_with(
+            device_dev_type["is_of__cpu_architecture"][0]["slug"],
+            app_dev_type["is_of__cpu_architecture"][0]["slug"],
+        ):
             raise exceptions.IncompatibleApplication(app_name)
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
-        data = {
-            'belongs_to__application': application['id']
-        }
+        params = {"filter": "uuid", "eq": uuid}
+        data = {"belongs_to__application": application["id"]}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def get_status(self, uuid):
@@ -912,33 +1221,36 @@ class Device:
             >>> balena.models.device.get_status('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
             'Offline'
 
-        """
+        """  # noqa: E501
 
         device = self.get_with_service_details(uuid)
-        if not device['is_active']:
+        if not device["is_active"]:
             return DeviceStatus.INACTIVE
 
-        if device['provisioning_state'] == 'Post-Provisioning':
+        if device["provisioning_state"] == "Post-Provisioning":
             return DeviceStatus.POST_PROVISIONING
 
-        seen = device['last_connectivity_event'] and (datetime.strptime(device['last_connectivity_event'], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
-        if not device['is_online'] and not seen:
+        seen = (
+            device["last_connectivity_event"]
+            and (datetime.strptime(device["last_connectivity_event"], "%Y-%m-%dT%H:%M:%S.%fZ")).year >= 2013
+        )
+        if not device["is_online"] and not seen:
             return DeviceStatus.CONFIGURING
 
-        if not device['is_online']:
+        if not device["is_online"]:
             return DeviceStatus.OFFLINE
 
-        if device['download_progress'] is not None and device['status'] == 'Downloading':
+        if device["download_progress"] is not None and device["status"] == "Downloading":
             return DeviceStatus.UPDATING
 
-        if device['download_progress'] is not None:
+        if device["download_progress"] is not None:
             return DeviceStatus.CONFIGURING
 
-        if device['current_services']:
-            for service_name in device['current_services']:
-                installs = device['current_services'][service_name]
-                install = max(installs, key=lambda x: x['id'])
-                if install and install['download_progress'] is not None and install['status'] == 'Downloading':
+        if device["current_services"]:
+            for service_name in device["current_services"]:
+                installs = device["current_services"][service_name]
+                install = max(installs, key=lambda x: x["id"])
+                if install and install["download_progress"] is not None and install["status"] == "Downloading":
                     return DeviceStatus.UPDATING
 
         return DeviceStatus.IDLE
@@ -962,23 +1274,23 @@ class Device:
             >>> balena.models.device.set_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a',location)
             OK
 
-        """
+        """  # noqa: E501
 
         if not self.has(uuid):
             raise exceptions.DeviceNotFound(uuid)
 
-        params = {
-            'filter': 'uuid',
-            'eq': uuid
-        }
+        params = {"filter": "uuid", "eq": uuid}
         data = {
-            'custom_latitude': location['latitude'],
-            'custom_longitude': location['longitude']
+            "custom_latitude": location["latitude"],
+            "custom_longitude": location["longitude"],
         }
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def unset_custom_location(self, uuid):
@@ -994,9 +1306,9 @@ class Device:
         Examples:
             >>> balena.models.device.unset_custom_location('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
             OK
-        """
+        """  # noqa: E501
 
-        return self.set_custom_location(uuid, {'latitude': '', 'longitude': ''})
+        return self.set_custom_location(uuid, {"latitude": "", "longitude": ""})
 
     def generate_device_key(self, uuid, key_name=None, key_description=None, expiry_date=None):
         """
@@ -1015,19 +1327,21 @@ class Device:
             >>> balena.models.device.generate_device_key('df09262c283b1dc1462d0e82caa7a88e52588b8c5d7475dd22210edec1c50a')
             2UrtMWeLqYXfTznZo1xNuZQXmEE6cOZk
 
-        """
+        """  # noqa: E501
 
-        device_id = self.get(uuid)['id']
-        
+        device_id = self.get(uuid)["id"]
+
         data = {
-            'name': key_name,
-            'description': key_description,
-            'expiryDate': expiry_date
+            "name": key_name,
+            "description": key_description,
+            "expiryDate": expiry_date,
         }
 
         return self.base_request.request(
-            '/api-key/device/{id}/device-key'.format(id=device_id), 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint')
+            "/api-key/device/{id}/device-key".format(id=device_id),
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
         )
 
     def get_dashboard_url(self, uuid):
@@ -1045,11 +1359,8 @@ class Device:
 
         if not uuid:
             raise ValueError("Device UUID must be a non empty string")
-        dashboard_url = self.settings.get('api_endpoint').replace('api', 'dashboard')
-        return urljoin(
-            dashboard_url,
-            '/devices/{}/summary'.format(uuid)
-        )
+        dashboard_url = self.settings.get("api_endpoint").replace("api", "dashboard")
+        return urljoin(dashboard_url, "/devices/{}/summary".format(uuid))
 
     def grant_support_access(self, uuid, expiry_timestamp):
         """
@@ -1063,27 +1374,27 @@ class Device:
             OK.
 
         Examples:
-            >> > balena.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
+            >>> balena.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
             'OK'
 
-        """
+        """  # noqa: E501
 
-        if not expiry_timestamp or expiry_timestamp <= int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000):
-            raise exceptions.InvalidParameter('expiry_timestamp', expiry_timestamp)
+        if not expiry_timestamp or expiry_timestamp <= int(
+            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000
+        ):
+            raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
 
-        device_id = self.get(uuid)['id']
-        params = {
-            'filter': 'id',
-            'eq': device_id
-        }
+        device_id = self.get(uuid)["id"]
+        params = {"filter": "id", "eq": device_id}
 
-        data = {
-            'is_accessible_by_support_until__date': expiry_timestamp
-        }
+        data = {"is_accessible_by_support_until__date": expiry_timestamp}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def revoke_support_access(self, uuid):
@@ -1100,21 +1411,19 @@ class Device:
             >> > balena.models.device.revoke_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
             'OK'
 
-        """
+        """  # noqa: E501
 
-        device_id = self.get(uuid)['id']
-        params = {
-            'filter': 'id',
-            'eq': device_id
-        }
+        device_id = self.get(uuid)["id"]
+        params = {"filter": "id", "eq": device_id}
 
-        data = {
-            'is_accessible_by_support_until__date': None
-        }
+        data = {"is_accessible_by_support_until__date": None}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def set_to_release(self, uuid, commit_id):
@@ -1133,16 +1442,16 @@ class Device:
             >>> balena.models.device.set_to_release('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', '45c90004de73557ded7274d4896a6db90ea61e36')
             'OK'
 
-        """
+        """  # noqa: E501
 
         device = self.get(uuid)
         query = {
-            'commit': commit_id,
-            'status': 'success',
-            'belongs_to__application': device['belongs_to__application']['__id']
+            "commit": commit_id,
+            "status": "success",
+            "belongs_to__application": device["belongs_to__application"]["__id"],
         }
 
-        release_id = self.release._Release__get_by_option(**query)[0]['id'] if commit_id else None
+        release_id = self.release._Release__get_by_option(**query)[0]["id"] if commit_id else None
 
         return self.set_to_release_by_id(uuid, release_id=release_id)
 
@@ -1164,22 +1473,20 @@ class Device:
             >>> balena.models.device.set_to_release_by_id('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d')
             'OK'
 
-        """
+        """  # noqa: E501
 
-        device_id = self.get(uuid)['id']
+        device_id = self.get(uuid)["id"]
 
-        params = {
-            'filter': 'id',
-            'eq': device_id
-        }
+        params = {"filter": "id", "eq": device_id}
 
-        data = {
-            'should_be_running__release': release_id
-        }
+        data = {"should_be_running__release": release_id}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def is_tracking_application_release(self, uuid):
@@ -1197,7 +1504,7 @@ class Device:
 
         """
 
-        return not bool(self.get(uuid)['should_be_running__release'])
+        return not bool(self.get(uuid)["should_be_running__release"])
 
     def track_application_release(self, uuid):
         """
@@ -1211,20 +1518,18 @@ class Device:
 
         """
 
-        device_id = self.get(uuid)['id']
+        device_id = self.get(uuid)["id"]
 
-        params = {
-            'filter': 'id',
-            'eq': device_id
-        }
+        params = {"filter": "id", "eq": device_id}
 
-        data = {
-            'should_be_running__release': None
-        }
+        data = {"should_be_running__release": None}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def enable_lock_override(self, uuid):
@@ -1240,7 +1545,7 @@ class Device:
         """
 
         device = self.get(uuid)
-        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, '1')
+        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, "1")
 
     def disable_lock_override(self, uuid):
         """
@@ -1255,7 +1560,7 @@ class Device:
         """
 
         device = self.get(uuid)
-        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, '0')
+        self.__upsert_device_config_variable(device, OVERRIDE_LOCK_ENV_VAR, "0")
 
     def has_lock_override(self, uuid):
         """
@@ -1272,7 +1577,7 @@ class Device:
 
         """
 
-        return self.__get_applied_device_config_variable_value(uuid, OVERRIDE_LOCK_ENV_VAR) == '1'
+        return self.__get_applied_device_config_variable_value(uuid, OVERRIDE_LOCK_ENV_VAR) == "1"
 
     def get_supervisor_state(self, uuid):
         """
@@ -1286,18 +1591,28 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_supervisor_state('b6070f4fea5edf808b576123157fe5ec')
-            {u'status': u'Idle', u'update_failed': False, u'os_version': u'balenaOS 2.29.0+rev1', u'download_progress': None, u'update_pending': False, u'api_port': u'48484', u'commit': u'd26dd8a68a47c40daaa1d32e03c96d934f37c53b', u'update_downloaded': False, u'supervisor_version': u'9.0.1', u'ip_address': u'192.168.100.16'}
+            {
+                "status": "Idle",
+                "update_failed": False,
+                "os_version": "balenaOS 2.29.0+rev1",
+                "download_progress": None,
+                "update_pending": False,
+                "api_port": "48484",
+                "commit": "d26dd8a68a47c40daaa1d32e03c96d934f37c53b",
+                "update_downloaded": False,
+                "supervisor_version": "9.0.1",
+                "ip_address": "192.168.100.16",
+            }
 
         """
 
-        data = {
-            'uuid': uuid,
-            'method': 'GET'
-        }
+        data = {"uuid": uuid, "method": "GET"}
 
         return self.base_request.request(
-            '/supervisor/v1/device', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint')
+            "/supervisor/v1/device",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
         )
 
     def get_supervisor_target_state(self, uuid):
@@ -1312,13 +1627,53 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_supervisor_target_state('b6070f4fea5edf808b576123157fe5ec')
-            {u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
+            {
+                "local": {
+                    "name": "holy-darkness",
+                    "config": {
+                        "RESIN_SUPERVISOR_NATIVE_LOGGER": "true",
+                        "RESIN_SUPERVISOR_POLL_INTERVAL": "900000",
+                    },
+                    "apps": {
+                        "1398898": {
+                            "name": "test-nuc",
+                            "commit": "f9d139b80a7df94f90d7b9098b1353b14ca31b85",
+                            "releaseId": 850293,
+                            "services": {
+                                "229592": {
+                                    "imageId": 1016025,
+                                    "serviceName": "main",
+                                    "image": "registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22",
+                                    "running": True,
+                                    "environment": {},
+                                    "labels": {
+                                        "io.resin.features.dbus": "1",
+                                        "io.resin.features.firmware": "1",
+                                        "io.resin.features.kernel-modules": "1",
+                                        "io.resin.features.resin-api": "1",
+                                        "io.resin.features.supervisor-api": "1",
+                                    },
+                                    "privileged": True,
+                                    "tty": True,
+                                    "restart": "always",
+                                    "network_mode": "host",
+                                    "volumes": ["resin-data:/data"],
+                                }
+                            },
+                            "volumes": {"resin-data": {}},
+                            "networks": {},
+                        }
+                    },
+                },
+                "dependent": {"apps": {}, "devices": {}},
+            }
 
-        """
+        """  # noqa: E501
 
         return self.base_request.request(
-            '/device/v2/{0}/state'.format(uuid), 'GET',
-            endpoint=self.settings.get('api_endpoint')
+            "/device/v2/{0}/state".format(uuid),
+            "GET",
+            endpoint=self.settings.get("api_endpoint"),
         )
 
     def set_supervisor_release(self, device_uuid, supervisor_version):
@@ -1339,69 +1694,88 @@ class Device:
 
         """
 
-        raw_query = "$filter=uuid%20eq%20'{uuid}'&$select=id&$expand=is_of__device_type($select=slug)".format(uuid=device_uuid)
+        raw_query = f"$filter=uuid%20eq%20'{device_uuid}'" "&$select=id" "&$expand=is_of__device_type($select=slug)"
 
         device = self.base_request.request(
-            'device', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not device:
             raise exceptions.DeviceNotFound(device_uuid)
 
         device = device[0]
-        device_type_slug = device['is_of__device_type'][0]['slug']
+        device_type_slug = device["is_of__device_type"][0]["slug"]
 
-        raw_query = "$top=1&$select=id&$filter=supervisor_version%20eq%20'{version}'%20and%20is_for__device_type/any(dt:dt/slug%20eq%20'{slug}')".format(
-            version=supervisor_version,
-            slug=device_type_slug
+        # fmt: off
+        raw_query = (
+            "$top=1"
+            "&$select=id"
+            "&$filter="
+                f"supervisor_version%20eq%20'{supervisor_version}'%20and%20"
+                f"is_for__device_type/any(dt:dt/slug%20eq%20'{device_type_slug}')"
         )
+        # fmt: on
 
         supervisor = self.base_request.request(
-            'supervisor_release', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint'), login=True
-        )['d']
+            "supervisor_release",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
+        )["d"]
 
         if not supervisor:
             raise exceptions.ReleaseNotFound(supervisor_version)
 
         supervisor = supervisor[0]
 
-        params = {
-            'filter': 'id',
-            'eq': device['id']
-        }
+        params = {"filter": "id", "eq": device["id"]}
 
-        data = {
-            'should_be_managed_by__supervisor_release': supervisor['id']
-        }
+        data = {"should_be_managed_by__supervisor_release": supervisor["id"]}
 
         return self.base_request.request(
-            'device', 'PATCH', params=params, data=data,
-            endpoint=self.settings.get('pine_endpoint')
+            "device",
+            "PATCH",
+            params=params,
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
     def __check_os_update_target(self, device_info, target_os_version):
-        """
-        """
+        """ """
 
-        if 'uuid' not in device_info or not device_info['uuid']:
-            raise exceptions.OsUpdateError('The uuid of the device is not available')
+        if "uuid" not in device_info or not device_info["uuid"]:
+            raise exceptions.OsUpdateError("The uuid of the device is not available")
 
-        if 'is_online' not in device_info or not device_info['is_online']:
-            raise exceptions.OsUpdateError('The device is offline: {uuid}'.format(uuid=device_info['uuid']))
+        if "is_online" not in device_info or not device_info["is_online"]:
+            raise exceptions.OsUpdateError("The device is offline: {uuid}".format(uuid=device_info["uuid"]))
 
-        if 'os_version' not in device_info or not device_info['os_version']:
-            raise exceptions.OsUpdateError('The current os version of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
+        if "os_version" not in device_info or not device_info["os_version"]:
+            raise exceptions.OsUpdateError(
+                "The current os version of the device is not available: {uuid}".format(uuid=device_info["uuid"])
+            )
 
-        if 'is_of__device_type' not in device_info or not device_info['is_of__device_type']:
-            raise exceptions.OsUpdateError('The device type of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
+        if "is_of__device_type" not in device_info or not device_info["is_of__device_type"]:
+            raise exceptions.OsUpdateError(
+                "The device type of the device is not available: {uuid}".format(uuid=device_info["uuid"])
+            )
 
-        if 'os_variant' not in device_info:
-            raise exceptions.OsUpdateError('The os variant of the device is not available: {uuid}'.format(uuid=device_info['uuid']))
+        if "os_variant" not in device_info:
+            raise exceptions.OsUpdateError(
+                "The os variant of the device is not available: {uuid}".format(uuid=device_info["uuid"])
+            )
 
-        current_os_version = self.device_os.get_device_os_semver_with_variant(device_info['os_version'], device_info['os_variant'])
-        self.hup.get_hup_action_type(device_info['is_of__device_type'][0]['slug'], current_os_version, target_os_version)
+        current_os_version = self.device_os.get_device_os_semver_with_variant(
+            device_info["os_version"], device_info["os_variant"]
+        )
+        self.hup.get_hup_action_type(
+            device_info["is_of__device_type"][0]["slug"],
+            current_os_version,
+            target_os_version,
+        )
 
     def start_os_update(self, uuid, target_os_version):
         """
@@ -1424,14 +1798,16 @@ class Device:
             >>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.29.2+rev1.prod')
             >>> # or for unified OS releases
             >>> balena.models.device.start_os_update('b6070f4fea5edf808b576123157fe5ec', '2.89.0+rev1')
-        """
+        """  # noqa: E501
 
         raw_query = "$filter=uuid%20eq%20'{uuid}'&$expand=is_of__device_type($select=slug)".format(uuid=uuid)
 
         device = self.base_request.request(
-            'device', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if not device:
             raise exceptions.DeviceNotFound(uuid)
@@ -1440,24 +1816,22 @@ class Device:
         # this will throw an error if the action is not available
         self.__check_os_update_target(device, target_os_version)
 
-        all_versions = self.device_os.get_available_os_versions(device['is_of__device_type'][0]['slug'])
-        if not [v for v in all_versions if target_os_version == v['raw_version']]:
-            raise exceptions.InvalidParameter('target_os_version', target_os_version)
+        all_versions = self.device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
+        if not [v for v in all_versions if target_os_version == v["raw_version"]]:
+            raise exceptions.InvalidParameter("target_os_version", target_os_version)
 
-        data = {
-            'parameters': {
-                'target_version': target_os_version
-            }
-        }
+        data = {"parameters": {"target_version": target_os_version}}
 
         return self.base_request.request(
-            '{uuid}/{action_name}'.format(uuid=uuid, action_name=self.device_os.OS_UPDATE_ACTION_NAME),
-            'POST',
+            "{uuid}/{action_name}".format(uuid=uuid, action_name=self.device_os.OS_UPDATE_ACTION_NAME),
+            "POST",
             data=data,
-            endpoint='https://actions.{device_url_base}/{device_actions_api_version}/'.format(
-                device_url_base=self.config.get_all()['deviceUrlsBase'],
-                device_actions_api_version=self.settings.get('device_actions_endpoint_version')
-            )
+            endpoint=(
+                "https://actions.{device_url_base}/{device_actions_api_version}/".format(
+                    device_url_base=self.config.get_all()["deviceUrlsBase"],
+                    device_actions_api_version=self.settings.get("device_actions_endpoint_version"),
+                )
+            ),
         )
 
     def get_os_update_status(self, uuid):
@@ -1472,32 +1846,40 @@ class Device:
 
         Examples:
             >>> balena.models.device.get_os_update_status('b6070f4fea5edf808b576123157fe5ec')
-            {u'status': u'done', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'stdout': u'[1554490814][LOG]Normalized target version: 2.29.2+rev1\n', u'last_run': 1554491107242L, u'error': u'', u'action': u'resinhup'}
+            {'status': 'idle', 'action': 'resinhup', 'lastRun': None}
         """
 
         return self.base_request.request(
-            '{uuid}/{action_name}'.format(uuid=uuid, action_name=self.device_os.OS_UPDATE_ACTION_NAME),
-            'GET',
-            endpoint='https://actions.{device_url_base}/{device_actions_api_version}/'.format(
-                device_url_base=self.config.get_all()['deviceUrlsBase'],
-                device_actions_api_version=self.settings.get('device_actions_endpoint_version')
-            )
+            "{uuid}/{action_name}".format(uuid=uuid, action_name=self.device_os.OS_UPDATE_ACTION_NAME),
+            "GET",
+            endpoint=(
+                "https://actions.{device_url_base}/{device_actions_api_version}/".format(
+                    device_url_base=self.config.get_all()["deviceUrlsBase"],
+                    device_actions_api_version=self.settings.get("device_actions_endpoint_version"),
+                )
+            ),
         )
 
     def __is_provisioned_device(self, device):
-        return device['supervisor_version'] and device['last_connectivity_event']
+        return device["supervisor_version"] and device["last_connectivity_event"]
 
     def __check_local_mode_supported(self, device):
         if not self.__is_provisioned_device(device):
             raise exceptions.LocalModeError(Message.DEVICE_NOT_PROVISIONED)
 
-        if semver.compare(normalize_balena_semver(device['os_version']), LOCAL_MODE_MIN_OS_VERSION) < 0:
+        if semver.compare(normalize_balena_semver(device["os_version"]), LOCAL_MODE_MIN_OS_VERSION) < 0:
             raise exceptions.LocalModeError(Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE)
 
-        if semver.compare(normalize_balena_semver(device['supervisor_version']), LOCAL_MODE_MIN_SUPERVISOR_VERSION) < 0:
+        if (
+            semver.compare(
+                normalize_balena_semver(device["supervisor_version"]),
+                LOCAL_MODE_MIN_SUPERVISOR_VERSION,
+            )
+            < 0
+        ):
             raise exceptions.LocalModeError(Message.DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE)
 
-        if device['os_variant'] != 'dev':
+        if device["os_variant"] != "dev":
             raise exceptions.LocalModeError(Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE)
 
     def is_in_local_mode(self, uuid):
@@ -1518,21 +1900,18 @@ class Device:
 
         device = self.get(uuid)
 
-        params = {
-            'filters': {
-                'device': device['id'],
-                'name': LOCAL_MODE_ENV_VAR
-            }
-        }
+        params = {"filters": {"device": device["id"], "name": LOCAL_MODE_ENV_VAR}}
 
         response = self.base_request.request(
-            'device_config_variable', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device_config_variable",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
         if len(response) == 0:
             return False
-        if response[0]['value'] == '1':
+        if response[0]["value"] == "1":
             return True
         return False
 
@@ -1559,7 +1938,7 @@ class Device:
         # this will throw an error if a device doesn't support local mode
         self.__check_local_mode_supported(device)
 
-        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, '1')
+        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, "1")
 
     def disable_local_mode(self, uuid):
         """
@@ -1577,11 +1956,11 @@ class Device:
         """
 
         device = self.get(uuid)
-        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, '0')
+        self.__upsert_device_local_mode(device, LOCAL_MODE_ENV_VAR, "0")
 
     def get_local_mode_support(self, uuid):
         """
-        Returns whether local mode is supported along with a message describing the reason why local mode is not supported.
+        Returns whether local mode is supported and a message describing the reason why local mode is not supported.
 
         Args:
             uuid (str): device uuid.
@@ -1597,15 +1976,9 @@ class Device:
         device = self.get(uuid)
         try:
             self.__check_local_mode_supported(device)
-            return {
-                'supported': True,
-                'message': 'Supported'
-            }
+            return {"supported": True, "message": "Supported"}
         except exceptions.LocalModeError as e:
-            return {
-                'supported': False,
-                'message': e.message
-            }
+            return {"supported": False, "message": e.message}
 
     def get_mac_address(self, uuid):
         """
@@ -1623,8 +1996,8 @@ class Device:
         """
 
         device = self.get(uuid)
-        if 'mac_address' in device:
-            return device['mac_address'].split()
+        if "mac_address" in device:
+            return device["mac_address"].split()
         else:
             return []
 
@@ -1645,8 +2018,17 @@ class Device:
 
         device = self.get(uuid)
         if "memory_usage" in device:
-            metrics = ["memory_usage", "memory_total", "storage_block_device", "storage_usage", "storage_total", "cpu_usage", "cpu_temp", "cpu_id", "is_undervolted"]
+            metrics = [
+                "memory_usage",
+                "memory_total",
+                "storage_block_device",
+                "storage_usage",
+                "storage_total",
+                "cpu_usage",
+                "cpu_temp",
+                "cpu_id",
+                "is_undervolted",
+            ]
             return {k: device.get(k, "") for k in metrics}
         else:
             return {}
-    

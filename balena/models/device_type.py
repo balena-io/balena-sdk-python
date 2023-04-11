@@ -23,10 +23,7 @@ class DeviceType(object):
 
         """
 
-        return self.base_request.request(
-            'device_type', 'GET',
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        return self.base_request.request("device_type", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
 
     def get_all_supported(self):
         """
@@ -36,13 +33,21 @@ class DeviceType(object):
             list: list contains info of all supported device types.
 
         """
-        
-        raw_query = '$expand=is_of__cpu_architecture($select=slug,id)&$filter=is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)'
+
+        # fmt: off
+        raw_query = (
+            "$expand=is_of__cpu_architecture($select=slug,id)"
+            "&$filter="
+                "is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)"
+        )
+        # fmt: on
 
         return self.base_request.request(
-            'device_type', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "device_type",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
 
     def get(self, id_or_slug):
         """
@@ -52,34 +57,39 @@ class DeviceType(object):
             id_or_slug (str): device type slug or alias (string) or id (number).
 
         """
-        
+
         if not id_or_slug:
             raise exceptions.InvalidDeviceType(id_or_slug)
 
         if is_id(id_or_slug):
             # ID
-            params = {
-                'filter': 'id',
-                'eq': id_or_slug
-            }
+            params = {"filter": "id", "eq": id_or_slug}
 
             device_type = self.base_request.request(
-                'device_type', 'GET', params=params,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
+                "device_type",
+                "GET",
+                params=params,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"]
         else:
             # Slug or alias
-            
-            raw_query = "$top=1&$expand=is_of__cpu_architecture($select=slug,id)&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{slug}')".format(slug=id_or_slug)
+
+            raw_query = (
+                "$top=1"
+                "&$expand=is_of__cpu_architecture($select=slug,id)"
+                f"&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{id_or_slug}')"
+            )
 
             device_type = self.base_request.request(
-                'device_type', 'GET', raw_query=raw_query,
-                endpoint=self.settings.get('pine_endpoint')
-            )['d']
-    
+                "device_type",
+                "GET",
+                raw_query=raw_query,
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"]
+
         if not device_type:
             raise exceptions.InvalidDeviceType(id_or_slug)
-        
+
         return device_type[0]
 
     def get_by_slug_or_name(self, slug_or_name):
@@ -90,17 +100,23 @@ class DeviceType(object):
             slug_or_name (str): device type slug or name.
 
         """
-        
-        raw_query = "$top=1&$expand=is_of__cpu_architecture($select=slug,id)&$filter=name%20eq%20'{slug_or_name}'%20or%20slug%20eq%20'{slug_or_name}'".format(slug_or_name=slug_or_name)
+
+        raw_query = (
+            "$top=1"
+            "&$expand=is_of__cpu_architecture($select=slug,id)"
+            f"&$filter=name%20eq%20'{slug_or_name}'%20or%20slug%20eq%20'{slug_or_name}'"
+        )
 
         device_type = self.base_request.request(
-            'device_type', 'GET', raw_query=raw_query,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
-    
+            "device_type",
+            "GET",
+            raw_query=raw_query,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
+
         if not device_type:
             raise exceptions.InvalidDeviceType(slug_or_name)
-        
+
         return device_type[0]
 
     def get_name(self, slug):
@@ -111,8 +127,8 @@ class DeviceType(object):
             slug (str): device type slug.
 
         """
-        
-        return self.get_by_slug_or_name(slug)['name']
+
+        return self.get_by_slug_or_name(slug)["name"]
 
     def get_slug_by_name(self, name):
         """
@@ -122,5 +138,5 @@ class DeviceType(object):
             name (str): device type name.
 
         """
-        
-        return self.get_by_slug_or_name(name)['slug']
+
+        return self.get_by_slug_or_name(name)["slug"]

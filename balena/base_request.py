@@ -13,7 +13,7 @@ import jwt
 from .settings import Settings
 from . import exceptions
 
-TOKEN_KEY = 'token'
+TOKEN_KEY = "token"
 
 
 class BaseRequest:
@@ -29,40 +29,60 @@ class BaseRequest:
 
     @property
     def timeout(self):
-        return float(self.settings.get('timeout')) / 1000
+        return float(self.settings.get("timeout")) / 1000
 
     def __str__(self):
-        return b'<{:s} at {:#x}>'.format(type(self).__name__, id(self))
+        return b"<{:s} at {:#x}>".format(type(self).__name__, id(self))
 
     def __set_content_type(self, headers, ctype):
-        headers.update({'Content-Type': ctype})
+        headers.update({"Content-Type": ctype})
 
     def __set_authorization(self, headers, key=None):
         if not key:
-            headers.update({'Authorization': 'Bearer {:s}'.format(self.settings.get(TOKEN_KEY))})
+            headers.update({"Authorization": "Bearer {:s}".format(self.settings.get(TOKEN_KEY))})
         else:
-            headers.update({'Authorization': 'Bearer {:s}'.format(key)})
+            headers.update({"Authorization": "Bearer {:s}".format(key)})
 
     def __get(self, url, headers, data=None, stream=None):
         return requests.get(url, headers=headers, timeout=self.timeout, stream=stream)
 
     def __post(self, url, headers, data, stream=None):
-        self.__set_content_type(headers, 'application/json')
+        self.__set_content_type(headers, "application/json")
         if not stream:
-            return requests.post(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
+            return requests.post(
+                url,
+                data=json.dumps(self.util.decode_utf8(data)),
+                headers=headers,
+                timeout=self.timeout,
+            )
         return requests.post(
-            url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, stream=stream, timeout=self.timeout)
+            url,
+            data=json.dumps(self.util.decode_utf8(data)),
+            headers=headers,
+            stream=stream,
+            timeout=self.timeout,
+        )
 
     def __put(self, url, headers, data=None, stream=None):
-        self.__set_content_type(headers, 'application/json')
-        return requests.put(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
+        self.__set_content_type(headers, "application/json")
+        return requests.put(
+            url,
+            data=json.dumps(self.util.decode_utf8(data)),
+            headers=headers,
+            timeout=self.timeout,
+        )
 
     def __patch(self, url, headers, data=None, stream=None):
-        self.__set_content_type(headers, 'application/json')
-        return requests.patch(url, data=json.dumps(self.util.decode_utf8(data)), headers=headers, timeout=self.timeout)
+        self.__set_content_type(headers, "application/json")
+        return requests.patch(
+            url,
+            data=json.dumps(self.util.decode_utf8(data)),
+            headers=headers,
+            timeout=self.timeout,
+        )
 
     def __delete(self, url, headers, data=None, stream=None):
-        self.__set_content_type(headers, 'application/x-www-form-urlencoded')
+        self.__set_content_type(headers, "application/x-www-form-urlencoded")
         return requests.delete(url, headers=headers, timeout=self.timeout)
 
     def __head(self, url, headers, data=None, stream=None):
@@ -71,22 +91,18 @@ class BaseRequest:
     def _format_params(self, params, raw_query=None):
         query_elements = []
         if params:
-            if 'filters' in params:
+            if "filters" in params:
                 # Multiple filters
                 filters = []
-                for key in params['filters']:
+                for key in params["filters"]:
                     filters.append(
-                        Template("$key%20eq%20'$value'").safe_substitute(
-                            key=key,
-                            value=params['filters'][key]
-                        )
+                        Template("$key%20eq%20'$value'").safe_substitute(key=key, value=params["filters"][key])
                     )
-                query_elements.append("$filter={}".format('%20and%20'.join(filters)))
+                query_elements.append("$filter={}".format("%20and%20".join(filters)))
             else:
-                if 'expand' in params:
-                    query_template = Template(
-                        "$$expand=$expand($$filter=$filter%20eq%20'$eq')")
-                elif 'filter' in params:
+                if "expand" in params:
+                    query_template = Template("$$expand=$expand($$filter=$filter%20eq%20'$eq')")
+                elif "filter" in params:
                     query_template = Template("$$filter=$filter%20eq%20'$eq'")
                 else:
                     query_template = Template("")
@@ -94,10 +110,21 @@ class BaseRequest:
         if raw_query:
             query_elements.append(raw_query)
         if query_elements:
-            return '?{0}'.format('&'.join(query_elements))
+            return "?{0}".format("&".join(query_elements))
 
-    def __request(self, url, method, params, endpoint, headers=None,
-                  data=None, stream=None, auth=True, api_key=None, raw_query=None):
+    def __request(
+        self,
+        url,
+        method,
+        params,
+        endpoint,
+        headers=None,
+        data=None,
+        stream=None,
+        auth=True,
+        api_key=None,
+        raw_query=None,
+    ):
         """
         This function builds HTTP requests and send them to the balena API.
         The API host is prepended automatically, therefore only relative urls should be passed.
@@ -127,12 +154,12 @@ class BaseRequest:
         headers = headers or {}
 
         methods = {
-            'get': self.__get,
-            'post': self.__post,
-            'put': self.__put,
-            'delete': self.__delete,
-            'head': self.__head,
-            'patch': self.__patch
+            "get": self.__get,
+            "post": self.__post,
+            "put": self.__put,
+            "delete": self.__delete,
+            "head": self.__head,
+            "patch": self.__patch,
         }
         request_method = methods[method.lower()]
         url = urljoin(endpoint, url)
@@ -144,8 +171,19 @@ class BaseRequest:
         url = urljoin(url, params)
         return request_method(url, headers=headers, data=data, stream=stream)
 
-    def request(self, url, method, endpoint, params=None, data=None,
-                stream=None, auth=True, login=False, api_key=None, raw_query=None):
+    def request(
+        self,
+        url,
+        method,
+        endpoint,
+        params=None,
+        data=None,
+        stream=None,
+        auth=True,
+        login=False,
+        api_key=None,
+        raw_query=None,
+    ):
         if api_key is None:
             api_key = self.util.get_api_key()
 
@@ -161,7 +199,7 @@ class BaseRequest:
 
                 if self.util.should_update_token(
                     self.settings.get(TOKEN_KEY),
-                    self.settings.get('token_refresh_interval')
+                    self.settings.get("token_refresh_interval"),
                 ):
                     self.settings.set(TOKEN_KEY, self._request_new_token().decode())
             else:
@@ -178,8 +216,17 @@ class BaseRequest:
         data = data or {}
         # About response obj:
         # https://github.com/kennethreitz/requests/blob/master/requests/models.py#L525
-        response = self.__request(url, method, params, endpoint, data=data,
-                                  stream=stream, auth=auth, api_key=api_key, raw_query=raw_query)
+        response = self.__request(
+            url,
+            method,
+            params,
+            endpoint,
+            data=data,
+            stream=stream,
+            auth=auth,
+            api_key=api_key,
+            raw_query=raw_query,
+        )
 
         if stream:
             return response
@@ -191,7 +238,7 @@ class BaseRequest:
             return
 
         # 200: OK
-        if response.status_code == 200 and response.content == 'OK':
+        if response.status_code == 200 and response.content == "OK":
             return response.content
         if not response.ok:
             raise exceptions.RequestError(response._content)
@@ -206,7 +253,7 @@ class BaseRequest:
     def _request_new_token(self):
         headers = {}
         self.__set_authorization(headers)
-        url = urljoin(self.settings.get('api_endpoint'), 'whoami')
+        url = urljoin(self.settings.get("api_endpoint"), "whoami")
         response = requests.get(url, headers=headers, timeout=self.timeout)
         if not response.ok:
             raise exceptions.RequestError(response._content)
@@ -214,7 +261,6 @@ class BaseRequest:
 
 
 class Util:
-
     def should_update_token(self, token, token_fresh_interval):
         try:
             # Auth token
@@ -223,7 +269,7 @@ class Util:
             # milliseconds for consistency with js/sc sdk
             dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
             dt = dt * 1000
-            age = dt - (int(token_data['iat']) * 1000)
+            age = dt - (int(token_data["iat"]) * 1000)
             return int(age) >= int(token_fresh_interval)
         except jwt.InvalidTokenError:
             # User API token
@@ -231,10 +277,12 @@ class Util:
 
     def get_api_key(self):
         # return None if key is not present
-        return os.environ.get('BALENA_API_KEY') or os.environ.get('RESIN_API_KEY')
+        return os.environ.get("BALENA_API_KEY") or os.environ.get("RESIN_API_KEY")
 
     def decode_utf8(self, source):
         return {
-            (k.decode('utf-8') if type(k).__name__ == 'bytes' else k):
-            (v.decode('utf-8') if type(v).__name__ == 'bytes' else v) for k, v in source.items()
+            (k.decode("utf-8") if type(k).__name__ == "bytes" else k): (
+                v.decode("utf-8") if type(v).__name__ == "bytes" else v
+            )
+            for k, v in source.items()
         }

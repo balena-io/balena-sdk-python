@@ -25,10 +25,9 @@ class Key:
             list: list of ssh keys.
 
         """
-        return self.base_request.request(
-            'user__has__public_key', 'GET',
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+        return self.base_request.request("user__has__public_key", "GET", endpoint=self.settings.get("pine_endpoint"))[
+            "d"
+        ]
 
     def get(self, id):
         """
@@ -45,14 +44,13 @@ class Key:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': id
-        }
+        params = {"filter": "id", "eq": id}
         key = self.base_request.request(
-            'user__has__public_key', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )['d']
+            "user__has__public_key",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+        )["d"]
         if key:
             return key[0]
         else:
@@ -67,13 +65,13 @@ class Key:
 
         """
 
-        params = {
-            'filter': 'id',
-            'eq': id
-        }
+        params = {"filter": "id", "eq": id}
         return self.base_request.request(
-            'user__has__public_key', 'DELETE', params=params,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            "user__has__public_key",
+            "DELETE",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
         )
 
     def create(self, title, key):
@@ -92,13 +90,12 @@ class Key:
         # Trim ugly whitespaces
         key = key.strip()
 
-        data = {
-            'title': title,
-            'public_key': key,
-            'user': self.auth.get_user_id()
-        }
+        data = {"title": title, "public_key": key, "user": self.auth.get_user_id()}
         key = self.base_request.request(
-            'user__has__public_key', 'POST', data=data,
-            endpoint=self.settings.get('pine_endpoint'), login=True
+            "user__has__public_key",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("pine_endpoint"),
+            login=True,
         )
-        return json.loads(key)['id']
+        return json.loads(key)["id"]

@@ -1,5 +1,3 @@
-import sys
-
 from ..base_request import BaseRequest
 from ..settings import Settings
 from .. import exceptions
@@ -30,24 +28,18 @@ class Image:
         Raises:
             ImageNotFound: if image couldn't be found.
 
-        """
+        """  # noqa: E501
 
-        params = {
-            'filter': key,
-            'eq': value
-        }
+        params = {"filter": key, "eq": value}
 
-        image = self.base_request.request(
-            'image', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
-        )
+        image = self.base_request.request("image", "GET", params=params, endpoint=self.settings.get("pine_endpoint"))
 
-        if image['d']:
+        if image["d"]:
             if include_logs:
-                return image['d'][0]
+                return image["d"][0]
             else:
-                image['d'][0].pop('build_log', None)
-                return image['d'][0]
+                image["d"][0].pop("build_log", None)
+                return image["d"][0]
         else:
             raise exceptions.ImageNotFound(key)
 
@@ -66,24 +58,24 @@ class Image:
 
         """
 
-        image = self.__get_by_option('id', id)
+        image = self.__get_by_option("id", id)
 
         # Only return selected fields, build_log is not included by default since they can be very large.
         selected_fields = [
-            'id',
-            'content_hash',
-            'dockerfile',
-            'project_type',
-            'status',
-            'error_message',
-            'image_size',
-            'created_at',
-            'push_timestamp',
-            'start_timestamp',
-            'end_timestamp'
+            "id",
+            "content_hash",
+            "dockerfile",
+            "project_type",
+            "status",
+            "error_message",
+            "image_size",
+            "created_at",
+            "push_timestamp",
+            "start_timestamp",
+            "end_timestamp",
         ]
 
-        return ({k: image[k] for k in selected_fields})
+        return {k: image[k] for k in selected_fields}
 
     def get_log(self, id):
         """
@@ -100,4 +92,4 @@ class Image:
 
         """
 
-        return self.__get_by_option('id', id, include_logs=True)['build_log']
+        return self.__get_by_option("id", id, include_logs=True)["build_log"]

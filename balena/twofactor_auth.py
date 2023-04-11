@@ -10,7 +10,7 @@ from .base_request import BaseRequest
 from .settings import Settings
 from . import exceptions
 
-TOKEN_KEY = 'token'
+TOKEN_KEY = "token"
 
 
 class TwoFactorAuth:
@@ -39,7 +39,7 @@ class TwoFactorAuth:
         try:
             token = self.settings.get(TOKEN_KEY)
             token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
-            if 'twoFactorRequired' in token_data:
+            if "twoFactorRequired" in token_data:
                 return True
             return False
         except jwt.InvalidTokenError:
@@ -82,15 +82,16 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.is_passed()
             True
 
-        """
+        """  # noqa: E501
 
-        data = {
-            'code': code
-        }
+        data = {"code": code}
 
         token = self.base_request.request(
-            'auth/totp/verify', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "auth/totp/verify",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
         self.settings.set(TOKEN_KEY, token)
@@ -130,16 +131,19 @@ class TwoFactorAuth:
         """
 
         otp_auth_url = self.base_request.request(
-            'auth/totp/setup', 'GET',
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "auth/totp/setup",
+            "GET",
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
         tmp = parse_qs(otp_auth_url)
-        return tmp['secret'.encode()][0]
+        return tmp["secret".encode()][0]
 
     def verify(self, code):
         """
         Verifies two factor authentication.
-        Note that this method not update the token automatically. You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
+        Note that this method not update the token automatically.
+        You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
 
         Args:
             code (str): two-factor authentication code.
@@ -153,13 +157,14 @@ class TwoFactorAuth:
 
         """
 
-        data = {
-            'code': code
-        }
+        data = {"code": code}
 
         return self.base_request.request(
-            'auth/totp/verify', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "auth/totp/verify",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
     def enable(self, code):
@@ -198,13 +203,14 @@ class TwoFactorAuth:
 
         """
 
-        data = {
-            'password': password
-        }
+        data = {"password": password}
 
         token = self.base_request.request(
-            'auth/totp/disable', 'POST', data=data,
-            endpoint=self.settings.get('api_endpoint'), login=True
+            "auth/totp/disable",
+            "POST",
+            data=data,
+            endpoint=self.settings.get("api_endpoint"),
+            login=True,
         )
 
         self.settings.set(TOKEN_KEY, token)

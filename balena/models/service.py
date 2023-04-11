@@ -1,8 +1,5 @@
-import sys
-
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .. import exceptions
 
 
 class Service:
@@ -28,17 +25,13 @@ class Service:
 
         """
 
-        params = {
-            'filter': key,
-            'eq': value
-        }
+        params = {"filter": key, "eq": value}
 
         services = self.base_request.request(
-            'service', 'GET', params=params,
-            endpoint=self.settings.get('pine_endpoint')
+            "service", "GET", params=params, endpoint=self.settings.get("pine_endpoint")
         )
 
-        return services['d']
+        return services["d"]
 
     def get_all_by_application(self, app_id):
         """
@@ -52,4 +45,4 @@ class Service:
 
         """
 
-        return self.__get_by_option('application', app_id)
+        return self.__get_by_option("application", app_id)
