@@ -1,4 +1,15 @@
 - commits:
+    - subject: Reuse created apps to make the application tests faster
+      hash: f67e19b0d756e56c93d068258813ffa694b1dceb
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 12.6.7
+  title: ""
+  date: 2023-04-11T10:51:58.316Z
+- commits:
     - subject: Make the tests faster by re-using created resources
       hash: 818e26a0095eb6387293d6d7ff2b186dae1de66e
       body: ""
