@@ -4,3 +4,4 @@ test.py
 .env*
 build/*
 .vscode/
+dist/

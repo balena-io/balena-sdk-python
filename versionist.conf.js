@@ -1,6 +1,8 @@
 'use strict';
 
 const execSync = require('child_process').execSync;
+const exec = require('child_process').exec;
+const path = require('path');
 
 const getAuthor = (commitHash) => {
   return execSync(`git show --quiet --format="%an" ${commitHash}`, {
@@ -20,9 +22,14 @@ module.exports = {
   parseFooterTags: true,
   getGitReferenceFromVersion: 'v-prefix',
   incrementVersion: 'semver',
-  updateVersion: {
-    preset: 'initPy',
-    targetFile: 'balena/__init__.py'
+  updateVersion: (cwd, version, callback) => {
+    execSync(`sed -i '/^__version__ = ".*"/  s/^__version__ = ".*"/__version__ = "${version}"/g' balena/__init__.py`, {encoding: 'utf8'});
+
+    const pyprojectToml = path.join(cwd, 'pyproject.toml');
+    return exec(`sed -i '/\[tool\.poetry\]/,/^version = ".*"/  s/^version = ".*"/version = "${version}"/g' ${pyprojectToml}`,
+    {
+      encoding: 'utf8',
+    }, callback);
   },
 
   // Always add the entry to the top of the Changelog, below the header.
