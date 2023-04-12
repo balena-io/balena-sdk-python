@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fixes CI versioning and publishing
+      hash: b331effe545f57d54b33a9b99c969758bc952b73
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balenaCI
+  version: 12.6.9
+  title: ""
+  date: 2023-04-12T18:37:24.411Z
+- commits:
     - subject: Fixes linting and formatting
       hash: 29274481f9adff283d04196421ccb9868619d101
       body: ""
