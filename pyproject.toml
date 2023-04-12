@@ -1,13 +1,14 @@
 [tool.poetry]
 name = "balena-sdk-python"
-version = "12.5.0"
+version = "12.6.8"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Balena <info@balena.io>"]
 license = "Apache License 2.0"
 readme = "README.md"
+packages = [{include = "balena"}]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.6.2"
 PyJWT = ">=2.0.0"
 requests = ">=2.19.1"
 pyotp = ">=2.2.5"
@@ -17,9 +18,10 @@ service-identity = "*"
 semver = "*"
 
 [tool.poetry.dev-dependencies]
-black = {version = "^22.12", python = ">=3.8.1"}
-pydocstyle = "^6.3.0"
-flake8 = "^6.0.0"
+black = {version = "*", python = ">=3.6.2"}
+pydocstyle = "*"
+flake8 = "*"
+pytest= "*"
 
 [tool.pytest.ini_options]
 # Tests are run via the custom action in .github/actions/test/action.yml
