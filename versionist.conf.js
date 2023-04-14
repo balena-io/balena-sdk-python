@@ -46,7 +46,13 @@ module.exports = {
 
   // Determine the type from 'change-type:' tag.
   // Should no explicit change type be made, then no changes are assumed.
+
   getIncrementLevelFromCommit: (commit) => {
+    const match = commit.subject.match(/^(patch|minor|major):/i);
+    if (Array.isArray(match) && isIncrementalCommit(match[1])) {
+      return match[1].trim().toLowerCase();
+    }
+
     if (isIncrementalCommit(commit.footer['change-type'])) {
       return commit.footer['change-type'].trim().toLowerCase();
     }
