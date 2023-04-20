@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "balena-sdk-python"
+name = "balena-sdk"
 version = "12.6.12"
 description = ""
 authors = ["Balena <info@balena.io>"]
