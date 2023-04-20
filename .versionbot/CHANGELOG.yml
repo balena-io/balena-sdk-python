@@ -1,4 +1,15 @@
 - commits:
+    - subject: Triggers deployment
+      hash: 3c11d543cef5d2afb8e780aea6ca633d1172d6a6
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 12.6.12
+  title: ""
+  date: 2023-04-20T17:41:19.636Z
+- commits:
     - subject: Bumps docs
       hash: 5f805b7d9eb6329f300daa9a9448c2871bbacaa5
       body: ""
