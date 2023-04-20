@@ -67,7 +67,7 @@ Documentation
 
 We generate markdown documentation in [DOCUMENTATION.md](https://github.com/balena-io/balena-sdk-python/blob/master/DOCUMENTATION.md).
 
-To generate the documentation:
+To generate the documentation run:
 ```bash
 python docs_generator.py > DOCUMENTATION.md
 ```
