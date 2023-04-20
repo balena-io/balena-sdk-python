@@ -3853,12 +3853,13 @@ Remove a device tag.
 >>> balena.models.tag.device.remove('f5213eac0d63ac47721b037a7406d306', 'testtag'))
 OK
 ```
-### Function: set(uuid, tag_key, value)
+### Function: set(parent_id, tag_key, value)
 
 Set a device tag (update tag value if it exists).
+___Note___: Notice that when using the device ID rather than UUID, it will avoid one extra API roundtrip.
 
 #### Args:
-    uuid (str): device uuid.
+    parent_id (Union[str, int]): device uuid or device id.
     tag_key (str): tag key.
     value (str): tag value.
 

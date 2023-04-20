@@ -159,15 +159,17 @@ class RequestError(BalenaException):
 
     Args:
         body (str): response body.
+        status_code (Optional[int]): status code.
 
     Attributes:
         message (str): error message.
 
     """
 
-    def __init__(self, body):
+    def __init__(self, body, status_code=None):
         super(RequestError, self).__init__()
         self.message = Message.REQUEST_ERROR.format(body=body)
+        self.status_code = status_code
 
 
 class NotLoggedIn(BalenaException):

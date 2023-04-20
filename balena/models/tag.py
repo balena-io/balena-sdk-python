@@ -4,6 +4,9 @@ from ..base_request import BaseRequest
 from .device import Device
 from .release import Release
 from ..settings import Settings
+from ..utils import is_id
+from .. import exceptions
+import re
 
 
 class Tag:
@@ -46,18 +49,21 @@ class BaseTag:
                 endpoint=self.settings.get("pine_endpoint"),
             )["d"]
 
-    def _get(self, resource_id, tag_key):
-        params = {"filters": {self.resource: resource_id, "tag_key": tag_key}}
-
-        return self.base_request.request(
-            "{}_tag".format(self.resource),
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
     def set(self, resource_id, tag_key, value):
-        if len(self._get(resource_id, tag_key)) > 0:
+        try:
+            data = {self.resource: resource_id, "tag_key": tag_key, "value": value}
+
+            return json.loads(
+                self.base_request.request(
+                    "{}_tag".format(self.resource), "POST", data=data, endpoint=self.settings.get("pine_endpoint")
+                ).decode("utf-8")
+            )
+        except exceptions.RequestError as e:
+            is_unique_key_violation_response = e.status_code == 409 and re.search(r"unique", e.message, re.IGNORECASE)
+
+            if not is_unique_key_violation_response:
+                raise e
+
             params = {"filters": {self.resource: resource_id, "tag_key": tag_key}}
 
             data = {"value": value}
@@ -68,17 +74,6 @@ class BaseTag:
                 params=params,
                 data=data,
                 endpoint=self.settings.get("pine_endpoint"),
-            )
-        else:
-            data = {self.resource: resource_id, "tag_key": tag_key, "value": value}
-
-            return json.loads(
-                self.base_request.request(
-                    "{}_tag".format(self.resource),
-                    "POST",
-                    data=data,
-                    endpoint=self.settings.get("pine_endpoint"),
-                ).decode("utf-8")
             )
 
     def remove(self, resource_id, tag_key):
@@ -205,12 +200,13 @@ class DeviceTag(BaseTag):
 
         return super(DeviceTag, self).get_all()
 
-    def set(self, uuid, tag_key, value):
+    def set(self, parent_id, tag_key, value):
         """
         Set a device tag (update tag value if it exists).
+        ___Note___: Notice that when using the device ID rather than UUID, it will avoid one extra API roundtrip.
 
         Args:
-            uuid (str): device uuid.
+            parent_id (Union[str, int]): device uuid or device id.
             tag_key (str): tag key.
             value (str): tag value.
 
@@ -235,16 +231,20 @@ class DeviceTag(BaseTag):
 
         """
 
-        device = self.device.get(uuid)
+        # Trying to avoid an extra HTTP request
+        # when the provided parameter looks like an id.
+        # Note that this throws an exception for missing names/uuids,
+        # but not for missing ids
+        device_id = parent_id if is_id(parent_id) else self.device.get(parent_id)["id"]
 
-        return super(DeviceTag, self).set(device["id"], tag_key, value)
+        return super(DeviceTag, self).set(device_id, tag_key, value)
 
-    def remove(self, uuid, tag_key):
+    def remove(self, parent_id, tag_key):
         """
         Remove a device tag.
 
         Args:
-            uuid (str): device uuid.
+            parent_id (Union[str, int]): device uuid or device id.
             tag_key (str): tag key.
 
         Raises:
@@ -256,9 +256,8 @@ class DeviceTag(BaseTag):
 
         """
 
-        device = self.device.get(uuid)
-
-        return super(DeviceTag, self).remove(device["id"], tag_key)
+        device_id = parent_id if is_id(parent_id) else self.device.get(parent_id)["id"]
+        return super(DeviceTag, self).remove(device_id, tag_key)
 
 
 class ApplicationTag(BaseTag):

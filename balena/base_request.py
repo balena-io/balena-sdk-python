@@ -241,7 +241,7 @@ class BaseRequest:
         if response.status_code == 200 and response.content == "OK":
             return response.content
         if not response.ok:
-            raise exceptions.RequestError(response._content)
+            raise exceptions.RequestError(response._content, response.status_code)
 
         try:
             json_data = response.json()
@@ -256,7 +256,7 @@ class BaseRequest:
         url = urljoin(self.settings.get("api_endpoint"), "whoami")
         response = requests.get(url, headers=headers, timeout=self.timeout)
         if not response.ok:
-            raise exceptions.RequestError(response._content)
+            raise exceptions.RequestError(response._content, response.status_code)
         return response.content
 
 
