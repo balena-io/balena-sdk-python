@@ -1,3 +1,14 @@
+- commits:
+    - subject: Bumps docs
+      hash: 5f805b7d9eb6329f300daa9a9448c2871bbacaa5
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 12.6.11
+  title: ""
+  date: 2023-04-20T16:23:55.052Z
 - commits: []
   version: 12.6.10
   title: ""
