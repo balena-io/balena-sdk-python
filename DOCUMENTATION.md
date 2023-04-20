@@ -759,7 +759,24 @@ Creates a new invite for an application.
 #### Examples:
 ```python
 >>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
-{'id': 5860, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'is_invited_to__application': {'__id': 1681618, '__deferred': {'uri': '/resin/application(@id)?@id=1681618'}}, 'application_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/application_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__application(@id)?@id=5860'}}
+{
+    "id": 5860,
+    "message": "Test invite",
+    "invitee": {"__id": 2965, "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"}},
+    "is_created_by__user": {
+        "__id": 5227,
+        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+    },
+    "is_invited_to__application": {
+        "__id": 1681618,
+        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
+    },
+    "application_membership_role": {
+        "__id": 2,
+        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
+    },
+    "__metadata": {"uri": "/resin/invitee__is_invited_to__application(@id)?@id=5860"},
+}
 ```
 ### Function: get_all()
 
@@ -879,7 +896,19 @@ Creates a new membership for an application.
 #### Examples:
 ```python
 >>> balena.models.application.membership.create(1681618, 'nghiant2710')
-{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+{
+    "is_member_of__application": {
+        "__id": 1681618,
+        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
+    },
+    "application_membership_role": {
+        "__id": 2,
+        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
+    },
+    "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
+    "id": 55074,
+    "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
+}
 ```
 ### Function: get(membership_id)
 
@@ -894,7 +923,19 @@ Get a single application membership.
 #### Examples:
 ```python
 >>> balena.models.application.membership.get(55074)
-{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}
+{
+    "is_member_of__application": {
+        "__id": 1681618,
+        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
+    },
+    "application_membership_role": {
+        "__id": 2,
+        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
+    },
+    "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
+    "id": 55074,
+    "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
+}
 ```
 ### Function: get_all()
 
@@ -906,7 +947,21 @@ Get all application memberships.
 #### Examples:
 ```python
 >>> balena.models.application.membership.get_all()
-[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+[
+    {
+        "is_member_of__application": {
+            "__id": 1681618,
+            "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
+        },
+        "application_membership_role": {
+            "__id": 2,
+            "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
+        },
+        "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
+        "id": 55074,
+        "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
+    }
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -921,7 +976,21 @@ Get all memberships by application.
 #### Examples:
 ```python
 >>> balena.models.application.membership.get_all_by_application(1681618)
-[{u'is_member_of__application': {u'__id': 1681618, u'__deferred': {u'uri': u'/resin/application(@id)?@id=1681618'}}, u'application_membership_role': {u'__id': 2, u'__deferred': {u'uri': u'/resin/application_membership_role(@id)?@id=2'}}, u'__metadata': {u'uri': u'/resin/user__is_member_of__application(@id)?@id=55074'}, u'id': 55074, u'user': {u'__id': 189, u'__deferred': {u'uri': u'/resin/user(@id)?@id=189'}}}]
+[
+    {
+        "is_member_of__application": {
+            "__id": 1681618,
+            "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
+        },
+        "application_membership_role": {
+            "__id": 2,
+            "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
+        },
+        "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
+        "id": 55074,
+        "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
+    }
+]
 ```
 ### Function: remove(membership_id)
 
@@ -1128,8 +1197,17 @@ Create an application config variable.
 
 #### Examples:
 ```python
->>> print(balena.models.config_variable.application_config_variable.create('1005160', 'BALENA_TEST_APP_CONFIG_VAR', 'test value'))
-{"id":117738,"application":{"__deferred":{"uri":"/balena/application(1005160)"},"__id":1005160},"name":"BALENA_TEST_APP_CONFIG_VAR","value":"test value","__metadata":{"uri":"/balena/application_config_variable(117738)","type":""}}
+>>> balena.models.config_variable.application_config_variable.create('1005160', 'BALENA_TEST_APP_CONFIG_VAR', 'test value')
+{
+    "id": 117738,
+    "application": {
+        "__deferred": {"uri": "/balena/application(1005160)"},
+        "__id": 1005160,
+    },
+    "name": "BALENA_TEST_APP_CONFIG_VAR",
+    "value": "test value",
+    "__metadata": {"uri": "/balena/application_config_variable(117738)", "type": ""},
+}
 ```
 ### Function: get_all(app_id)
 
@@ -1144,7 +1222,21 @@ Get all application config variables belong to an application.
 #### Examples:
 ```python
 >>> balena.models.config_variable.application_config_variable.get_all('1005160')
-[{u'application': {u'__deferred': {u'uri': u'/balena/application(1005160)'}, u'__id': 1005160}, u'__metadata': {u'type': u'', u'uri': u'/balena/application_config_variable(116965)'}, u'id': 116965, u'value': u'false', u'name': u'BALENA_SUPERVISOR_NATIVE_LOGGER'}]
+[
+    {
+        "application": {
+            "__deferred": {"uri": "/balena/application(1005160)"},
+            "__id": 1005160,
+        },
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/application_config_variable(116965)",
+        },
+        "id": 116965,
+        "value": "false",
+        "name": "BALENA_SUPERVISOR_NATIVE_LOGGER",
+    }
+]
 ```
 ### Function: remove(var_id)
 
@@ -1189,7 +1281,13 @@ Create a device config variable.
 #### Examples:
 ```python
 >>> balena.models.config_variable.device_config_variable.create('f14a73b3a762396f7bfeacf5d530c316aa8cfeff307bea93422f71a106c344','BALENA_TEST_DEVICE_CONFIG_VAR','test value')
-{u'device': {u'__deferred': {u'uri': u'/balena/device(1083716)'}, u'__id': 1083716}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variable(163985)'}, u'id': 163985, u'value': u'test value', u'name': u'BALENA_TEST_DEVICE_CONFIG_VAR'}
+{
+    "device": {"__deferred": {"uri": "/balena/device(1083716)"}, "__id": 1083716},
+    "__metadata": {"type": "", "uri": "/balena/device_config_variable(163985)"},
+    "id": 163985,
+    "value": "test value",
+    "name": "BALENA_TEST_DEVICE_CONFIG_VAR",
+}
 ```
 ### Function: get_all(uuid)
 
@@ -1204,7 +1302,20 @@ Get all device config variables belong to a device.
 #### Examples:
 ```python
 >>> balena.models.config_variable.device_config_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-[{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
+[
+    {
+        "id": 1234567,
+        "device": {"__id": 7654321},
+        "value": "test",
+        "name": "MODE",
+    },
+    {
+        "id": 7890123,
+        "device": {"__id": 3210987},
+        "value": "true",
+        "name": "IS_TESTING",
+    },
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -1219,7 +1330,20 @@ Get all device config variables by application.
 #### Examples:
 ```python
 >>> balena.models.config_variable.device_config_variable.get_all_by_application(1043050)
-[{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id74}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_variab8)'}, u'id': 130598, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_avoid_'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'_36574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_var0597)'}, u'id': 130597, u'value': u'1', u'name': u'BALENA_HOST_CONFIG_disash'}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'},  1036574}, u'__metadata': {u'type': u'', u'uri': u'/balena/device_config_(130596)'}, u'id': 130596, u'value': u'"i2c_arm=on","spi=on","audio=on"'': u'BALENA_HOST_CONFIG_dtparam'}, {u'device': {u'__deferred': {u'uri': udevice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'ubalena/device_config_variable(130595)'}, u'id': 130595, u'value': u'16', uu'BALENA_HOST_CONFIG_gpu_mem'}, {u'device': {u'__deferred': {u'uri': u'/rice(1036574)'}, u'__id': 1036574}, u'__metadata': {u'type': u'', u'uri':n/device_config_variable(130594)'}, u'id': 130594, u'value': u'false', uu'BALENA_HOST_LOG_TO_DISPLAY'}]
+[
+    {
+        "id": 1234567,
+        "device": {"__id": 7654321},
+        "value": "test_app",
+        "name": "MODE_APPLICATION",
+    },
+    {
+        "id": 7890123,
+        "device": {"__id": 3210987},
+        "value": "true",
+        "name": "IS_TESTING",
+    },
+]
 ```
 ### Function: remove(var_id)
 
@@ -1401,7 +1525,34 @@ Get a single device by device uuid.
 #### Examples:
 ```python
 >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}
+{
+    "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+    "is_web_accessible": False,
+    "device_type": "raspberry-pi",
+    "id": 122950,
+    "logs_channel": None,
+    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+    "note": None,
+    "os_version": None,
+    "location": "",
+    "latitude": "",
+    "status": None,
+    "public_address": "",
+    "provisioning_state": None,
+    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+    "is_online": False,
+    "supervisor_version": None,
+    "ip_address": None,
+    "vpn_address": None,
+    "name": "floral-mountain",
+    "download_progress": None,
+    "longitude": "",
+    "commit": None,
+    "provisioning_progress": None,
+    "supervisor_release": None,
+}
 ```
 ### Function: get_all()
 
@@ -1413,7 +1564,36 @@ Get all devices.
 #### Examples:
 ```python
 >>> balena.models.device.get_all()
-[{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+[
+    {
+        "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+        "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+        "is_web_accessible": False,
+        "device_type": "raspberry-pi",
+        "id": 122950,
+        "logs_channel": None,
+        "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+        "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+        "note": None,
+        "os_version": None,
+        "location": "",
+        "latitude": "",
+        "status": None,
+        "public_address": "",
+        "provisioning_state": None,
+        "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+        "is_online": False,
+        "supervisor_version": None,
+        "ip_address": None,
+        "vpn_address": None,
+        "name": "floral-mountain",
+        "download_progress": None,
+        "longitude": "",
+        "commit": None,
+        "provisioning_progress": None,
+        "supervisor_release": None,
+    }
+]
 ```
 ### Function: get_all_by_application(name)
 
@@ -1428,7 +1608,36 @@ Get devices by application name.
 #### Examples:
 ```python
 >>> balena.models.device.get_all_by_application('RPI1')
-[{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+[
+    {
+        "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+        "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+        "is_web_accessible": False,
+        "device_type": "raspberry-pi",
+        "id": 122950,
+        "logs_channel": None,
+        "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+        "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+        "note": None,
+        "os_version": None,
+        "location": "",
+        "latitude": "",
+        "status": None,
+        "public_address": "",
+        "provisioning_state": None,
+        "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+        "is_online": False,
+        "supervisor_version": None,
+        "ip_address": None,
+        "vpn_address": None,
+        "name": "floral-mountain",
+        "download_progress": None,
+        "longitude": "",
+        "commit": None,
+        "provisioning_progress": None,
+        "supervisor_release": None,
+    }
+]
 ```
 ### Function: get_all_by_application_id(appid)
 
@@ -1443,7 +1652,36 @@ Get devices by application name.
 #### Examples:
 ```python
 >>> balena.models.device.get_all_by_application_id(1234)
-[{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+[
+    {
+        "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+        "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+        "is_web_accessible": False,
+        "device_type": "raspberry-pi",
+        "id": 122950,
+        "logs_channel": None,
+        "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+        "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+        "note": None,
+        "os_version": None,
+        "location": "",
+        "latitude": "",
+        "status": None,
+        "public_address": "",
+        "provisioning_state": None,
+        "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+        "is_online": False,
+        "supervisor_version": None,
+        "ip_address": None,
+        "vpn_address": None,
+        "name": "floral-mountain",
+        "download_progress": None,
+        "longitude": "",
+        "commit": None,
+        "provisioning_progress": None,
+        "supervisor_release": None,
+    }
+]
 ```
 ### Function: get_application_name(uuid)
 
@@ -1470,7 +1708,36 @@ Get devices by device name.
 #### Examples:
 ```python
 >>> balena.models.device.get_by_name('floral-mountain')
-[{u'__metadata': {u'type': u'', u'uri': u'/ewa/device(122950)'}, u'last_connectivity_event': u'1970-01-01T00:00:00.000Z', u'is_web_accessible': False, u'device_type': u'raspberry-pi', u'id': 122950, u'logs_channel': None, u'uuid': u'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'note': None, u'os_version': None, u'location': u'', u'latitude': u'', u'status': None, u'public_address': u'', u'provisioning_state': None, u'user': {u'__deferred': {u'uri': u'/ewa/user(5397)'}, u'__id': 5397}, u'is_online': False, u'supervisor_version': None, u'ip_address': None, u'vpn_address': None, u'name': u'floral-mountain', u'download_progress': None, u'longitude': u'', u'commit': None, u'provisioning_progress': None, u'supervisor_release': None}]
+[
+    {
+        "__metadata": {"type": "", "uri": "/ewa/device(122950)"},
+        "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+        "is_web_accessible": False,
+        "device_type": "raspberry-pi",
+        "id": 122950,
+        "logs_channel": None,
+        "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+        "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+        "note": None,
+        "os_version": None,
+        "location": "",
+        "latitude": "",
+        "status": None,
+        "public_address": "",
+        "provisioning_state": None,
+        "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+        "is_online": False,
+        "supervisor_version": None,
+        "ip_address": None,
+        "vpn_address": None,
+        "name": "floral-mountain",
+        "download_progress": None,
+        "longitude": "",
+        "commit": None,
+        "provisioning_progress": None,
+        "supervisor_release": None,
+    }
+]
 ```
 ### Function: get_dashboard_url(uuid)
 
@@ -1514,7 +1781,7 @@ Get the local IP addresses of a device.
     DeviceOffline: if device is offline.
 ### Function: get_local_mode_support(uuid)
 
-Returns whether local mode is supported along with a message describing the reason why local mode is not supported.
+Returns whether local mode is supported and a message describing the reason why local mode is not supported.
 
 #### Args:
     uuid (str): device uuid.
@@ -1586,20 +1853,18 @@ Get device name by device uuid.
     DeviceNotFound: if device couldn't be found.
 ### Function: get_os_update_status(uuid)
 
-        Get the OS update status of a device.
+Get the OS update status of a device.
 
-####         Args:
-            uuid (str): device uuid.
+#### Args:
+    uuid (str): device uuid.
 
-####         Returns:
-            dict: action response.
+#### Returns:
+    dict: action response.
 
-####         Examples:
+#### Examples:
 ```python
-            >>> balena.models.device.get_os_update_status('b6070f4fea5edf808b576123157fe5ec')
-            {u'status': u'done', u'parameters': {u'target_version': u'2.29.2+rev1.prod'}, u'stdout': u'[1554490814][LOG]Normalized target version: 2.29.2+rev1
-', u'last_run': 1554491107242L, u'error': u'', u'action': u'resinhup'}
-        
+>>> balena.models.device.get_os_update_status('b6070f4fea5edf808b576123157fe5ec')
+{'status': 'idle', 'action': 'resinhup', 'lastRun': None}
 ```
 ### Function: get_status(uuid)
 
@@ -1632,7 +1897,18 @@ Get the supervisor state on a device
 #### Examples:
 ```python
 >>> balena.models.device.get_supervisor_state('b6070f4fea5edf808b576123157fe5ec')
-{u'status': u'Idle', u'update_failed': False, u'os_version': u'balenaOS 2.29.0+rev1', u'download_progress': None, u'update_pending': False, u'api_port': u'48484', u'commit': u'd26dd8a68a47c40daaa1d32e03c96d934f37c53b', u'update_downloaded': False, u'supervisor_version': u'9.0.1', u'ip_address': u'192.168.100.16'}
+{
+    "status": "Idle",
+    "update_failed": False,
+    "os_version": "balenaOS 2.29.0+rev1",
+    "download_progress": None,
+    "update_pending": False,
+    "api_port": "48484",
+    "commit": "d26dd8a68a47c40daaa1d32e03c96d934f37c53b",
+    "update_downloaded": False,
+    "supervisor_version": "9.0.1",
+    "ip_address": "192.168.100.16",
+}
 ```
 ### Function: get_supervisor_target_state(uuid)
 
@@ -1647,7 +1923,46 @@ Get the supervisor target state on a device
 #### Examples:
 ```python
 >>> balena.models.device.get_supervisor_target_state('b6070f4fea5edf808b576123157fe5ec')
-{u'local': {u'name': u'holy-darkness', u'config': {u'RESIN_SUPERVISOR_NATIVE_LOGGER': u'true', u'RESIN_SUPERVISOR_POLL_INTERVAL': u'900000'}, u'apps': {u'1398898': {u'name': u'test-nuc', u'commit': u'f9d139b80a7df94f90d7b9098b1353b14ca31b85', u'releaseId': 850293, u'services': {u'229592': {u'imageId': 1016025, u'serviceName': u'main', u'image': u'registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22', u'running': True, u'environment': {}, u'labels': {u'io.resin.features.dbus': u'1', u'io.resin.features.firmware': u'1', u'io.resin.features.kernel-modules': u'1', u'io.resin.features.resin-api': u'1', u'io.resin.features.supervisor-api': u'1'}, u'privileged': True, u'tty': True, u'restart': u'always', u'network_mode': u'host', u'volumes': ['resin-data:/data']}}, u'volumes': {u'resin-data': {}}, u'networks': {}}}}, u'dependent': {u'apps': {}, u'devices': {}}}
+{
+    "local": {
+        "name": "holy-darkness",
+        "config": {
+            "RESIN_SUPERVISOR_NATIVE_LOGGER": "true",
+            "RESIN_SUPERVISOR_POLL_INTERVAL": "900000",
+        },
+        "apps": {
+            "1398898": {
+                "name": "test-nuc",
+                "commit": "f9d139b80a7df94f90d7b9098b1353b14ca31b85",
+                "releaseId": 850293,
+                "services": {
+                    "229592": {
+                        "imageId": 1016025,
+                        "serviceName": "main",
+                        "image": "registry2.balena-cloud.com/v2/27aa30131b770a4f993da9a54eca6ed8@sha256:f489c30335a0036ecf1606df3150907b32ea39d73ec6de825a549385022e3e22",
+                        "running": True,
+                        "environment": {},
+                        "labels": {
+                            "io.resin.features.dbus": "1",
+                            "io.resin.features.firmware": "1",
+                            "io.resin.features.kernel-modules": "1",
+                            "io.resin.features.resin-api": "1",
+                            "io.resin.features.supervisor-api": "1",
+                        },
+                        "privileged": True,
+                        "tty": True,
+                        "restart": "always",
+                        "network_mode": "host",
+                        "volumes": ["resin-data:/data"],
+                    }
+                },
+                "volumes": {"resin-data": {}},
+                "networks": {},
+            }
+        },
+    },
+    "dependent": {"apps": {}, "devices": {}},
+}
 ```
 ### Function: get_with_service_details(uuid, expand_release)
 
@@ -1655,7 +1970,7 @@ Get a single device along with its associated services' essential details.
 
 #### Args:
     uuid (str): device uuid.
-    expand_release (Optional[bool]): Set this parameter to False then the commit of service details will not be included.
+    expand_release (Optional[bool]): Set this to False and the commit of service details will not be included.
 
 #### Returns:
     dict: device info with associated services details.
@@ -1666,7 +1981,97 @@ Get a single device along with its associated services' essential details.
 #### Examples:
 ```python
 >>> balena.models.device.get_with_service_details('0fcd753af396247e035de53b4e43eec3')
-{u'os_variant': u'prod', u'__metadata': {u'type': u'', u'uri': u'/balena/device(1136312)'}, u'is_managed_by__service_instance': {u'__deferred': {u'uri': u'/balena/service_instance(182)'}, u'__id': 182}, u'should_be_running__release': None, u'belongs_to__user': {u'__deferred': {u'uri': u'/balena/user(32986)'}, u'__id': 32986}, u'is_web_accessible': False, u'device_type': u'raspberrypi3', u'belongs_to__application': {u'__deferred': {u'uri': u'/balena/application(1116729)'}, u'__id': 1116729}, u'id': 1136312, u'is_locked_until__date': None, u'logs_channel': u'1da2f8db7c5edbf268ba6c34d91974de8e910eef0033a1172386ad27807552', u'uuid': u'0fcd753af396247e035de53b4e43eec3', u'is_managed_by__device': None, u'should_be_managed_by__supervisor_release': None, u'is_accessible_by_support_until__date': None, u'actor': 2895243, u'note': None, u'os_version': u'Balena OS 2.12.7+rev1', u'longitude': u'105.85', u'last_connectivity_event': u'2018-05-27T05:43:54.027Z', u'is_on__commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', u'location': u'Hanoi, Thanh Pho Ha Noi, Vietnam', u'status': u'Idle', u'public_address': u'14.231.243.124', u'is_connected_to_vpn': False, u'custom_latitude': u'', u'is_active': True, u'provisioning_state': u'', u'latitude': u'21.0333', u'custom_longitude': u'', 'current_services': {u'frontend': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952657)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296863, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52327, u'id': 8952657}], u'data': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952656)'}, u'install_date': u'2018-05-25T19:00:12.989Z', 'image_id': 296864, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52329, u'id': 8952656}], u'proxy': [{u'status': u'Running', u'download_progress': None, u'__metadata': {u'type': u'', u'uri': u'/balena/image_install(8952655)'}, u'install_date': u'2018-05-25T19:00:12.985Z', 'image_id': 296862, 'commit': u'01defe8bbd1b5b832b32c6e1d35890317671cbb5', 'service_id': 52328, u'id': 8952655}]}, u'is_online': False, u'supervisor_version': u'7.4.3', u'ip_address': u'192.168.0.102', u'provisioning_progress': None, u'owns__device_log': {u'__deferred': {u'uri': u'/balena/device_log(1136312)'}, u'__id': 1136312}, u'created_at': u'2018-05-25T10:55:47.825Z', u'download_progress': None, u'last_vpn_event': u'2018-05-27T05:43:54.027Z', u'device_name': u'billowing-night', u'local_id': None, u'vpn_address': None, 'current_gateway_downloads': []}
+{
+    "os_variant": "prod",
+    "__metadata": {"type": "", "uri": "/balena/device(1136312)"},
+    "is_managed_by__service_instance": {
+        "__deferred": {"uri": "/balena/service_instance(182)"},
+        "__id": 182,
+    },
+    "should_be_running__release": None,
+    "belongs_to__user": {"__deferred": {"uri": "/balena/user(32986)"}, "__id": 32986},
+    "is_web_accessible": False,
+    "device_type": "raspberrypi3",
+    "belongs_to__application": {
+        "__deferred": {"uri": "/balena/application(1116729)"},
+        "__id": 1116729,
+    },
+    "id": 1136312,
+    "is_locked_until__date": None,
+    "logs_channel": "1da2f8db7c5edbf268ba6c34d91974de8e910eef0033a1172386ad27807552",
+    "uuid": "0fcd753af396247e035de53b4e43eec3",
+    "is_managed_by__device": None,
+    "should_be_managed_by__supervisor_release": None,
+    "is_accessible_by_support_until__date": None,
+    "actor": 2895243,
+    "note": None,
+    "os_version": "Balena OS 2.12.7+rev1",
+    "longitude": "105.85",
+    "last_connectivity_event": "2018-05-27T05:43:54.027Z",
+    "is_on__commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+    "location": "Hanoi, Thanh Pho Ha Noi, Vietnam",
+    "status": "Idle",
+    "public_address": "14.231.243.124",
+    "is_connected_to_vpn": False,
+    "custom_latitude": "",
+    "is_active": True,
+    "provisioning_state": "",
+    "latitude": "21.0333",
+    "custom_longitude": "",
+    "current_services": {
+        "frontend": [
+            {
+                "status": "Running",
+                "download_progress": None,
+                "__metadata": {"type": "", "uri": "/balena/image_install(8952657)"},
+                "install_date": "2018-05-25T19:00:12.989Z",
+                "image_id": 296863,
+                "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                "service_id": 52327,
+                "id": 8952657,
+            }
+        ],
+        "data": [
+            {
+                "status": "Running",
+                "download_progress": None,
+                "__metadata": {"type": "", "uri": "/balena/image_install(8952656)"},
+                "install_date": "2018-05-25T19:00:12.989Z",
+                "image_id": 296864,
+                "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                "service_id": 52329,
+                "id": 8952656,
+            }
+        ],
+        "proxy": [
+            {
+                "status": "Running",
+                "download_progress": None,
+                "__metadata": {"type": "", "uri": "/balena/image_install(8952655)"},
+                "install_date": "2018-05-25T19:00:12.985Z",
+                "image_id": 296862,
+                "commit": "01defe8bbd1b5b832b32c6e1d35890317671cbb5",
+                "service_id": 52328,
+                "id": 8952655,
+            }
+        ],
+    },
+    "is_online": False,
+    "supervisor_version": "7.4.3",
+    "ip_address": "192.168.0.102",
+    "provisioning_progress": None,
+    "owns__device_log": {
+        "__deferred": {"uri": "/balena/device_log(1136312)"},
+        "__id": 1136312,
+    },
+    "created_at": "2018-05-25T10:55:47.825Z",
+    "download_progress": None,
+    "last_vpn_event": "2018-05-27T05:43:54.027Z",
+    "device_name": "billowing-night",
+    "local_id": None,
+    "vpn_address": None,
+    "current_gateway_downloads": [],
+}
 ```
 ### Function: grant_support_access(uuid, expiry_timestamp)
 
@@ -1680,8 +2085,10 @@ Grant support access to a device until a specified time.
     OK.
 
 #### Examples:
-    >> > balena.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
-    'OK'
+```python
+>>> balena.models.device.grant_support_access('49b2a76b7f188c1d6f781e67c8f34adb4a7bfd2eec3f91d40b1efb75fe413d', 1511974999000)
+'OK'
+```
 ### Function: has(uuid)
 
 Check if a device exists.
@@ -1800,12 +2207,13 @@ Note a device.
 
 #### Examples:
 ```python
->>> balena.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test device')
+>>> balena.models.device.note('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143', 'test note')
 'OK'
 ```
 ### Function: register(app_id, uuid, device_type_slug)
 
-Register a new device with a balena application. This function only works if you log in using credentials or Auth Token.
+Register a new device with a balena application.
+This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     app_id (str): application id.
@@ -1819,7 +2227,34 @@ Register a new device with a balena application. This function only works if you
 ```python
 >>> device_uuid = balena.models.device.generate_uuid()
 >>> balena.models.device.register('RPI1',device_uuid)
-{'id':122950,'application':{'__deferred':{'uri':'/ewa/application(9020)'},'__id':9020},'user':{'__deferred':{'uri':'/ewa/user(5397)'},'__id':5397},'name':'floral-mountain','device_type':'raspberry-pi','uuid':'8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','commit':null,'note':null,'status':null,'is_online':false,'last_connectivity_event':'1970-01-01T00:00:00.000Z','ip_address':null,'vpn_address':null,'public_address':'','os_version':null,'supervisor_version':null,'supervisor_release':null,'provisioning_progress':null,'provisioning_state':null,'download_progress':null,'is_web_accessible':false,'longitude':'','latitude':'','location':'','logs_channel':null,'__metadata':{'uri':'/ewa/device(122950)','type':''}}
+{
+    "id": 122950,
+    "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+    "user": {"__deferred": {"uri": "/ewa/user(5397)"}, "__id": 5397},
+    "name": "floral-mountain",
+    "device_type": "raspberry-pi",
+    "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
+    "commit": null,
+    "note": null,
+    "status": null,
+    "is_online": false,
+    "last_connectivity_event": "1970-01-01T00:00:00.000Z",
+    "ip_address": null,
+    "vpn_address": null,
+    "public_address": "",
+    "os_version": null,
+    "supervisor_version": null,
+    "supervisor_release": null,
+    "provisioning_progress": null,
+    "provisioning_state": null,
+    "download_progress": null,
+    "is_web_accessible": false,
+    "longitude": "",
+    "latitude": "",
+    "location": "",
+    "logs_channel": null,
+    "__metadata": {"uri": "/ewa/device(122950)", "type": ""},
+}
 ```
 ### Function: remove(uuid)
 
@@ -1848,7 +2283,8 @@ u'python-sdk-test-device'
 ```
 ### Function: restart(uuid)
 
-Restart a user application container on device. This function only works if you log in using credentials or Auth Token.
+Restart a user application container on device.
+This function only works if you log in using credentials or Auth Token.
 
 #### Args:
     uuid (str): device uuid.
@@ -2028,7 +2464,23 @@ Download an OS image. This function only works if you log in using credentials o
 <class 'requests.models.Response'>
 >>> response['headers']
 >>> response.headers
-{'Content-Length': '134445838', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client', 'content-disposition': 'attachment; filename="balena-cloud-FooBar4-raspberry-pi2-2.43.0+rev1-v10.2.2.img.zip"', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Max-Age': '86400', 'x-powered-by': 'Express', 'Vary': 'X-HTTP-Method-Override', 'x-transfer-length': '134445838', 'Connection': 'keep-alive', 'Access-Control-Allow-Credentials': 'true', 'Date': 'Tue, 07 Jan 2020 17:40:52 GMT', 'X-Frame-Options': 'DENY', 'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'Content-Type': 'application/zip', 'Access-Control-Allow-Origin': '*'}
+{
+    "Content-Length": "134445838",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client",
+    "content-disposition": 'attachment; filename="balena-cloud-FooBar4-raspberry-pi2-2.43.0+rev1-v10.2.2.img.zip"',
+    "X-Content-Type-Options": "nosniff",
+    "Access-Control-Max-Age": "86400",
+    "x-powered-by": "Express",
+    "Vary": "X-HTTP-Method-Override",
+    "x-transfer-length": "134445838",
+    "Connection": "keep-alive",
+    "Access-Control-Allow-Credentials": "true",
+    "Date": "Tue, 07 Jan 2020 17:40:52 GMT",
+    "X-Frame-Options": "DENY",
+    "Access-Control-Allow-Methods": "GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD",
+    "Content-Type": "application/zip",
+    "Access-Control-Allow-Origin": "*",
+}
 ```
 ### Function: download_unconfigured_image(device_type, version, login, raw)
 
@@ -2190,7 +2642,16 @@ Create an environment variable for application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.application.create('978062', 'test2', '123')
-{'id': 91138, 'application': {'__deferred': {'uri': '/balena/application(978062)'}, '__id': 978062}, 'name': 'test2', 'value': '123', '__metadata': {'uri': '/balena/environment_variable(91138)', 'type': ''}}
+{
+    "id": 91138,
+    "application": {
+        "__deferred": {"uri": "/balena/application(978062)"},
+        "__id": 978062,
+    },
+    "name": "test2",
+    "value": "123",
+    "__metadata": {"uri": "/balena/environment_variable(91138)", "type": ""},
+}
 ```
 ### Function: get_all(app_id)
 
@@ -2205,7 +2666,15 @@ Get all environment variables by application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.application.get_all(9020)
-[{u'application': {u'__deferred': {u'uri': u'/ewa/application(9020)'}, u'__id': 9020}, u'__metadata': {u'type': u'', u'uri': u'/ewa/environment_variable(5650)'}, u'id': 5650, u'value': u'7330634368117899', u'name': u'BALENA_RESTART'}]
+[
+    {
+        "application": {"__deferred": {"uri": "/ewa/application(9020)"}, "__id": 9020},
+        "__metadata": {"type": "", "uri": "/ewa/environment_variable(5650)"},
+        "id": 5650,
+        "value": "7330634368117899",
+        "name": "BALENA_RESTART",
+    }
+]
 ```
 ### Function: is_system_variable(variable)
 
@@ -2268,7 +2737,14 @@ Create a service environment variable for application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.service_environment_variable.create('1005160', 'proxy', 'app_proxy', 'test value')
-{"id":12444,"created_at":"2018-03-18T09:34:09.144Z","service":{"__deferred":{"uri":"/balena/service(21668)"},"__id":21668},"name":"app_proxy","value":"test value","__metadata":{"uri":"/balena/service_environment_variable(12444)","type":""}}
+{
+    "id": 12444,
+    "created_at": "2018-03-18T09:34:09.144Z",
+    "service": {"__deferred": {"uri": "/balena/service(21668)"}, "__id": 21668},
+    "name": "app_proxy",
+    "value": "test value",
+    "__metadata": {"uri": "/balena/service_environment_variable(12444)", "type": ""},
+}
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -2283,7 +2759,41 @@ Get all service environment variables by application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.service_environment_variable.get_all_by_application('1005160')
-[{u'name': u'app_data', u'service': {u'__deferred': {u'uri': u'/balena/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:21.087Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12365)'}, u'value': u'app_data_value', u'id': 12365}, {u'name': u'app_data1', u'service': {u'__deferred': {u'uri': u'/balena/service(21667)'}, u'__id': 21667}, u'created_at': u'2018-03-16T19:21:49.662Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12366)'}, u'value': u'app_data_value', u'id': 12366}, {u'name': u'app_front', u'service': {u'__deferred': {u'uri': u'/balena/service(21669)'}, u'__id': 21669}, u'created_at': u'2018-03-16T19:22:06.955Z', u'__metadata': {u'type': u'', u'uri': u'/balena/service_environment_variable(12367)'}, u'value': u'front_value', u'id': 12367}]
+[
+    {
+        "name": "app_data",
+        "service": {"__deferred": {"uri": "/balena/service(21667)"}, "__id": 21667},
+        "created_at": "2018-03-16T19:21:21.087Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/service_environment_variable(12365)",
+        },
+        "value": "app_data_value",
+        "id": 12365,
+    },
+    {
+        "name": "app_data1",
+        "service": {"__deferred": {"uri": "/balena/service(21667)"}, "__id": 21667},
+        "created_at": "2018-03-16T19:21:49.662Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/service_environment_variable(12366)",
+        },
+        "value": "app_data_value",
+        "id": 12366,
+    },
+    {
+        "name": "app_front",
+        "service": {"__deferred": {"uri": "/balena/service(21669)"}, "__id": 21669},
+        "created_at": "2018-03-16T19:22:06.955Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/service_environment_variable(12367)",
+        },
+        "value": "front_value",
+        "id": 12367,
+    },
+]
 ```
 ### Function: remove(var_id)
 
@@ -2328,7 +2838,13 @@ Create a device environment variable.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device.create('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143','test_env4', 'testing1')
-{'name': u'test_env4', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(42166)'}, u'value': u'testing1', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 42166}
+{
+    "name": "test_env4",
+    "__metadata": {"type": "", "uri": "/balena/device_environment_variable(42166)"},
+    "value": "testing1",
+    "device": {"__deferred": {"uri": "/balena/device(115792)"}, "__id": 115792},
+    "id": 42166,
+}
 ```
 ### Function: get_all(uuid)
 
@@ -2343,7 +2859,15 @@ Get all device environment variables.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device.get_all('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-[{u'device': {u'__deferred': {u'uri': u'/ewa/device(122950)'}, u'__id': 122950}, u'__metadata': {u'type': u'', u'uri': u'/ewa/device_environment_variable(2173)'}, u'id': 2173, u'value': u'1322944771964103', u'env_var_name': u'BALENA_DEVICE_RESTART'}]
+[
+    {
+        "device": {"__deferred": {"uri": "/ewa/device(122950)"}, "__id": 122950},
+        "__metadata": {"type": "", "uri": "/ewa/device_environment_variable(2173)"},
+        "id": 2173,
+        "value": "1322944771964103",
+        "env_var_name": "BALENA_DEVICE_RESTART",
+    }
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -2358,7 +2882,22 @@ Get all device environment variables for an application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device.get_all_by_application('5780')
-[{'name': u'device1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(40794)'}, u'value': u'test', u'device': {u'__deferred': {u'uri': u'/balena/device(115792)'}, u'__id': 115792}, u'id': 40794}, {'name': u'BALENA_DEVICE_RESTART', u'__metadata': {u'type': u'', u'uri': u'/balena/device_environment_variable(1524)'}, u'value': u'961506585823372', u'device': {u'__deferred': {u'uri': u'/balena/device(121794)'}, u'__id': 121794}, u'id': 1524}]
+[
+    {
+        "name": "device1",
+        "__metadata": {"type": "", "uri": "/balena/device_environment_variable(40794)"},
+        "value": "test",
+        "device": {"__deferred": {"uri": "/balena/device(115792)"}, "__id": 115792},
+        "id": 40794,
+    },
+    {
+        "name": "BALENA_DEVICE_RESTART",
+        "__metadata": {"type": "", "uri": "/balena/device_environment_variable(1524)"},
+        "value": "961506585823372",
+        "device": {"__deferred": {"uri": "/balena/device(121794)"}, "__id": 121794},
+        "id": 1524,
+    },
+]
 ```
 ### Function: remove(var_id)
 
@@ -2404,7 +2943,20 @@ Create a device service environment variable.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device_service_environment_variable.create('f5213eac0d63ac47721b037a7406d306', 'data', 'dev_data_sdk', 'test1')
-{"id":28970,"created_at":"2018-03-17T10:13:14.184Z","service_install":{"__deferred":{"uri":"/balena/service_install(30789)"},"__id":30789},"value":"test1","name":"dev_data_sdk","__metadata":{"uri":"/balena/device_service_environment_variable(28970)","type":""}}
+{
+    "id": 28970,
+    "created_at": "2018-03-17T10:13:14.184Z",
+    "service_install": {
+        "__deferred": {"uri": "/balena/service_install(30789)"},
+        "__id": 30789,
+    },
+    "value": "test1",
+    "name": "dev_data_sdk",
+    "__metadata": {
+        "uri": "/balena/device_service_environment_variable(28970)",
+        "type": "",
+    },
+}
 ```
 ### Function: get_all(uuid)
 
@@ -2419,7 +2971,74 @@ Get all device service environment variables belong to a device.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device_service_environment_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-[{u'name': u'dev_proxy', u'created_at': u'2018-03-16T19:23:21.727Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28888)'}, u'value': u'value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30788)'}, u'id': 30788, u'service': [{u'service_name': u'proxy', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28888}, {u'name': u'dev_data', u'created_at': u'2018-03-16T19:23:11.614Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28887)'}, u'value': u'dev_data_value', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28887}, {u'name': u'dev_data1', u'created_at': u'2018-03-17T05:53:19.257Z', u'__metadata': {u'type': u'', u'uri': u'/balena/device_service_environment_variable(28964)'}, u'value': u'aaaa', u'service_install': [{u'__metadata': {u'type': u'', u'uri': u'/balena/service_install(30789)'}, u'id': 30789, u'service': [{u'service_name': u'data', u'__metadata': {u'type': u'', u'uri': u'/balena/service(NaN)'}}]}], u'id': 28964}]
+[
+    {
+        "name": "dev_proxy",
+        "created_at": "2018-03-16T19:23:21.727Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/device_service_environment_variable(28888)",
+        },
+        "value": "value",
+        "service_install": [
+            {
+                "__metadata": {"type": "", "uri": "/balena/service_install(30788)"},
+                "id": 30788,
+                "service": [
+                    {
+                        "service_name": "proxy",
+                        "__metadata": {"type": "", "uri": "/balena/service(NaN)"},
+                    }
+                ],
+            }
+        ],
+        "id": 28888,
+    },
+    {
+        "name": "dev_data",
+        "created_at": "2018-03-16T19:23:11.614Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/device_service_environment_variable(28887)",
+        },
+        "value": "dev_data_value",
+        "service_install": [
+            {
+                "__metadata": {"type": "", "uri": "/balena/service_install(30789)"},
+                "id": 30789,
+                "service": [
+                    {
+                        "service_name": "data",
+                        "__metadata": {"type": "", "uri": "/balena/service(NaN)"},
+                    }
+                ],
+            }
+        ],
+        "id": 28887,
+    },
+    {
+        "name": "dev_data1",
+        "created_at": "2018-03-17T05:53:19.257Z",
+        "__metadata": {
+            "type": "",
+            "uri": "/balena/device_service_environment_variable(28964)",
+        },
+        "value": "aaaa",
+        "service_install": [
+            {
+                "__metadata": {"type": "", "uri": "/balena/service_install(30789)"},
+                "id": 30789,
+                "service": [
+                    {
+                        "service_name": "data",
+                        "__metadata": {"type": "", "uri": "/balena/service(NaN)"},
+                    }
+                ],
+            }
+        ],
+        "id": 28964,
+    },
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -2434,7 +3053,34 @@ Get all device service environment variables belong to an application.
 #### Examples:
 ```python
 >>> balena.models.environment_variables.device_service_environment_variable.get_all_by_application(1043050)
-[{'id': 566017, 'created_at': '2021-04-23T08:28:08.539Z', 'service_install': {'__id': 1874939, '__deferred': {'uri': '/resin/service_install(@id)?@id=1874939'}}, 'value': '1', 'name': 'testEnv1', '__metadata': {'uri': '/resin/device_service_environment_variable(@id)?@id=566017'}}, {'id': 566015, 'created_at': '2021-04-23T08:17:45.767Z', 'service_install': {'__id': 1874939, '__deferred': {'uri': '/resin/service_install(@id)?@id=1874939'}}, 'value': '12', 'name': 'testEnv2', '__metadata': {'uri': '/resin/device_service_environment_variable(@id)?@id=566015'}}]
+[
+    {
+        "id": 566017,
+        "created_at": "2021-04-23T08:28:08.539Z",
+        "service_install": {
+            "__id": 1874939,
+            "__deferred": {"uri": "/resin/service_install(@id)?@id=1874939"},
+        },
+        "value": "1",
+        "name": "testEnv1",
+        "__metadata": {
+            "uri": "/resin/device_service_environment_variable(@id)?@id=566017"
+        },
+    },
+    {
+        "id": 566015,
+        "created_at": "2021-04-23T08:17:45.767Z",
+        "service_install": {
+            "__id": 1874939,
+            "__deferred": {"uri": "/resin/service_install(@id)?@id=1874939"},
+        },
+        "value": "12",
+        "name": "testEnv2",
+        "__metadata": {
+            "uri": "/resin/device_service_environment_variable(@id)?@id=566015"
+        },
+    },
+]
 ```
 ### Function: remove(var_id)
 
@@ -2458,7 +3104,7 @@ Update a device service environment variable.
 
 #### Examples:
 ```python
->>> balena.models.environment_variables.device_service_environment_variable.update('28970', 'test1 new value')
+>>> balena.models.environment_variables.device_service_environment_variable.update('28970', 'test1 new')
 'OK'
 ```
 ## Image
@@ -2505,7 +3151,14 @@ Creates a new organization.
 #### Examples:
 ```python
 >>> balena.models.organization.create('My Org', 'test_org')
-'{'id': 147950, 'created_at': '2020-06-23T09:33:25.187Z', 'name': 'My Org', 'handle': 'test_org', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=147950'}}'
+{
+    "id": 147950,
+    "created_at": "2020-06-23T09:33:25.187Z",
+    "name": "My Org",
+    "handle": "test_org",
+    "billing_account_code": None,
+    "__metadata": {"uri": "/resin/organization(@id)?@id=147950"},
+}
 ```
 ### Function: get(org_id)
 
@@ -2523,7 +3176,14 @@ Get a single organization by id.
 #### Examples:
 ```python
 >>> balena.models.organization.get('26474')
-'{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}'
+{
+    "id": 26474,
+    "created_at": "2018-08-14T00:24:33.144Z",
+    "name": "test_account1",
+    "handle": "test_account1",
+    "billing_account_code": None,
+    "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+}
 ```
 ### Function: get_all()
 
@@ -2535,7 +3195,16 @@ Get all organizations.
 #### Examples:
 ```python
 >>> balena.models.organization.get_all()
-'[{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}]'
+[
+    {
+        "id": 26474,
+        "created_at": "2018-08-14T00:24:33.144Z",
+        "name": "test_account1",
+        "handle": "test_account1",
+        "billing_account_code": None,
+        "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+    }
+]
 ```
 ### Function: get_by_handle(handle)
 
@@ -2553,7 +3222,14 @@ Get a single organization by handle.
 #### Examples:
 ```python
 >>> balena.models.organization.get_by_handle('test_account1')
-''{'id': 26474, 'created_at': '2018-08-14T00:24:33.144Z', 'name': 'test_account1', 'handle': 'test_account1', 'billing_account_code': None, '__metadata': {'uri': '/resin/organization(@id)?@id=26474'}}''
+{
+    "id": 26474,
+    "created_at": "2018-08-14T00:24:33.144Z",
+    "name": "test_account1",
+    "handle": "test_account1",
+    "billing_account_code": None,
+    "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+}
 ```
 ### Function: remove(org_id)
 
@@ -2595,7 +3271,24 @@ Creates a new invite for an organization.
 #### Examples:
 ```python
 >>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
-{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}
+{
+    "id": 2862,
+    "message": "Test invite",
+    "invitee": {"__id": 2965, "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"}},
+    "is_invited_to__organization": {
+        "__id": 26474,
+        "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+    },
+    "is_created_by__user": {
+        "__id": 5227,
+        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+    },
+    "organization_membership_role": {
+        "__id": 2,
+        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+    },
+    "__metadata": {"uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"},
+}
 ```
 ### Function: get_all()
 
@@ -2607,7 +3300,31 @@ Get all invites.
 #### Examples:
 ```python
 >>> balena.models.organization.invite.get_all()
-[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+[
+    {
+        "id": 2862,
+        "message": "Test invite",
+        "invitee": {
+            "__id": 2965,
+            "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
+        },
+        "is_invited_to__organization": {
+            "__id": 26474,
+            "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+        },
+        "is_created_by__user": {
+            "__id": 5227,
+            "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+        },
+        "organization_membership_role": {
+            "__id": 2,
+            "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+        },
+        "__metadata": {
+            "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
+        },
+    }
+]
 ```
 ### Function: get_all_by_organization(org_id)
 
@@ -2622,7 +3339,31 @@ Get all invites by organization.
 #### Examples:
 ```python
 >>> balena.models.organization.invite.get_all_by_organization(26474)
-[{'id': 2862, 'message': 'Test invite', 'invitee': {'__id': 2965, '__deferred': {'uri': '/resin/invitee(@id)?@id=2965'}}, 'is_invited_to__organization': {'__id': 26474, '__deferred': {'uri': '/resin/organization(@id)?@id=26474'}}, 'is_created_by__user': {'__id': 5227, '__deferred': {'uri': '/resin/user(@id)?@id=5227'}}, 'organization_membership_role': {'__id': 2, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=2'}}, '__metadata': {'uri': '/resin/invitee__is_invited_to__organization(@id)?@id=2862'}}]
+[
+    {
+        "id": 2862,
+        "message": "Test invite",
+        "invitee": {
+            "__id": 2965,
+            "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
+        },
+        "is_invited_to__organization": {
+            "__id": 26474,
+            "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
+        },
+        "is_created_by__user": {
+            "__id": 5227,
+            "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
+        },
+        "organization_membership_role": {
+            "__id": 2,
+            "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
+        },
+        "__metadata": {
+            "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
+        },
+    }
+]
 ```
 ### Function: revoke(invite_id)
 
@@ -2655,7 +3396,22 @@ Get a single organization membership.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.get(17608)
-'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+[
+    {
+        "id": 17608,
+        "created_at": "2017-08-03T11:16:03.022Z",
+        "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+        "is_member_of__organization": {
+            "__id": 3014,
+            "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+        },
+        "organization_membership_role": {
+            "__id": 3,
+            "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+        },
+        "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+    }
+]
 ```
 ### Function: get_all()
 
@@ -2667,7 +3423,22 @@ Get all organization memberships.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.get_all()
-'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+[
+    {
+        "id": 17608,
+        "created_at": "2017-08-03T11:16:03.022Z",
+        "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+        "is_member_of__organization": {
+            "__id": 3014,
+            "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+        },
+        "organization_membership_role": {
+            "__id": 3,
+            "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+        },
+        "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+    }
+]
 ```
 ### Function: get_all_by_organization(handle_or_id)
 
@@ -2685,7 +3456,22 @@ Get all memberships by organization.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.get_all_by_organization(3014)
-'[{'id': 17608, 'created_at': '2017-08-03T11:16:03.022Z', 'user': {'__id': 22294, '__deferred': {'uri': '/resin/user(@id)?@id=22294'}}, 'is_member_of__organization': {'__id': 3014, '__deferred': {'uri': '/resin/organization(@id)?@id=3014'}}, 'organization_membership_role': {'__id': 3, '__deferred': {'uri': '/resin/organization_membership_role(@id)?@id=3'}}, '__metadata': {'uri': '/resin/organization_membership(@id)?@id=17608'}}]'
+[
+    {
+        "id": 17608,
+        "created_at": "2017-08-03T11:16:03.022Z",
+        "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
+        "is_member_of__organization": {
+            "__id": 3014,
+            "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
+        },
+        "organization_membership_role": {
+            "__id": 3,
+            "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
+        },
+        "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+    }
+]
 ```
 ## OrganizationMembershipTag
 
@@ -2700,7 +3486,18 @@ Get all organization membership tags.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.tag.get_all()
-[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+[
+    {
+        "id": 991,
+        "organization_membership": {
+            "__id": 17608,
+            "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+        },
+        "tag_key": "mTag1",
+        "value": "Python SDK 1",
+        "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+    }
+]
 ```
 ### Function: get_all_by_organization(handle_or_id)
 
@@ -2718,7 +3515,18 @@ Get all organization membership tags for an organization.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.tag.get_all_by_organization(3014)
-[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+[
+    {
+        "id": 991,
+        "organization_membership": {
+            "__id": 17608,
+            "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+        },
+        "tag_key": "mTag1",
+        "value": "Python SDK 1",
+        "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+    }
+]
 ```
 ### Function: get_all_by_organization_membership(membership_id)
 
@@ -2733,7 +3541,18 @@ Get all organization membership tags for all memberships of an organization.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
-[{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK 1', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}]
+[
+    {
+        "id": 991,
+        "organization_membership": {
+            "__id": 17608,
+            "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+        },
+        "tag_key": "mTag1",
+        "value": "Python SDK 1",
+        "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+    }
+]
 ```
 ### Function: remove(membership_id, tag_key)
 
@@ -2764,7 +3583,16 @@ Set an organization membership tag.
 #### Examples:
 ```python
 >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
-{'id': 991, 'organization_membership': {'__id': 17608, '__deferred': {'uri': '/resin/organization_membership(@id)?@id=17608'}}, 'tag_key': 'mTag1', 'value': 'Python SDK', '__metadata': {'uri': '/resin/organization_membership_tag(@id)?@id=991'}}
+{
+    "id": 991,
+    "organization_membership": {
+        "__id": 17608,
+        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
+    },
+    "tag_key": "mTag1",
+    "value": "Python SDK",
+    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
+}
 >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK 1')
 'OK'
 ```
@@ -2929,7 +3757,22 @@ Get all device tags.
 #### Examples:
 ```python
 >>> balena.models.tag.device.get_all()
-[{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20162)'}}]
+[
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1036574)"}, "__id": 1036574},
+        "tag_key": "db_tag",
+        "id": 20157,
+        "value": "rpi3",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20157)"},
+    },
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1055117)"}, "__id": 1055117},
+        "tag_key": "group1",
+        "id": 20158,
+        "value": "aaa",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20158)"},
+    },
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -2944,7 +3787,22 @@ Get all device tags for an application.
 #### Examples:
 ```python
 >>> balena.models.tag.device.get_all_by_application('1005160')
-[{u'device': {u'__deferred': {u'uri': u'/balena/device(1055117)'}, u'__id': 1055117}, u'tag_key': u'group1', u'id': 20158, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20158)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'db_tag', u'id': 20157, u'value': u'rpi3', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20157)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag', u'id': 20161, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20161)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'newtag1', u'id': 20162, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20162)'}}]
+[
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1055117)"}, "__id": 1055117},
+        "tag_key": "group1",
+        "id": 20158,
+        "value": "aaa",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20158)"},
+    },
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
+        "tag_key": "group1",
+        "id": 20159,
+        "value": "bbb",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20159)"},
+    },
+]
 ```
 ### Function: get_all_by_device(uuid)
 
@@ -2962,7 +3820,22 @@ Get all device tags for a device.
 #### Examples:
 ```python
 >>> balena.models.tag.device.get_all_by_device('a03ab646c01f39e39a1e3deb7fce76b93075c6d599fd5be4a889b8145e2f8f')
-[{u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'group1', u'id': 20159, u'value': u'bbb', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20159)'}}, {u'device': {u'__deferred': {u'uri': u'/balena/device(1055116)'}, u'__id': 1055116}, u'tag_key': u'db_tag', u'id': 20160, u'value': u'aaa', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20160)'}}]
+[
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
+        "tag_key": "group1",
+        "id": 20159,
+        "value": "bbb",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20159)"},
+    },
+    {
+        "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
+        "tag_key": "db_tag",
+        "id": 20160,
+        "value": "aaa",
+        "__metadata": {"type": "", "uri": "/balena/device_tag(20160)"},
+    },
+]
 ```
 ### Function: remove(uuid, tag_key)
 
@@ -2999,7 +3872,13 @@ Set a device tag (update tag value if it exists).
 #### Examples:
 ```python
 >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
-{u'device': {u'__deferred': {u'uri': u'/balena/device(1036574)'}, u'__id': 1036574}, u'tag_key': u'testtag', u'id': 20163, u'value': u'test1', u'__metadata': {u'type': u'', u'uri': u'/balena/device_tag(20163)'}}
+{
+    "device": {"__deferred": {"uri": "/balena/device(1036574)"}, "__id": 1036574},
+    "tag_key": "testtag",
+    "id": 20163,
+    "value": "test1",
+    "__metadata": {"type": "", "uri": "/balena/device_tag(20163)"},
+}
 >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
 OK
 ```
@@ -3016,7 +3895,28 @@ Get all application tags.
 #### Examples:
 ```python
 >>> balena.models.tag.application.get_all()
-[{u'application': {u'__deferred': {u'uri': u'/balena/application(1005160)'}, u'__id': 1005160}, u'tag_key': u'appTag', u'id': 12886, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12886)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12888)'}}]
+[
+    {
+        "application": {
+            "__deferred": {"uri": "/balena/application(1005160)"},
+            "__id": 1005160,
+        },
+        "tag_key": "appTag",
+        "id": 12886,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/application_tag(12886)"},
+    },
+    {
+        "application": {
+            "__deferred": {"uri": "/balena/application(1005767)"},
+            "__id": 1005767,
+        },
+        "tag_key": "appTa1",
+        "id": 12887,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/application_tag(12887)"},
+    },
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -3031,7 +3931,28 @@ Get all application tags for an application.
 #### Examples:
 ```python
 >>> balena.models.tag.application.get_all_by_application('1005767')
-[{u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTa1', u'id': 12887, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12887)'}}, {u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'appTag2', u'id': 12888, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12888)'}}]
+[
+    {
+        "application": {
+            "__deferred": {"uri": "/balena/application(1005767)"},
+            "__id": 1005767,
+        },
+        "tag_key": "appTa1",
+        "id": 12887,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/application_tag(12887)"},
+    },
+    {
+        "application": {
+            "__deferred": {"uri": "/balena/application(1005767)"},
+            "__id": 1005767,
+        },
+        "tag_key": "appTag2",
+        "id": 12888,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/application_tag(12888)"},
+    },
+]
 ```
 ### Function: remove(app_id, tag_key)
 
@@ -3062,7 +3983,16 @@ Set an application tag (update tag value if it exists).
 #### Examples:
 ```python
 >>> balena.models.tag.application.set('1005767', 'tag1', 'Python SDK')
-{u'application': {u'__deferred': {u'uri': u'/balena/application(1005767)'}, u'__id': 1005767}, u'tag_key': u'tag1', u'id': 12889, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/application_tag(12889)'}}
+{
+    "application": {
+        "__deferred": {"uri": "/balena/application(1005767)"},
+        "__id": 1005767,
+    },
+    "tag_key": "tag1",
+    "id": 12889,
+    "value": "Python SDK",
+    "__metadata": {"type": "", "uri": "/balena/application_tag(12889)"},
+}
 >>> balena.models.tag.application.set('1005767', 'tag1','Balena Python SDK')
 OK
 ```
@@ -3079,7 +4009,15 @@ Get all release tags.
 #### Examples:
 ```python
 >>> balena.models.tag.release.get_all()
-[{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
+[
+    {
+        "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
+        "tag_key": "releaseTag1",
+        "id": 135,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
+    }
+]
 ```
 ### Function: get_all_by_application(app_id)
 
@@ -3094,7 +4032,15 @@ Get all release tags for an application.
 #### Examples:
 ```python
 >>> balena.models.tag.release.get_all_by_application('1043050')
-[{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
+[
+    {
+        "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
+        "tag_key": "releaseTag1",
+        "id": 135,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
+    }
+]
 ```
 ### Function: get_all_by_release(commit_or_id)
 
@@ -3109,7 +4055,15 @@ Get all release tags for a release.
 #### Examples:
 ```python
 >>> balena.models.tag.release.get_all_by_release(135)
-[{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}]
+[
+    {
+        "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
+        "tag_key": "releaseTag1",
+        "id": 135,
+        "value": "Python SDK",
+        "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
+    }
+]
 ```
 ### Function: remove(commit_or_id, tag_key)
 
@@ -3140,7 +4094,13 @@ Set a release tag (update tag value if it exists).
 #### Examples:
 ```python
 >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
-{u'release': {u'__deferred': {u'uri': u'/balena/release(465307)'}, u'__id': 465307}, u'tag_key': u'releaseTag1', u'id': 135, u'value': u'Python SDK', u'__metadata': {u'type': u'', u'uri': u'/balena/release_tag(135)'}}
+{
+    "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
+    "tag_key": "releaseTag1",
+    "id": 135,
+    "value": "Python SDK",
+    "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
+}
 >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK 1')
 OK
 ```
@@ -3259,7 +4219,18 @@ No need to set device_uuid and app_id if command is sent to the API on device.
 #### Examples:
 ```python
 >>> balena.models.supervisor.get_device_state(device_uuid='8f66ec7335267e7cc7999ca9eec029a01ea7d823214c742ace5cfffaa21be3', app_id='9020')
-{u'status': u'Idle', u'update_failed': False, u'update_pending': False, u'download_progress': None, u'os_version': u'Balena OS 1.1.1', u'api_port': 48484, u'commit': u'ff812b9a5f82d9661fb23c24aa86dce9425f1112', u'update_downloaded': False, u'supervisor_version': u'1.7.0', u'ip_address': u'192.168.0.102'}
+{
+    "status": "Idle",
+    "update_failed": False,
+    "update_pending": False,
+    "download_progress": None,
+    "os_version": "Balena OS 1.1.1",
+    "api_port": 48484,
+    "commit": "ff812b9a5f82d9661fb23c24aa86dce9425f1112",
+    "update_downloaded": False,
+    "supervisor_version": "1.7.0",
+    "ip_address": "192.168.0.102",
+}
 ```
 ### Function: ping(device_uuid)
 
@@ -3509,7 +4480,49 @@ Get all device history entries for an application.
 >>> balena.models.history.device.get_all_by_application('2036095')
 >>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-5))
 >>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
-[{'id': 48262901, 'tracks__device': {'__id': 11196426, '__deferred': {'uri': '/v6/device(@id)?@id=11196426'}}, 'tracks__actor': {'__id': 14923839, '__deferred': {'uri': '/v6/actor(@id)?@id=14923839'}}, 'uuid': '6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab', 'is_active': False, 'belongs_to__application': {'__id': 2036095, '__deferred': {'uri': '/v6/application(@id)?@id=2036095'}}, 'is_running__release': {'__id': 2534745, '__deferred': {'uri': '/v6/release(@id)?@id=2534745'}}, 'should_be_running__release': {'__id': 2534744, '__deferred': {'uri': '/v6/release(@id)?@id=2534744'}}, 'should_be_managed_by__release': None, 'os_version': None, 'os_variant': None, 'supervisor_version': None, 'is_of__device_type': {'__id': 57, '__deferred': {'uri': '/v6/device_type(@id)?@id=57'}}, 'end_timestamp': None, 'created_at': '2023-03-28T20:28:22.773Z', 'is_created_by__actor': {'__id': 14845379, '__deferred': {'uri': '/v6/actor(@id)?@id=14845379'}}, 'is_ended_by__actor': None, '__metadata': {'uri': '/v6/device_history(@id)?@id=48262901'}}]
+[
+    {
+        "id": 48262901,
+        "tracks__device": {
+            "__id": 11196426,
+            "__deferred": {"uri": "/v6/device(@id)?@id=11196426"},
+        },
+        "tracks__actor": {
+            "__id": 14923839,
+            "__deferred": {"uri": "/v6/actor(@id)?@id=14923839"},
+        },
+        "uuid": "6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab",
+        "is_active": False,
+        "belongs_to__application": {
+            "__id": 2036095,
+            "__deferred": {"uri": "/v6/application(@id)?@id=2036095"},
+        },
+        "is_running__release": {
+            "__id": 2534745,
+            "__deferred": {"uri": "/v6/release(@id)?@id=2534745"},
+        },
+        "should_be_running__release": {
+            "__id": 2534744,
+            "__deferred": {"uri": "/v6/release(@id)?@id=2534744"},
+        },
+        "should_be_managed_by__release": None,
+        "os_version": None,
+        "os_variant": None,
+        "supervisor_version": None,
+        "is_of__device_type": {
+            "__id": 57,
+            "__deferred": {"uri": "/v6/device_type(@id)?@id=57"},
+        },
+        "end_timestamp": None,
+        "created_at": "2023-03-28T20:28:22.773Z",
+        "is_created_by__actor": {
+            "__id": 14845379,
+            "__deferred": {"uri": "/v6/actor(@id)?@id=14845379"},
+        },
+        "is_ended_by__actor": None,
+        "__metadata": {"uri": "/v6/device_history(@id)?@id=48262901"},
+    }
+]
 ```
 ### Function: get_all_by_device(uuid_or_id, fromDate, toDate)
 
@@ -3528,7 +4541,49 @@ Get all device history entries for a device.
 >>> balena.models.history.device_history.get_all_by_device('11196426')
 >>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-5))
 >>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
-[{'id': 48262901, 'tracks__device': {'__id': 11196426, '__deferred': {'uri': '/v6/device(@id)?@id=11196426'}}, 'tracks__actor': {'__id': 14923839, '__deferred': {'uri': '/v6/actor(@id)?@id=14923839'}}, 'uuid': '6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab', 'is_active': False, 'belongs_to__application': {'__id': 2036095, '__deferred': {'uri': '/v6/application(@id)?@id=2036095'}}, 'is_running__release': {'__id': 2534745, '__deferred': {'uri': '/v6/release(@id)?@id=2534745'}}, 'should_be_running__release': {'__id': 2534744, '__deferred': {'uri': '/v6/release(@id)?@id=2534744'}}, 'should_be_managed_by__release': None, 'os_version': None, 'os_variant': None, 'supervisor_version': None, 'is_of__device_type': {'__id': 57, '__deferred': {'uri': '/v6/device_type(@id)?@id=57'}}, 'end_timestamp': None, 'created_at': '2023-03-28T20:28:22.773Z', 'is_created_by__actor': {'__id': 14845379, '__deferred': {'uri': '/v6/actor(@id)?@id=14845379'}}, 'is_ended_by__actor': None, '__metadata': {'uri': '/v6/device_history(@id)?@id=48262901'}}]
+[
+    {
+        "id": 48262901,
+        "tracks__device": {
+            "__id": 11196426,
+            "__deferred": {"uri": "/v6/device(@id)?@id=11196426"},
+        },
+        "tracks__actor": {
+            "__id": 14923839,
+            "__deferred": {"uri": "/v6/actor(@id)?@id=14923839"},
+        },
+        "uuid": "6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab",
+        "is_active": False,
+        "belongs_to__application": {
+            "__id": 2036095,
+            "__deferred": {"uri": "/v6/application(@id)?@id=2036095"},
+        },
+        "is_running__release": {
+            "__id": 2534745,
+            "__deferred": {"uri": "/v6/release(@id)?@id=2534745"},
+        },
+        "should_be_running__release": {
+            "__id": 2534744,
+            "__deferred": {"uri": "/v6/release(@id)?@id=2534744"},
+        },
+        "should_be_managed_by__release": None,
+        "os_version": None,
+        "os_variant": None,
+        "supervisor_version": None,
+        "is_of__device_type": {
+            "__id": 57,
+            "__deferred": {"uri": "/v6/device_type(@id)?@id=57"},
+        },
+        "end_timestamp": None,
+        "created_at": "2023-03-28T20:28:22.773Z",
+        "is_created_by__actor": {
+            "__id": 14845379,
+            "__deferred": {"uri": "/v6/actor(@id)?@id=14845379"},
+        },
+        "is_ended_by__actor": None,
+        "__metadata": {"uri": "/v6/device_history(@id)?@id=48262901"},
+    }
+]
 ```
 ## Auth
 
@@ -3779,7 +4834,14 @@ Get all settings.
 #### Examples:
 ```python
 >>> balena.settings.get_all()
-{'image_cache_time': '604800000', 'api_endpoint': 'https://api.balena-cloud.com/', 'data_directory': '/root/.balena', 'token_refresh_interval': '3600000', 'cache_directory': '/root/.balena/cache', 'pine_endpoint': 'https://api.balena-cloud.com/ewa/'}
+{
+    "image_cache_time": "604800000",
+    "api_endpoint": "https://api.balena-cloud.com/",
+    "data_directory": "/root/.balena",
+    "token_refresh_interval": "3600000",
+    "cache_directory": "/root/.balena/cache",
+    "pine_endpoint": "https://api.balena-cloud.com/ewa/",
+}
 ```
 ### Function: has(key)
 
@@ -3937,7 +4999,8 @@ True
 ### Function: verify(code)
 
 Verifies two factor authentication.
-Note that this method not update the token automatically. You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
+Note that this method not update the token automatically.
+You should use balena.twofactor_auth.challenge() when possible, as it takes care of that as well.
 
 #### Args:
     code (str): two-factor authentication code.
