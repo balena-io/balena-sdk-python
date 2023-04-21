@@ -1,4 +1,20 @@
 - commits:
+    - subject: Fix formatted string in `device_os` by deviceType
+      hash: 8dfa4ef9d5036ff4c7cb062c0964ba800e52782f
+      body: |
+        Added test for `device_os.get_support_versions`
+
+        Fixed styles after running `black`
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+  version: 12.6.15
+  title: ""
+  date: 2023-04-21T12:08:42.184Z
+- commits:
     - subject: Changes tag set behaviour to use upsert
       hash: c4ae3370e7baf52478d3479a2cac3684af7dc5bd
       body: ""
