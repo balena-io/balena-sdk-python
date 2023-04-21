@@ -20,7 +20,6 @@ class ApiKey:
         self.settings = Settings()
 
     def __get_all_with_filter(self, filters):
-
         return self.base_request.request(
             "api_key",
             "GET",

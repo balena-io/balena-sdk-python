@@ -27,7 +27,6 @@ class HistoryBaseClass(ABC):
         self.base_request = BaseRequest()
 
     def _history_timerange_filter_with_guard(self, fromDate=None, toDate=None):
-
         rawTimeRangeFilters = []
         if fromDate is not None:
             if isinstance(fromDate, datetime):
@@ -49,7 +48,6 @@ class HistoryBaseClass(ABC):
             return None
 
     def _get_history_by_resource_and_filter(self, resource_name, fromDate=None, toDate=None, **options):
-
         rawTimeRangeFilter = self._history_timerange_filter_with_guard(fromDate=fromDate, toDate=toDate)
 
         params = {"filters": options}

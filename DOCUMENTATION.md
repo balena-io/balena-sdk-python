@@ -3837,12 +3837,12 @@ Get all device tags for a device.
     },
 ]
 ```
-### Function: remove(uuid, tag_key)
+### Function: remove(parent_id, tag_key)
 
 Remove a device tag.
 
 #### Args:
-    uuid (str): device uuid.
+    parent_id (Union[str, int]): device uuid or device id.
     tag_key (str): tag key.
 
 #### Raises:

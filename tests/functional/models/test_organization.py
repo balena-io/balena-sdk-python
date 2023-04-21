@@ -5,7 +5,6 @@ from tests.helper import TestHelper
 
 
 class TestOrganization(unittest.TestCase):
-
     helper = None
     balena = None
     test_org_handle = "python_sdk_org_test_{time}".format(time=datetime.now().strftime("%H_%M_%S"))

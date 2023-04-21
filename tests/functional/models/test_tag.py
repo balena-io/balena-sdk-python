@@ -124,7 +124,6 @@ class BaseTagTest:
 
 
 class TestDeviceTag(unittest.TestCase):
-
     helper = None
     balena = None
     device_tag = None
@@ -170,7 +169,6 @@ class TestDeviceTag(unittest.TestCase):
 
 
 class TestReleaseTag(unittest.TestCase):
-
     helper = None
     balena = None
     release_tag = None
