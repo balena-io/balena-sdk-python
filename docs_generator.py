@@ -76,7 +76,6 @@ def make_function_name(func, func_name):
 
 
 def main():
-
     print(doc2md.doc2md(balena.__doc__, "Balena Python SDK", type=0))
     print_newline()
     print("## Table of Contents")

@@ -118,7 +118,6 @@ def compare_balena_version(version_a, version_b):
     is_valid_semver_version_b = semver.VersionInfo.isvalid(normalized_version_b)
 
     if not is_valid_semver_version_a or not is_valid_semver_version_b:
-
         if is_valid_semver_version_a:
             # verison b not valid semver
             return 1
@@ -460,7 +459,6 @@ class DeviceOs:
         }
 
     def __get_os_versions(self, device_type):
-
         # fmt: off
         raw_query = (
             "$select=is_for__device_type,is_host"
@@ -477,7 +475,7 @@ class DeviceOs:
                 ")"
             "&$filter="
                 "is_host%20eq%20true%20and%20"
-                "is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))"
+                f"is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))"
         )
         # fmt: on
 

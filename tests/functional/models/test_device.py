@@ -5,7 +5,6 @@ from tests.helper import TestHelper
 
 
 class TestDevice(unittest.TestCase):
-
     helper = None
     balena = None
     app = None

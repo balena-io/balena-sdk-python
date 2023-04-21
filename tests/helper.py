@@ -16,7 +16,6 @@ from balena.settings import Settings
 
 
 class TestHelper:
-
     credentials = {}
 
     balena = Balena()

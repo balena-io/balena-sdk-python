@@ -50,7 +50,6 @@ class Auth:
         """
 
         if not self._user_full_detail_cache:
-
             params = {"filter": "id", "eq": self.get_user_id()}
 
             self._user_full_detail_cache = self.base_request.request(

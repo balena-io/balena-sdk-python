@@ -218,7 +218,6 @@ class Release:
         )
 
         if raw_release["d"]:
-
             raw_release = raw_release["d"][0]
             release = {
                 "user": raw_release["is_created_by__user"][0],
