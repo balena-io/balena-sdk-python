@@ -27,10 +27,12 @@ class Hup:
         if parsed_current_ver["prerelease"] or parsed_target_ver["prerelease"]:
             raise exceptions.OsUpdateError("Updates cannot be performed on pre-release balenaOS versions")
 
-        releases = self.__xstr(parsed_current_ver["prerelease"])
-        +self.__xstr(parsed_target_ver["prerelease"])
-        +self.__xstr(parsed_target_ver["build"])
-        +self.__xstr(parsed_current_ver["build"])
+        releases = (
+            self.__xstr(parsed_current_ver["prerelease"])
+            + self.__xstr(parsed_target_ver["prerelease"])
+            + self.__xstr(parsed_target_ver["build"])
+            + self.__xstr(parsed_current_ver["build"])
+        )
 
         if "dev" in releases:
             raise exceptions.OsUpdateError("Updates cannot be performed on development balenaOS variants")
