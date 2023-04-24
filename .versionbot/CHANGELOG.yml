@@ -1,4 +1,17 @@
 - commits:
+    - subject: Fix multiline string concatenation in HUP release
+      hash: 64ec258143d60edb34b97a38924daaa13ed277dc
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+  version: 12.6.16
+  title: ""
+  date: 2023-04-24T11:23:58.247Z
+- commits:
     - subject: Fix formatted string in `device_os` by deviceType
       hash: 8dfa4ef9d5036ff4c7cb062c0964ba800e52782f
       body: |
