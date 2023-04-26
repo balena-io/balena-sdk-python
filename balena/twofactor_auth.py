@@ -1,14 +1,11 @@
-try:  # Python 3 imports
-    from urllib.parse import parse_qs
-except ImportError:  # Python 2 imports
-    from urlparse.parse import parse_qs
+from urllib.parse import parse_qs
 
-import pyotp
 import jwt
+import pyotp
 
+from . import exceptions
 from .base_request import BaseRequest
 from .settings import Settings
-from . import exceptions
 
 TOKEN_KEY = "token"
 

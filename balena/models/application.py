@@ -1,20 +1,16 @@
-try:  # Python 3 imports
-    from urllib.parse import urljoin
-except ImportError:  # Python 2 imports
-    from urlparse import urljoin
+import json
+from collections import defaultdict
+from datetime import datetime
+from math import isinf
+from urllib.parse import urljoin
 
+from .. import exceptions
 from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
+from ..utils import is_id
 from .device_type import DeviceType
 from .release import Release
-from .. import exceptions
-from ..utils import is_id
-
-from datetime import datetime
-import json
-from math import isinf
-from collections import defaultdict
 
 
 def _get_role_by_name(role_name):

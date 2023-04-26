@@ -1,14 +1,13 @@
 import json
-
-from urllib.parse import urljoin
 from collections import defaultdict
 from threading import Thread
+from urllib.parse import urljoin
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol
+from twisted.internet.ssl import ClientContextFactory
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
-from twisted.internet.ssl import ClientContextFactory
 
 from .base_request import BaseRequest
 from .models.config import Config

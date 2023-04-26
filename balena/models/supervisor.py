@@ -1,9 +1,10 @@
 import os
+
 from pkg_resources import parse_version
 
+from .. import exceptions
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .. import exceptions
 from .device import Device
 
 

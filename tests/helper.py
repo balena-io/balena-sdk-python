@@ -1,13 +1,10 @@
-from datetime import datetime
-import os.path as Path
-import os
-import jwt
+import configparser
 import json
+import os
+import os.path as Path
+from datetime import datetime
 
-try:  # Python 3 imports
-    import configparser
-except ImportError:  # Python 2 imports
-    import ConfigParser as configparser
+import jwt
 
 from balena import Balena
 from balena import exceptions as balena_exceptions

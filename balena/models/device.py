@@ -1,28 +1,24 @@
 import binascii
-import os
-from datetime import datetime
 import json
+import os
 from collections import defaultdict
+from datetime import datetime
+from urllib.parse import urljoin
+
 import semver
 
-try:  # Python 3 imports
-    from urllib.parse import urljoin
-except ImportError:  # Python 2 imports
-    from urlparse import urljoin
-
+from .. import exceptions
+from ..auth import Auth
 from ..base_request import BaseRequest
+from ..resources import Message
+from ..settings import Settings
+from .application import Application
 from .config import Config
 from .device_os import DeviceOs, normalize_balena_semver
 from .device_type import DeviceType
-from ..settings import Settings
-from ..auth import Auth
-from .. import exceptions
-from ..resources import Message
-from .application import Application
-from .release import Release
-from .hup import Hup
 from .history import DeviceHistory
-
+from .hup import Hup
+from .release import Release
 
 LOCAL_MODE_MIN_OS_VERSION = "2.0.0"
 LOCAL_MODE_MIN_SUPERVISOR_VERSION = "4.0.0"

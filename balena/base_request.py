@@ -1,17 +1,14 @@
-try:  # Python 3 imports
-    from urllib.parse import urljoin
-except ImportError:  # Python 2 imports
-    from urlparse import urljoin
-
-from datetime import datetime
 import json
-from string import Template
 import os
-import requests
-import jwt
+from datetime import datetime
+from string import Template
+from urllib.parse import urljoin
 
-from .settings import Settings
+import jwt
+import requests
+
 from . import exceptions
+from .settings import Settings
 
 TOKEN_KEY = "token"
 

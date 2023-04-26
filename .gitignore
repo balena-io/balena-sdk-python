@@ -5,3 +5,4 @@ test.py
 build/*
 .vscode/
 dist/
+poetry.lock

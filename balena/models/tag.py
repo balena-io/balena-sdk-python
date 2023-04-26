@@ -1,12 +1,12 @@
 import json
+import re
 
+from .. import exceptions
 from ..base_request import BaseRequest
-from .device import Device
-from .release import Release
 from ..settings import Settings
 from ..utils import is_id
-from .. import exceptions
-import re
+from .device import Device
+from .release import Release
 
 
 class Tag:

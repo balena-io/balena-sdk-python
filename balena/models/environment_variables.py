@@ -1,10 +1,10 @@
-import re
 import json
+import re
 
-from ..base_request import BaseRequest
-from .device import Device
-from ..settings import Settings
 from .. import exceptions
+from ..base_request import BaseRequest
+from ..settings import Settings
+from .device import Device
 from .service import Service
 from .service_install import ServiceInstall
 

@@ -1,6 +1,6 @@
 import configparser
-import os.path as Path
 import os
+import os.path as Path
 import shutil
 import sys
 
