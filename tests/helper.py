@@ -33,13 +33,12 @@ class TestHelper:
                 "{0}/{1}/".format(self.credentials["api_endpoint"], self.settings.get("api_version")),
             )
 
-        if not self.balena.auth.is_logged_in():
-            self.balena.auth.login(
-                **{
-                    "username": self.credentials["user_id"],
-                    "password": self.credentials["password"],
-                }
-            )
+        self.balena.auth.login(
+            **{
+                "username": self.credentials["user_id"],
+                "password": self.credentials["password"],
+            }
+        )
 
         # Stop the test if it's run by an admin user account.
         token_data = jwt.decode(
