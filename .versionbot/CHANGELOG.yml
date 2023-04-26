@@ -1,4 +1,23 @@
 - commits:
+    - subject: Fix device history filter arguments
+      hash: 62a4f45e3f9de38cff9b09194c70833a2a9be68d
+      body: >
+        Device history was not filtered by `deviceId`, `deviceUUID` or
+        `applicationID` as SDK created two `$filter` arguments which are not
+        interpreted on the API site.
+
+
+        Fixes: #317
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+  version: 12.6.17
+  title: ""
+  date: 2023-04-26T12:23:27.579Z
+- commits:
     - subject: Fix multiline string concatenation in HUP release
       hash: 64ec258143d60edb34b97a38924daaa13ed277dc
       body: ""
@@ -231,8 +250,8 @@
     - subject: Add device_os.get_available_os_versions()
       hash: 2590e20d89315d8d1ff7c3e2db6868773e1f60d7
       body: >
-        This method returns list of the supported balenaOS versions (ESR included)
-        for the provided device type.
+        This method returns list of the supported balenaOS versions (ESR
+        included) for the provided device type.
       footer:
         Change-type: patch
         change-type: patch
