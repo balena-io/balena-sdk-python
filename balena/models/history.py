@@ -40,25 +40,26 @@ class HistoryBaseClass(ABC):
             else:
                 raise exceptions.InvalidParameter("toDate", toDate)
 
-        rawFilterString = "$filter=" + " and ".join(rawTimeRangeFilters)
+        return rawTimeRangeFilters
 
-        if len(rawTimeRangeFilters) > 0:
-            return rawFilterString
-        else:
-            return None
+    def _history_compile_raw_filter(self, **options):
+        rawOptionsFilter = []
+        for key in options:
+            rawOptionsFilter.append(f"{key}%20eq%20'{options[key]}'")
+        return rawOptionsFilter
 
     def _get_history_by_resource_and_filter(self, resource_name, fromDate=None, toDate=None, **options):
-        rawTimeRangeFilter = self._history_timerange_filter_with_guard(fromDate=fromDate, toDate=toDate)
+        rawTimeFilterArray = self._history_timerange_filter_with_guard(fromDate=fromDate, toDate=toDate)
+        rawOptionsFilter = self._history_compile_raw_filter(**options)
 
-        params = {"filters": options}
+        rawFilterString = "$filter=" + " and ".join(rawTimeFilterArray + rawOptionsFilter)
 
         history_resource = resource_name + "_history"
         return self.base_request.request(
             history_resource,
             "GET",
-            params=params,
             endpoint=self.settings.get("pine_endpoint"),
-            raw_query=rawTimeRangeFilter,
+            raw_query=rawFilterString,
         )["d"]
 
 
@@ -81,9 +82,9 @@ class DeviceHistory(HistoryBaseClass):
         Examples:
             >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab')
             >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211')
-            >>> balena.models.history.device_history.get_all_by_device('11196426')
-            >>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-5))
-            >>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
+            >>> balena.models.history.device_history.get_all_by_device(11196426)
+            >>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-5))
+            >>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
             [
                 {
                     "id": 48262901,
@@ -132,10 +133,13 @@ class DeviceHistory(HistoryBaseClass):
 
         if is_id(uuid_or_id):
             return self._get_history_by_resource_and_filter(
-                "device", tracks__device=uuid_or_id, fromDate=fromDate, toDate=toDate
+                "device",
+                fromDate=fromDate,
+                toDate=toDate,
+                tracks__device=int(uuid_or_id),
             )
         elif is_full_uuid(uuid_or_id):
-            return self._get_history_by_resource_and_filter("device", uuid=uuid_or_id, fromDate=fromDate, toDate=toDate)
+            return self._get_history_by_resource_and_filter("device", fromDate=fromDate, toDate=toDate, uuid=uuid_or_id)
         else:
             raise exceptions.InvalidParameter("uuid_or_id", uuid_or_id)
 
@@ -144,15 +148,15 @@ class DeviceHistory(HistoryBaseClass):
         Get all device history entries for an application.
 
         Args:
-            app_id (str): application id.
+            app_id (Union[str, int]): application id.
 
         Returns:
             list: device history entries.
 
         Examples:
-            >>> balena.models.history.device.get_all_by_application('2036095')
-            >>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-5))
-            >>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
+            >>> balena.models.history.device.get_all_by_application(2036095)
+            >>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-5))
+            >>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
             [
                 {
                     "id": 48262901,
@@ -200,5 +204,5 @@ class DeviceHistory(HistoryBaseClass):
         """  # noqa: E501
 
         return self._get_history_by_resource_and_filter(
-            "device", belongs_to__application=app_id, fromDate=fromDate, toDate=toDate
+            "device", fromDate=fromDate, toDate=toDate, belongs_to__application=int(app_id)
         )
