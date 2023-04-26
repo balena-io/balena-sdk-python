@@ -84,7 +84,7 @@ class TestOrganization(unittest.TestCase):
     def test_invite_create(self):
         # should create and return an organization invite
         invite = self.balena.models.organization.invite.create(
-            type(self).org1["id"], "james@resin.io", "member", "Python SDK test invite"
+            type(self).org1["id"], self.helper.credentials["email"], "member", "Python SDK test invite"
         )
         self.assertEqual(invite["message"], "Python SDK test invite")
         self.assertEqual(invite["is_invited_to__organization"]["__id"], type(self).org1["id"])
@@ -95,7 +95,7 @@ class TestOrganization(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound):
             invite = self.balena.models.organization.invite.create(
                 type(self).org1["id"],
-                "james@resin.io",
+                self.helper.credentials["email"],
                 "member1",
                 "Python SDK test invite",
             )
@@ -107,7 +107,7 @@ class TestOrganization(unittest.TestCase):
 
         # shoud return an invite list with length equals 1.
         self.balena.models.organization.invite.create(
-            type(self).org1["id"], "james@resin.io", "member", "Python SDK test invite"
+            type(self).org1["id"], self.helper.credentials["email"], "member", "Python SDK test invite"
         )
         invite_list = self.balena.models.organization.invite.get_all()
         self.assertEqual(1, len(invite_list))

@@ -292,7 +292,7 @@ class TestApplication(unittest.TestCase):
 
         # should create and return an application invite
         invite = self.balena.models.application.invite.create(
-            app["id"], "james@resin.io", "developer", "Python SDK test invite"
+            app["id"], self.helper.credentials["email"], "developer", "Python SDK test invite"
         )
         type(self).invite = invite
         self.assertEqual(invite["message"], "Python SDK test invite")
@@ -302,7 +302,7 @@ class TestApplication(unittest.TestCase):
         # raise balena.exceptions.BalenaApplicationMembershipRoleNotFound if  role is not found.
         with self.assertRaises(self.helper.balena_exceptions.BalenaApplicationMembershipRoleNotFound):
             self.balena.models.application.invite.create(
-                app["id"], "james@resin.io", "developer1", "Python SDK test invite"
+                app["id"], self.helper.credentials["email"], "developer1", "Python SDK test invite"
             )
 
     def test_26_invite_get_all(self):
@@ -344,7 +344,7 @@ class TestApplication(unittest.TestCase):
         # should throw an error when role is not found
         # raise balena.exceptions.BalenaApplicationMembershipRoleNotFound if  role is not found.
         with self.assertRaises(self.helper.balena_exceptions.BalenaApplicationMembershipRoleNotFound):
-            self.balena.models.application.membership.create(app["id"], "james@resin.io", "developer1")
+            self.balena.models.application.membership.create(app["id"], self.helper.credentials["email"], "developer1")
 
     def test_32_membership_get_all(self):
         membership_list = self.balena.models.application.membership.get_all()

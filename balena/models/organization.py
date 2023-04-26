@@ -311,7 +311,7 @@ class OrganizationInvite:
             dict: organization invite.
 
         Examples:
-            >>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
+            >>> balena.models.organization.invite.create(26474, 'invitee@example.org', 'member', 'Test invite')
             {
                 "id": 2862,
                 "message": "Test invite",

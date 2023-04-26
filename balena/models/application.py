@@ -1382,7 +1382,7 @@ class ApplicationInvite:
             dict: application invite.
 
         Examples:
-            >>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
+            >>> balena.models.application.invite.create(1681618, 'invitee@example.org', 'developer', 'Test invite')
             {
                 "id": 5860,
                 "message": "Test invite",
