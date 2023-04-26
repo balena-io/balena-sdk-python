@@ -1,4 +1,15 @@
 - commits:
+    - subject: Always logins with test user for tests
+      hash: dca47f995e9636d8aca489edbe9ff508ccc7f4bb
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 12.6.18
+  title: ""
+  date: 2023-04-26T14:27:44.842Z
+- commits:
     - subject: Fix device history filter arguments
       hash: 62a4f45e3f9de38cff9b09194c70833a2a9be68d
       body: >
