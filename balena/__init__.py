@@ -36,7 +36,7 @@ from .models import Models
 from .twofactor_auth import TwoFactorAuth
 
 
-__version__ = "12.6.18"
+__version__ = "12.6.19"
 
 
 class Balena:

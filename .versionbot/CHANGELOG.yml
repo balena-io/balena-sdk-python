@@ -1,4 +1,15 @@
 - commits:
+    - subject: Removes hardcoded personal emails from docs and tests
+      hash: a2ebc171b5b4005cabcc1260cf95f2ce4acafbda
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 12.6.19
+  title: ""
+  date: 2023-04-26T14:51:56.332Z
+- commits:
     - subject: Always logins with test user for tests
       hash: dca47f995e9636d8aca489edbe9ff508ccc7f4bb
       body: ""
