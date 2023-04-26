@@ -758,7 +758,7 @@ Creates a new invite for an application.
 
 #### Examples:
 ```python
->>> balena.models.application.invite.create(1681618, 'james@resin.io', 'developer', 'Test invite')
+>>> balena.models.application.invite.create(1681618, 'invitee@example.org', 'developer', 'Test invite')
 {
     "id": 5860,
     "message": "Test invite",
@@ -3270,7 +3270,7 @@ Creates a new invite for an organization.
 
 #### Examples:
 ```python
->>> balena.models.organization.invite.create(26474, 'james@resin.io', 'member', 'Test invite')
+>>> balena.models.organization.invite.create(26474, 'invitee@example.org', 'member', 'Test invite')
 {
     "id": 2862,
     "message": "Test invite",
