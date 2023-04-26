@@ -1,5 +1,5 @@
-import inspect
 import importlib
+import inspect
 
 balena = importlib.import_module("balena", ".")
 doc2md = importlib.import_module("docs.doc2md", ".")

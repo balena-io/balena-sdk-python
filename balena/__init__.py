@@ -31,10 +31,9 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
 
 from .auth import Auth
 from .logs import Logs
-from .settings import Settings
 from .models import Models
+from .settings import Settings
 from .twofactor_auth import TwoFactorAuth
-
 
 __version__ = "12.6.19"
 

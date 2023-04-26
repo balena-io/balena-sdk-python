@@ -1,9 +1,9 @@
 import json
 
-from ..base_request import BaseRequest
-from .device import Device
-from ..settings import Settings
 from .. import exceptions
+from ..base_request import BaseRequest
+from ..settings import Settings
+from .device import Device
 
 
 def _is_valid_config_var_name(config_var_name):

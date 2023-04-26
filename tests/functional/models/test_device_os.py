@@ -1,6 +1,6 @@
 import unittest
-from balena.models.hup import Hup
 
+from balena.models.hup import Hup
 from tests.helper import TestHelper
 
 

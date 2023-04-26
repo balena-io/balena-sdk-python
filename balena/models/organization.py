@@ -1,12 +1,12 @@
+import json
+
+from .. import exceptions
 from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .config import Config
 from ..utils import is_id
+from .config import Config
 from .tag import BaseTag
-from .. import exceptions
-
-import json
 
 
 class Organization:

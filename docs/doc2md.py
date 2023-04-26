@@ -2,9 +2,9 @@
 """
 This script is from https://github.com/nghiant2710/doc2md
 """
+import inspect
 import re
 import sys
-import inspect
 
 __all__ = ["doctrim", "doc2md"]
 

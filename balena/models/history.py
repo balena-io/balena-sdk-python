@@ -1,9 +1,10 @@
 from abc import ABC
 from datetime import datetime, timedelta
-from ..utils import is_id, is_full_uuid
+
+from .. import exceptions
 from ..base_request import BaseRequest
 from ..settings import Settings
-from .. import exceptions
+from ..utils import is_full_uuid, is_id
 
 
 class History:

@@ -1,9 +1,9 @@
 import json
 
+from .. import exceptions
+from ..auth import Auth
 from ..base_request import BaseRequest
 from ..settings import Settings
-from ..auth import Auth
-from .. import exceptions
 
 
 class Key:
