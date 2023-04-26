@@ -4471,16 +4471,16 @@ This class implements device history model for balena python SDK.
 Get all device history entries for an application.
 
 #### Args:
-    app_id (str): application id.
+    app_id (Union[str, int]): application id.
 
 #### Returns:
     list: device history entries.
 
 #### Examples:
 ```python
->>> balena.models.history.device.get_all_by_application('2036095')
->>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-5))
->>> balena.models.history.device.get_all_by_application('2036095', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
+>>> balena.models.history.device.get_all_by_application(2036095)
+>>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-5))
+>>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
 [
     {
         "id": 48262901,
@@ -4539,9 +4539,9 @@ Get all device history entries for a device.
 ```python
 >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab')
 >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211')
->>> balena.models.history.device_history.get_all_by_device('11196426')
->>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-5))
->>> balena.models.history.device_history.get_all_by_device('11196426', fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
+>>> balena.models.history.device_history.get_all_by_device(11196426)
+>>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-5))
+>>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
 [
     {
         "id": 48262901,
