@@ -1,4 +1,15 @@
 - commits:
+    - subject: Adds API Keys tests and not use private methods outside class
+      hash: 870c938d0f9c34902cdc959477a188a0e844fe12
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 12.6.21
+  title: ""
+  date: 2023-04-27T22:03:18.887Z
+- commits:
     - subject: Removes py2 imports and sorts imports
       hash: 7ce586670b14f628af1ffe2de15f2a5f818786f8
       body: ""
