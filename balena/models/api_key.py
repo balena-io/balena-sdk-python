@@ -40,7 +40,7 @@ class ApiKey:
 
         Examples:
             >>> balena.models.api_key.create_api_key('myApiKey')
-            3YHD9DVPLe6LbjEgQb7FEFXYdtPEMkV9
+            '3YHD9DVPLe6LbjEgQb7FEFXYdtPEMkV9'
 
         """
 
@@ -236,8 +236,8 @@ class ApiKey:
         """
 
         if self.auth.is_logged_in():
-            user = self.auth._Auth__get_full_user_data()
-            raw_query = "$filter=is_of__actor%20eq%20'{actor}'%20and%20name%20ne%20null".format(actor=user["actor"])
+            actor = self.auth.get_user_actor_id()
+            raw_query = f"$filter=is_of__actor%20eq%20'{actor}'%20and%20name%20ne%20null"
 
             return self.base_request.request(
                 "api_key",
