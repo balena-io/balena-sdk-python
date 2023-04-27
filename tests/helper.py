@@ -107,7 +107,7 @@ class TestHelper:
 
     def reset_user(self):
         """
-        Wipe all user's apps and ssh keys added.
+        Wipe all user's apps, ssh keys and api keys added.
         """
 
         params = {"filter": "1", "eq": 1}
@@ -121,6 +121,9 @@ class TestHelper:
                 endpoint=self.balena.settings.get("pine_endpoint"),
                 login=True,
             )
+
+            for key in self.balena.models.api_key.get_all_named_user_api_keys():
+                self.balena.models.api_key.revoke(key["id"])
 
     def datetime_to_epoch_ms(self, dt):
         return int((dt - datetime.utcfromtimestamp(0)).total_seconds() * 1000)

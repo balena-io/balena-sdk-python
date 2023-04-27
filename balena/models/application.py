@@ -585,7 +585,7 @@ class Application:
                 params=params,
                 endpoint=self.settings.get("pine_endpoint"),
             )["d"][0]
-        except IndexError:
+        except Exception:
             raise exceptions.ApplicationNotFound(app_id)
 
     def create(self, name, device_type, organization, app_type=None):

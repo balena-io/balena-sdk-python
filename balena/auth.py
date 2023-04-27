@@ -12,7 +12,7 @@ class Auth:
     """
 
     _user_detail_cache = {}
-    _user_full_detail_cache = {}
+    _user_actor_id_cache = None
 
     def __init__(self):
         self.base_request = BaseRequest()
@@ -36,30 +36,6 @@ class Auth:
             )
 
         return self._user_detail_cache
-
-    def __get_full_user_data(self):
-        """
-        Get all user details.
-
-        Returns:
-            dict: user details.
-
-        Raises:
-            NotLoggedIn: if there is no user logged in.
-
-        """
-
-        if not self._user_full_detail_cache:
-            params = {"filter": "id", "eq": self.get_user_id()}
-
-            self._user_full_detail_cache = self.base_request.request(
-                "user",
-                "get",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"][0]
-
-        return self._user_full_detail_cache
 
     def __get_property(self, element):
         """
@@ -108,7 +84,7 @@ class Auth:
 
         token = self.authenticate(**credentials).decode("utf-8")
         self._user_detail_cache = {}
-        self._user_full_detail_cache = {}
+        self._user_actor_id_cache = None
         self.settings.set(TOKEN_KEY, token)
 
     def login_with_token(self, token):
@@ -134,7 +110,7 @@ class Auth:
 
         """
         self._user_detail_cache = {}
-        self._user_full_detail_cache = {}
+        self._user_actor_id_cache = None
         self.settings.set(TOKEN_KEY, token)
 
     def who_am_i(self):
@@ -227,6 +203,30 @@ class Auth:
 
         return self.settings.get(TOKEN_KEY)
 
+    def get_user_actor_id(self):
+        """
+        Get current logged in user's actor id.
+
+        Returns:
+            int: User actor id
+
+        Examples:
+            # If you are logged in.
+            >>> balena.auth.get_user_actor_id()
+            9761945
+
+        """
+
+        if self._user_actor_id_cache is None:
+            self._user_actor_id_cache = self.base_request.request(
+                f"user({self.get_user_id()})",
+                "get",
+                raw_query="$select=actor",
+                endpoint=self.settings.get("pine_endpoint"),
+            )["d"][0]["actor"]
+
+        return self._user_actor_id_cache
+
     def get_user_id(self):
         """
         This function retrieves current logged in user's id.
@@ -280,7 +280,7 @@ class Auth:
         """
 
         self._user_detail_cache = {}
-        self._user_full_detail_cache = {}
+        self._user_actor_id_cache = None
         return self.settings.remove(TOKEN_KEY)
 
     def register(self, **credentials):
