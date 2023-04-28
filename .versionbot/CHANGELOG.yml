@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix semver error caused by a major release
+      hash: 87f4bf95d15bd9b02825819556d4dfb2ad21ad7e
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: JSReds
+  version: 12.6.22
+  title: ""
+  date: 2023-04-28T09:48:48.810Z
+- commits:
     - subject: Adds API Keys tests and not use private methods outside class
       hash: 870c938d0f9c34902cdc959477a188a0e844fe12
       body: ""
