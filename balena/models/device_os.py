@@ -114,8 +114,8 @@ def compare_balena_version(version_a, version_b):
     normalized_version_a = normalize_balena_semver(version_a)
     normalized_version_b = normalize_balena_semver(version_b)
 
-    is_valid_semver_version_a = semver.VersionInfo.isvalid(normalized_version_a)
-    is_valid_semver_version_b = semver.VersionInfo.isvalid(normalized_version_b)
+    is_valid_semver_version_a = semver.VersionInfo.is_valid(normalized_version_a)
+    is_valid_semver_version_b = semver.VersionInfo.is_valid(normalized_version_b)
 
     if not is_valid_semver_version_a or not is_valid_semver_version_b:
         if is_valid_semver_version_a:
@@ -162,9 +162,9 @@ def sort_version(x, y):
 
 
 def bsemver_match_range(version, version_range):
-    if semver.VersionInfo.isvalid(version):
+    if semver.VersionInfo.is_valid(version):
         try:
-            if semver.VersionInfo.isvalid(version_range):
+            if semver.VersionInfo.is_valid(version_range):
                 if version_range and semver.match(version, f">={version_range}"):
                     return True
             else:
