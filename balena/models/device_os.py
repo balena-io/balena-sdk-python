@@ -1,6 +1,6 @@
 import re
 
-import semver
+from semver.version import Version
 
 from .. import exceptions
 from ..base_request import BaseRequest
@@ -114,8 +114,8 @@ def compare_balena_version(version_a, version_b):
     normalized_version_a = normalize_balena_semver(version_a)
     normalized_version_b = normalize_balena_semver(version_b)
 
-    is_valid_semver_version_a = semver.VersionInfo.isvalid(normalized_version_a)
-    is_valid_semver_version_b = semver.VersionInfo.isvalid(normalized_version_b)
+    is_valid_semver_version_a = Version.is_valid(normalized_version_a)
+    is_valid_semver_version_b = Version.is_valid(normalized_version_b)
 
     if not is_valid_semver_version_a or not is_valid_semver_version_b:
         if is_valid_semver_version_a:
@@ -128,8 +128,8 @@ def compare_balena_version(version_a, version_b):
 
         return compare(is_valid_semver_version_a, is_valid_semver_version_b)
 
-    version_a_semver_obj = semver.VersionInfo.parse(normalized_version_a)
-    version_b_semver_obj = semver.VersionInfo.parse(normalized_version_b)
+    version_a_semver_obj = Version.parse(normalized_version_a)
+    version_b_semver_obj = Version.parse(normalized_version_b)
 
     semver_compare_result = version_a_semver_obj.compare(version_b_semver_obj)
 
@@ -162,17 +162,18 @@ def sort_version(x, y):
 
 
 def bsemver_match_range(version, version_range):
-    if semver.VersionInfo.isvalid(version):
+    if Version.is_valid(version):
         try:
-            if semver.VersionInfo.isvalid(version_range):
-                if version_range and semver.match(version, f">={version_range}"):
+            parsed_version = Version.parse(version)
+            if Version.is_valid(version_range):
+                if version_range and parsed_version.match(f">={version_range}"):
                     return True
             else:
                 if version_range[-1] in VERSION_RANGE_CHAR_LIST:
                     # version range contains 'x', 'X' or '*'
                     min_ver = f"{version_range[:-1]}0"
-                    max_ver = str(semver.VersionInfo.parse(min_ver).next_version("minor"))
-                    if semver.match(version, f">={min_ver}") and semver.match(version, f"<{max_ver}"):
+                    max_ver = str(Version.parse(min_ver).next_version("minor"))
+                    if parsed_version.match(f">={min_ver}") and parsed_version.match(f"<{max_ver}"):
                         return True
         except Exception:
             return False
@@ -408,7 +409,7 @@ class DeviceOs:
         if not os_version:
             return None
 
-        version_info = semver.VersionInfo.parse(normalize_balena_semver(os_version))
+        version_info = Version.parse(normalize_balena_semver(os_version))
 
         if not version_info:
             return os_version
@@ -431,13 +432,13 @@ class DeviceOs:
         if os_variant and os_variant not in pre_releases and os_variant not in builds:
             builds.append(os_variant)
 
-        return semver.format_version(
+        return str(Version(
             version_info.major,
             version_info.minor,
             version_info.patch,
             version_info.prerelease,
             ".".join(builds),
-        )
+        ))
 
     def __get_os_app_tag(self, app_tags):
         tag_map = {}

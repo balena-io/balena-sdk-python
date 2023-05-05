@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from urllib.parse import urljoin
 
-import semver
+from semver.version import Version
 
 from .. import exceptions
 from ..auth import Auth
@@ -1900,13 +1900,12 @@ class Device:
         if not self.__is_provisioned_device(device):
             raise exceptions.LocalModeError(Message.DEVICE_NOT_PROVISIONED)
 
-        if semver.compare(normalize_balena_semver(device["os_version"]), LOCAL_MODE_MIN_OS_VERSION) < 0:
+        if Version.parse(normalize_balena_semver(device["os_version"])).compare(LOCAL_MODE_MIN_OS_VERSION) < 0:
             raise exceptions.LocalModeError(Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE)
 
         if (
-            semver.compare(
-                normalize_balena_semver(device["supervisor_version"]),
-                LOCAL_MODE_MIN_SUPERVISOR_VERSION,
+            Version.parse(normalize_balena_semver(device["supervisor_version"])).compare(
+                LOCAL_MODE_MIN_SUPERVISOR_VERSION
             )
             < 0
         ):

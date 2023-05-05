@@ -1,4 +1,4 @@
-import semver
+from semver.version import Version
 
 from .. import exceptions
 
@@ -15,16 +15,16 @@ class Hup:
         """
 
         try:
-            parsed_current_ver = semver.parse(current_version)
+            parsed_current_ver = Version.parse(current_version)
         except Exception:
             raise exceptions.OsUpdateError("Invalid current balenaOS version")
 
         try:
-            parsed_target_ver = semver.parse(target_version)
+            parsed_target_ver = Version.parse(target_version)
         except Exception:
             raise exceptions.OsUpdateError("Invalid target balenaOS version")
 
-        if parsed_current_ver["prerelease"] or parsed_target_ver["prerelease"]:
+        if parsed_current_ver.prerelease or parsed_target_ver.prerelease:
             raise exceptions.OsUpdateError("Updates cannot be performed on pre-release balenaOS versions")
 
         cur_variant = self.__get_variant(parsed_current_ver)
@@ -35,16 +35,16 @@ class Hup:
                 "Updates cannot be performed between development and production balenaOS variants"
             )
 
-        if semver.compare(target_version, current_version) < 0:
+        if Version.parse(target_version).compare(current_version) < 0:
             raise exceptions.OsUpdateError("OS downgrades are not allowed")
 
         # For 1.x -> 2.x or 2.x to 2.x only
-        if parsed_target_ver["major"] > 1 and semver.compare(target_version, self.MIN_TARGET_VERSION) < 0:
+        if parsed_target_ver.major > 1 and Version.parse(target_version).compare(self.MIN_TARGET_VERSION) < 0:
             raise exceptions.OsUpdateError(
                 "Target balenaOS version must be greater than {0}".format(self.MIN_TARGET_VERSION)
             )
 
-        return "resinhup{from_v}{to_v}".format(from_v=parsed_current_ver["major"], to_v=parsed_target_ver["major"])
+        return "resinhup{from_v}{to_v}".format(from_v=parsed_current_ver.major, to_v=parsed_target_ver.major)
 
     def __get_variant(self, ver):
         if "dev" in (ver["build"] or "") or "dev" in (ver["prerelease"] or ""):
