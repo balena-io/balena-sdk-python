@@ -3,6 +3,7 @@ import json
 import os
 from collections import defaultdict
 from datetime import datetime
+from typing import Union
 from urllib.parse import urljoin
 
 from semver.version import Version
@@ -10,8 +11,11 @@ from semver.version import Version
 from .. import exceptions
 from ..auth import Auth
 from ..base_request import BaseRequest
+from ..pine import pine
 from ..resources import Message
 from ..settings import Settings
+from ..types import AnyObject
+from ..utils import is_full_uuid, is_id, merge
 from .application import Application
 from .config import Config
 from .device_os import DeviceOs, normalize_balena_semver
@@ -125,12 +129,13 @@ class Device:
         else:
             raise exceptions.DeviceNotFound(uuid)
 
-    def get(self, uuid):
+    def get(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> AnyObject:
         """
-        Get a single device by device uuid.
+        This method returns a single device by id or uuid.
 
         Args:
-            uuid (str): device uuid.
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            options (AnyObject): extra pine options to use
 
         Returns:
             dict: device info.
@@ -140,87 +145,37 @@ class Device:
 
         Examples:
             >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-            {
-                "id": 8570370,
-                "belongs_to__application": {
-                    "__id": 1280664
-                },
-                "belongs_to__user": None,
-                "actor": 12049318,
-                "should_be_running__release": None,
-                "device_name": "otaviojacobi",
-                "is_of__device_type": {
-                    "__id": 145
-                },
-                "uuid": "8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143",
-                "is_running__release": {
-                    "__id": 2556338
-                },
-                "note": None,
-                "local_id": None,
-                "status": "Idle",
-                "is_online": True,
-                "last_connectivity_event": "2023-04-28T05:39:48.890Z",
-                "is_connected_to_vpn": True,
-                "last_vpn_event": "2023-04-28T05:39:48.890Z",
-                "ip_address": "192.168.0.49 2804:14d:4cdc:1b77::1000 2804:14d:4cdc:1b77:3904:981a:95c9:cd74",
-                "mac_address": "1C:69:7A:AB:AB:76 F4:4E:E3:E1:F0:2D",
-                "vpn_address": None,
-                "public_address": "179.152.22.41",
-                "os_version": "balenaOS 2.113.4",
-                "os_variant": "dev",
-                "supervisor_version": "14.9.4",
-                "should_be_managed_by__supervisor_release": {
-                    "__id": 2514540
-                },
-                "should_be_operated_by__release": {
-                    "__id": 2182319
-                },
-                "is_managed_by__service_instance": {
-                    "__id": 128359
-                },
-                "provisioning_progress": None,
-                "provisioning_state": "",
-                "download_progress": None,
-                "is_web_accessible": True,
-                "longitude": "51.2658",
-                "latitude": "-75.1169",
-                "location": "Secret Location, Nowhere, CA",
-                "custom_longitude": "",
-                "custom_latitude": "",
-                "is_locked_until__date": None,
-                "is_accessible_by_support_until__date": None,
-                "created_at": "2022-09-30T11:40:11.901Z",
-                "modified_at": "2023-04-28T12:46:03.584Z",
-                "is_active": True,
-                "api_heartbeat_state": "online",
-                "memory_usage": 5303,
-                "memory_total": 15624,
-                "storage_block_device": "/dev/nvme0n1p6",
-                "storage_usage": 162869,
-                "storage_total": 236417,
-                "cpu_temp": 58,
-                "cpu_usage": 13,
-                "cpu_id": "gepa136000r6",
-                "is_undervolted": false,
-                "logs_channel": null
-            }
-
         """
 
-        params = {"filter": "uuid", "eq": uuid}
-        try:
-            devices = self.base_request.request(
-                "device",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
+        if uuid_or_id is None:
+            raise exceptions.DeviceNotFound(uuid_or_id)
+
+        is_potentially_full_uuid = is_full_uuid(uuid_or_id)
+        if is_potentially_full_uuid or is_id(uuid_or_id):
+            device = pine.get(
+                {
+                    "resource": "device",
+                    "id": {"uuid": uuid_or_id} if is_potentially_full_uuid else uuid_or_id,
+                    "options": options,
+                }
+            )
+        else:
+            devices = pine.get(
+                {"resource": "device", "options": merge({"$filter": {"uuid": {"$startswith": uuid_or_id}}}, options)}
+            )
+
             if len(devices) > 1:
-                raise exceptions.AmbiguousDevice(uuid)
-            return devices[0]
-        except IndexError:
-            raise exceptions.DeviceNotFound(uuid)
+                raise exceptions.AmbiguousDevice(uuid_or_id)
+            try:
+                device = devices[0]
+            except IndexError:
+                raise exceptions.DeviceNotFound(uuid_or_id)
+
+        if device is None:
+            raise exceptions.DeviceNotFound(uuid_or_id)
+
+        # TODO: mimic nodesdk by adding extra os info
+        return device
 
     def get_all(self):
         """

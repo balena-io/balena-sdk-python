@@ -32,6 +32,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
 from .auth import Auth
 from .logs import Logs
 from .models import Models
+from .pine import pine as pine_client
 from .settings import Settings
 from .twofactor_auth import TwoFactorAuth
 
@@ -55,3 +56,4 @@ class Balena:
         self.auth = Auth()
         self.models = Models()
         self.twofactor_auth = TwoFactorAuth()
+        self.pine = pine_client

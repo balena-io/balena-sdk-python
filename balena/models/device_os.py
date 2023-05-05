@@ -432,13 +432,15 @@ class DeviceOs:
         if os_variant and os_variant not in pre_releases and os_variant not in builds:
             builds.append(os_variant)
 
-        return str(Version(
-            version_info.major,
-            version_info.minor,
-            version_info.patch,
-            version_info.prerelease,
-            ".".join(builds),
-        ))
+        return str(
+            Version(
+                version_info.major,
+                version_info.minor,
+                version_info.patch,
+                version_info.prerelease,
+                ".".join(builds),
+            )
+        )
 
     def __get_os_app_tag(self, app_tags):
         tag_map = {}

@@ -16,6 +16,8 @@ pyOpenSSL = ">=18.0.0"
 Twisted = ">=18.7.0"
 service-identity = "*"
 semver = "^3.0.0"
+pine-client= "*"
+deprecated = "^1.2.13"
 
 [tool.poetry.dev-dependencies]
 black = {version = "*", python = ">=3.8.1"}

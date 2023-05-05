@@ -1,7 +1,17 @@
+from typing import List, Optional, Union
+from urllib.parse import urljoin
+
+import requests
+from deprecated import deprecated
+
 from .. import exceptions
 from ..auth import Auth
-from ..base_request import BaseRequest
-from ..settings import Settings
+from ..balena_auth import get_token
+from ..pine import pine
+from ..settings import settings
+from ..types import AnyObject
+from ..types.models import APIKeyInfoType, APIKeyType
+from ..utils import merge
 from .application import Application
 from .device import Device
 
@@ -15,235 +25,177 @@ class ApiKey:
     def __init__(self):
         self.application = Application()
         self.auth = Auth()
-        self.base_request = BaseRequest()
         self.device = Device()
-        self.settings = Settings()
 
-    def __get_all_with_filter(self, filters):
-        return self.base_request.request(
-            "api_key",
-            "GET",
-            params=filters,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-    def create_api_key(self, name, description=None):
+    def create(
+        self,
+        name: str,
+        description: Optional[str] = None,
+        expiry_date: Optional[str] = None,
+    ) -> str:
         """
-        This function registers a new api key for the current user with the name given.
+        This method registers a new api key for the current user with the name given.
 
         Args:
-            name (str): user API key name.
-            description (Optional[str]): API key description.
+            name (str): the API key name
+            description (Optional[str]): the API key description
+            expiry_date (Optional[str]): the API key expiring date
 
         Returns:
-            str: user API key.
+            str: API key
 
         Examples:
-            >>> balena.models.api_key.create_api_key('myApiKey')
-            '3YHD9DVPLe6LbjEgQb7FEFXYdtPEMkV9'
-
+            >>> balena.models.api_key.create_api_key("myApiKey")
+            >>> balena.models.api_key.create_api_key("myApiKey", "my api key description")
         """
+        api_key_body = {"name": name}
 
-        data = {"name": name, "description": description}
+        if description is not None and isinstance(description, str):
+            api_key_body["description"] = description
 
-        return self.base_request.request(
-            "/api-key/user/full",
-            "POST",
-            data=data,
-            endpoint=self.settings.get("api_endpoint"),
-        )
+        if expiry_date is not None and isinstance(expiry_date, str):
+            api_key_body["expiry_date"] = expiry_date
 
-    def get_all(self):
+        token = get_token()
+
+        if token is None:
+            raise exceptions.NotLoggedIn()
+        try:
+            req = requests.post(
+                url=urljoin(settings.get("pine_endpoint"), "/api-key/user/full"),
+                json=api_key_body,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            return req.content.decode()
+        except Exception:
+            raise exceptions.NotLoggedIn()
+
+    @deprecated(reason="This function is deprecated, use 'balena.models.api_key.create' instead")
+    def create_api_key(self, name: str, description: Optional[str] = None) -> str:
+        """
+        DEPRECATED: Please use balena.models.api_key.create instead.
+        """
+        return self.create(name, description)
+
+    def get_all(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
         This function gets all API keys.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: user API key.
+            List[APIKeyType]: user API key
 
         Examples:
             >>> balena.models.api_key.get_all()
-            [
-                {
-                    "description": None,
-                    "created_at": "2018-04-06T03:53:34.189Z",
-                    "__metadata": {"type": "", "uri": "/balena/api_key(1296047)"},
-                    "is_of__actor": {
-                        "__deferred": {"uri": "/balena/actor(2454095)"},
-                        "__id": 2454095,
-                    },
-                    "id": 1296047,
-                    "name": "myApiKey",
-                }
-            ]
-
 
         """
+        return pine.get(
+            {"resource": "api_key", "options": merge({"$orderby": "name asc"}, options)}
+        )
 
-        return self.base_request.request("api_key", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def update(self, id, api_key_info):
+    def update(self, id: int, api_key_info: APIKeyInfoType):
         """
         This function updates details of an API key.
 
         Args:
             id (str): API key id.
-            api_key_info: new API key info.
-                name (str): new API key name.
-                description (Optional[str]): new API key description.
+            api_key_info (APIKeyInfoType): new API key info.
 
         Examples:
-            >>> balena.models.api_key.update(1296047, {'name':'new name')
-            OK
+            >>> balena.models.api_key.update(1296047, {"name":"new name"})
 
         """
 
-        data = api_key_info
-        params = {"filter": "id", "eq": id}
+        if api_key_info is None:
+            raise exceptions.InvalidParameter("apiKeyInfo", api_key_info)
 
-        return self.base_request.request(
-            "api_key",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
+        if api_key_info.get("name") is not None and api_key_info.get("name") == "":
+            raise exceptions.InvalidParameter(
+                "apiKeyInfo.name", api_key_info.get("name")
+            )
 
-    def revoke(self, id):
+        body = {
+            "description": api_key_info.get("description"),
+            "expiry_date": api_key_info.get("expiry_date")
+        }
+
+        name = api_key_info.get("name")
+        if name is not None:
+            body["name"] = name
+
+        pine.patch({"resource": "api_key", "id": id, "body": body})
+
+    def revoke(self, id: int):
         """
         This function revokes an API key.
 
         Args:
-            id (str): API key id.
+            id (int): API key id.
 
         Examples:
             >>> balena.models.api_key.revoke(1296047)
-            OK
 
         """
 
-        params = {"filter": "id", "eq": id}
+        pine.delete({"resource": "api_key", "id": id})
 
-        return self.base_request.request(
-            "api_key",
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def get_provisioning_api_keys_by_application(self, app_id):
+    def get_provisioning_api_keys_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[APIKeyType]:
         """
         Get all provisioning API keys for an application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Examples:
             >>> balena.models.api_key.get_provisioning_api_keys_by_application(1296047)
-            [
-                {
-                    "id": 5492033,
-                    "created_at": "2021-12-29T03:38:04.470Z",
-                    "is_of__actor": {
-                        "__id": 6444453,
-                        "__deferred": {"uri": "/resin/actor(@id)?@id=6444453"},
-                    },
-                    "name": None,
-                    "description": None,
-                    "__metadata": {"uri": "/resin/api_key(@id)?@id=5492033"},
-                },
-                {
-                    "id": 5492044,
-                    "created_at": "2021-12-29T03:41:04.441Z",
-                    "is_of__actor": {
-                        "__id": 6444453,
-                        "__deferred": {"uri": "/resin/actor(@id)?@id=6444453"},
-                    },
-                    "name": "key p1",
-                    "description": "key desc",
-                    "__metadata": {"uri": "/resin/api_key(@id)?@id=5492044"},
-                },
-                {
-                    "id": 3111481,
-                    "created_at": "2020-06-25T04:24:53.621Z",
-                    "is_of__actor": {
-                        "__id": 6444453,
-                        "__deferred": {"uri": "/resin/actor(@id)?@id=6444453"},
-                    },
-                    "name": None,
-                    "description": None,
-                    "__metadata": {"uri": "/resin/api_key(@id)?@id=3111481"},
-                },
-            ]
+            >>> balena.models.api_key.get_provisioning_api_keys_by_application("myorg/myapp")
         """
 
-        app = self.application.get_by_id(app_id)
+        app = self.application.get(slug_or_uuid_or_id, {"$select": "actor"})
+        return self.get_all(merge({"$filter": {"is_of__actor": app.get("actor")}}, options))
 
-        params = {"filter": "is_of__actor", "eq": app["actor"]}
-
-        return self.__get_all_with_filter(params)
-
-    def get_device_api_keys_by_device(self, device_uuid):
+    def get_device_api_keys_by_device(
+        self, uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[APIKeyType]:
         """
         Get all API keys for a device.
 
         Args:
-            device_uuid (str): device uuid.
+            device_uuid (Union[str, int]): device, uuid (string) or id (int)
+            options (AnyObject): extra pine options to use
 
         Examples:
-            >>> balena.models.api_key.get_device_api_keys_by_device('44cc9d1861b9f992808c506276e5d31d')
-            [
-                {
-                    "id": 3111484,
-                    "created_at": "2020-06-25T04:33:33.069Z",
-                    "is_of__actor": {
-                        "__id": 6444456,
-                        "__deferred": {"uri": "/resin/actor(@id)?@id=6444456"},
-                    },
-                    "name": None,
-                    "description": None,
-                    "__metadata": {"uri": "/resin/api_key(@id)?@id=3111484"},
-                }
-            ]
-
+            >>> balena.models.api_key.get_device_api_keys_by_device("44cc9d1861b9f992808c506276e5d31d")
+            >>> balena.models.api_key.get_device_api_keys_by_device(1111386)
         """
 
-        device = self.device.get(device_uuid)
+        dev = self.device.get(uuid_or_id, {"$select": "actor"})
+        return self.get_all(merge({"$filter": {"is_of__actor": dev["actor"]}}, options))
 
-        params = {"filter": "is_of__actor", "eq": device["actor"]}
-
-        return self.__get_all_with_filter(params)
-
-    def get_all_named_user_api_keys(self):
+    def get_all_named_user_api_keys(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
         Get all named user API keys of the current user.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Examples:
             >>> balena.models.api_key.get_all_named_user_api_keys()
-            [
-                {
-                    "id": 2452013,
-                    "created_at": "2019-11-12T09:48:42.437Z",
-                    "is_of__actor": {
-                        "__id": 113809,
-                        "__deferred": {"uri": "/resin/actor(@id)?@id=113809"},
-                    },
-                    "name": "test",
-                    "description": None,
-                    "__metadata": {"uri": "/resin/api_key(@id)?@id=2452013"},
-                }
-            ]
-
         """
 
-        if self.auth.is_logged_in():
-            actor = self.auth.get_user_actor_id()
-            raw_query = f"$filter=is_of__actor%20eq%20'{actor}'%20and%20name%20ne%20null"
-
-            return self.base_request.request(
-                "api_key",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-        else:
-            raise exceptions.NotLoggedIn()
+        return self.get_all(
+            merge(
+                {
+                    "$filter": {
+                        "is_of__actor": self.auth.get_user_actor_id(),
+                        "name": {"$ne": None},
+                    }
+                },
+                options,
+            )
+        )

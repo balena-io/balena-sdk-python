@@ -39,7 +39,7 @@ class TestDevice(unittest.TestCase):
         # should generate a valid uuid.
         uuid = self.balena.models.device.generate_uuid()
         self.assertEqual(len(uuid), 62)
-        self.assertRegexpMatches(uuid.decode("utf-8"), "^[a-z0-9]{62}$")
+        self.assertRegex(uuid.decode("utf-8"), "^[a-z0-9]{62}$")
 
         # should generate different uuids.
         self.assertNotEqual(

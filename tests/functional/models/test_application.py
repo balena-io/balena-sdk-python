@@ -14,6 +14,7 @@ class TestApplication(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
+        cls.organization_name = cls.helper.default_organization["name"]
         cls.balena = cls.helper.balena
         # Wipe all apps before the tests run.
         cls.helper.wipe_application()
@@ -85,12 +86,14 @@ class TestApplication(unittest.TestCase):
         self.assertNotEqual(all_apps[0]["app_name"], all_apps[1]["app_name"])
 
     def test_05_get(self):
+
         # raise balena.exceptions.ApplicationNotFound if no application found.
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
             self.balena.models.application.get("AppNotExist")
 
         # found an application, it should return an application with matched name.
-        self.assertEqual(self.balena.models.application.get("FooBar")["app_name"], "FooBar")
+        org_handle = self.helper.default_organization["handle"]
+        self.assertEqual(self.balena.models.application.get(f"{org_handle}/FooBar")["app_name"], "FooBar")
 
     def test_06_get_by_owner(self):
         # raise balena.exceptions.ApplicationNotFound if no application found.
@@ -155,7 +158,9 @@ class TestApplication(unittest.TestCase):
         app = type(self).app
         self.balena.models.application.disable_rolling_updates(app["id"])
         self.balena.models.application.enable_rolling_updates(app["id"])
-        app = self.balena.models.application.get("FooBar")
+
+        org_handle = self.helper.default_organization["handle"]
+        app = self.balena.models.application.get(f"{org_handle}/FooBar")
         self.assertTrue(app["should_track_latest_release"])
 
     def test_13_disable_rolling_updates(self):
@@ -163,7 +168,9 @@ class TestApplication(unittest.TestCase):
         app = type(self).app
         self.balena.models.application.enable_rolling_updates(app["id"])
         self.balena.models.application.disable_rolling_updates(app["id"])
-        app = self.balena.models.application.get("FooBar")
+
+        org_handle = self.helper.default_organization["handle"]
+        app = self.balena.models.application.get(f"{org_handle}/FooBar")
         self.assertFalse(app["should_track_latest_release"])
 
     def test_14_enable_device_urls(self):
@@ -192,8 +199,10 @@ class TestApplication(unittest.TestCase):
         # should grant support access until the specified time.
         expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
+
+        org_handle = self.helper.default_organization["handle"]
         support_date = datetime.strptime(
-            self.balena.models.application.get("FooBar")["is_accessible_by_support_until__date"],
+            self.balena.models.application.get(f"{org_handle}/FooBar")["is_accessible_by_support_until__date"],
             "%Y-%m-%dT%H:%M:%S.%fZ",
         )
         self.assertEqual(self.helper.datetime_to_epoch_ms(support_date), expiry_time)
@@ -204,7 +213,9 @@ class TestApplication(unittest.TestCase):
         expiry_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 + 3600 * 1000)
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
         self.balena.models.application.revoke_support_access(app["id"])
-        app = self.balena.models.application.get("FooBar")
+
+        org_handle = self.helper.default_organization["handle"]
+        app = self.balena.models.application.get(f"{org_handle}/FooBar")
         self.assertIsNone(app["is_accessible_by_support_until__date"])
 
     def test_18_will_track_new_releases(self):

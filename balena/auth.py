@@ -125,7 +125,6 @@ class Auth:
 
         Examples:
             >>> balena.auth.who_am_i()
-            u'g_trong_nghia_nguyen'
 
         """
 

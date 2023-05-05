@@ -41,9 +41,7 @@ class Settings:
     _setting = {
         # These are default config values to write default config file.
         # All values here must be in string format otherwise there will be error when write config file.
-        "pine_endpoint": "https://api.balena-cloud.com/v6/",
-        "api_endpoint": "https://api.balena-cloud.com/",
-        "builder_url": "https://builder.balena-cloud.com/",
+        "balena_host": "balena-cloud.com",
         "api_version": "v6",
         "device_actions_endpoint_version": "v1",
         "data_directory": Path.join(HOME_DIRECTORY, ".balena"),
@@ -54,6 +52,10 @@ class Settings:
         # requests timeout: 30 seconds in milliseconds
         "timeout": str(30 * 1000),
     }
+    host = _setting["balena_host"]
+    _setting["builder_url"] = f"https://builder.{host}/"
+    _setting["api_endpoint"] = f"https://api.{host}/"
+    _setting["pine_endpoint"] = f"https://api.{host}/{_setting['api_version']}/"
 
     _setting["cache_directory"] = Path.join(_setting["data_directory"], "cache")
 
@@ -199,8 +201,6 @@ class Settings:
 
     def remove(self, key):
         """
-        Remove a setting.
-
         Args:
             key (str): setting.
 
@@ -223,3 +223,6 @@ class Settings:
             self.__write_settings()
             return True
         return False
+
+
+settings = Settings()

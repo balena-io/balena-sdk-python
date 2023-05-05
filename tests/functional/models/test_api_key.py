@@ -1,4 +1,5 @@
 import unittest
+
 from tests.helper import TestHelper
 
 
@@ -38,11 +39,11 @@ class TestApiKey(unittest.TestCase):
             self.assertIsInstance(key["created_at"], str)
 
     def test_01_create_api_key(self):
-        key = self.balena.models.api_key.create_api_key("apiKey1")
+        key = self.balena.models.api_key.create("apiKey1")
         self.assertIsInstance(key, str)
 
     def test_02_create_api_key_wth_description(self):
-        key = self.balena.models.api_key.create_api_key("apiKey2", "apiKey2Description")
+        key = self.balena.models.api_key.create("apiKey2", "apiKey2Description")
         self.assertIsInstance(key, str)
 
     def test_03_get_all_named_user_api_keys(self):

@@ -2,13 +2,16 @@ import json
 from collections import defaultdict
 from datetime import datetime
 from math import isinf
+from typing import Any, Union
 from urllib.parse import urljoin
 
 from .. import exceptions
 from ..auth import Auth
 from ..base_request import BaseRequest
+from ..pine import pine
 from ..settings import Settings
-from ..utils import is_id
+from ..types import AnyObject
+from ..utils import is_id, merge
 from .device_type import DeviceType
 from .release import Release
 
@@ -156,56 +159,6 @@ class Application:
         """
 
         return self.base_request.request("my_application", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def get(self, name):
-        """
-        Get a single application.
-
-        Args:
-            name (str): application name.
-
-        Returns:
-            dict: application info.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-            AmbiguousApplication: when more than one application is returned.
-
-        Examples:
-            >>> balena.models.application.get('foo')
-            {
-                "depends_on__application": None,
-                "should_track_latest_release": True,
-                "app_name": "foo",
-                "application_type": {
-                    "__deferred": {"uri": "/resin/application_type(5)"},
-                    "__id": 5,
-                },
-                "__metadata": {"type": "", "uri": "/resin/application(12345)"},
-                "is_accessible_by_support_until__date": None,
-                "actor": 12345,
-                "id": 12345,
-                "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                "device_type": "raspberrypi3",
-                "commit": None,
-                "slug": "my_user/foo",
-            }
-
-        """
-
-        params = {"filter": "app_name", "eq": name}
-        try:
-            apps = self.base_request.request(
-                "application",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-            if len(apps) > 1:
-                raise exceptions.AmbiguousApplication(name)
-            return apps[0]
-        except IndexError:
-            raise exceptions.ApplicationNotFound(name)
 
     def get_with_device_service_details(self, name, expand_release=False):
         """
@@ -544,10 +497,20 @@ class Application:
 
     def get_by_id(self, app_id):
         """
-        Get a single application by application id.
+        DEPRECATED: Please use balena.models.application.get instead.
+        """
+        return self.get(app_id)
+
+    def get(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}, context: str = "directly_accessible"
+    ) -> Any:
+        """
+        Get a single application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+            context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
             dict: application info.
@@ -557,36 +520,54 @@ class Application:
 
         Examples:
             >>> balena.models.application.get_by_id(12345)
-            {
-                "depends_on__application": None,
-                "should_track_latest_release": True,
-                "app_name": "foo",
-                "application_type": {
-                    "__deferred": {"uri": "/resin/application_type(5)"},
-                    "__id": 5,
-                },
-                "__metadata": {"type": "", "uri": "/resin/application(12345)"},
-                "is_accessible_by_support_until__date": None,
-                "actor": 12345,
-                "id": 12345,
-                "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                "device_type": "raspberrypi3",
-                "commit": None,
-                "slug": "my_user/foo",
-            }
 
         """
 
-        params = {"filter": "id", "eq": app_id}
-        try:
-            return self.base_request.request(
-                "application",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"][0]
-        except Exception:
-            raise exceptions.ApplicationNotFound(app_id)
+        access_filter = None
+        if context == "directly_accessible":
+            access_filter = {
+                "is_directly_accessible_by__user": {
+                    "$any": {
+                        "$alias": "dau",
+                        "$expr": {
+                            "1": 1,
+                        },
+                    },
+                },
+            }
+
+        application = None
+        if is_id(slug_or_uuid_or_id):
+            application = pine.get(
+                {
+                    "resource": "application",
+                    "id": slug_or_uuid_or_id,
+                    "options": merge({} if access_filter is None else {"$filter": access_filter}, options),
+                }
+            )
+        elif isinstance(slug_or_uuid_or_id, str):
+            lower_case_slug_or_uuid = slug_or_uuid_or_id.lower()
+
+            if access_filter is not None:
+                app_filter = {
+                    **access_filter,
+                    "$or": {"slug": lower_case_slug_or_uuid, "uuid": lower_case_slug_or_uuid},
+                }
+            else:
+                app_filter = {"$or": {"slug": lower_case_slug_or_uuid, "uuid": lower_case_slug_or_uuid}}
+            applications = pine.get({"resource": "application", "options": merge({"$filter": app_filter}, options)})
+
+            if len(applications) > 1:
+                raise exceptions.AmbiguousApplication(slug_or_uuid_or_id)
+            try:
+                application = applications[0]
+            except IndexError:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+
+        if application is None:
+            raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+
+        return application
 
     def create(self, name, device_type, organization, app_type=None):
         """
