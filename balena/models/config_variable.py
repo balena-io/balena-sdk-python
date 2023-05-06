@@ -44,21 +44,6 @@ class DeviceConfigVariable:
 
         Examples:
             >>> balena.models.config_variable.device_config_variable.get_all('f5213eac0d63ac47721b037a7406d306')
-            [
-                {
-                    "id": 1234567,
-                    "device": {"__id": 7654321},
-                    "value": "test",
-                    "name": "MODE",
-                },
-                {
-                    "id": 7890123,
-                    "device": {"__id": 3210987},
-                    "value": "true",
-                    "name": "IS_TESTING",
-                },
-            ]
-
         """
 
         raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)

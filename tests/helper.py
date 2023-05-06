@@ -89,7 +89,7 @@ class TestHelper:
 
         params = {"filter": "1", "eq": 1}
 
-        self.balena.models.application.base_request.request(
+        self.base_request.request(
             "application",
             "DELETE",
             params=params,
@@ -114,7 +114,7 @@ class TestHelper:
 
         if self.balena.auth.is_logged_in():
             self.wipe_application()
-            self.balena.models.key.base_request.request(
+            self.base_request.request(
                 "user__has__public_key",
                 "DELETE",
                 params=params,
@@ -128,23 +128,23 @@ class TestHelper:
     def datetime_to_epoch_ms(self, dt):
         return int((dt - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
 
-    def create_device(self, app_name="FooBar", device_type="Raspberry Pi 2"):
+    def create_device(self, app_name="FooBar", device_type="raspberry-pi2"):
         """
         Create a device belongs to an application.
         """
 
         app = self.balena.models.application.create(app_name, device_type, self.default_organization["id"])
-        return app, self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
+        return app, self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
 
-    def create_multicontainer_app(self, app_name="FooBar", device_type="Raspberry Pi 2"):
+    def create_multicontainer_app(self, app_name="FooBar", device_type="raspberry-pi2"):
         """
         Create a multicontainer application with a device and two releases.
         """
 
         app = self.balena.models.application.create(
-            app_name, device_type, self.default_organization["id"], "microservices"
+            app_name, device_type, self.default_organization["id"],
         )
-        dev = self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
+        dev = self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
         user_id = self.balena.auth.get_user_id()
 
         # Register web & DB services
@@ -430,13 +430,13 @@ class TestHelper:
             "current_db_image": new_db_image,
         }
 
-    def create_app_with_releases(self, app_name="FooBar", device_type="Raspberry Pi 2"):
+    def create_app_with_releases(self, app_name="FooBar", device_type="raspberry-pi2"):
         """
         Create a multicontainer application with  two releases.
         """
 
         app = self.balena.models.application.create(
-            app_name, device_type, self.default_organization["id"], "microservices"
+            app_name, device_type, self.default_organization["id"]
         )
         user_id = self.balena.auth.get_user_id()
 
@@ -490,7 +490,7 @@ class TestHelper:
 
         params = {"filter": "name", "eq": "administrator"}
 
-        return self.balena.models.key.base_request.request(
+        return self.base_request.request(
             "organization_membership_role",
             "GET",
             params=params,

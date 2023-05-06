@@ -34,6 +34,23 @@ class MissingOption(BalenaException):
         self.message = Message.MISSING_OPTION.format(option=option)
 
 
+class SupervisorLocked(BalenaException):
+    """
+    Exception type for supervisor locked.
+
+    Args:
+        option (str): option name.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(SupervisorLocked, self).__init__()
+        self.message = Message.SUPERVISOR_LOCKED
+
+
 class InvalidOption(BalenaException):
     """
     Exception type for invalid option in settings or auth token.

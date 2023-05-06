@@ -37,8 +37,7 @@ class PineClient(PinejsClientCore):
             except Exception:
                 return req.content.decode()
         else:
-            print(req.status_code)
-            print(req.content)
+            print(req.content, req.status_code)
             raise RequestError(body=req.content, status_code=req.status_code)
 
 

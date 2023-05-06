@@ -1,3 +1,22 @@
-from typing import Any, Dict
+from typing import Any, Dict, Literal, TypedDict, Union
 
 AnyObject = Dict[str, Any]
+ApplicationMembershipRoles = Literal["developer", "operator", "observer"]
+
+
+class ShutdownOptions(TypedDict, total=False):
+    force: bool
+
+
+class ApplicationInviteOptions(TypedDict, total=False):
+    invitee: str
+    roleName: ApplicationMembershipRoles
+    message: str
+
+
+class ResourceKeyDict(TypedDict):
+    user: int
+    is_member_of__application: int
+
+
+ResourceKey = Union[int, ResourceKeyDict]

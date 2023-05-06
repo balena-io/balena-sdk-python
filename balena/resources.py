@@ -50,3 +50,4 @@ class Message:
     BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"
     APPLICATION_MEMBERSHIP_NOT_FOUND = "Application membership not found: {membership}"
     BALENA_INVALID_DEVICE_TYPE = "Invalid device type: ${device_type}"
+    SUPERVISOR_LOCKED = "Supervisor is locked"

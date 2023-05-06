@@ -1,12 +1,12 @@
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urljoin
 
 import jwt
 import requests
 
-from .exceptions import RequestError
+from . import exceptions
 from .settings import settings
 
 
@@ -16,7 +16,7 @@ def __request_new_token() -> str:
     response = requests.get(url, headers=headers)
 
     if not response.ok:
-        raise RequestError(response.content.decode(), response.status_code)
+        raise exceptions.RequestError(response.content.decode(), response.status_code)
 
     return response.content.decode()
 
@@ -47,3 +47,20 @@ def get_token() -> Optional[str]:
         api_key = os.environ.get("BALENA_API_KEY") or os.environ.get("RESIN_API_KEY")
 
     return api_key
+
+
+def request(method: str, path: str, body: Optional[Any] = None):
+    token = get_token()
+
+    if token is None:
+        raise exceptions.NotLoggedIn()
+    try:
+        req = requests.request(
+            method=method,
+            url=urljoin(settings.get("pine_endpoint"), path),
+            json=body,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        return req.content.decode()
+    except Exception:
+        raise exceptions.NotLoggedIn()

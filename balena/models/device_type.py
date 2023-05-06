@@ -1,7 +1,11 @@
+from typing import Any, Union
+
 from .. import exceptions
 from ..base_request import BaseRequest
+from ..pine import pine
 from ..settings import Settings
-from ..utils import is_id
+from ..types import AnyObject
+from ..utils import merge
 
 
 class DeviceType(object):
@@ -14,16 +18,21 @@ class DeviceType(object):
         self.base_request = BaseRequest()
         self.settings = Settings()
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> Any:
         """
         Get all device types.
+
+        Args:
+            options (AnyObject): extra pine options to use.
 
         Returns:
             list: list contains info of device types.
 
         """
-
-        return self.base_request.request("device_type", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
+        return pine.get({
+            "resource": "device_type",
+            "options": merge({"$orderby": "name asc"}, options),
+        })
 
     def get_all_supported(self):
         """
@@ -49,48 +58,48 @@ class DeviceType(object):
             endpoint=self.settings.get("pine_endpoint"),
         )["d"]
 
-    def get(self, id_or_slug):
+    def get(self, id_or_slug: Union[str, int], options: AnyObject = {}) -> Any:
         """
         Get a single device type.
 
         Args:
-            id_or_slug (str): device type slug or alias (string) or id (number).
-
+            id_or_slug (Union[str, int]): device type slug or alias (string) or id (int).
+            options (AnyObject): extra pine options to use.
         """
 
-        if not id_or_slug:
+        if id_or_slug is None:
             raise exceptions.InvalidDeviceType(id_or_slug)
 
-        if is_id(id_or_slug):
-            # ID
-            params = {"filter": "id", "eq": id_or_slug}
-
-            device_type = self.base_request.request(
-                "device_type",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
+        if isinstance(id_or_slug, str):
+            device_types = self.get_all(merge({
+                "$top": 1,
+                "$filter": {
+                    "device_type_alias": {
+                        "$any": {
+                            "$alias": "dta",
+                            "$expr": {
+                                "dta": {
+                                    "is_referenced_by__alias": id_or_slug,
+                                },
+                            },
+                        },
+                    },
+                },
+            }, options))
+            device_type = None
+            if len(device_types) > 0:
+                device_type = device_types[0]
         else:
-            # Slug or alias
+            device_type = pine.get({
+                "resource": "device_type",
+                "id": id_or_slug,
+                "options": options
+            })
 
-            raw_query = (
-                "$top=1"
-                "&$expand=is_of__cpu_architecture($select=slug,id)"
-                f"&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{id_or_slug}')"
-            )
-
-            device_type = self.base_request.request(
-                "device_type",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-
-        if not device_type:
+        if device_type is None:
             raise exceptions.InvalidDeviceType(id_or_slug)
 
-        return device_type[0]
+        return device_type
 
     def get_by_slug_or_name(self, slug_or_name):
         """

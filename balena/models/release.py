@@ -1,9 +1,19 @@
+from typing import TypedDict, Union
+
 from .. import exceptions
 from ..base_request import BaseRequest
+from ..pine import pine
 from ..settings import Settings
-from ..utils import is_id
+from ..types import AnyObject
+from ..utils import is_id, merge
+from . import application as app_module
 from .image import Image
 from .service import Service
+
+
+class ReleaseRawVersionApplicationPair(TypedDict, total=True):
+    application: Union[str, int]
+    rawVersion: str
 
 
 class Release:
@@ -36,7 +46,10 @@ class Release:
         params = {"filters": options}
 
         release = self.base_request.request(
-            "release", "GET", params=params, endpoint=self.settings.get("pine_endpoint")
+            "release",
+            "GET",
+            params=params,
+            endpoint=self.settings.get("pine_endpoint"),
         )
 
         if release["d"]:
@@ -71,13 +84,21 @@ class Release:
         else:
             raise exceptions.ReleaseNotFound(raw_query)
 
-    def get(self, commit_or_id):
+    def get(
+        self,
+        commit_or_id_or_raw_version: Union[
+            str, int, ReleaseRawVersionApplicationPair
+        ],
+        options: AnyObject = {},
+    ) -> AnyObject:
         """
         Get a specific release.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
-
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            id (number) or an object with the unique `application` (number or string) & `rawVersion` (string)
+            pair of the release options
+            options(AnyObject): extra pine options to use
         Returns:
             dict: release info.
 
@@ -86,20 +107,45 @@ class Release:
 
         """
 
-        if is_id(commit_or_id):
-            return self.__get_by_option(id=commit_or_id)[0]
+        if commit_or_id_or_raw_version is None:
+            raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
+
+        if is_id(commit_or_id_or_raw_version):
+            release = pine.get({
+                "resource": "release",
+                "id": commit_or_id_or_raw_version,  # type: ignore
+                "options": options
+            })
+
+            if release is None:
+                raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
+            return release
         else:
-            raw_query = "$filter=startswith(commit, '{}')".format(commit_or_id)
+            if isinstance(commit_or_id_or_raw_version, dict):
+                raw_version = commit_or_id_or_raw_version["rawVersion"]
+                app = commit_or_id_or_raw_version["application"]
+                app = app_module.application.get(app, {"$select": "id"})
+                app_id = app["id"]  # type: ignore
+                dollar_filter = {
+                    "raw_version": raw_version,
+                    "belongs_to__application": app_id
+                }
+            else:
+                dollar_filter = {
+                    "commit": {"$startswith": commit_or_id_or_raw_version}
+                }
+            releases = pine.get({
+                "resource": "release",
+                "options": merge({
+                    "$filter": dollar_filter
+                }, options)
+            })
 
-            try:
-                rt = self.__get_by_raw_query(raw_query)
-
-                if len(rt) > 1:
-                    raise exceptions.AmbiguousRelease(commit_or_id)
-
-                return rt[0]
-            except exceptions.ReleaseNotFound:
-                raise exceptions.ReleaseNotFound(commit_or_id)
+            if len(releases) == 0:
+                raise exceptions.ReleaseNotFound(str(commit_or_id_or_raw_version))
+            if len(releases) > 1:
+                raise exceptions.AmbiguousRelease(str(commit_or_id_or_raw_version))
+            return releases[0]
 
     def get_all_by_application(self, app_id):
         """
@@ -224,7 +270,9 @@ class Release:
                 "images": [
                     {
                         "id": i["id"],
-                        "service_name": i["image"][0]["is_a_build_of__service"][0]["service_name"],
+                        "service_name": i["image"][0]["is_a_build_of__service"][
+                            0
+                        ]["service_name"],
                     }
                     for i in raw_release["release_image"]
                 ],
@@ -254,7 +302,11 @@ class Release:
 
         """  # noqa: E501
 
-        raw_query = f"$filter=id%20eq%20'{app_id}'" "&$select=app_name" "&$expand=organization($select=handle)"
+        raw_query = (
+            f"$filter=id%20eq%20'{app_id}'"
+            "&$select=app_name"
+            "&$expand=organization($select=handle)"
+        )
 
         app = self.base_request.request(
             "application",
@@ -272,7 +324,8 @@ class Release:
 
         response = self.base_request.request(
             "/v3/buildFromUrl?headless=true&owner={owner}&app={app_name}".format(
-                app_name=app[0]["app_name"], owner=app[0]["organization"][0]["handle"]
+                app_name=app[0]["app_name"],
+                owner=app[0]["organization"][0]["handle"],
             ),
             "POST",
             data=data,

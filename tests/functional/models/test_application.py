@@ -16,6 +16,9 @@ class TestApplication(unittest.TestCase):
         cls.helper = TestHelper()
         cls.organization_name = cls.helper.default_organization["name"]
         cls.balena = cls.helper.balena
+        cls.org_handle = cls.helper.default_organization["handle"]
+        cls.app_slug = f"{cls.org_handle}/FooBar"
+
         # Wipe all apps before the tests run.
         cls.helper.wipe_application()
 
@@ -40,7 +43,7 @@ class TestApplication(unittest.TestCase):
 
         # should be rejected if the name has less than four characters
         with self.assertRaises(Exception) as cm:
-            self.balena.models.application.create("Fo", "Raspberry Pi 2", self.helper.default_organization["id"])
+            self.balena.models.application.create("Fo", "raspberry-pi2", self.helper.default_organization["id"])
         self.assertIn(
             "It is necessary that each application has an app name that has a Length"
             " (Type) that is greater than or equal to 4 and is less than or equal"
@@ -50,34 +53,16 @@ class TestApplication(unittest.TestCase):
 
         # should be able to create an application
         type(self).app = self.balena.models.application.create(
-            "FooBar", "Raspberry Pi 2", self.helper.default_organization["id"]
+            "FooBar", "raspberry-pi2", self.helper.default_organization["id"]
         )
         self.assertEqual(type(self).app["app_name"], "FooBar")
 
-        # should be rejected if the application type is invalid
-        with self.assertRaises(self.helper.balena_exceptions.InvalidApplicationType):
-            self.balena.models.application.create(
-                "FooBar1",
-                "Raspberry Pi 3",
-                self.helper.default_organization["id"],
-                "microservices-starterrrrrr",
-            )
-
-        # should be rejected if the application type is legacy
-        with self.assertRaises(Exception) as cm:
-            self.balena.models.application.create(
-                "FooBar1",
-                "Raspberry Pi 3",
-                self.helper.default_organization["id"],
-                "microservices-starter",
-            )
-        self.assertIn("The provided application type is not valid.", cm.exception.message)
-
-        # should be able to create an application with a application type
+        # should be able to create an application with a application class
         type(self).app1 = self.balena.models.application.create(
-            "FooBar1", "Raspberry Pi 3", self.helper.default_organization["id"], "microservices"
+            "FooBar1", "raspberrypi3", self.helper.default_organization["id"], "block"
         )
         self.assertEqual(type(self).app1["app_name"], "FooBar1")
+        self.assertEqual(type(self).app1["is_of__class"], "block")
 
     def test_04_get_all(self):
         # given there is an application, it should return a list with length 2.
@@ -92,8 +77,7 @@ class TestApplication(unittest.TestCase):
             self.balena.models.application.get("AppNotExist")
 
         # found an application, it should return an application with matched name.
-        org_handle = self.helper.default_organization["handle"]
-        self.assertEqual(self.balena.models.application.get(f"{org_handle}/FooBar")["app_name"], "FooBar")
+        self.assertEqual(self.balena.models.application.get(self.app_slug)["app_name"], "FooBar")
 
     def test_06_get_by_owner(self):
         # raise balena.exceptions.ApplicationNotFound if no application found.
@@ -115,8 +99,9 @@ class TestApplication(unittest.TestCase):
 
     def test_07_has(self):
         # should be true if the application name exists, otherwise it should return false.
+
         self.assertFalse(self.balena.models.application.has("AppNotExist"))
-        self.assertTrue(self.balena.models.application.has("FooBar"))
+        self.assertTrue(self.balena.models.application.has(self.app_slug))
 
     def test_08_has_any(self):
         # should return true if at least one application exists.
@@ -125,22 +110,22 @@ class TestApplication(unittest.TestCase):
     def test_09_get_by_id(self):
         # raise balena.exceptions.ApplicationNotFound if no application found.
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
-            self.balena.models.application.get_by_id(1)
+            self.balena.models.application.get(1)
 
         # found an application, it should return an application with matched id.
         app = type(self).app
-        self.assertEqual(self.balena.models.application.get_by_id(app["id"])["id"], app["id"])
+        self.assertEqual(self.balena.models.application.get(app["id"])["id"], app["id"])
 
     def test_10_remove(self):
         # should be able to remove an existing application by name.
         self.assertEqual(len(self.balena.models.application.get_all()), 2)
-        self.balena.models.application.remove("FooBar1")
+        self.balena.models.application.remove(f"{self.org_handle}/FooBar1")
         self.assertEqual(len(self.balena.models.application.get_all()), 1)
 
     def test_11_generate_provisioning_key(self):
         # should be rejected if the application id does not exist.
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
-            self.balena.models.application.generate_provisioning_key("5685")
+            self.balena.models.application.generate_provisioning_key("app/notexists")
 
         # should be able to generate a provisioning key by app id.
         app = type(self).app
@@ -153,30 +138,10 @@ class TestApplication(unittest.TestCase):
         )
         self.assertEqual(len(key), 32)
 
-    def test_12_enable_rolling_updates(self):
-        # should enable rolling update for the applications devices.
-        app = type(self).app
-        self.balena.models.application.disable_rolling_updates(app["id"])
-        self.balena.models.application.enable_rolling_updates(app["id"])
-
-        org_handle = self.helper.default_organization["handle"]
-        app = self.balena.models.application.get(f"{org_handle}/FooBar")
-        self.assertTrue(app["should_track_latest_release"])
-
-    def test_13_disable_rolling_updates(self):
-        # should disable rolling update for the applications devices.
-        app = type(self).app
-        self.balena.models.application.enable_rolling_updates(app["id"])
-        self.balena.models.application.disable_rolling_updates(app["id"])
-
-        org_handle = self.helper.default_organization["handle"]
-        app = self.balena.models.application.get(f"{org_handle}/FooBar")
-        self.assertFalse(app["should_track_latest_release"])
-
     def test_14_enable_device_urls(self):
         # should enable the device url for the applications devices.
         app = type(self).app
-        device = self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
+        device = self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
         type(self).device = device
         self.balena.models.application.enable_device_urls(app["id"])
         self.assertTrue(self.balena.models.device.has_device_url(device["uuid"]))
@@ -200,9 +165,8 @@ class TestApplication(unittest.TestCase):
         expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
 
-        org_handle = self.helper.default_organization["handle"]
         support_date = datetime.strptime(
-            self.balena.models.application.get(f"{org_handle}/FooBar")["is_accessible_by_support_until__date"],
+            self.balena.models.application.get(self.app_slug)["is_accessible_by_support_until__date"],
             "%Y-%m-%dT%H:%M:%S.%fZ",
         )
         self.assertEqual(self.helper.datetime_to_epoch_ms(support_date), expiry_time)
@@ -214,20 +178,13 @@ class TestApplication(unittest.TestCase):
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
         self.balena.models.application.revoke_support_access(app["id"])
 
-        org_handle = self.helper.default_organization["handle"]
-        app = self.balena.models.application.get(f"{org_handle}/FooBar")
+        app = self.balena.models.application.get(self.app_slug)
         self.assertIsNone(app["is_accessible_by_support_until__date"])
 
     def test_18_will_track_new_releases(self):
         # should be configured to track new releases by default.
         app_info = self.helper.create_app_with_releases(app_name="FooBarWithReleases")
         type(self).app_info = app_info
-        self.assertTrue(self.balena.models.application.will_track_new_releases(app_info["app"]["id"]))
-
-        # should be false when should_track_latest_release is false.
-        self.balena.models.application.disable_rolling_updates(app_info["app"]["id"])
-        self.assertFalse(self.balena.models.application.will_track_new_releases(app_info["app"]["id"]))
-        self.balena.models.application.enable_rolling_updates(app_info["app"]["id"])
         self.assertTrue(self.balena.models.application.will_track_new_releases(app_info["app"]["id"]))
 
     def test_19_get_target_release_hash(self):
@@ -238,27 +195,10 @@ class TestApplication(unittest.TestCase):
             app_info["current_release"]["commit"],
         )
 
-    def test_20_is_tracking_latest_release(self):
-        # should be tracking the latest release by default.
-        app_info = type(self).app_info
-        self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info["app"]["id"]))
-
-        # should be false when should_track_latest_release is false.
-        self.balena.models.application.disable_rolling_updates(app_info["app"]["id"])
-        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info["app"]["id"]))
-        self.balena.models.application.enable_rolling_updates(app_info["app"]["id"])
-        self.assertTrue(self.balena.models.application.is_tracking_latest_release(app_info["app"]["id"]))
-
-        # should be false when the current commit is not of the latest release.
-        self.balena.models.application.set_to_release(app_info["app"]["id"], app_info["old_release"]["commit"])
-        # app.set_to_release() will set should_track_latest_release to false so need to set it to true again.
-        self.balena.models.application.enable_rolling_updates(app_info["app"]["id"])
-        self.assertFalse(self.balena.models.application.is_tracking_latest_release(app_info["app"]["id"]))
-
-    def test_21_set_to_release(self):
+    def test_21_pin_to_release(self):
         # should set the application to specific release & disable latest release tracking
         app_info = type(self).app_info
-        self.balena.models.application.set_to_release(app_info["app"]["id"], app_info["old_release"]["commit"])
+        self.balena.models.application.pin_to_release(app_info["app"]["id"], app_info["old_release"]["commit"])
         self.assertEqual(
             self.balena.models.application.get_target_release_hash(app_info["app"]["id"]),
             app_info["old_release"]["commit"],
@@ -269,7 +209,7 @@ class TestApplication(unittest.TestCase):
     def test_22_track_latest_release(self):
         # should re-enable latest release tracking
         app_info = type(self).app_info
-        self.balena.models.application.set_to_release(app_info["app"]["id"], app_info["old_release"]["commit"])
+        self.balena.models.application.pin_to_release(app_info["app"]["id"], app_info["old_release"]["commit"])
         self.assertEqual(
             self.balena.models.application.get_target_release_hash(app_info["app"]["id"]),
             app_info["old_release"]["commit"],
@@ -303,7 +243,11 @@ class TestApplication(unittest.TestCase):
 
         # should create and return an application invite
         invite = self.balena.models.application.invite.create(
-            app["id"], self.helper.credentials["email"], "developer", "Python SDK test invite"
+            app["id"], {
+                "invitee": self.helper.credentials["email"],
+                "roleName": "developer",
+                "message": "Python SDK test invite"
+            }
         )
         type(self).invite = invite
         self.assertEqual(invite["message"], "Python SDK test invite")
@@ -313,7 +257,11 @@ class TestApplication(unittest.TestCase):
         # raise balena.exceptions.BalenaApplicationMembershipRoleNotFound if  role is not found.
         with self.assertRaises(self.helper.balena_exceptions.BalenaApplicationMembershipRoleNotFound):
             self.balena.models.application.invite.create(
-                app["id"], self.helper.credentials["email"], "developer1", "Python SDK test invite"
+                app["id"], {
+                    "invitee": self.helper.credentials["email"],
+                    "roleName": "developer1",
+                    "message": "Python SDK test invite"
+                }
             )
 
     def test_26_invite_get_all(self):
@@ -348,7 +296,7 @@ class TestApplication(unittest.TestCase):
         app = type(self).app
 
         # should create and return an application membership
-        membership = self.balena.models.application.membership.create(app["id"], "nghiant2710")
+        membership = self.balena.models.application.membership.create(app["id"], "device_tester1")
         type(self).membership = membership
         self.assertEqual(membership["is_member_of__application"]["__id"], app["id"])
 

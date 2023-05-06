@@ -1,14 +1,11 @@
 from typing import List, Optional, Union
-from urllib.parse import urljoin
 
-import requests
 from deprecated import deprecated
 
 from .. import exceptions
 from ..auth import Auth
-from ..balena_auth import get_token
+from ..balena_auth import request
 from ..pine import pine
-from ..settings import settings
 from ..types import AnyObject
 from ..types.models import APIKeyInfoType, APIKeyType
 from ..utils import merge
@@ -56,19 +53,11 @@ class ApiKey:
         if expiry_date is not None and isinstance(expiry_date, str):
             api_key_body["expiry_date"] = expiry_date
 
-        token = get_token()
-
-        if token is None:
-            raise exceptions.NotLoggedIn()
-        try:
-            req = requests.post(
-                url=urljoin(settings.get("pine_endpoint"), "/api-key/user/full"),
-                json=api_key_body,
-                headers={"Authorization": f"Bearer {token}"},
-            )
-            return req.content.decode()
-        except Exception:
-            raise exceptions.NotLoggedIn()
+        return request(
+            method="POST",
+            path="/api-key/user/full",
+            body=api_key_body
+        )
 
     @deprecated(reason="This function is deprecated, use 'balena.models.api_key.create' instead")
     def create_api_key(self, name: str, description: Optional[str] = None) -> str:

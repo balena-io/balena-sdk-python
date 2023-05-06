@@ -965,7 +965,7 @@ class Device:
                 raise exceptions.InvalidDeviceType(device_type_slug)
             data["device_type"] = device_type["slug"]
 
-        api_key = self.application.generate_provisioning_key(app_id)
+        api_key = self.application.generate_provisioning_key(int(app_id))
         data["apikey"] = api_key
 
         return json.loads(

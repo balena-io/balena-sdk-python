@@ -1,53 +1,39 @@
-import json
-from collections import defaultdict
 from datetime import datetime
 from math import isinf
-from typing import Any, Union
+from typing import List, Literal, Optional, Union
 from urllib.parse import urljoin
 
+from deprecated import deprecated
+
 from .. import exceptions
-from ..auth import Auth
+from ..balena_auth import request
 from ..base_request import BaseRequest
 from ..pine import pine
-from ..settings import Settings
-from ..types import AnyObject
-from ..utils import is_id, merge
+from ..settings import settings
+from ..types import (
+    AnyObject,
+    ApplicationInviteOptions,
+    ApplicationMembershipRoles,
+    ShutdownOptions,
+    ResourceKey,
+)
+from ..types.models import (
+    ApplicationInviteType,
+    ApplicationMembershipType,
+    ApplicationType,
+)
+from ..utils import (
+    generate_current_service_details,
+    get_current_service_details_pine_expand,
+    is_id,
+    merge,
+    normalize_device_os_version,
+    with_supervisor_locked_error,
+)
 from .device_type import DeviceType
 from .release import Release
 
 
-def _get_role_by_name(role_name):
-    """
-
-    Get application membership role
-
-    Args:
-        role_name (str): role name.
-
-    Returns:
-        int: application membership role id.
-
-    """
-
-    base_request = BaseRequest()
-    settings = Settings()
-
-    params = {"filter": "name", "eq": role_name}
-
-    roles = base_request.request(
-        "application_membership_role",
-        "GET",
-        params=params,
-        endpoint=settings.get("pine_endpoint"),
-    )["d"]
-
-    if not roles:
-        raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name=role_name)
-    else:
-        return roles[0]["id"]
-
-
-# TODO: support both app_id and app_name
 class Application:
     """
     This class implements application model for balena python SDK.
@@ -59,451 +45,172 @@ class Application:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.auth = Auth()
         self.device_type = DeviceType()
         self.release = Release()
         self.invite = ApplicationInvite()
         self.membership = ApplicationMembership()
 
-    def __get_single_install_summary(self, raw_data):
-        """
-        Builds summary data for an image install or gateway download
-
-        """
-
-        image = raw_data["image"][0]
-        service = image["is_a_build_of__service"][0]
-        release = None
-
-        if "is_provided_by__release" in raw_data:
-            release = raw_data["is_provided_by__release"][0]
-
-        install = {
-            "service_name": service["service_name"],
-            "image_id": image["id"],
-            "service_id": service["id"],
+    def __get_access_filter(self):
+        return {
+            "is_directly_accessible_by__user": {
+                "$any": {
+                    "$alias": "dau",
+                    "$expr": {
+                        "1": 1,
+                    },
+                },
+            },
         }
 
-        if release:
-            install["commit"] = release["commit"]
+    def __get_device_type_id(self, device_type: str) -> int:
+        dt = self.device_type.get(
+            device_type,
+            {
+                "$select": "id",
+                "$expand": {
+                    "is_default_for__application": {
+                        "$select": "is_archived",
+                        "$filter": {
+                            "is_host": True,
+                        },
+                    },
+                },
+            },
+        )
 
-        raw_data.pop("is_provided_by__release", None)
-        raw_data.pop("image", None)
-        install.update(raw_data)
+        host_apps = dt["is_default_for__application"]
+        if len(host_apps) > 0 and all(
+            map(lambda ha: ha["is_archived"], host_apps)
+        ):
+            raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
-        return install
+        return dt["id"]
 
-    def __generate_current_service_details(self, raw_data):
-        groupedServices = defaultdict(list)
+    def __get_organization_id(self, organization: Union[str, int]) -> int:
+        id_filter = {"handle": organization}
+        if is_id(organization):
+            id_filter = {"id": organization}
 
-        for obj in [self.__get_single_install_summary(i) for i in raw_data["image_install"]]:
-            groupedServices[obj.pop("service_name", None)].append(obj)
+        org = pine.get(
+            {
+                "resource": "organization",
+                "id": id_filter,
+                "options": {"$select": ["id"]},
+            }
+        )
 
-        raw_data["current_services"] = dict(groupedServices)
-        raw_data["current_gateway_downloads"] = [
-            self.__get_single_install_summary(i) for i in raw_data["gateway_download"]
-        ]
-        raw_data.pop("image_install", None)
-        raw_data.pop("gateway_download", None)
+        if org is None:
+            raise exceptions.OrganizationNotFound(organization)
 
-        return raw_data
+        return org["id"]
 
-    def get_all(self):
+    def __normalize_application(
+        self, application: ApplicationType
+    ) -> ApplicationType:
+        owned_devices = application.get("owns__device")
+        if isinstance(owned_devices, list):
+            application["owns__device"] = list(
+                map(normalize_device_os_version, owned_devices)
+            )
+        return application
+
+    def get_id(self, slug_or_uuid_or_id: Union[str, int]) -> int:
+        if is_id(slug_or_uuid_or_id):
+            return slug_or_uuid_or_id  # type: ignore
+        app = self.get(slug_or_uuid_or_id, {"$select": "id"})
+        return app["id"]  # type: ignore
+
+    def get_dashboard_url(self, app_id: int) -> str:
         """
-        Get all applications (including collaborator applications).
+        Get Dashboard URL for a specific application.
+
+        Args:
+            app_id (int): application id.
+
+        Raises:
+            InvalidParameter: if the app_id is not a finite number.
 
         Returns:
-            list: list contains info of applications.
+            str: Dashboard URL for the specific application.
+
+        Examples:
+            >>> balena.models.application.get_dashboard_url(1476418)
+
+        """
+        try:
+            if isinf(int(app_id)):
+                raise exceptions.InvalidParameter("app_id", app_id)
+        except ValueError:
+            raise exceptions.InvalidParameter("app_id", app_id)
+
+        return urljoin(
+            settings.get("api_endpoint").replace("api", "dashboard"),
+            f"/apps/{app_id}",
+        )
+
+    def get_all(
+        self,
+        options: AnyObject = {},
+        context: Optional[str] = "directly_accessible",
+    ) -> List[ApplicationType]:
+        """
+        Get all applications
+
+        Args:
+            options (AnyObject): extra pine options to use
+            context (Optional[str]): extra access filters, None or 'directly_accessible'
+
+        Returns:
+            List[APIKeyType]: user API key
 
         Examples:
             >>> balena.models.application.get_all()
-            [
-                {
-                    "depends_on__application": None,
-                    "should_track_latest_release": True,
-                    "app_name": "foo",
-                    "application_type": {
-                        "__deferred": {"uri": "/resin/application_type(5)"},
-                        "__id": 5,
-                    },
-                    "__metadata": {"type": "", "uri": "/resin/application(12345)"},
-                    "is_accessible_by_support_until__date": None,
-                    "actor": 12345,
-                    "id": 12345,
-                    "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                    "device_type": "raspberrypi3",
-                    "commit": None,
-                    "slug": "my_user/foo",
-                },
-                {
-                    "depends_on__application": None,
-                    "should_track_latest_release": True,
-                    "app_name": "bar",
-                    "application_type": {
-                        "__deferred": {"uri": "/resin/application_type(5)"},
-                        "__id": 5,
-                    },
-                    "__metadata": {"type": "", "uri": "/resin/application(12346)"},
-                    "is_accessible_by_support_until__date": None,
-                    "actor": 12345,
-                    "id": 12346,
-                    "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                    "device_type": "raspberrypi3",
-                    "commit": None,
-                    "slug": "my_user/bar",
-                },
-            ]
-
         """
 
-        return self.base_request.request("my_application", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def get_with_device_service_details(self, name, expand_release=False):
-        """
-        Get a single application along with its associated services' essential details.
-
-        Args:
-            name (str): application name.
-            expand_release (Optional[bool]): Set this to True then the commit of service details will be included.
-
-        Returns:
-            dict: application info.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-            AmbiguousApplication: when more than one application is returned.
-
-        Examples:
-            >>> balena.models.application.get('test-app')
+        apps = pine.get(
             {
-                "depends_on__application": None,
-                "should_track_latest_release": True,
-                "app_name": "test-app",
-                "application_type": {
-                    "__deferred": {"uri": "/resin/application_type(5)"},
-                    "__id": 5,
-                },
-                "__metadata": {"type": "", "uri": "/resin/application(1252573)"},
-                "is_accessible_by_support_until__date": None,
-                "actor": 3259381,
-                "slug": "nghiant27101/test-app",
-                "owns__device": [
+                "resource": "application",
+                "options": merge(
                     {
-                        "os_variant": "prod",
-                        "__metadata": {"type": "", "uri": "/resin/device(1460194)"},
-                        "is_managed_by__service_instance": {
-                            "__deferred": {"uri": "/resin/service_instance(117953)"},
-                            "__id": 117953,
-                        },
-                        "should_be_running__release": None,
-                        "belongs_to__user": {
-                            "__deferred": {"uri": "/resin/user(5227)"},
-                            "__id": 5227,
-                        },
-                        "is_web_accessible": False,
-                        "device_type": "raspberrypi3",
-                        "belongs_to__application": {
-                            "__deferred": {"uri": "/resin/application(1252573)"},
-                            "__id": 1252573,
-                        },
-                        "id": 1460194,
-                        "is_locked_until__date": None,
-                        "logs_channel": None,
-                        "uuid": "b6070f4fea5edf808b576123157fe5ec",
-                        "is_managed_by__device": None,
-                        "should_be_managed_by__supervisor_release": None,
-                        "actor": 3505229,
-                        "note": None,
-                        "os_version": "balenaOS 2.29.2+rev2",
-                        "longitude": "105.8516",
-                        "last_connectivity_event": "2019-05-06T07:30:20.230Z",
-                        "is_on__commit": "ddf95bef72a981f826bf5303df11f318dbdbff23",
-                        "gateway_download": [],
-                        "location": "Hanoi, Hanoi, Vietnam",
-                        "status": "Idle",
-                        "public_address": "14.162.159.155",
-                        "is_connected_to_vpn": False,
-                        "custom_latitude": "",
-                        "is_active": True,
-                        "provisioning_state": "",
-                        "latitude": "21.0313",
-                        "custom_longitude": "",
-                        "is_online": False,
-                        "supervisor_version": "9.0.1",
-                        "ip_address": "192.168.100.20",
-                        "provisioning_progress": None,
-                        "is_accessible_by_support_until__date": None,
-                        "created_at": "2019-01-09T11:41:19.336Z",
-                        "download_progress": None,
-                        "last_vpn_event": "2019-05-06T07:30:20.230Z",
-                        "device_name": "spring-morning",
-                        "image_install": [
-                            {
-                                "status": "Running",
-                                "__metadata": {"type": "", "uri": "/resin/image_install(34691843)"},
-                                "image": [
-                                    {
-                                        "is_a_build_of__service": [
-                                            {
-                                                "service_name": "main",
-                                                "__metadata": {
-                                                    "type": "",
-                                                    "uri": "/resin/service(92238)",
-                                                },
-                                                "id": 92238,
-                                            }
-                                        ],
-                                        "__metadata": {"type": "", "uri": "/resin/image(1117181)"},
-                                        "id": 1117181,
-                                    }
-                                ],
-                                "download_progress": None,
-                                "install_date": "2019-04-29T10:24:23.476Z",
-                                "id": 34691843,
-                            }
-                        ],
-                        "local_id": None,
-                        "vpn_address": None,
+                        **(
+                            {"$filter": self.__get_access_filter()}
+                            if context == "directly_accessible"
+                            else {}
+                        ),
+                        "$orderby": "app_name asc",
                     },
-                    {
-                        "os_variant": "prod",
-                        "__metadata": {"type": "", "uri": "/resin/device(1308755)"},
-                        "is_managed_by__service_instance": {
-                            "__deferred": {"uri": "/resin/service_instance(2205)"},
-                            "__id": 2205,
-                        },
-                        "should_be_running__release": None,
-                        "belongs_to__user": {
-                            "__deferred": {"uri": "/resin/user(5227)"},
-                            "__id": 5227,
-                        },
-                        "is_web_accessible": False,
-                        "device_type": "raspberrypi3",
-                        "belongs_to__application": {
-                            "__deferred": {"uri": "/resin/application(1252573)"},
-                            "__id": 1252573,
-                        },
-                        "id": 1308755,
-                        "is_locked_until__date": None,
-                        "logs_channel": None,
-                        "uuid": "531e5cc893b7df1e1118121059d93eee",
-                        "is_managed_by__device": None,
-                        "should_be_managed_by__supervisor_release": None,
-                        "actor": 3259425,
-                        "note": None,
-                        "os_version": "Resin OS 2.15.1+rev1",
-                        "longitude": "105.85",
-                        "last_connectivity_event": "2018-09-27T14:48:53.034Z",
-                        "is_on__commit": "19ab64483292f0a52989d0ce15ee3d21348dbfce",
-                        "gateway_download": [],
-                        "location": "Hanoi, Hanoi, Vietnam",
-                        "status": "Idle",
-                        "public_address": "14.231.247.155",
-                        "is_connected_to_vpn": False,
-                        "custom_latitude": "",
-                        "is_active": True,
-                        "provisioning_state": "",
-                        "latitude": "21.0333",
-                        "custom_longitude": "",
-                        "is_online": False,
-                        "supervisor_version": "7.16.6",
-                        "ip_address": "192.168.0.102",
-                        "provisioning_progress": None,
-                        "is_accessible_by_support_until__date": None,
-                        "created_at": "2018-09-12T04:30:13.549Z",
-                        "download_progress": None,
-                        "last_vpn_event": "2018-09-27T14:48:53.034Z",
-                        "device_name": "nameless-resonance",
-                        "image_install": [
-                            {
-                                "status": "Running",
-                                "__metadata": {"type": "", "uri": "/resin/image_install(33844685)"},
-                                "image": [
-                                    {
-                                        "is_a_build_of__service": [
-                                            {
-                                                "service_name": "main",
-                                                "__metadata": {
-                                                    "type": "",
-                                                    "uri": "/resin/service(92238)",
-                                                },
-                                                "id": 92238,
-                                            }
-                                        ],
-                                        "__metadata": {"type": "", "uri": "/resin/image(513014)"},
-                                        "id": 513014,
-                                    }
-                                ],
-                                "download_progress": None,
-                                "install_date": "2018-09-27T13:53:04.748Z",
-                                "id": 33844685,
-                            }
-                        ],
-                        "local_id": None,
-                        "vpn_address": None,
-                    },
-                ],
-                "user": {"__deferred": {"uri": "/resin/user(5227)"}, "__id": 5227},
-                "device_type": "raspberrypi3",
-                "commit": "ddf95bef72a981f826bf5303df11f318dbdbff23",
-                "id": 1252573,
+                    options,
+                ),
             }
-
-        """
-
-        release = ""
-        if expand_release:
-            release = ",is_provided_by__release($select=id,commit)"
-
-        # fmt: off
-        raw_query = (
-            f"$filter=app_name%20eq%20'{name}'"
-            "&$expand=owns__device("
-                "$expand=image_install("
-                    "$select=id,download_progress,status,install_date"
-                    "&$filter=status%20ne%20'deleted'"
-                    "&$expand=image("
-                        "$select=id"
-                        "&$expand=is_a_build_of__service("
-                            "$select=id,service_name"
-                        ")"
-                    ")"
-                    f"{release}"
-                "),"
-                "gateway_download("
-                    "$select=id,download_progress,status"
-                    "&$filter=status%20ne%20'deleted'"
-                    "&$expand=image("
-                        "$select=id"
-                        "&$expand=is_a_build_of__service("
-                            "$select=id,service_name"
-                        ")"
-                    ")"
-                ")"
-            ")"
         )
-        # fmt: on
 
-        try:
-            raw_data = self.base_request.request(
-                "application",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
+        return list(map(self.__normalize_application, apps))
 
-            if raw_data and "owns__device" in raw_data:
-                map(self.__generate_current_service_details, raw_data["owns__device"])
-            if len(raw_data) > 1:
-                raise exceptions.AmbiguousApplication(name)
-            return raw_data[0]
-        except IndexError:
-            raise exceptions.ApplicationNotFound(name)
-
-    def get_by_owner(self, name, owner):
+    def get_all_directly_accessible(
+        self,
+        options: AnyObject = {},
+    ) -> List[ApplicationType]:
         """
-        Get a single application using the appname and the handle of the owning organization.
+        Get all applications directly accessible by the user
 
         Args:
-            name (str): application name.
-            owner (str): The handle of the owning organization.
+            options (AnyObject): extra pine options to use
 
         Returns:
-            dict: application info.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-            AmbiguousApplication: when more than one application is returned.
+            List[APIKeyType]: user API key
 
         Examples:
-            >>> balena.models.application.get_by_owner('foo', 'my_org')
-            {
-                "depends_on__application": None,
-                "should_track_latest_release": True,
-                "app_name": "foo",
-                "application_type": {
-                    "__deferred": {"uri": "/resin/application_type(5)"},
-                    "__id": 5,
-                },
-                "__metadata": {"type": "", "uri": "/resin/application(12345)"},
-                "is_accessible_by_support_until__date": None,
-                "actor": 12345,
-                "id": 12345,
-                "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                "device_type": "raspberrypi3",
-                "commit": None,
-                "slug": "my_user/foo",
-            }
-
+            >>> balena.models.application.get_all_directly_accessible()
         """
 
-        slug = "{owner}/{app_name}".format(owner=owner.lower(), app_name=name.lower())
-
-        params = {"filter": "slug", "eq": slug}
-        try:
-            apps = self.base_request.request(
-                "application",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-            if len(apps) > 1:
-                raise exceptions.AmbiguousApplication(slug)
-            return apps[0]
-        except IndexError:
-            raise exceptions.ApplicationNotFound(slug)
-
-    def has(self, name):
-        """
-        Check if an application exists.
-
-        Args:
-            name (str): application name.
-
-        Returns:
-            bool: True if application exists, False otherwise.
-
-        Examples:
-            >>> balena.models.application.has('foo')
-            True
-
-        """
-
-        params = {"filter": "app_name", "eq": name}
-        app = self.base_request.request(
-            "application",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-        return bool(app)
-
-    def has_any(self):
-        """
-        Check if the user has any applications.
-
-        Returns:
-            bool: True if user has any applications, False otherwise.
-
-        Examples:
-            >>> balena.models.application.has_any()
-            True
-
-        """
-
-        return len(self.get_all()) > 0
-
-    def get_by_id(self, app_id):
-        """
-        DEPRECATED: Please use balena.models.application.get instead.
-        """
-        return self.get(app_id)
+        return self.get_all(options, "directly_accessible")
 
     def get(
-        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}, context: str = "directly_accessible"
-    ) -> Any:
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        options: AnyObject = {},
+        context: Optional[str] = "directly_accessible",
+    ) -> ApplicationType:
         """
         Get a single application.
 
@@ -513,28 +220,20 @@ class Application:
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
-            dict: application info.
+            ApplicationType: application info.
 
         Raises:
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> balena.models.application.get_by_id(12345)
+            >>> balena.models.application.get("myorganization/myapp")
+            >>> balena.models.application.get(123)
 
         """
 
         access_filter = None
         if context == "directly_accessible":
-            access_filter = {
-                "is_directly_accessible_by__user": {
-                    "$any": {
-                        "$alias": "dau",
-                        "$expr": {
-                            "1": 1,
-                        },
-                    },
-                },
-            }
+            access_filter = self.__get_access_filter()
 
         application = None
         if is_id(slug_or_uuid_or_id):
@@ -542,7 +241,12 @@ class Application:
                 {
                     "resource": "application",
                     "id": slug_or_uuid_or_id,
-                    "options": merge({} if access_filter is None else {"$filter": access_filter}, options),
+                    "options": merge(
+                        {}
+                        if access_filter is None
+                        else {"$filter": access_filter},
+                        options,
+                    ),
                 }
             )
         elif isinstance(slug_or_uuid_or_id, str):
@@ -551,11 +255,24 @@ class Application:
             if access_filter is not None:
                 app_filter = {
                     **access_filter,
-                    "$or": {"slug": lower_case_slug_or_uuid, "uuid": lower_case_slug_or_uuid},
+                    "$or": {
+                        "slug": lower_case_slug_or_uuid,
+                        "uuid": lower_case_slug_or_uuid,
+                    },
                 }
             else:
-                app_filter = {"$or": {"slug": lower_case_slug_or_uuid, "uuid": lower_case_slug_or_uuid}}
-            applications = pine.get({"resource": "application", "options": merge({"$filter": app_filter}, options)})
+                app_filter = {
+                    "$or": {
+                        "slug": lower_case_slug_or_uuid,
+                        "uuid": lower_case_slug_or_uuid,
+                    }
+                }
+            applications = pine.get(
+                {
+                    "resource": "application",
+                    "options": merge({"$filter": app_filter}, options),
+                }
+            )
 
             if len(applications) > 1:
                 raise exceptions.AmbiguousApplication(slug_or_uuid_or_id)
@@ -567,17 +284,233 @@ class Application:
         if application is None:
             raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
 
-        return application
+        return self.__normalize_application(application)
 
-    def create(self, name, device_type, organization, app_type=None):
+    def get_directly_accessible(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        options: AnyObject = {},
+    ) -> ApplicationType:
         """
-        Create an application. This function only works if you log in using credentials or Auth Token.
+        Get a single application directly accessible by the user
+
+         Args:
+             slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+             options (AnyObject): extra pine options to use
+
+         Returns:
+             ApplicationType: application info.
+
+         Raises:
+             ApplicationNotFound: if application couldn't be found.
+
+         Examples:
+             >>> balena.models.application.get_directly_accessible("myorganization/myapp")
+             >>> balena.models.application.get_directly_accessible(123)
+        """
+        return self.get(slug_or_uuid_or_id, options, "directly_accessible")
+
+    def get_with_device_service_details(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        options: AnyObject = {},
+    ) -> ApplicationType:
+        """
+        This method does not map exactly to the underlying model: it runs a
+        larger prebuilt query, and reformats it into an easy to use and
+        understand format. If you want more control, or to see the raw model
+        directly, use `application.get(uuidOrId, options)` instead.
+
+        Args:
+            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            ApplicationType: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+            AmbiguousApplication: when more than one application is returned.
+
+        Examples:
+            >>> balena.models.application.get_with_device_service_details('my_org_handle/my_app_name')
+
+        """
+        service_options = merge(
+            {
+                "$expand": [
+                    {
+                        "owns__device": {
+                            "$expand": get_current_service_details_pine_expand(
+                                True
+                            )
+                        }
+                    }
+                ]
+            },
+            options,
+        )
+
+        app = self.get(slug_or_uuid_or_id, service_options)
+
+        devices = app.get("owns__device")
+        if app is not None and devices is not None:
+            app["owns__device"] = list(
+                map(generate_current_service_details, devices)
+            )
+
+        return app
+
+    def get_by_name(
+        self,
+        app_name: str,
+        options: AnyObject = {},
+        context: Optional[str] = "directly_accessible",
+    ) -> ApplicationType:
+        """
+         Get a single application using the appname.
+
+        Args:
+            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+            context (Optional[str]): extra access filters, None or 'directly_accessible'
+
+        Returns:
+            ApplicationType: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+
+        Examples:
+            >>> balena.models.application.get("myapp")
+
+        """
+        apps = pine.get(
+            {
+                "resource": "application",
+                "options": merge(
+                    {
+                        "$filter": {
+                            **(
+                                self.__get_access_filter()
+                                if context == "directly_accessible"
+                                else {}
+                            ),
+                            "app_name": app_name,
+                        }
+                    },
+                    options,
+                ),
+            }
+        )
+
+        if len(apps) == 0:
+            raise exceptions.ApplicationNotFound(app_name)
+
+        if len(apps) > 1:
+            raise exceptions.AmbiguousApplication(app_name)
+
+        return self.__normalize_application(apps[0])
+
+    def get_by_owner(
+        self, app_name: str, owner: str, options: AnyObject = {}
+    ) -> ApplicationType:
+        """
+        Get a single application using the appname and the handle of the owning organization.
+
+        Args:
+            app_name (str): application name.
+            owner (str): The handle of the owning organization.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            ApplicationType: application info.
+
+        Raises:
+            ApplicationNotFound: if application couldn't be found.
+            AmbiguousApplication: when more than one application is returned.
+
+        Examples:
+            >>> balena.models.application.get_by_owner('foo', 'my_org')
+
+        """
+
+        slug = f"{owner.lower()}/{app_name.lower()}"
+        app = pine.get(
+            {
+                "resource": "application",
+                "id": {"slug": slug},
+                "options": options,
+            }
+        )
+
+        if app is None:
+            raise exceptions.ApplicationNotFound(slug)
+
+        return self.__normalize_application(app)
+
+    def has(self, slug_or_uuid_or_id: Union[str, int]) -> bool:
+        """
+        Check if an application exists.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+
+        Returns:
+            bool: True if application exists, False otherwise.
+
+        Examples:
+            >>> balena.models.application.has('my_org/foo')
+
+        """
+
+        try:
+            self.get(slug_or_uuid_or_id, {"$select": ["id"]})
+            return True
+        except exceptions.ApplicationNotFound:
+            return False
+
+    def has_any(self) -> bool:
+        """
+        Check if the user has any applications.
+
+        Returns:
+            bool: True if user has any applications, False otherwise.
+
+        Examples:
+            >>> balena.models.application.has_any()
+        """
+
+        applications = self.get_all(
+            {"$select": ["id"]},
+            "directly_accessible",
+        )
+        return len(applications) != 0
+
+    @deprecated(
+        reason="This function is deprecated, use 'balena.models.application.get' instead"
+    )
+    def get_by_id(self, app_id):
+        """
+        DEPRECATED: Please use balena.models.application.get instead.
+        """
+        return self.get(app_id)
+
+    def create(
+        self,
+        name: str,
+        device_type: str,
+        organization: Union[str, int],
+        application_class: Optional[Literal["app", "fleet", "block"]] = None,
+    ) -> ApplicationType:
+        """
+        Create an application.
 
         Args:
             name (str): application name.
-            device_type (str): device type (display form).
-            organization (str): handle or id of the organization that the application will belong to.
-            app_type (Optional[str]): application type.
+            device_type (str): device type (slug).
+            organization (Union[str, int]): handle or id of the organization that the application will belong to.
+            application_class (Optional[Literal["app", "fleet", "block"]]): application class.
 
         Returns:
             dict: application info.
@@ -589,409 +522,117 @@ class Application:
             OrganizationNotFound: if organization couldn't be found.
 
         Examples:
-            >>> balena.models.application.create('foo', 'Raspberry Pi 3', 12345, 'microservices')
-            {
-                "depends_on__application": None,
-                "should_track_latest_release": True,
-                "app_name": "foo",
-                "application_type": {
-                    "__deferred": {"uri": "/resin/application_type(5)"},
-                    "__id": 5,
-                },
-                "__metadata": {"type": "", "uri": "/resin/application(12345)"},
-                "is_accessible_by_support_until__date": None,
-                "actor": 12345,
-                "id": 12345,
-                "user": {"__deferred": {"uri": "/resin/user(12345)"}, "__id": 12345},
-                "device_type": "raspberrypi3",
-                "commit": None,
-                "slug": "my_user/foo",
-            }
-
+            >>> balena.models.application.create('foo', 'raspberry-pi', 12345)
+            >>> balena.models.application.create('foo', 'raspberry-pi', 12345, 'block')
         """
 
-        if not organization:
+        if organization is None:
             raise exceptions.InvalidParameter("organization", organization)
-        else:
-            if is_id(organization):
-                key = "id"
-            else:
-                key = "handle"
-            raw_query = "$top=1&$select=id&$filter={key}%20eq%20'{value}'".format(key=key, value=organization)
 
-            org = self.base_request.request(
-                "organization",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            )["d"]
+        # TODO: run these two in parallel
+        device_type_id = self.__get_device_type_id(device_type)
+        organization_id = self.__get_organization_id(organization)
 
-            if not org:
-                raise exceptions.OrganizationNotFound(organization)
-
-        device_types = self.device_type.get_all_supported()
-        device_manifest = [device for device in device_types if device["name"] == device_type]
-
-        if device_manifest:
-            slug = device_manifest[0]["slug"]
-            # fmt: off
-            raw_query = (
-                f"$filter=(slug%20eq%20'{slug}')%20or%20(name%20eq%20'{slug}')"
-                "&$select=id,name"
-                "&$expand=is_default_for__application("
-                    "$select=is_archived"
-                    "&$filter=is_host%20eq%20true"
-                ")"
-            )
-            # fmt: on
-
-            device_type_detail = self.base_request.request(
-                "device_type",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            )["d"][0]
-
-            if not device_type_detail:
-                raise exceptions.InvalidDeviceType(device_type)
-
-        else:
-            raise exceptions.InvalidDeviceType(device_type)
-
-        host_apps = device_type_detail["is_default_for__application"]
-        # TODO: We are now checking whether all returned hostApps are marked as archived so that we
-        # do not break open-balena. Once open-balena gets hostApps, we can change this to just a $filter on is_archived.
-        if len(host_apps) > 0 and all([dt["is_archived"] for dt in host_apps]):
-            raise exceptions.BalenaDiscontinuedDeviceType(device_type)
-
-        data = {
+        body = {
             "app_name": name,
-            "is_for__device_type": device_type_detail["id"],
-            "organization": org[0]["id"],
+            "is_for__device_type": device_type_id,
+            "organization": organization_id,
         }
 
-        if app_type:
-            params = {"filter": "slug", "eq": app_type}
+        if application_class is not None:
+            body["is_of__class"] = application_class
 
-            app_type_detail = self.base_request.request(
-                "application_type",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            )["d"]
+        return pine.post({"resource": "application", "body": body})
 
-            if not app_type_detail:
-                raise exceptions.InvalidApplicationType(app_type)
-
-            data["application_type"] = app_type_detail[0]["id"]
-
-        return json.loads(
-            self.base_request.request(
-                "application",
-                "POST",
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            ).decode("utf-8")
-        )
-
-    def remove(self, name):
+    # TODO: enable batch operations
+    def remove(self, slug_or_uuid_or_id: Union[str, int]) -> None:
         """
-        Remove application. This function only works if you log in using credentials or Auth Token.
+        Remove application(s).
 
         Args:
-            name (str): application name.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
 
         Examples:
-            >>> balena.models.application.remove('Edison')
-            'OK'
-
+            >>> balena.models.application.remove('my_org/my_app')
+            >>> balena.models.application.remove('c184556293854781aea71b0bdae10e45')
+            >>> balena.models.application.remove(123)
         """
 
-        params = {"filter": "app_name", "eq": name}
-        return self.base_request.request(
-            "application",
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )
+        try:
+            application_id = self.get_id(slug_or_uuid_or_id)
+            pine.delete({"resource": "application", "id": application_id})
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
 
-    def rename(self, app_id, new_name):
+    def rename(
+        self, slug_or_uuid_or_id: Union[str, int], new_name: str
+    ) -> None:
         """
-        Rename application. This function only works if you log in using credentials or Auth Token.
+        Rename application.
 
         Args:
-            app_id (int): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
             new_name (str): new application name.
 
         Examples:
             >>> balena.models.application.rename(1681618, 'py-test-app')
-            'OK'
-
         """
 
-        params = {"filter": "id", "eq": app_id}
-        data = {"app_name": new_name}
+        try:
+            application_id = self.get_id(slug_or_uuid_or_id)
+            pine.patch(
+                {
+                    "resource": "application",
+                    "id": application_id,
+                    "body": {"app_name": new_name},
+                }
+            )
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
 
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def restart(self, name):
+    def restart(self, slug_or_uuid_or_id: Union[str, int]):
         """
-        Restart application. This function only works if you log in using credentials or Auth Token.
+        Restart application.
 
         Args:
-            name (str): application name.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
 
         Raises:
             ApplicationNotFound: if application couldn't be found.
 
         Examples:
-            >>> balena.models.application.restart('RPI1')
-            'OK'
-
+            >>> balena.models.application.restart('myorg/RPI1')
         """
 
-        app = self.get(name)
-        return self.base_request.request(
-            "application/{0}/restart".format(app["id"]),
-            "POST",
-            endpoint=self.settings.get("api_endpoint"),
-            login=True,
-        )
+        def __restart():
+            try:
+                application_id = self.get_id(slug_or_uuid_or_id)
+                request(
+                    method="POST", path=f"/applcation/{application_id}/restart"
+                )
+            except exceptions.RequestError as e:
+                if e.status_code == 404:
+                    raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+                raise e
 
-    def get_config(self, app_id, version, **options):
-        """
-        Download application config.json.
+        with_supervisor_locked_error(__restart)
 
-        Args:
-            app_id (str): application id.
-            version (str): the OS version of the image.
-            **options (dict): OS configuration keyword arguments to use. The available options are listed below:
-                network (Optional[str]): the network type that the device will use, one of 'ethernet' or 'wifi' and defaults to 'ethernet' if not specified.
-                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
-                wifiKey (Optional[str]): the key for the wifi network the device will connect to.
-                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to.
-                ip (Optional[str]): static ip address.
-                gateway (Optional[str]): static ip gateway.
-                netmask (Optional[str]): static ip netmask.
-
-        Returns:
-            dict: application config.json content.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-
-        """  # noqa: E501
-
-        # Application not found will be raised if can't get app by id.
-        self.get_by_id(app_id)
-
-        if not version:
-            raise exceptions.MissingOption("An OS version is required when calling application.get_config()")
-
-        if "network" not in options:
-            options["network"] = "ethernet"
-
-        options["appId"] = app_id
-        options["version"] = version
-
-        return self.base_request.request(
-            "/download-config",
-            "POST",
-            data=options,
-            endpoint=self.settings.get("api_endpoint"),
-        )
-
-    def enable_rolling_updates(self, app_id):
-        """
-        Enable Rolling update on application.
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            OK/error.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-
-        Examples:
-            >> > balena.models.application.enable_rolling_updates('106640')
-            'OK'
-        """
-
-        params = {"filter": "id", "eq": app_id}
-        data = {"should_track_latest_release": True}
-
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def disable_rolling_updates(self, app_id):
-        """
-        Disable Rolling update on application.
-
-        Args:
-            name (str): application id.
-
-        Returns:
-            OK/error.
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-
-        Examples:
-            >> > balena.models.application.disable_rolling_updates('106640')
-            'OK'
-        """
-
-        params = {"filter": "id", "eq": app_id}
-        data = {"should_track_latest_release": False}
-
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def enable_device_urls(self, app_id):
-        """
-        Enable device urls for all devices that belong to an application
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            OK/error.
-
-        Examples:
-            >> > balena.models.application.enable_device_urls('5685')
-            'OK'
-
-        """
-
-        params = {"filter": "belongs_to__application", "eq": app_id}
-        data = {"is_web_accessible": True}
-
-        return self.base_request.request(
-            "device",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def disable_device_urls(self, app_id):
-        """
-        Disable device urls for all devices that belong to an application.
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            OK/error.
-
-        Examples:
-            >> > balena.models.application.disable_device_urls('5685')
-            'OK'
-
-        """
-
-        params = {"filter": "belongs_to__application", "eq": app_id}
-        data = {"is_web_accessible": False}
-
-        return self.base_request.request(
-            "device",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def grant_support_access(self, app_id, expiry_timestamp):
-        """
-        Grant support access to an application until a specified time.
-
-        Args:
-            app_id (str): application id.
-            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
-
-        Returns:
-            OK/error.
-
-        Examples:
-            >> > balena.models.application.grant_support_access('5685', 1511974999000)
-            'OK'
-
-        """
-
-        if not expiry_timestamp or expiry_timestamp <= int(
-            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000
-        ):
-            raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
-
-        params = {"filter": "id", "eq": app_id}
-
-        data = {"is_accessible_by_support_until__date": expiry_timestamp}
-
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def revoke_support_access(self, app_id):
-        """
-        Revoke support access to an application.
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            OK/error.
-
-        Examples:
-            >> > balena.models.application.revoke_support_access('5685')
-            'OK'
-
-        """
-
-        params = {"filter": "id", "eq": app_id}
-
-        data = {"is_accessible_by_support_until__date": None}
-
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def generate_provisioning_key(self, app_id, key_name=None, description=None, expiry_date=None):
+    def generate_provisioning_key(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        key_name: Optional[str] = None,
+        description: Optional[str] = None,
+        expiry_date: Optional[str] = None,
+    ) -> str:
         """
         Generate a device provisioning key for a specific application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
             key_name (Optional[str]): provisioning key name.
             description (Optional[str]): description for provisioning key.
             expiry_date (Optional[str]): expiry date for provisioning key, for example: `2030-01-01T00:00:00Z`.
@@ -1000,248 +641,385 @@ class Application:
             str: device provisioning key.
 
         Examples:
-            >> > balena.models.application.generate_provisioning_key('5685')
-            'GThZJps91PoJCdzfYqF7glHXzBDGrkr9'
-
+            >>> balena.models.application.generate_provisioning_key(5685)
         """
-
-        # Make sure user has access to the app_id
-        self.get_by_id(app_id)
-
-        data = {
-            "actorType": "application",
-            "actorTypeId": app_id,
-            "roles": ["provisioning-api-key"],
-            "name": key_name,
-            "description": description,
-            "expiryDate": expiry_date,
-        }
-
-        return self.base_request.request(
-            "/api-key/v1/",
-            "POST",
-            data=data,
-            endpoint=self.settings.get("api_endpoint"),
-        )
-
-    def set_to_release(self, app_id, full_release_hash):
-        """
-        Set an application to a specific commit.
-
-        Args:
-            app_id (str): application id.
-            full_release_hash (str) : full_release_hash.
-
-        Returns:
-            OK/error.
-
-        Examples:
-            >> > balena.models.application.set_to_release('5685', '7dba4e0c461215374edad74a5b78f470b894b5b7')
-            'OK'
-
-        """
-
-        raw_query = (
-            f"$filter=startswith(commit, '{full_release_hash}')"
-            "&$top=1"
-            "&$select=id"
-            f"&filter=belongs_to__application%20eq%20'{app_id}'%20and%20status%20eq%20'success'"
-        )
         try:
-            release = self.release._Release__get_by_raw_query(raw_query)[0]
-        except exceptions.ReleaseNotFound:
-            raise exceptions.ReleaseNotFound(full_release_hash)
+            application_id = self.get_id(slug_or_uuid_or_id)
+            return request(
+                method="POST",
+                path="/api-key/v1/",
+                body={
+                    "actorType": "application",
+                    "actorTypeId": application_id,
+                    "roles": ["provisioning-api-key"],
+                    "name": key_name,
+                    "description": description,
+                    "expiryDate": expiry_date,
+                },
+            ).strip("\"")
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
 
-        params = {"filter": "id", "eq": app_id}
+    def purge(self, app_id: int) -> None:
+        """
+        Purge devices by application id
 
-        data = {
-            "should_be_running__release": release["id"],
-            "should_track_latest_release": False,
+        Args:
+            app_id (int): application id (number)
+
+        Examples:
+            >>> balena.models.application.purge(5685)
+        """
+        with_supervisor_locked_error(
+            lambda: request(
+                method="POST",
+                path="/supervisor/v1/purge",
+                body={"appId": app_id, "data": {"appId": f"{app_id}"}},
+            )
+        )
+
+    def shutdown(self, app_id: int, options: ShutdownOptions = {}) -> None:
+        """
+        Shutdown devices by application id
+
+        Args:
+            app_id (int): application id (number)
+            options (ShutdownOptions): override update lock
+
+        Examples:
+            >>> balena.models.application.shutdown(5685)
+            >>> balena.models.application.shutdown(5685, {"force": True})
+        """
+        with_supervisor_locked_error(
+            lambda: request(
+                method="POST",
+                path="/supervisor/v1/shutdown",
+                body={
+                    "appId": app_id,
+                    "data": {"force": bool(options.get("force"))},
+                },
+            )
+        )
+
+    def reboot(self, app_id: int, options: ShutdownOptions = {}) -> None:
+        """
+        Reboots devices by application id
+
+        Args:
+            app_id (int): application id (number)
+            options (ShutdownOptions): override update lock
+
+        Examples:
+            >>> balena.models.application.reboot(5685)
+            >>> balena.models.application.reboot(5685, {"force": True})
+        """
+        with_supervisor_locked_error(
+            lambda: request(
+                method="POST",
+                path="/supervisor/v1/reboot",
+                body={
+                    "appId": app_id,
+                    "data": {"force": bool(options.get("force"))},
+                },
+            )
+        )
+
+    def will_track_new_releases(
+        self, slug_or_uuid_or_id: Union[str, int]
+    ) -> bool:
+        """
+         Get whether the application is configured to receive updates whenever a new release is available.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+
+        Returns:
+            bool: is tracking the latest release.
+
+        Examples:
+            >>> balena.models.application.will_track_new_releases(5685)
+        """
+
+        app = self.get(
+            slug_or_uuid_or_id, {"$select": "should_track_latest_release"}
+        )
+        return bool(app.get("should_track_latest_release"))
+
+    def is_tracking_latest_release(
+        self, slug_or_uuid_or_id: Union[str, int]
+    ) -> bool:
+        """
+        Get whether the application is up to date and is tracking the latest finalized release for updates
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+
+        Returns:
+            bool: is tracking the latest release.
+
+        Examples:
+            >>> balena.models.application.is_tracking_latest_release(5685)
+        """
+        app_options = {
+            "$select": "should_track_latest_release",
+            "$expand": {
+                "should_be_running__release": {"$select": "id"},
+                "owns__release": {
+                    "$select": "id",
+                    "$top": 1,
+                    "$filter": {
+                        "is_final": True,
+                        "is_passing_tests": True,
+                        "is_invalidated": False,
+                        "status": "success",
+                    },
+                    "$orderby": "created_at desc",
+                },
+            },
         }
 
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
+        app = self.get(slug_or_uuid_or_id, app_options)
+        tracked_release = app.get("should_be_running__release")[0]  # type: ignore
+        latest_release = app.get("owns__release")[0]  # type: ignore
+
+        return bool(
+            app.get("should_track_latest_release")
+            and (
+                not latest_release
+                or tracked_release.get("id") == latest_release["id"]
+            )
         )
 
-    def will_track_new_releases(self, app_id):
+    @deprecated(
+        reason="This function is deprecated, use 'balena.models.application.pin_to_release' instead"
+    )
+    def set_to_release(
+        self, app_id: Union[str, int], full_release_hash: str
+    ) -> None:
         """
-        Get whether the application is configured to receive updates whenever a new release is available.
+        DEPRECATED: Please use balena.models.application.pin_to_release instead.
+        """
+        return self.pin_to_release(app_id, full_release_hash)
+
+    def pin_to_release(
+        self, slug_or_uuid_or_id: Union[str, int], full_release_hash: str
+    ) -> None:
+        """
+        Configures the application to run a particular release
+        and not get updated when the latest release changes.
 
         Args:
-            app_id (str): application id.
-
-        Returns:
-            bool: is tracking the latest release.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            full_release_hash (str) : the hash of a successful release (string)
 
         Examples:
-            >> > balena.models.application.will_track_new_releases('5685')
-            True
-
+            >>> balena.models.application.set_to_release(5685, '7dba4e0c461215374edad74a5b78f470b894b5b7')
         """
 
-        return bool(self.get_by_id(app_id)["should_track_latest_release"])
-
-    def is_tracking_latest_release(self, app_id):
-        """
-        Get whether the application is up to date and is tracking the latest release for updates.
-
-        Args:
-            app_id (str): application id.
-
-        Returns:
-            bool: is tracking the latest release.
-
-        Examples:
-            >> > balena.models.application.is_tracking_latest_release('5685')
-            True
-
-        """
-        # fmt: off
-        raw_query = (
-            f"$filter=id%20eq%20'{app_id}'"
-            "&$select=should_track_latest_release"
-            "&$expand="
-                "should_be_running__release($select=id),"
-                "owns__release("
-                    "$select=id"
-                    "&$top=1"
-                    "&$filter="
-                        "status%20eq%20'success'%20and%20"
-                        "is_final%20eq%20true%20and%20"
-                        "is_passing_tests%20eq%20true%20and%20"
-                        "is_invalidated%20eq%20false"
-                    "&$orderby=created_at%20desc"
-                ")"
-        )
-        # fmt: on
-        app = self.base_request.request(
-            "application",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-        if not app:
-            raise exceptions.ApplicationNotFound(app_id)
-
-        app = app[0]
-
-        latest_release = None
-        if app["owns__release"]:
-            latest_release = app["owns__release"][0]
-
-        tracked_release = None
-        if app["should_be_running__release"]:
-            tracked_release = app["should_be_running__release"][0]
-
-        return bool(app["should_track_latest_release"]) and (
-            not latest_release or (tracked_release and tracked_release["id"] == latest_release["id"])
+        application_id = self.get_id(slug_or_uuid_or_id)
+        release = self.release.get(
+            full_release_hash,
+            {
+                "$select": "id",
+                "$top": 1,
+                "$filter": {
+                    "belongs_to__application": application_id,
+                    "status": "success",
+                },
+            },
         )
 
-    def get_target_release_hash(self, app_id):
+        pine.patch(
+            {
+                "resource": "application",
+                "id": application_id,
+                "body": {
+                    "should_be_running__release": release["id"],
+                    "should_track_latest_release": False,
+                },
+            }
+        )
+
+    def get_target_release_hash(
+        self, slug_or_uuid_or_id: Union[str, int]
+    ) -> Optional[str]:
         """
         Get the hash of the current release for a specific application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
 
         Returns:
-            str: The release hash of the current release.
+            Optional[str]: The release hash of the current release or None.
 
         Examples:
-            >>> balena.models.application.get_target_release_hash('5685')
+            >>> balena.models.application.get_target_release_hash(5685)
 
         """
+        app_options = {
+            "$select": "id",
+            "$expand": {"should_be_running__release": {"$select": "commit"}},
+        }
+        application = self.get(slug_or_uuid_or_id, app_options)
 
-        raw_query = "$filter=id%20eq%20'{app_id}'&$select=id&$expand=should_be_running__release($select=commit)".format(
-            app_id=app_id
+        return application.get("should_be_running__release", [{}])[0].get(
+            "commit"
         )
 
-        app = self.base_request.request(
-            "application",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-        if not app:
-            raise exceptions.ApplicationNotFound(app_id)
-
-        app = app[0]
-
-        if app["should_be_running__release"]:
-            return app["should_be_running__release"][0]["commit"]
-
-        return ""
-
-    def track_latest_release(self, app_id):
+    def track_latest_release(self, slug_or_uuid_or_id: Union[str, int]) -> None:
         """
         Configure a specific application to track the latest available release.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
 
         Examples:
-            >>> balena.models.application.track_latest_release('5685')
-
+            >>> balena.models.application.track_latest_release(5685)
         """
 
-        latest_release = None
+        app_options = {
+            "$select": "id",
+            "$expand": {
+                "owns__release": {
+                    "$select": "id",
+                    "$top": 1,
+                    "$filter": {
+                        "is_final": True,
+                        "is_passing_tests": True,
+                        "is_invalidated": False,
+                        "status": "success",
+                    },
+                    "$orderby": "created_at desc",
+                }
+            },
+        }
 
-        try:
-            latest_release = self.release.get_latest_by_application(app_id)
-        except exceptions.ReleaseNotFound:
-            pass
+        application = self.get(slug_or_uuid_or_id, app_options)
+        body = {"should_track_latest_release": True}
+        latest_release = application.get("owns__release", [None])[0]
+        if latest_release is not None:
+            body["should_be_running__release"] = latest_release.get("id")
 
-        params = {"filter": "id", "eq": app_id}
-
-        data = {"should_track_latest_release": True}
-
-        if latest_release:
-            data["should_be_running__release"] = latest_release["id"]
-
-        return self.base_request.request(
-            "application",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
+        pine.patch(
+            {
+                "resource": "application",
+                "id": application["id"],  # type: ignore
+                "body": body,
+            }
         )
 
-    def get_dashboard_url(self, app_id):
+    def enable_device_urls(self, slug_or_uuid_or_id: Union[str, int]) -> None:
         """
-        Get Dashboard URL for a specific application.
+        Enable device urls for all devices that belong to an application
 
         Args:
-            app_id (str): application id.
-
-        Raises:
-            InvalidParameter: if the app_id is not a finite number.
-
-        Returns:
-            str: Dashboard URL for the specific application.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
 
         Examples:
-            >>> balena.models.application.get_dashboard_url('1476418')
-            https://dashboard.balena-cloud.com/apps/1476418
-
+            >>> balena.models.application.enable_device_urls(5685)
         """
-        try:
-            if isinf(int(app_id)):
-                raise exceptions.InvalidParameter("app_id", app_id)
-        except ValueError:
-            raise exceptions.InvalidParameter("app_id", app_id)
 
-        return urljoin(
-            self.settings.get("api_endpoint").replace("api", "dashboard"),
-            "/apps/{app_id}".format(app_id=app_id),
+        app = self.get(slug_or_uuid_or_id, {"$select": "id"})
+        pine.patch(
+            {
+                "resource": "device",
+                "body": {"is_web_accessible": True},
+                "options": {
+                    "$filter": {
+                        "belongs_to__application": app["id"]  # type: ignore
+                    }
+                },
+            }
         )
+
+    def disable_device_urls(self, slug_or_uuid_or_id: Union[str, int]) -> None:
+        """
+        Disable device urls for all devices that belong to an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+
+        Examples:
+            >>> balena.models.application.disable_device_urls(5685)
+        """
+
+        app = self.get(slug_or_uuid_or_id, {"$select": "id"})
+        pine.patch(
+            {
+                "resource": "device",
+                "body": {"is_web_accessible": False},
+                "options": {
+                    "$filter": {
+                        "belongs_to__application": app["id"]  # type: ignore
+                    }
+                },
+            }
+        )
+
+    def grant_support_access(
+        self, slug_or_uuid_or_id: Union[str, int], expiry_timestamp: int
+    ):
+        """
+        Grant support access to an application until a specified time.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            expiry_timestamp (int): a timestamp in ms for when the support access will expire.
+
+        Examples:
+            >>> balena.models.application.grant_support_access(5685, 1511974999000)
+        """
+
+        if expiry_timestamp is None or expiry_timestamp <= int(
+            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
+            * 1000
+        ):
+            raise exceptions.InvalidParameter(
+                "expiry_timestamp", expiry_timestamp
+            )
+
+        try:
+            application_id = self.get_id(slug_or_uuid_or_id)
+            pine.patch(
+                {
+                    "resource": "application",
+                    "id": application_id,
+                    "body": {
+                        "is_accessible_by_support_until__date": expiry_timestamp
+                    },
+                }
+            )
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
+
+    def revoke_support_access(self, slug_or_uuid_or_id: Union[str, int]):
+        """
+        Revoke support access to an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+
+        Examples:
+            >>> balena.models.application.revoke_support_access(5685)
+        """
+
+        try:
+            application_id = self.get_id(slug_or_uuid_or_id)
+            pine.patch(
+                {
+                    "resource": "application",
+                    "id": application_id,
+                    "body": {"is_accessible_by_support_until__date": None},
+                }
+            )
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
 
 
 class ApplicationInvite:
@@ -1251,156 +1029,107 @@ class ApplicationInvite:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.auth = Auth()
-        self.release = Release()
         self.RESOURCE = "invitee__is_invited_to__application"
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[ApplicationInviteType]:
         """
         Get all invites.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains info of invites.
+            List[ApplicationInviteType]: list contains info of invites.
 
         Examples:
             >>> balena.models.application.invite.get_all()
-            [
-                {
-                    "id": 5860,
-                    "message": "Test invite",
-                    "invitee": {
-                        "__id": 2965,
-                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
-                    },
-                    "is_created_by__user": {
-                        "__id": 5227,
-                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                    },
-                    "is_invited_to__application": {
-                        "__id": 1681618,
-                        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                    },
-                    "application_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {
-                        "uri": "/resin/invitee__is_invited_to__application(@id)?@id=5860"
-                    },
-                }
-            ]
-
         """
+        return pine.get({"resource": self.RESOURCE, "options": options})
 
-        return self.base_request.request(self.RESOURCE, "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[ApplicationInviteType]:
         """
         Get all invites by application.
 
         Args:
-            app_id (int): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains info of invites.
+            List[ApplicationInviteType]: list contains info of invites.
 
         Examples:
             >>> balena.models.application.invite.get_all_by_application(1681618)
-            [
-                {
-                    "id": 5860,
-                    "message": "Test invite",
-                    "invitee": {
-                        "__id": 2965,
-                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
-                    },
-                    "is_created_by__user": {
-                        "__id": 5227,
-                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                    },
-                    "is_invited_to__application": {
-                        "__id": 1681618,
-                        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                    },
-                    "application_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {
-                        "uri": "/resin/invitee__is_invited_to__application(@id)?@id=5860"
-                    },
-                }
-            ]
-
         """
+        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        return self.get_all(
+            merge(
+                {
+                    "$filter": {"is_invited_to__application": app["id"]}  # type: ignore
+                },
+                options,
+            )
+        )
 
-        params = {"filter": "is_invited_to__application", "eq": app_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-    def create(self, app_id, invitee, role_name=None, message=None):
+    def create(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        options: ApplicationInviteOptions,
+    ) -> ApplicationInviteType:
         """
         Creates a new invite for an application.
 
         Args:
-            app_id (int): application id.
-            invitee (str): the email of the invitee.
-            role_name (Optional[str]): the role name to be granted to the invitee.
-            message (Optional[str]): the message to send along with the invite.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (ApplicationInviteOptions): Application Invite options dict to use.
+                invitee (str): the email/balena_username of the invitee.
+                role_name (Optional[str]): the role name to be granted to the invitee.
+                One of "observer", "developer", "operator". Defaults to "developer"
+                message (Optional[str]): the message to send along with the invite.
 
         Returns:
             dict: application invite.
 
         Examples:
             >>> balena.models.application.invite.create(1681618, 'invitee@example.org', 'developer', 'Test invite')
-            {
-                "id": 5860,
-                "message": "Test invite",
-                "invitee": {"__id": 2965, "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"}},
-                "is_created_by__user": {
-                    "__id": 5227,
-                    "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                },
-                "is_invited_to__application": {
-                    "__id": 1681618,
-                    "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                },
-                "application_membership_role": {
-                    "__id": 2,
-                    "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                },
-                "__metadata": {"uri": "/resin/invitee__is_invited_to__application(@id)?@id=5860"},
-            }
-
         """
+        invitee = options.get("invitee")
+        if invitee is None:
+            raise exceptions.InvalidParameter("options.invitee", None)
 
-        data = {
-            "invitee": invitee,
-            "is_invited_to__application": app_id,
-            "message": message,
-        }
+        role_name = options.get("roleName", "developer")
 
-        if role_name:
-            data["application_membership_role "] = _get_role_by_name(role_name)
-
-        return json.loads(
-            self.base_request.request(
-                self.RESOURCE,
-                "POST",
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            ).decode("utf-8")
+        # TODO: paralelize me
+        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        roles = pine.get(
+            {
+                "resource": "application_membership_role",
+                "options": {
+                    "$top": 1,
+                    "$select": "id",
+                    "$filter": {"name": role_name},
+                },
+            }
         )
 
-    def revoke(self, invite_id):
+        body = {
+            "invitee": invitee,
+            "is_invited_to__application": app["id"],  # type: ignore
+            "message": options.get("message"),
+        }
+
+        if roles is not None:
+            role_id = (roles[0] if len(roles) > 0 else {}).get("id", None)
+            if role_id is None:
+                raise exceptions.BalenaApplicationMembershipRoleNotFound(
+                    role_name
+                )
+            body["application_membership_role"] = role_id
+
+        return pine.post({"resource": self.RESOURCE, "body": body})
+
+    def revoke(self, invite_id: int) -> None:
         """
         Revoke an invite.
 
@@ -1409,34 +1138,25 @@ class ApplicationInvite:
 
         Examples:
             >>> balena.models.application.invite.revoke(5860)
-            'OK'
-
         """
+        pine.delete({"resource": self.RESOURCE, "id": invite_id})
 
-        params = {"filter": "id", "eq": invite_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def accept(self, invite_token):
+    def accept(self, invite_token: str) -> None:
         """
         Accepts an invite.
 
         Args:
             invite_token (str): invitationToken - invite token.
 
+        Examples:
+            >>> balena.models.application.invite.accept("qwerty-invitation-token")
         """
-
-        return self.base_request.request(
-            "/user/v1/invitation/{0}".format(invite_token),
-            "POST",
-            endpoint=self.settings.get("api_endpoint"),
-            login=True,
-        )
+        try:
+            request(method="POST", path=f"/user/v1/invitation/{invite_token}")
+        except exceptions.RequestError as e:
+            if e.status_code == 401:
+                raise exceptions.NotLoggedIn()
+            raise e
 
 
 class ApplicationMembership:
@@ -1446,207 +1166,168 @@ class ApplicationMembership:
 
     def __init__(self):
         self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.auth = Auth()
         self.RESOURCE = "user__is_member_of__application"
 
-    def get_all(self):
+    def __get_role_id(self, role_name: str) -> Optional[int]:
+        role = pine.get(
+            {
+                "resource": "application_membership_role",
+                "id": {"name": role_name},
+                "options": {"$select": "id"},
+            }
+        )
+
+        if role is None:
+            raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
+
+        return role["id"]  # type: ignore
+
+    def get_all(
+        self, options: AnyObject = {}
+    ) -> List[ApplicationMembershipType]:
         """
         Get all application memberships.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains info of application memberships.
+            List[ApplicationMembershipType]: list contains info of application memberships.
 
         Examples:
             >>> balena.models.application.membership.get_all()
-            [
-                {
-                    "is_member_of__application": {
-                        "__id": 1681618,
-                        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                    },
-                    "application_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
-                    "id": 55074,
-                    "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
-                }
-            ]
-
         """
 
-        return self.base_request.request(self.RESOURCE, "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
+        return pine.get({"resource": self.RESOURCE, "options": options})
 
-    def get(self, membership_id):
+    def get(
+        self, membership_id: ResourceKey, options: AnyObject = {}
+    ) -> ApplicationMembershipType:
         """
         Get a single application membership.
 
         Args:
-            membership_id (int): application membership id.
+            membership_id (ResourceKey): the id or an object with the unique `user` & `is_member_of__application`
+            numeric pair of the membership
+            options (AnyObject): extra pine options to use
 
         Returns:
-            dict: application membership.
+            ApplicationMembershipType: application membership.
 
         Examples:
             >>> balena.models.application.membership.get(55074)
-            {
-                "is_member_of__application": {
-                    "__id": 1681618,
-                    "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                },
-                "application_membership_role": {
-                    "__id": 2,
-                    "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                },
-                "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
-                "id": 55074,
-                "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
-            }
-
+            >>> balena.models.application.membership.get({"user": 123, "is_member_of__application": 125})
         """
 
-        params = {"filter": "id", "eq": membership_id}
+        if not isinstance(membership_id, int) and not isinstance(
+            membership_id, dict
+        ):
+            raise exceptions.InvalidParameter("membershipId", membership_id)
 
-        result = self.base_request.request(
-            self.RESOURCE,
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
+        result = pine.get(
+            {
+                "resource": self.RESOURCE,
+                "id": membership_id,  # type: ignore
+                "options": options,
+            }
+        )
 
-        if not result:
-            raise exceptions.ApplicationMembershipNotFound(membership_id)
+        if result is None:
+            raise exceptions.ApplicationMembershipNotFound(str(membership_id))
 
-        return result[0]
+        return result
 
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[ApplicationMembershipType]:
         """
         Get all memberships by application.
 
         Args:
-            app_id (int): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
             list: list contains info of application memberships.
 
         Examples:
             >>> balena.models.application.membership.get_all_by_application(1681618)
-            [
-                {
-                    "is_member_of__application": {
-                        "__id": 1681618,
-                        "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                    },
-                    "application_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
-                    "id": 55074,
-                    "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
-                }
-            ]
-
         """
+        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        return self.get_all(
+            merge(
+                {
+                    "$filter": {
+                        "is_member_of__application": app["id"]  # type: ignore
+                    }
+                },
+                options,
+            )
+        )
 
-        params = {"filter": "is_member_of__application", "eq": app_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-    def create(self, app_id, user_name, role_name=None):
+    def create(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        username: str,
+        role_name: ApplicationMembershipRoles = "developer",
+    ) -> ApplicationMembershipType:
         """
         Creates a new membership for an application.
 
         Args:
-            app_id (int): application id.
-            user_name (str): the username of the balena user that will become a member.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            username (str): the username of the balena user that will become a member.
             role_name (Optional[str]): the role name to be granted to the membership.
 
         Returns:
-            dict: application invite.
+            ApplicationMembershipType: application membership.
 
         Examples:
-            >>> balena.models.application.membership.create(1681618, 'nghiant2710')
-            {
-                "is_member_of__application": {
-                    "__id": 1681618,
-                    "__deferred": {"uri": "/resin/application(@id)?@id=1681618"},
-                },
-                "application_membership_role": {
-                    "__id": 2,
-                    "__deferred": {"uri": "/resin/application_membership_role(@id)?@id=2"},
-                },
-                "__metadata": {"uri": "/resin/user__is_member_of__application(@id)?@id=55074"},
-                "id": 55074,
-                "user": {"__id": 189, "__deferred": {"uri": "/resin/user(@id)?@id=189"}},
-            }
-
+            >>> balena.models.application.membership.create(1681618, 'testuser')
         """
 
-        data = {"username": user_name, "is_member_of__application": app_id}
+        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        role_id = self.__get_role_id(role_name)
+        body = {
+            "username": username,
+            "is_member_of__application": app["id"],  # type: ignore
+            "application_membership_role": role_id,
+        }
 
-        if role_name:
-            data["application_membership_role "] = _get_role_by_name(role_name)
+        return pine.post({"resource": self.RESOURCE, "body": body})
 
-        return json.loads(
-            self.base_request.request(
-                self.RESOURCE,
-                "POST",
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            ).decode("utf-8")
-        )
-
-    def change_role(self, membership_id, role_name):
+    def change_role(self, membership_id: ResourceKey, role_name: str) -> None:
         """
         Changes the role of an application member.
 
         Args:
-            membership_id (int): the id of the membership that will be changed.
+            membership_id (ResourceKey): the id or an object with the unique `user` & `is_member_of__application`
+            numeric pair of the membership
             role_name (str): the role name to be granted to the membership.
 
         Examples:
             >>> balena.models.application.membership.change_role(55074, 'observer')
-            'OK'
-
         """
 
-        role_id = _get_role_by_name(role_name)
-
-        params = {"filter": "id", "eq": membership_id}
-
-        data = {"application_membership_role": role_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
+        role_id = self.__get_role_id(role_name)
+        pine.patch(
+            {
+                "resource": self.RESOURCE,
+                "id": membership_id,  # type: ignore
+                "body": {"application_membership_role": role_id},
+            }
         )
 
-    def remove(self, membership_id):
+    def remove(self, membership_id: ResourceKey) -> None:
         """
         Remove a membership.
 
         Args:
-            membership_id (int): application membership id.
-
+            membership_id (ResourceKey): the id or an object with the unique `user` & `is_member_of__application`
         """
-
-        params = {"filter": "id", "eq": membership_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
+        pine.delete(
+            {"resource": self.RESOURCE, "id": membership_id}  # type: ignore
         )
+
+
+application = Application()

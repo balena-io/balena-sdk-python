@@ -17,7 +17,7 @@ class TestDevice(unittest.TestCase):
         # Wipe all apps before the tests run.
         cls.helper.wipe_application()
         cls.app = cls.balena.models.application.create(
-            "FooBar", "Raspberry Pi 2", cls.helper.default_organization["id"]
+            "FooBar", "raspberry-pi2", cls.helper.default_organization["id"]
         )
 
     @classmethod
@@ -85,14 +85,15 @@ class TestDevice(unittest.TestCase):
         # should be rejected when providing a device type incompatible with the application.
         with self.assertRaises(self.helper.balena_exceptions.InvalidDeviceType):
             self.balena.models.device.register(
-                type(self).app["id"],
+                str(type(self).app["id"]),
                 self.balena.models.device.generate_uuid(),
                 "intel-nuc",
             )
 
     def test_05_get_all_by_application_id(self):
-        app = self.balena.models.application.create("FooBar2", "Raspberry Pi 2", self.helper.default_organization["id"])
+        app = self.balena.models.application.create("FooBar2", "raspberry-pi2", self.helper.default_organization["id"])
         # should return empty
+
         self.assertEqual(len(self.balena.models.device.get_all_by_application_id(app["id"])), 0)
 
         # should return correct number of device in an application.
@@ -101,7 +102,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(len(self.balena.models.device.get_all_by_application_id(app["id"])), 2)
 
     def test_06_get_all_by_application(self):
-        app = self.balena.models.application.create("FooBar3", "Raspberry Pi 2", self.helper.default_organization["id"])
+        app = self.balena.models.application.create("FooBar3", "raspberry-pi2", self.helper.default_organization["id"])
         # should return empty
         self.assertEqual(len(self.balena.models.device.get_all_by_application(app["app_name"])), 0)
 
@@ -212,8 +213,8 @@ class TestDevice(unittest.TestCase):
 
     def test_19_move(self):
         device = self.balena.models.device.register(type(self).app["id"], self.balena.models.device.generate_uuid())
-        self.balena.models.application.create("FooBarBar", "Raspberry Pi 2", self.helper.default_organization["id"])
-        self.balena.models.application.create("FooBarBar3", "Raspberry Pi 3", self.helper.default_organization["id"])
+        self.balena.models.application.create("FooBarBar", "raspberry-pi2", self.helper.default_organization["id"])
+        self.balena.models.application.create("FooBarBar3", "raspberry-pi3", self.helper.default_organization["id"])
 
         # should be able to move a device by device uuid and application name.
         self.balena.models.device.move(device["uuid"], "FooBarBar")
