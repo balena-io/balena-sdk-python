@@ -1,6 +1,6 @@
 from typing import Any, Literal, Optional, TypedDict
 
-from ..types import AnyObject
+from ..types import Any
 
 
 class APIKeyType(TypedDict):
@@ -9,14 +9,14 @@ class APIKeyType(TypedDict):
     name: str
     description: Optional[str]
     expiry_date: Optional[str]
-    is_of__actor: AnyObject
+    is_of__actor: Any
 
 
 class ApplicationType(TypedDict, total=False):
     id: int
     created_at: str
     app_name: str
-    actor: AnyObject
+    actor: Any
     slug: str
     uuid: str
     is_accessible_by_support_until__date: str
@@ -60,13 +60,28 @@ class ApplicationInviteType(TypedDict, total=False):
     message: str
     created_at: str
     invitationToken: str
-    application_membership_role: AnyObject
-    invitee: AnyObject
-    is_invited_to__application: AnyObject
+    application_membership_role: Any
+    invitee: Any
+    is_invited_to__application: Any
 
 
 class ApplicationMembershipType(TypedDict, total=False):
     id: int
-    user: AnyObject
-    is_member_of__application: AnyObject
-    application_membership_role: AnyObject
+    user: Any
+    is_member_of__application: Any
+    application_membership_role: Any
+
+
+class DeviceTypeType(TypedDict, total=False):
+    id: int
+    slug: str
+    name: str
+    is_private: bool
+    logo: str
+    contract: Any
+    belongs_to__device_family: Any
+    is_default_for__application: Any
+    is_of__cpu_architecture: Any
+    is_accessible_privately_by__organization: Any
+    describes_device: Any
+    device_type_alias: Any

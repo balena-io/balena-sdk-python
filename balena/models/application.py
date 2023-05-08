@@ -78,13 +78,13 @@ class Application:
             },
         )
 
-        host_apps = dt["is_default_for__application"]
+        host_apps = dt.get("is_default_for__application", [])
         if len(host_apps) > 0 and all(
             map(lambda ha: ha["is_archived"], host_apps)
         ):
             raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
-        return dt["id"]
+        return dt["id"]  # type: ignore
 
     def __get_organization_id(self, organization: Union[str, int]) -> int:
         id_filter = {"handle": organization}
