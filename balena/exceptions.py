@@ -133,7 +133,9 @@ class ApplicationNotFound(BalenaException):
 
     def __init__(self, application):
         super(ApplicationNotFound, self).__init__()
-        self.message = Message.APPLICATION_NOT_FOUND.format(application=application)
+        self.message = Message.APPLICATION_NOT_FOUND.format(
+            application=application
+        )
 
 
 class DeviceNotFound(BalenaException):
@@ -185,8 +187,11 @@ class RequestError(BalenaException):
 
     def __init__(self, body, status_code=None):
         super(RequestError, self).__init__()
-        self.message = Message.REQUEST_ERROR.format(body=body)
+        self.message = Message.REQUEST_ERROR.format(
+            body=body
+        )
         self.status_code = status_code
+        # print(self.message)
 
 
 class NotLoggedIn(BalenaException):
@@ -281,7 +286,9 @@ class IncompatibleApplication(BalenaException):
 
     def __init__(self, application):
         super(IncompatibleApplication, self).__init__()
-        self.message = Message.INCOMPATIBLE_APPLICATION.format(application=application)
+        self.message = Message.INCOMPATIBLE_APPLICATION.format(
+            application=application
+        )
 
 
 class UnsupportedFunction(BalenaException):
@@ -316,7 +323,9 @@ class AmbiguousApplication(BalenaException):
 
     def __init__(self, application):
         super(AmbiguousApplication, self).__init__()
-        self.message = Message.AMBIGUOUS_APPLICATION.format(application=application)
+        self.message = Message.AMBIGUOUS_APPLICATION.format(
+            application=application
+        )
 
 
 class AmbiguousDevice(BalenaException):
@@ -349,7 +358,9 @@ class InvalidParameter(BalenaException):
 
     def __init__(self, parameter, value):
         super(InvalidParameter, self).__init__()
-        self.message = Message.INVALID_PARAMETER.format(parameter=parameter, value=value)
+        self.message = Message.INVALID_PARAMETER.format(
+            parameter=parameter, value=value
+        )
 
 
 class ImageNotFound(BalenaException):
@@ -424,7 +435,9 @@ class InvalidApplicationType(BalenaException):
 
     def __init__(self, app_type):
         super(InvalidApplicationType, self).__init__()
-        self.message = Message.INVALID_APPLICATION_TYPE.format(app_type=app_type)
+        self.message = Message.INVALID_APPLICATION_TYPE.format(
+            app_type=app_type
+        )
 
 
 class UnsupportedFeature(BalenaException):
@@ -500,7 +513,9 @@ class OrganizationNotFound(BalenaException):
 
     def __init__(self, organization):
         super(OrganizationNotFound, self).__init__()
-        self.message = Message.ORGANIZATION_NOT_FOUND.format(organization=organization)
+        self.message = Message.ORGANIZATION_NOT_FOUND.format(
+            organization=organization
+        )
 
 
 class OrganizationMembershipNotFound(BalenaException):
@@ -517,7 +532,9 @@ class OrganizationMembershipNotFound(BalenaException):
 
     def __init__(self, org_membership):
         super(OrganizationMembershipNotFound, self).__init__()
-        self.message = Message.ORGANIZATION_MEMBERSHIP_NOT_FOUND.format(org_membership=org_membership)
+        self.message = Message.ORGANIZATION_MEMBERSHIP_NOT_FOUND.format(
+            org_membership=org_membership
+        )
 
 
 class BalenaDiscontinuedDeviceType(BalenaException):
@@ -548,7 +565,9 @@ class BalenaOrganizationMembershipRoleNotFound(BalenaException):
 
     def __init__(self, role_name):
         super(BalenaOrganizationMembershipRoleNotFound, self).__init__()
-        self.message = Message.BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
+        self.message = Message.BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND.format(
+            role_name=role_name
+        )
 
 
 class BalenaApplicationMembershipRoleNotFound(BalenaException):
@@ -565,7 +584,9 @@ class BalenaApplicationMembershipRoleNotFound(BalenaException):
 
     def __init__(self, role_name):
         super(BalenaApplicationMembershipRoleNotFound, self).__init__()
-        self.message = Message.BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND.format(role_name=role_name)
+        self.message = Message.BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND.format(
+            role_name=role_name
+        )
 
 
 class ApplicationMembershipNotFound(BalenaException):
@@ -582,7 +603,9 @@ class ApplicationMembershipNotFound(BalenaException):
 
     def __init__(self, membership):
         super(ApplicationMembershipNotFound, self).__init__()
-        self.message = Message.APPLICATION_MEMBERSHIP_NOT_FOUND.format(membership=membership)
+        self.message = Message.APPLICATION_MEMBERSHIP_NOT_FOUND.format(
+            membership=membership
+        )
 
 
 class BalenaInvalidDeviceType(BalenaException):
@@ -599,4 +622,6 @@ class BalenaInvalidDeviceType(BalenaException):
 
     def __init__(self, device_type):
         super(BalenaInvalidDeviceType, self).__init__()
-        self.message = Message.BALENA_INVALID_DEVICE_TYPE.format(device_type=device_type)
+        self.message = Message.BALENA_INVALID_DEVICE_TYPE.format(
+            device_type=device_type
+        )

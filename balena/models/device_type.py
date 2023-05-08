@@ -130,7 +130,9 @@ class DeviceType(object):
 
         return device_type
 
-    def get_by_slug_or_name(self, slug_or_name: str, options: AnyObject = {}) -> DeviceTypeType:
+    def get_by_slug_or_name(
+        self, slug_or_name: str, options: AnyObject = {}
+    ) -> DeviceTypeType:
         """
         Get a single device type by slug or name.
 
@@ -142,15 +144,17 @@ class DeviceType(object):
             DeviceTypeType: Returns the device type
         """
 
-        device_types = self.get_all(merge({
-            "$top": 1,
-            "$filter": {
-                "$or": [
-                    {"name": slug_or_name},
-                    {"slug": slug_or_name}
-                ]
-            }
-        }, options))
+        device_types = self.get_all(
+            merge(
+                {
+                    "$top": 1,
+                    "$filter": {
+                        "$or": [{"name": slug_or_name}, {"slug": slug_or_name}]
+                    },
+                },
+                options,
+            )
+        )
 
         device_type = device_types[0] if len(device_types) > 0 else None
 
@@ -168,7 +172,7 @@ class DeviceType(object):
 
         """
 
-        return self.get_by_slug_or_name(slug, {"$select": "name"})["name"]  # type: ignore
+        return self.get_by_slug_or_name(slug, {"$select": "name"})["name"]
 
     def get_slug_by_name(self, name: str) -> str:
         """
@@ -179,4 +183,4 @@ class DeviceType(object):
 
         """
 
-        return self.get_by_slug_or_name(name, {"$select": "slug"})["slug"]  # type: ignore
+        return self.get_by_slug_or_name(name, {"$select": "slug"})["slug"]

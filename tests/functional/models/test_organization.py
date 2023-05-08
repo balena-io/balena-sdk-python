@@ -46,6 +46,7 @@ class TestOrganization(unittest.TestCase):
     def test_get_all(self):
         # given three extra non-user organization, should retrieve all organizations.
         orgs = self.balena.models.organization.get_all()
+        print(orgs)
         orgs = sorted(orgs, key=lambda k: k["created_at"])
         self.assertEqual(len(orgs), 4)
         self.assertEqual(orgs[0]["handle"], self.helper.credentials["user_id"])

@@ -1,7 +1,5 @@
 from typing import Any, Literal, Optional, TypedDict
 
-from ..types import Any
-
 
 class APIKeyType(TypedDict):
     id: int
@@ -12,7 +10,7 @@ class APIKeyType(TypedDict):
     is_of__actor: Any
 
 
-class ApplicationType(TypedDict, total=False):
+class ApplicationType(TypedDict):
     id: int
     created_at: str
     app_name: str
@@ -49,13 +47,13 @@ class ApplicationType(TypedDict, total=False):
     can_use__application_as_host: Any
 
 
-class APIKeyInfoType(TypedDict, total=False):
+class APIKeyInfoType(TypedDict):
     name: str
     description: str
     expiry_date: str
 
 
-class ApplicationInviteType(TypedDict, total=False):
+class ApplicationInviteType(TypedDict):
     id: int
     message: str
     created_at: str
@@ -65,14 +63,14 @@ class ApplicationInviteType(TypedDict, total=False):
     is_invited_to__application: Any
 
 
-class ApplicationMembershipType(TypedDict, total=False):
+class ApplicationMembershipType(TypedDict):
     id: int
     user: Any
     is_member_of__application: Any
     application_membership_role: Any
 
 
-class DeviceTypeType(TypedDict, total=False):
+class DeviceTypeType(TypedDict):
     id: int
     slug: str
     name: str
@@ -85,3 +83,86 @@ class DeviceTypeType(TypedDict, total=False):
     is_accessible_privately_by__organization: Any
     describes_device: Any
     device_type_alias: Any
+
+
+class TypeDeviceState(TypedDict):
+    key: str
+    name: str
+
+
+class TypeDevice(TypedDict):
+    id: int
+    actor: Any
+    created_at: str
+    modified_at: str
+    custom_latitude: str
+    custom_longitude: str
+    device_name: str
+    download_progress: int
+    ip_address: str
+    public_address: str
+    mac_address: str
+    is_accessible_by_support_until__date: str
+    is_connected_to_vpn: bool
+    is_locked_until__date: str
+    is_web_accessible: bool
+    is_active: bool
+    # This is a computed term
+    is_frozen: bool
+    is_online: bool
+    last_connectivity_event: str
+    last_vpn_event: str
+    latitude: str
+    local_id: str
+    location: str
+    longitude: str
+    note: str
+    os_variant: str
+    os_version: str
+    provisioning_progress: int
+    provisioning_state: str
+    state: TypeDeviceState
+    status: str
+    status_sort_index: int
+    supervisor_version: str
+    uuid: str
+    vpn_address: str
+    api_heartbeat_state: Literal["online", "offline", "timeout", "unknown"]
+    memory_usage: int
+    memory_total: int
+    storage_block_device: str
+    storage_usage: int
+    storage_total: int
+    cpu_usage: int
+    cpu_temp: int
+    cpu_id: str
+    is_undervolted: bool
+    # This is a computed term
+    overall_status: Any
+    # This is a computed term
+    overall_progress: int
+
+    is_of__device_type: Any
+    belongs_to__application: Any
+    belongs_to__user: Any
+    is_running__release: Any
+    should_be_running__release: Any
+    is_managed_by__service_instance: Any
+    should_be_managed_by__supervisor_release: Any
+    device_config_variable: Any
+    device_environment_variable: Any
+    device_tag: Any
+    service_install: Any
+    image_install: Any
+
+
+class DeviceMetricsType(TypedDict):
+    memory_usage: int
+    memory_total: int
+    storage_block_device: str
+    storage_usage: int
+    storage_total: int
+    cpu_usage: int
+    cpu_temp: int
+    cpu_id: str
+    is_undervolted: bool

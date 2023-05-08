@@ -54,13 +54,15 @@ class ApiKey:
             api_key_body["expiry_date"] = expiry_date
 
         return request(
-            method="POST",
-            path="/api-key/user/full",
-            body=api_key_body
-        )
+            method="POST", path="/api-key/user/full", body=api_key_body
+        ).strip('"')
 
-    @deprecated(reason="This function is deprecated, use 'balena.models.api_key.create' instead")
-    def create_api_key(self, name: str, description: Optional[str] = None) -> str:
+    @deprecated(
+        reason="This function is deprecated, use 'balena.models.api_key.create' instead"
+    )
+    def create_api_key(
+        self, name: str, description: Optional[str] = None
+    ) -> str:
         """
         DEPRECATED: Please use balena.models.api_key.create instead.
         """
@@ -81,7 +83,10 @@ class ApiKey:
 
         """
         return pine.get(
-            {"resource": "api_key", "options": merge({"$orderby": "name asc"}, options)}
+            {
+                "resource": "api_key",
+                "options": merge({"$orderby": "name asc"}, options),
+            }
         )
 
     def update(self, id: int, api_key_info: APIKeyInfoType):
@@ -100,14 +105,17 @@ class ApiKey:
         if api_key_info is None:
             raise exceptions.InvalidParameter("apiKeyInfo", api_key_info)
 
-        if api_key_info.get("name") is not None and api_key_info.get("name") == "":
+        if (
+            api_key_info.get("name") is not None
+            and api_key_info.get("name") == ""
+        ):
             raise exceptions.InvalidParameter(
                 "apiKeyInfo.name", api_key_info.get("name")
             )
 
         body = {
             "description": api_key_info.get("description"),
-            "expiry_date": api_key_info.get("expiry_date")
+            "expiry_date": api_key_info.get("expiry_date"),
         }
 
         name = api_key_info.get("name")
@@ -146,7 +154,9 @@ class ApiKey:
         """
 
         app = self.application.get(slug_or_uuid_or_id, {"$select": "actor"})
-        return self.get_all(merge({"$filter": {"is_of__actor": app.get("actor")}}, options))
+        return self.get_all(
+            merge({"$filter": {"is_of__actor": app.get("actor")}}, options)
+        )
 
     def get_device_api_keys_by_device(
         self, uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -164,9 +174,13 @@ class ApiKey:
         """
 
         dev = self.device.get(uuid_or_id, {"$select": "actor"})
-        return self.get_all(merge({"$filter": {"is_of__actor": dev["actor"]}}, options))
+        return self.get_all(
+            merge({"$filter": {"is_of__actor": dev["actor"]}}, options)
+        )
 
-    def get_all_named_user_api_keys(self, options: AnyObject = {}) -> List[APIKeyType]:
+    def get_all_named_user_api_keys(
+        self, options: AnyObject = {}
+    ) -> List[APIKeyType]:
         """
         Get all named user API keys of the current user.
 

@@ -1,7 +1,10 @@
 import numbers
+import re
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any, Callable, Dict, TypeVar
+from typing import Any, Callable, Dict, Literal, TypeVar
+
+from semver.version import Version
 
 from .exceptions import RequestError, SupervisorLocked
 
@@ -141,13 +144,15 @@ def generate_current_service_details(raw_device: Any) -> Any:
     groupedServices = defaultdict(list)
 
     for obj in [
-        get_single_install_summary(i) for i in raw_device["image_install"]
+        get_single_install_summary(i)
+        for i in raw_device.get("image_install", [])
     ]:
         groupedServices[obj.pop("service_name", None)].append(obj)
 
     raw_device["current_services"] = dict(groupedServices)
     raw_device["current_gateway_downloads"] = [
-        get_single_install_summary(i) for i in raw_device["gateway_download"]
+        get_single_install_summary(i)
+        for i in raw_device.get("gateway_download", [])
     ]
     raw_device.pop("image_install", None)
     raw_device.pop("gateway_download", None)
@@ -166,7 +171,7 @@ def is_provisioned(device: Any) -> bool:
 def normalize_device_os_version(device: Any) -> Any:
     if (
         device.get("os_version") is not None
-        and len(device.get("os_version") == 0)
+        and len(device.get("os_version")) == 0
         and is_provisioned(device)
     ):
         device["os_version"] = "Resin OS 1.0.0-pre"
@@ -184,3 +189,49 @@ def with_supervisor_locked_error(fn: Callable[[], T]) -> T:
         if e.status_code == SUPERVISOR_LOCKED_STATUS_CODE:
             raise SupervisorLocked()
         raise e
+
+
+def normalize_balena_semver(os_version):
+    """
+    safeSemver and trimOsText from resin-semver in Python.
+    ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
+
+    """
+
+    # fix major.minor.patch.rev to use rev as build metadata
+    version = re.sub(r"(\.[0-9]+)\.rev", r"\1+rev", os_version)
+    # fix major.minor.patch.prod to be treat .dev & .prod as build metadata
+    version = re.sub(r"([0-9]+\.[0-9]+\.[0-9]+)\.(dev|prod)", r"\1+\2", version)
+    # if there are no build metadata, then treat the parenthesized value as one
+    version = re.sub(
+        r"([0-9]+\.[0-9]+\.[0-9]+(?:[-\.][0-9a-z]+)*) \(([0-9a-z]+)\)",
+        r"\1+\2",
+        version,
+    )
+    # if there are build metadata, then treat the parenthesized value as point value
+    version = re.sub(
+        r"([0-9]+\.[0-9]+\.[0-9]+(?:[-\+\.][0-9a-z]+)*) \(([0-9a-z]+)\)",
+        r"\1.\2",
+        version,
+    )
+    # Remove "Resin OS" and "Balena OS" text
+    version = re.sub(r"(resin|balena)\s*os\s*", "", version, flags=re.IGNORECASE)
+    # remove optional versioning, eg "(prod)", "(dev)"
+    version = re.sub(r"\s+\(\w+\)$", "", version)
+    # remove "v" prefix
+    version = re.sub(r"^v", "", version)
+    return version
+
+
+def ensure_version_compatibility(
+    version: str,
+    min_version: str,
+    version_type: Literal["supervisor", "host OS"],
+) -> None:
+
+    version = normalize_balena_semver(version)
+
+    if version and Version.parse(version) < Version.parse(min_version):
+        raise ValueError(
+            f"Incompatible {version_type} version: {version} - must be >= {min_version}"
+        )

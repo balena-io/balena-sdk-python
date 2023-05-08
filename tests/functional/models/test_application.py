@@ -141,7 +141,7 @@ class TestApplication(unittest.TestCase):
     def test_14_enable_device_urls(self):
         # should enable the device url for the applications devices.
         app = type(self).app
-        device = self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
+        device = self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
         type(self).device = device
         self.balena.models.application.enable_device_urls(app["id"])
         self.assertTrue(self.balena.models.device.has_device_url(device["uuid"]))

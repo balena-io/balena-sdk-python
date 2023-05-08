@@ -44,9 +44,9 @@ class TestHistory(unittest.TestCase):
                 )
 
         # should set the device to track the current application release.
-        self.balena.models.device.set_to_release(app_info["device"]["uuid"], app_info["old_release"]["commit"])
-        self.balena.models.device.set_to_release(deviceOne["uuid"], app_info["old_release"]["commit"])
-        self.balena.models.device.set_to_release(deviceTwo["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(app_info["device"]["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(deviceOne["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(deviceTwo["uuid"], app_info["old_release"]["commit"])
 
         # get by device uuid
         device_history = test_model.get_all_by_device(app_info["device"]["uuid"])

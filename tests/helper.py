@@ -134,7 +134,7 @@ class TestHelper:
         """
 
         app = self.balena.models.application.create(app_name, device_type, self.default_organization["id"])
-        return app, self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
+        return app, self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
 
     def create_multicontainer_app(self, app_name="FooBar", device_type="raspberry-pi2"):
         """
@@ -144,7 +144,7 @@ class TestHelper:
         app = self.balena.models.application.create(
             app_name, device_type, self.default_organization["id"],
         )
-        dev = self.balena.models.device.register(str(app["id"]), self.balena.models.device.generate_uuid())
+        dev = self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
         user_id = self.balena.auth.get_user_id()
 
         # Register web & DB services

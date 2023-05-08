@@ -1,12 +1,15 @@
 import json
+from typing import Any, Union
 
 from .. import exceptions
 from ..auth import Auth
 from ..base_request import BaseRequest
+from ..pine import pine
 from ..settings import Settings
+from ..types import AnyObject
 from ..utils import is_id
+from .base_tag import BaseTag
 from .config import Config
-from .tag import BaseTag
 
 
 class Organization:
@@ -90,12 +93,13 @@ class Organization:
             login=True,
         )["d"]
 
-    def get(self, org_id):
+    def get(self, handle_or_id: Union[str, int], options: AnyObject = {}) -> Any:
         """
-        Get a single organization by id.
+        Get a single organization.
 
         Args:
-            org_id (str): organization id.
+            handle_or_id (str): organization handle (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
             dict: organization info.
@@ -104,32 +108,23 @@ class Organization:
             OrganizationNotFound: if organization couldn't be found.
 
         Examples:
-            >>> balena.models.organization.get('26474')
-            {
-                "id": 26474,
-                "created_at": "2018-08-14T00:24:33.144Z",
-                "name": "test_account1",
-                "handle": "test_account1",
-                "billing_account_code": None,
-                "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
-            }
-
+            >>> balena.models.organization.get(26474)
+            >>> balena.models.organization.get('myorg')
         """
 
-        params = {"filter": "id", "eq": org_id}
+        if handle_or_id is None:
+            raise exceptions.InvalidParameter("handle_or_id", handle_or_id)
 
-        org = self.base_request.request(
-            "organization",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
+        org = pine.get({
+            "resource": "organization",
+            "id": handle_or_id if is_id(handle_or_id) else {"handle": handle_or_id},
+            "options": options
+        })
 
-        if not org:
-            raise exceptions.OrganizationNotFound(org_id)
+        if org is None:
+            raise exceptions.OrganizationNotFound(handle_or_id)
 
-        return org[0]
+        return org
 
     def get_by_handle(self, handle):
         """
@@ -726,3 +721,6 @@ class OrganizationMembershipTag(BaseTag):
         """
 
         return super(OrganizationMembershipTag, self).remove(membership_id, tag_key)
+
+
+organization = Organization()

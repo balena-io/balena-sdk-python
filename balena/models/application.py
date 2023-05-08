@@ -10,26 +10,13 @@ from ..balena_auth import request
 from ..base_request import BaseRequest
 from ..pine import pine
 from ..settings import settings
-from ..types import (
-    AnyObject,
-    ApplicationInviteOptions,
-    ApplicationMembershipRoles,
-    ShutdownOptions,
-    ResourceKey,
-)
-from ..types.models import (
-    ApplicationInviteType,
-    ApplicationMembershipType,
-    ApplicationType,
-)
-from ..utils import (
-    generate_current_service_details,
-    get_current_service_details_pine_expand,
-    is_id,
-    merge,
-    normalize_device_os_version,
-    with_supervisor_locked_error,
-)
+from ..types import (AnyObject, ApplicationInviteOptions,
+                     ApplicationMembershipRoles, ResourceKey, ShutdownOptions)
+from ..types.models import (ApplicationInviteType, ApplicationMembershipType,
+                            ApplicationType)
+from ..utils import (generate_current_service_details,
+                     get_current_service_details_pine_expand, is_id, merge,
+                     normalize_device_os_version, with_supervisor_locked_error)
 from .device_type import DeviceType
 from .release import Release
 
@@ -84,7 +71,7 @@ class Application:
         ):
             raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
-        return dt["id"]  # type: ignore
+        return dt["id"]
 
     def __get_organization_id(self, organization: Union[str, int]) -> int:
         id_filter = {"handle": organization}
@@ -116,9 +103,9 @@ class Application:
 
     def get_id(self, slug_or_uuid_or_id: Union[str, int]) -> int:
         if is_id(slug_or_uuid_or_id):
-            return slug_or_uuid_or_id  # type: ignore
+            return int(slug_or_uuid_or_id)
         app = self.get(slug_or_uuid_or_id, {"$select": "id"})
-        return app["id"]  # type: ignore
+        return app["id"]
 
     def get_dashboard_url(self, app_id: int) -> str:
         """
@@ -656,7 +643,7 @@ class Application:
                     "description": description,
                     "expiryDate": expiry_date,
                 },
-            ).strip("\"")
+            ).strip('"')
         except exceptions.RequestError as e:
             if e.status_code == 404:
                 raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
@@ -781,8 +768,8 @@ class Application:
         }
 
         app = self.get(slug_or_uuid_or_id, app_options)
-        tracked_release = app.get("should_be_running__release")[0]  # type: ignore
-        latest_release = app.get("owns__release")[0]  # type: ignore
+        tracked_release = app["should_be_running__release"][0]
+        latest_release = app["owns__release"][0]
 
         return bool(
             app.get("should_track_latest_release")
@@ -905,7 +892,7 @@ class Application:
         pine.patch(
             {
                 "resource": "application",
-                "id": application["id"],  # type: ignore
+                "id": application["id"],
                 "body": body,
             }
         )
@@ -926,11 +913,7 @@ class Application:
             {
                 "resource": "device",
                 "body": {"is_web_accessible": True},
-                "options": {
-                    "$filter": {
-                        "belongs_to__application": app["id"]  # type: ignore
-                    }
-                },
+                "options": {"$filter": {"belongs_to__application": app["id"]}},
             }
         )
 
@@ -950,11 +933,7 @@ class Application:
             {
                 "resource": "device",
                 "body": {"is_web_accessible": False},
-                "options": {
-                    "$filter": {
-                        "belongs_to__application": app["id"]  # type: ignore
-                    }
-                },
+                "options": {"$filter": {"belongs_to__application": app["id"]}},
             }
         )
 
@@ -1065,9 +1044,7 @@ class ApplicationInvite:
         app = application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(
             merge(
-                {
-                    "$filter": {"is_invited_to__application": app["id"]}  # type: ignore
-                },
+                {"$filter": {"is_invited_to__application": app["id"]}},
                 options,
             )
         )
@@ -1115,7 +1092,7 @@ class ApplicationInvite:
 
         body = {
             "invitee": invitee,
-            "is_invited_to__application": app["id"],  # type: ignore
+            "is_invited_to__application": app["id"],
             "message": options.get("message"),
         }
 
@@ -1180,7 +1157,7 @@ class ApplicationMembership:
         if role is None:
             raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
 
-        return role["id"]  # type: ignore
+        return role["id"]
 
     def get_all(
         self, options: AnyObject = {}
@@ -1256,11 +1233,7 @@ class ApplicationMembership:
         app = application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(
             merge(
-                {
-                    "$filter": {
-                        "is_member_of__application": app["id"]  # type: ignore
-                    }
-                },
+                {"$filter": {"is_member_of__application": app["id"]}},
                 options,
             )
         )
@@ -1290,7 +1263,7 @@ class ApplicationMembership:
         role_id = self.__get_role_id(role_name)
         body = {
             "username": username,
-            "is_member_of__application": app["id"],  # type: ignore
+            "is_member_of__application": app["id"],
             "application_membership_role": role_id,
         }
 
@@ -1325,9 +1298,7 @@ class ApplicationMembership:
         Args:
             membership_id (ResourceKey): the id or an object with the unique `user` & `is_member_of__application`
         """
-        pine.delete(
-            {"resource": self.RESOURCE, "id": membership_id}  # type: ignore
-        )
+        pine.delete({"resource": self.RESOURCE, "id": membership_id})  # type: ignore
 
 
 application = Application()
