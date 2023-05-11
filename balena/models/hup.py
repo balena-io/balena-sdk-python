@@ -27,15 +27,13 @@ class Hup:
         if parsed_current_ver["prerelease"] or parsed_target_ver["prerelease"]:
             raise exceptions.OsUpdateError("Updates cannot be performed on pre-release balenaOS versions")
 
-        releases = (
-            self.__xstr(parsed_current_ver["prerelease"])
-            + self.__xstr(parsed_target_ver["prerelease"])
-            + self.__xstr(parsed_target_ver["build"])
-            + self.__xstr(parsed_current_ver["build"])
-        )
+        cur_variant = self.__get_variant(parsed_current_ver)
+        target_variant = self.__get_variant(parsed_target_ver)
 
-        if "dev" in releases:
-            raise exceptions.OsUpdateError("Updates cannot be performed on development balenaOS variants")
+        if target_variant is not None and ((cur_variant == "dev") != (target_variant == "dev")):
+            raise exceptions.OsUpdateError(
+                "Updates cannot be performed between development and production balenaOS variants"
+            )
 
         if semver.compare(target_version, current_version) < 0:
             raise exceptions.OsUpdateError("OS downgrades are not allowed")
@@ -48,6 +46,9 @@ class Hup:
 
         return "resinhup{from_v}{to_v}".format(from_v=parsed_current_ver["major"], to_v=parsed_target_ver["major"])
 
-    @staticmethod
-    def __xstr(s):
-        return "" if s is None else str(s)
+    def __get_variant(self, ver):
+        if "dev" in (ver["build"] or "") or "dev" in (ver["prerelease"] or ""):
+            return "dev"
+        if "prod" in (ver["build"] or "") or "prod" in (ver["prerelease"] or ""):
+            return "prod"
+        return None
