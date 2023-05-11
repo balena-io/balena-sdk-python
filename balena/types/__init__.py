@@ -14,9 +14,10 @@ class ApplicationInviteOptions(TypedDict, total=False):
     message: str
 
 
-class ResourceKeyDict(TypedDict):
+class ResourceKeyDict(TypedDict, total=False):
     user: int
     is_member_of__application: int
+    is_member_of__organization: int
 
 
 ResourceKey = Union[int, ResourceKeyDict]

@@ -1,9 +1,8 @@
-import json
-import re
+from typing import Any, Optional
 
-from .. import exceptions
-from ..base_request import BaseRequest
-from ..settings import Settings
+from ..pine import pine
+from ..types import AnyObject
+from ..utils import merge
 
 
 class BaseTag:
@@ -12,61 +11,71 @@ class BaseTag:
 
     """
 
-    def __init__(self, resource):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.resource = resource
+    def __init__(self, resource: str):
+        self.resource = f"{resource}_tag"
+        self.resource_key_field = "tag_key"
+        self.parent_resource_name = resource
 
-    def get_all(self, params=None, data=None, raw_query=None):
-        if raw_query:
-            return self.base_request.request(
-                "{}_tag".format(self.resource),
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-        else:
-            return self.base_request.request(
-                "{}_tag".format(self.resource),
-                "GET",
-                params=params,
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
+    def get_all(self, options: AnyObject = {}) -> Any:
+        default_orderby = {"$orderby": {}}
+        default_orderby["$orderby"][self.resource_key_field] = "asc"
 
-    def set(self, resource_id, tag_key, value):
-        try:
-            data = {self.resource: resource_id, "tag_key": tag_key, "value": value}
+        return pine.get(
+            {
+                "resource": self.resource,
+                "options": merge(default_orderby, options),
+            }
+        )
 
-            return json.loads(
-                self.base_request.request(
-                    "{}_tag".format(self.resource), "POST", data=data, endpoint=self.settings.get("pine_endpoint")
-                ).decode("utf-8")
-            )
-        except exceptions.RequestError as e:
-            is_unique_key_violation_response = e.status_code == 409 and re.search(r"unique", e.message, re.IGNORECASE)
+    def get_all_by_parent(
+        self, parent_param: Any, options: AnyObject = {}
+    ) -> Any:
+        get_options = {
+            "$filter": {},
+            "$orderby": f"{self.resource_key_field} asc",
+        }
+        get_options["$filter"][self.parent_resource_name] = parent_param
 
-            if not is_unique_key_violation_response:
-                raise e
+        return pine.get(
+            {
+                "resource": self.resource,
+                "options": merge(get_options, options),
+            }
+        )
 
-            params = {"filters": {self.resource: resource_id, "tag_key": tag_key}}
+    def get(self, parent_param: Any, key: str) -> Optional[str]:
+        dollar_filter = {}
+        dollar_filter[self.parent_resource_name] = parent_param
+        dollar_filter[self.resource_key_field] = key
 
-            data = {"value": value}
+        result = pine.get(
+            {
+                "resource": self.resource,
+                "options": {"$select": "value", "$filter": dollar_filter},
+            }
+        )
 
-            return self.base_request.request(
-                "{}_tag".format(self.resource),
-                "PATCH",
-                params=params,
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-            )
+        if len(result) == 1:
+            return result[0].get("value")
 
-    def remove(self, resource_id, tag_key):
-        params = {"filters": {self.resource: resource_id, "tag_key": tag_key}}
+    def set(self, parent_param: Any, tag_key: str, value: str):
+        upsert_id = {}
+        upsert_id[self.parent_resource_name] = parent_param
+        upsert_id[self.resource_key_field] = tag_key
 
-        return self.base_request.request(
-            "{}_tag".format(self.resource),
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
+        pine.upsert(
+            {
+                "resource": self.resource,
+                "id": upsert_id,
+                "body": {"value": value},
+            }
+        )
+
+    def remove(self, parent_param: Any, tag_key: str):
+        dollar_filter = {}
+        dollar_filter[self.parent_resource_name] = parent_param
+        dollar_filter[self.resource_key_field] = tag_key
+
+        pine.delete(
+            {"resource": self.resource, "options": {"$filter": dollar_filter}}
         )

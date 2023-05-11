@@ -1,7 +1,5 @@
 from typing import List, Optional, Union
 
-from deprecated import deprecated
-
 from .. import exceptions
 from ..auth import Auth
 from ..balena_auth import request
@@ -57,17 +55,6 @@ class ApiKey:
             method="POST", path="/api-key/user/full", body=api_key_body
         ).strip('"')
 
-    @deprecated(
-        reason="This function is deprecated, use 'balena.models.api_key.create' instead"
-    )
-    def create_api_key(
-        self, name: str, description: Optional[str] = None
-    ) -> str:
-        """
-        DEPRECATED: Please use balena.models.api_key.create instead.
-        """
-        return self.create(name, description)
-
     def get_all(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
         This function gets all API keys.
@@ -80,7 +67,6 @@ class ApiKey:
 
         Examples:
             >>> balena.models.api_key.get_all()
-
         """
         return pine.get(
             {
@@ -99,7 +85,6 @@ class ApiKey:
 
         Examples:
             >>> balena.models.api_key.update(1296047, {"name":"new name"})
-
         """
 
         if api_key_info is None:
@@ -133,7 +118,6 @@ class ApiKey:
 
         Examples:
             >>> balena.models.api_key.revoke(1296047)
-
         """
 
         pine.delete({"resource": "api_key", "id": id})
@@ -169,7 +153,7 @@ class ApiKey:
             options (AnyObject): extra pine options to use
 
         Examples:
-            >>> balena.models.api_key.get_device_api_keys_by_device("44cc9d1861b9f992808c506276e5d31d")
+            >>> balena.models.api_key.get_device_api_keys_by_device("44cc9d186")
             >>> balena.models.api_key.get_device_api_keys_by_device(1111386)
         """
 

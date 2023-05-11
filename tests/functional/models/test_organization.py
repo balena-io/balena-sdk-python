@@ -7,7 +7,9 @@ from tests.helper import TestHelper
 class TestOrganization(unittest.TestCase):
     helper = None
     balena = None
-    test_org_handle = "python_sdk_org_test_{time}".format(time=datetime.now().strftime("%H_%M_%S"))
+    test_org_handle = "python_sdk_org_test_{time}".format(
+        time=datetime.now().strftime("%H_%M_%S")
+    )
     test_org_name = test_org_handle + " name"
     test_org_custom_handle = test_org_handle + "_python_sdk_test"
     org1 = None
@@ -34,7 +36,9 @@ class TestOrganization(unittest.TestCase):
         self.assertIsInstance(type(self).org1["handle"], str)
 
         # should be able to create a new organization with handle
-        type(self).org2 = self.balena.models.organization.create(self.test_org_name, self.test_org_custom_handle)
+        type(self).org2 = self.balena.models.organization.create(
+            self.test_org_name, self.test_org_custom_handle
+        )
         self.assertEqual(type(self).org2["name"], self.test_org_name)
         self.assertEqual(type(self).org2["handle"], self.test_org_custom_handle)
 
@@ -46,7 +50,6 @@ class TestOrganization(unittest.TestCase):
     def test_get_all(self):
         # given three extra non-user organization, should retrieve all organizations.
         orgs = self.balena.models.organization.get_all()
-        print(orgs)
         orgs = sorted(orgs, key=lambda k: k["created_at"])
         self.assertEqual(len(orgs), 4)
         self.assertEqual(orgs[0]["handle"], self.helper.credentials["user_id"])
@@ -57,23 +60,18 @@ class TestOrganization(unittest.TestCase):
 
     def test_get(self):
         # should be rejected if the organization id does not exist and raise balena.exceptions.OrganizationNotFound.
-        with self.assertRaises(self.helper.balena_exceptions.OrganizationNotFound) as cm:
+        with self.assertRaises(
+            self.helper.balena_exceptions.OrganizationNotFound
+        ) as cm:
             self.balena.models.organization.get("999999999")
         self.assertIn("Organization not found: 999999999", cm.exception.message)
 
         org = self.balena.models.organization.get(type(self).org2["id"])
         self.assertEqual(org["handle"], self.test_org_custom_handle)
         self.assertEqual(org["name"], self.test_org_name)
-
-    def test_get_by_handle(self):
-        # should be rejected if the organization handle does not exist and raise balena.exceptions.OrganizationNotFound.
-        with self.assertRaises(self.helper.balena_exceptions.OrganizationNotFound) as cm:
-            self.balena.models.organization.get_by_handle("999999999")
-        self.assertIn("Organization not found: 999999999", cm.exception.message)
-
         self.assertEqual(
-            self.balena.models.organization.get_by_handle(self.test_org_custom_handle)["id"],
-            type(self).org2["id"],
+            self.balena.models.organization.get(self.test_org_custom_handle)["id"],
+            org["id"],
         )
 
     def test_remove(self):
@@ -85,15 +83,22 @@ class TestOrganization(unittest.TestCase):
     def test_invite_create(self):
         # should create and return an organization invite
         invite = self.balena.models.organization.invite.create(
-            type(self).org1["id"], self.helper.credentials["email"], "member", "Python SDK test invite"
+            type(self).org1["id"],
+            self.helper.credentials["email"],
+            "member",
+            "Python SDK test invite",
         )
         self.assertEqual(invite["message"], "Python SDK test invite")
-        self.assertEqual(invite["is_invited_to__organization"]["__id"], type(self).org1["id"])
+        self.assertEqual(
+            invite["is_invited_to__organization"]["__id"], type(self).org1["id"]
+        )
         self.balena.models.organization.invite.revoke(invite["id"])
 
         # should throw an error when role is not found
         # raise balena.exceptions.BalenaOrganizationMembershipRoleNotFound if  role is not found.
-        with self.assertRaises(self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound):
+        with self.assertRaises(
+            self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound
+        ):
             invite = self.balena.models.organization.invite.create(
                 type(self).org1["id"],
                 self.helper.credentials["email"],
@@ -108,25 +113,84 @@ class TestOrganization(unittest.TestCase):
 
         # shoud return an invite list with length equals 1.
         self.balena.models.organization.invite.create(
-            type(self).org1["id"], self.helper.credentials["email"], "member", "Python SDK test invite"
+            type(self).org1["id"],
+            self.helper.credentials["email"],
+            "member",
+            "Python SDK test invite",
         )
         invite_list = self.balena.models.organization.invite.get_all()
         self.assertEqual(1, len(invite_list))
 
     def test_invite_get_all_by_organization(self):
-        invite_list = self.balena.models.organization.invite.get_all_by_organization(type(self).org1["id"])
+        invite_list = self.balena.models.organization.invite.get_all_by_organization(
+            type(self).org1["id"]
+        )
         self.assertEqual(1, len(invite_list))
 
     def test_membership_get_all_by_organization(self):
         # shoud return only the user's own membership
-        memberships = self.balena.models.organization.membership.get_all_by_organization(type(self).org1["id"])
+        memberships = (
+            self.balena.models.organization.membership.get_all_by_organization(
+                type(self).org1["id"]
+            )
+        )
         self.assertEqual(1, len(memberships))
         self.assertEqual(memberships[0]["user"]["__id"], self.balena.auth.get_user_id())
-        self.assertEqual(memberships[0]["is_member_of__organization"]["__id"], type(self).org1["id"])
+        self.assertEqual(
+            memberships[0]["is_member_of__organization"]["__id"], type(self).org1["id"]
+        )
         self.assertEqual(
             memberships[0]["organization_membership_role"]["__id"],
             self.test_org_admin_role["id"],
         )
+
+    def test_membership_tags(self):
+        org_id = type(self).org1["id"]
+        memberships = (
+            self.balena.models.organization.membership.get_all_by_organization(org_id)
+        )
+        membership_id = memberships[0]["id"]
+
+        membership_tag_model = self.balena.models.organization.membership.tag
+        self.assertEqual(0, len(membership_tag_model.get_all_by_organization(org_id)))
+        self.assertEqual(
+            0,
+            len(membership_tag_model.get_all_by_organization_membership(membership_id)),
+        )
+
+        membership_tag_model.set(membership_id, "test", "v1")
+        self.__assert_tags_changed(org_id, membership_id, "test", "v1")
+
+        membership_tag_model.set(membership_id, "test", "v2")
+        self.__assert_tags_changed(org_id, membership_id, "test", "v2")
+        self.__assert_tags_changed(org_id, membership_id, "test2", None)
+
+        membership_tag_model.remove(membership_id, "test")
+        self.__assert_tags_changed(org_id, membership_id, "test", None)
+
+    def __assert_tags_changed(self, org_id, membership_id, key, value):
+        membership_tag_model = self.balena.models.organization.membership.tag
+
+        if value is not None:
+            self.assertEqual(1, len(membership_tag_model.get_all_by_organization(org_id)))
+            self.assertEqual(
+                1,
+                len(membership_tag_model.get_all_by_organization_membership(membership_id)),
+            )
+
+        self.assertEqual(membership_tag_model.get(membership_id, key), value)
+
+        if value is not None:
+            self.assertEqual(
+                membership_tag_model.get_all_by_organization(org_id)[0].get("value"),
+                value,
+            )
+            self.assertEqual(
+                membership_tag_model.get_all_by_organization_membership(membership_id)[
+                    0
+                ].get("value"),
+                value,
+            )
 
 
 if __name__ == "__main__":

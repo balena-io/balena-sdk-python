@@ -33,8 +33,6 @@ class Config:
 
         Examples:
             >>> balena.models.config.get_all()
-            { all configuration details }
-
         """
 
         if not self._config:

@@ -3,20 +3,31 @@ from math import isinf
 from typing import List, Literal, Optional, Union
 from urllib.parse import urljoin
 
-from deprecated import deprecated
-
 from .. import exceptions
 from ..balena_auth import request
 from ..base_request import BaseRequest
 from ..pine import pine
 from ..settings import settings
-from ..types import (AnyObject, ApplicationInviteOptions,
-                     ApplicationMembershipRoles, ResourceKey, ShutdownOptions)
-from ..types.models import (ApplicationInviteType, ApplicationMembershipType,
-                            ApplicationType)
-from ..utils import (generate_current_service_details,
-                     get_current_service_details_pine_expand, is_id, merge,
-                     normalize_device_os_version, with_supervisor_locked_error)
+from ..types import (
+    AnyObject,
+    ApplicationInviteOptions,
+    ApplicationMembershipRoles,
+    ResourceKey,
+    ShutdownOptions,
+)
+from ..types.models import (
+    ApplicationInviteType,
+    ApplicationMembershipType,
+    ApplicationType,
+)
+from ..utils import (
+    generate_current_service_details,
+    get_current_service_details_pine_expand,
+    is_id,
+    merge,
+    normalize_device_os_version,
+    with_supervisor_locked_error,
+)
 from .device_type import DeviceType
 from .release import Release
 
@@ -24,11 +35,6 @@ from .release import Release
 class Application:
     """
     This class implements application model for balena python SDK.
-
-    The returned objects properties are
-    `__metadata, actor, app_name, application_type, commit, depends_on__application, device_type,
-    id, is_accessible_by_support_until__date, should_track_latest_release, slug, user`.
-
     """
 
     def __init__(self):
@@ -114,15 +120,11 @@ class Application:
         Args:
             app_id (int): application id.
 
-        Raises:
-            InvalidParameter: if the app_id is not a finite number.
-
         Returns:
             str: Dashboard URL for the specific application.
 
         Examples:
             >>> balena.models.application.get_dashboard_url(1476418)
-
         """
         try:
             if isinf(int(app_id)):
@@ -209,9 +211,6 @@ class Application:
         Returns:
             ApplicationType: application info.
 
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-
         Examples:
             >>> balena.models.application.get("myorganization/myapp")
             >>> balena.models.application.get(123)
@@ -281,19 +280,16 @@ class Application:
         """
         Get a single application directly accessible by the user
 
-         Args:
-             slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
-             options (AnyObject): extra pine options to use
+        Args:
+            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
-         Returns:
-             ApplicationType: application info.
+        Returns:
+            ApplicationType: application info.
 
-         Raises:
-             ApplicationNotFound: if application couldn't be found.
-
-         Examples:
-             >>> balena.models.application.get_directly_accessible("myorganization/myapp")
-             >>> balena.models.application.get_directly_accessible(123)
+        Examples:
+            >>> balena.models.application.get_directly_accessible("myorganization/myapp")
+            >>> balena.models.application.get_directly_accessible(123)
         """
         return self.get(slug_or_uuid_or_id, options, "directly_accessible")
 
@@ -315,13 +311,8 @@ class Application:
         Returns:
             ApplicationType: application info.
 
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-            AmbiguousApplication: when more than one application is returned.
-
         Examples:
             >>> balena.models.application.get_with_device_service_details('my_org_handle/my_app_name')
-
         """
         service_options = merge(
             {
@@ -365,12 +356,8 @@ class Application:
         Returns:
             ApplicationType: application info.
 
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-
         Examples:
             >>> balena.models.application.get("myapp")
-
         """
         apps = pine.get(
             {
@@ -413,13 +400,8 @@ class Application:
         Returns:
             ApplicationType: application info.
 
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
-            AmbiguousApplication: when more than one application is returned.
-
         Examples:
             >>> balena.models.application.get_by_owner('foo', 'my_org')
-
         """
 
         slug = f"{owner.lower()}/{app_name.lower()}"
@@ -448,7 +430,6 @@ class Application:
 
         Examples:
             >>> balena.models.application.has('my_org/foo')
-
         """
 
         try:
@@ -474,15 +455,6 @@ class Application:
         )
         return len(applications) != 0
 
-    @deprecated(
-        reason="This function is deprecated, use 'balena.models.application.get' instead"
-    )
-    def get_by_id(self, app_id):
-        """
-        DEPRECATED: Please use balena.models.application.get instead.
-        """
-        return self.get(app_id)
-
     def create(
         self,
         name: str,
@@ -501,12 +473,6 @@ class Application:
 
         Returns:
             dict: application info.
-
-        Raises:
-            InvalidDeviceType: if device type is not supported.
-            InvalidApplicationType: if app type is not supported.
-            InvalidParameter: if organization is missing.
-            OrganizationNotFound: if organization couldn't be found.
 
         Examples:
             >>> balena.models.application.create('foo', 'raspberry-pi', 12345)
@@ -587,9 +553,6 @@ class Application:
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
-
-        Raises:
-            ApplicationNotFound: if application couldn't be found.
 
         Examples:
             >>> balena.models.application.restart('myorg/RPI1')
@@ -779,17 +742,6 @@ class Application:
             )
         )
 
-    @deprecated(
-        reason="This function is deprecated, use 'balena.models.application.pin_to_release' instead"
-    )
-    def set_to_release(
-        self, app_id: Union[str, int], full_release_hash: str
-    ) -> None:
-        """
-        DEPRECATED: Please use balena.models.application.pin_to_release instead.
-        """
-        return self.pin_to_release(app_id, full_release_hash)
-
     def pin_to_release(
         self, slug_or_uuid_or_id: Union[str, int], full_release_hash: str
     ) -> None:
@@ -843,7 +795,6 @@ class Application:
 
         Examples:
             >>> balena.models.application.get_target_release_hash(5685)
-
         """
         app_options = {
             "$select": "id",

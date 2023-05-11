@@ -9,10 +9,9 @@ from semver.version import Version
 from .. import exceptions
 from ..auth import Auth
 from ..balena_auth import request
-from ..base_request import BaseRequest
 from ..pine import pine
 from ..resources import Message
-from ..settings import Settings, settings
+from ..settings import settings
 from ..types import AnyObject
 from ..types.models import DeviceMetricsType, TypeDevice
 from ..utils import (
@@ -85,9 +84,7 @@ class Device:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
         self.config = Config()
-        self.settings = Settings()
         self.application = Application()
         self.auth = Auth()
         self.release = Release()
@@ -519,10 +516,13 @@ class Device:
 
         """
 
-        device = self.get(uuid_or_id, {
-            "$select": "id",
-            "$expand": {"belongs_to__application": {"$select": "app_name"}},
-        })
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": "id",
+                "$expand": {"belongs_to__application": {"$select": "app_name"}},
+            },
+        )
         return device["belongs_to__application"][0]["app_name"]
 
     def has(self, uuid_or_id: Union[str, int]) -> bool:

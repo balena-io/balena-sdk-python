@@ -48,7 +48,7 @@ class TestHelper:
                 "The test is run with an admin user account. Cancelled, please try" " again with a normal account!"
             )
 
-        self.default_organization = self.balena.models.organization.get_by_handle(self.balena.auth.who_am_i())
+        self.default_organization = self.balena.models.organization.get(self.balena.auth.who_am_i())
 
     @classmethod
     def load_env(cls):

@@ -166,3 +166,45 @@ class DeviceMetricsType(TypedDict):
     cpu_temp: int
     cpu_id: str
     is_undervolted: bool
+
+
+class OrganizationType(TypedDict):
+    id: int
+    created_at: str
+    name: str
+    handle: str
+    has_past_due_invoice_since__date: str
+    application: Any
+    organization_membership: Any
+    owns__team: Any
+    organization__has_private_access_to__device_type: Any
+
+
+class OrganizationInviteType(TypedDict):
+    id: int
+    message: str
+    created_at: str
+    invitationToken: str
+    organization_membership_role: Any
+    invitee: Any
+    is_invited_to__organization: Any
+
+
+class OrganizationMembershipType(TypedDict):
+    id: int
+    created_at: str
+    user: Any
+    is_member_of__organization: Any
+    organization_membership_role: Any
+    effective_seat_role: str
+    organization_membership_tag: Any
+
+
+class OrganizationMembershipTagType(TypedDict):
+    organization_membership: Any
+
+
+class BaseTagType(TypedDict):
+    id: int
+    tag_key: str
+    value: str

@@ -52,19 +52,21 @@ class BaseTagTest:
     def test_set(self, test_runner, resource_id):
         # should be able to create a tag given a resource id
         current_length = len(self.test_obj.get_all())
-        new_tag = self.test_obj.set(resource_id, "Foo", "Bar")
+        self.test_obj.set(resource_id, "Foo", "Bar")
+
+        new_tag_value = self.test_obj.get(resource_id, "Foo")
 
         test_runner.assertEqual(len(self.test_obj.get_all()), (current_length + 1))
-        test_runner.assertEqual(new_tag["tag_key"], "Foo")
-        test_runner.assertEqual(new_tag["value"], "Bar")
+        test_runner.assertEqual(new_tag_value, "Bar")
 
         # should be able to create a numeric tag
         current_length = len(self.test_obj.get_all())
-        new_tag = self.test_obj.set(resource_id, "Foo1", "1")
+        self.test_obj.set(resource_id, "Foo1", "1")
+
+        new_tag_value = self.test_obj.get(resource_id, "Foo1")
 
         test_runner.assertEqual(len(self.test_obj.get_all()), (current_length + 1))
-        test_runner.assertEqual(new_tag["tag_key"], "Foo1")
-        test_runner.assertEqual(new_tag["value"], "1")
+        test_runner.assertEqual(new_tag_value, "1")
 
         # should not allow creating a balena tag
         with test_runner.assertRaises(Exception) as cm:
@@ -115,10 +117,10 @@ class BaseTagTest:
 
     def test_remove(self, test_runner, resource_id):
         # should be able to remove a tag by resource id
-        tag = self.test_obj.set(resource_id, "Foo_remove", "Bar")
+        self.test_obj.set(resource_id, "Foo_remove", "Bar")
         current_length = len(self.test_obj.get_all())
 
-        self.test_obj.remove(resource_id, tag["tag_key"])
+        self.test_obj.remove(resource_id, "Foo_remove")
         # after removing a tag, current_length should be reduced by 1
         test_runner.assertEqual(len(self.test_obj.get_all()), (current_length - 1))
 
@@ -166,6 +168,40 @@ class TestDeviceTag(unittest.TestCase):
 
     def test_05_remove(self):
         self.base_tag_test.test_remove(self, type(self).device["uuid"])
+
+
+class TestApplicationTag(unittest.TestCase):
+    helper = None
+    balena = None
+    base_tag_test = None
+    app = None
+    device = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.helper = TestHelper()
+        cls.balena = cls.helper.balena
+        cls.base_tag_test = BaseTagTest(cls.balena.models.tag.application, "application")
+        app, device = cls.helper.create_device()
+        cls.app = app
+        cls.device = device
+
+    @classmethod
+    def tearDownClass(cls):
+        # Wipe all apps after every test case.
+        cls.helper.wipe_application()
+
+    def test_01_set(self):
+        self.base_tag_test.test_set(self, type(self).app["id"])
+
+    def test_02_get_all_by_application(self):
+        self.base_tag_test.test_get_all_by_application(self, type(self).app["id"], type(self).app["id"])
+
+    def test_03_get_all(self):
+        self.base_tag_test.test_get_all(self, type(self).app["id"])
+
+    def test_04_remove(self):
+        self.base_tag_test.test_remove(self, type(self).app["id"])
 
 
 class TestReleaseTag(unittest.TestCase):

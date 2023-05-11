@@ -1,7 +1,11 @@
-from ..utils import is_id
+from typing import List, Optional, Union
+
+from ..types import AnyObject
+from ..types.models import BaseTagType
+from ..utils import is_id, merge
 from .base_tag import BaseTag
-from .device import Device
-from .release import Release
+from .device import Application, Device
+from .release import Release, ReleaseRawVersionApplicationPair
 
 
 class Tag:
@@ -25,168 +29,159 @@ class DeviceTag(BaseTag):
     def __init__(self):
         super(DeviceTag, self).__init__("device")
         self.device = Device()
+        self.application = Application()
 
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[BaseTagType]:
         """
         Get all device tags for an application.
 
         Args:
-            app_id (str): application id .
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains device tags.
+            List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.tag.device.get_all_by_application('1005160')
-            [
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1055117)"}, "__id": 1055117},
-                    "tag_key": "group1",
-                    "id": 20158,
-                    "value": "aaa",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20158)"},
-                },
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
-                    "tag_key": "group1",
-                    "id": 20159,
-                    "value": "bbb",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20159)"},
-                },
-            ]
-
+            >>> balena.models.tag.device.get_all_by_application(1005160)
         """
 
-        query = "$filter=device/any(d:d/belongs_to__application%20eq%20{app_id})".format(app_id=app_id)
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
+            "id"
+        ]
+        return super(DeviceTag, self).get_all(
+            merge(
+                {
+                    "$filter": {
+                        "device": {
+                            "$any": {
+                                "$alias": "d",
+                                "$expr": {
+                                    "d": {"belongs_to__application": app_id}
+                                },
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
 
-        return super(DeviceTag, self).get_all(raw_query=query)
-
-    def get_all_by_device(self, uuid):
+    def get_all_by_device(
+        self, uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[BaseTagType]:
         """
         Get all device tags for a device.
 
         Args:
-            uuid (str): device uuid.
+            uuid_or_id (Union[str, int]): device uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains device tags.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
+            List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.tag.device.get_all_by_device('a03ab646c01f39e39a1e3deb7fce76b93075c6d599fd5be4a889b8145e2f8f')
-            [
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
-                    "tag_key": "group1",
-                    "id": 20159,
-                    "value": "bbb",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20159)"},
-                },
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1055116)"}, "__id": 1055116},
-                    "tag_key": "db_tag",
-                    "id": 20160,
-                    "value": "aaa",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20160)"},
-                },
-            ]
+            >>> balena.models.tag.device.get_all_by_device('a03ab646c')
+        """
 
-        """  # noqa: E501
+        id = self.device.get(uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceTag, self).get_all_by_parent(id, options)
 
-        raw_query = "$filter=device/any(d:d/uuid%20eq%20'{uuid}')".format(uuid=uuid)
-
-        return super(DeviceTag, self).get_all(raw_query=raw_query)
-
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
         """
         Get all device tags.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains device tags.
+            List[BaseTagType]: tags list.
 
         Examples:
             >>> balena.models.tag.device.get_all()
-            [
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1036574)"}, "__id": 1036574},
-                    "tag_key": "db_tag",
-                    "id": 20157,
-                    "value": "rpi3",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20157)"},
-                },
-                {
-                    "device": {"__deferred": {"uri": "/balena/device(1055117)"}, "__id": 1055117},
-                    "tag_key": "group1",
-                    "id": 20158,
-                    "value": "aaa",
-                    "__metadata": {"type": "", "uri": "/balena/device_tag(20158)"},
-                },
-            ]
-
         """
 
-        return super(DeviceTag, self).get_all()
+        return super(DeviceTag, self).get_all(options)
 
-    def set(self, parent_id, tag_key, value):
+    def get(self, uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
         """
         Set a device tag (update tag value if it exists).
-        ___Note___: Notice that when using the device ID rather than UUID, it will avoid one extra API roundtrip.
+        ___Note___: Notice that when using the device ID rather than UUID,
+        it will avoid one extra API roundtrip.
 
         Args:
-            parent_id (Union[str, int]): device uuid or device id.
+            uuid_or_id (Union[str, int]): device uuid or device id.
             tag_key (str): tag key.
             value (str): tag value.
 
         Returns:
-            dict: dict contains device tag info if tag doesn't exist.
-            OK: if tag exists.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
+            Optional[str]: tag value
 
         Examples:
-            >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test1')
-            {
-                "device": {"__deferred": {"uri": "/balena/device(1036574)"}, "__id": 1036574},
-                "tag_key": "testtag",
-                "id": 20163,
-                "value": "test1",
-                "__metadata": {"type": "", "uri": "/balena/device_tag(20163)"},
-            }
-            >>> balena.models.tag.device.set('f5213eac0d63ac47721b037a7406d306', 'testtag','test2')
-            OK
-
+            >>> balena.models.tag.device.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.tag.device.set('f5213eac0d63ac4', 'testtag','test2')
         """
 
         # Trying to avoid an extra HTTP request
         # when the provided parameter looks like an id.
         # Note that this throws an exception for missing names/uuids,
         # but not for missing ids
-        device_id = parent_id if is_id(parent_id) else self.device.get(parent_id)["id"]
+        device_id = (
+            uuid_or_id
+            if is_id(uuid_or_id)
+            else self.device.get(uuid_or_id, {"$select": "id"})["id"]
+        )
+        return super(DeviceTag, self).get(device_id, tag_key)
 
-        return super(DeviceTag, self).set(device_id, tag_key, value)
+    def set(
+        self, uuid_or_id: Union[str, int], tag_key: str, value: str
+    ) -> None:
+        """
+        Set a device tag (update tag value if it exists).
+        ___Note___: Notice that when using the device ID rather than UUID,
+        it will avoid one extra API roundtrip.
 
-    def remove(self, parent_id, tag_key):
+        Args:
+            uuid_or_id (Union[str, int]): device uuid or device id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Examples:
+            >>> balena.models.tag.device.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.tag.device.set('f5213eac0d63ac4', 'testtag','test2')
+        """
+
+        # Trying to avoid an extra HTTP request
+        # when the provided parameter looks like an id.
+        # Note that this throws an exception for missing names/uuids,
+        # but not for missing ids
+        device_id = (
+            uuid_or_id
+            if is_id(uuid_or_id)
+            else self.device.get(uuid_or_id, {"$select": "id"})["id"]
+        )
+        super(DeviceTag, self).set(device_id, tag_key, value)
+
+    def remove(self, uuid_or_id: Union[str, int], tag_key: str) -> None:
         """
         Remove a device tag.
 
         Args:
-            parent_id (Union[str, int]): device uuid or device id.
+            uuid_or_id (Union[str, int]): device uuid or device id.
             tag_key (str): tag key.
 
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         Examples:
-            >>> balena.models.tag.device.remove('f5213eac0d63ac47721b037a7406d306', 'testtag'))
-            OK
-
+            >>> balena.models.tag.device.remove('f5213eac0d63ac477', 'testtag')
         """
 
-        device_id = parent_id if is_id(parent_id) else self.device.get(parent_id)["id"]
-        return super(DeviceTag, self).remove(device_id, tag_key)
+        device_id = (
+            uuid_or_id
+            if is_id(uuid_or_id)
+            else self.device.get(uuid_or_id, {"$select": "id"})["id"]
+        )
+        super(DeviceTag, self).remove(device_id, tag_key)
 
 
 class ApplicationTag(BaseTag):
@@ -197,130 +192,101 @@ class ApplicationTag(BaseTag):
 
     def __init__(self):
         super(ApplicationTag, self).__init__("application")
+        self.application = Application()
 
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[BaseTagType]:
         """
         Get all application tags for an application.
 
         Args:
-            app_id (str): application id .
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains application tags.
+            List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.tag.application.get_all_by_application('1005767')
-            [
-                {
-                    "application": {
-                        "__deferred": {"uri": "/balena/application(1005767)"},
-                        "__id": 1005767,
-                    },
-                    "tag_key": "appTa1",
-                    "id": 12887,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/application_tag(12887)"},
-                },
-                {
-                    "application": {
-                        "__deferred": {"uri": "/balena/application(1005767)"},
-                        "__id": 1005767,
-                    },
-                    "tag_key": "appTag2",
-                    "id": 12888,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/application_tag(12888)"},
-                },
-            ]
-
+            >>> balena.models.tag.device.get_all_by_application(1005160)
         """
+        return super(ApplicationTag, self).get_all_by_parent(
+            slug_or_uuid_or_id, options
+        )
 
-        params = {"filter": "application", "eq": app_id}
-
-        return super(ApplicationTag, self).get_all(params=params)
-
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
         """
         Get all application tags.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains application tags.
+            List[BaseTagType]: tags list.
 
         Examples:
             >>> balena.models.tag.application.get_all()
-            [
-                {
-                    "application": {
-                        "__deferred": {"uri": "/balena/application(1005160)"},
-                        "__id": 1005160,
-                    },
-                    "tag_key": "appTag",
-                    "id": 12886,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/application_tag(12886)"},
-                },
-                {
-                    "application": {
-                        "__deferred": {"uri": "/balena/application(1005767)"},
-                        "__id": 1005767,
-                    },
-                    "tag_key": "appTa1",
-                    "id": 12887,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/application_tag(12887)"},
-                },
-            ]
         """
+        return super(ApplicationTag, self).get_all(options)
 
-        return super(ApplicationTag, self).get_all()
-
-    def set(self, app_id, tag_key, value):
+    def get(
+        self, slug_or_uuid_or_id: Union[str, int], tag_key: str
+    ) -> Optional[str]:
         """
         Set an application tag (update tag value if it exists).
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            tag_key (str): tag key.
+
+        Returns:
+            Optional[str]: tag value.
+
+        Examples:
+            >>> balena.models.tag.application.get(1005767, 'tag1')
+        """
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
+            "id"
+        ]
+        return super(ApplicationTag, self).get(app_id, tag_key)
+
+    def set(
+        self, slug_or_uuid_or_id: Union[str, int], tag_key: str, value: str
+    ) -> None:
+        """
+        Set an application tag (update tag value if it exists).
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
             tag_key (str): tag key.
             value (str): tag value.
 
         Returns:
-            dict: dict contains application tag info if tag doesn't exist.
-            OK: if tag exists.
+            List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.tag.application.set('1005767', 'tag1', 'Python SDK')
-            {
-                "application": {
-                    "__deferred": {"uri": "/balena/application(1005767)"},
-                    "__id": 1005767,
-                },
-                "tag_key": "tag1",
-                "id": 12889,
-                "value": "Python SDK",
-                "__metadata": {"type": "", "uri": "/balena/application_tag(12889)"},
-            }
-            >>> balena.models.tag.application.set('1005767', 'tag1','Balena Python SDK')
-            OK
-
+            >>> balena.models.tag.application.set(1005767, 'tag1', 'Python SDK')
         """
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
+            "id"
+        ]
+        super(ApplicationTag, self).set(app_id, tag_key, value)
 
-        return super(ApplicationTag, self).set(app_id, tag_key, value)
-
-    def remove(self, app_id, tag_key):
+    def remove(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> None:
         """
         Remove an application tag.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.tag.application.remove('1005767', 'tag1')
-            OK
-
+            >>> balena.models.tag.application.remove(1005767, 'tag1')
         """
-
-        return super(ApplicationTag, self).remove(app_id, tag_key)
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
+            "id"
+        ]
+        super(ApplicationTag, self).remove(app_id, tag_key)
 
 
 class ReleaseTag(BaseTag):
@@ -332,133 +298,137 @@ class ReleaseTag(BaseTag):
     def __init__(self):
         super(ReleaseTag, self).__init__("release")
         self.release = Release()
+        self.application = Application()
 
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[BaseTagType]:
         """
-        Get all release tags for an application.
+        Get all device tags for an application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains release tags.
+            List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.tag.release.get_all_by_application('1043050')
-            [
-                {
-                    "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
-                    "tag_key": "releaseTag1",
-                    "id": 135,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
-                }
-            ]
-
-
+            >>> balena.models.tag.device.get_all_by_application(1005160)
         """
 
-        query = "$filter=release/any(d:d/belongs_to__application%20eq%20{app_id})".format(app_id=app_id)
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
+            "id"
+        ]
+        return super(ReleaseTag, self).get_all(
+            merge(
+                {
+                    "$filter": {
+                        "release": {
+                            "$any": {
+                                "$alias": "r",
+                                "$expr": {
+                                    "r": {"belongs_to__application": app_id}
+                                },
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
 
-        return super(ReleaseTag, self).get_all(raw_query=query)
-
-    def get_all_by_release(self, commit_or_id):
+    def get_all_by_release(
+        self,
+        commit_or_id_or_raw_version: Union[
+            str, int, ReleaseRawVersionApplicationPair
+        ],
+        options: AnyObject = {},
+    ) -> List[BaseTagType]:
         """
         Get all release tags for a release.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: list contains release tags.
+            List[BaseTagType]: tags list.
 
         Examples:
             >>> balena.models.tag.release.get_all_by_release(135)
-            [
-                {
-                    "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
-                    "tag_key": "releaseTag1",
-                    "id": 135,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
-                }
-            ]
-
         """
 
-        release_id = self.release.get(commit_or_id)["id"]
+        release_opts = {
+            "$select": "id",
+            "$expand": {
+                "release_tag": merge({"$orderby": "tag_key asc"}, options)
+            },
+        }
+        release = self.release.get(commit_or_id_or_raw_version, release_opts)
+        return release["release_tag"]
 
-        params = {"filter": "release", "eq": release_id}
-
-        return super(ReleaseTag, self).get_all(params=params)
-
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
         """
         Get all release tags.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains release tags.
+            List[BaseTagType]: tags list.
 
         Examples:
             >>> balena.models.tag.release.get_all()
-            [
-                {
-                    "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
-                    "tag_key": "releaseTag1",
-                    "id": 135,
-                    "value": "Python SDK",
-                    "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
-                }
-            ]
-
         """
+        return super(ReleaseTag, self).get_all(options)
 
-        return super(ReleaseTag, self).get_all()
-
-    def set(self, commit_or_id, tag_key, value):
+    def set(
+        self,
+        commit_or_id_or_raw_version: Union[
+            str, int, ReleaseRawVersionApplicationPair
+        ],
+        tag_key: str,
+        value: str,
+    ) -> None:
         """
         Set a release tag (update tag value if it exists).
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
             tag_key (str): tag key.
             value (str): tag value.
 
         Returns:
-            dict: dict contains release tag info if tag doesn't exist.
-            OK: if tag exists.
+            BaseTagType: dict contains release
 
         Examples:
             >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
-            {
-                "release": {"__deferred": {"uri": "/balena/release(465307)"}, "__id": 465307},
-                "tag_key": "releaseTag1",
-                "id": 135,
-                "value": "Python SDK",
-                "__metadata": {"type": "", "uri": "/balena/release_tag(135)"},
-            }
-            >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK 1')
-            OK
-
         """
-
-        release_id = self.release.get(commit_or_id)["id"]
-
+        release_id = self.release.get(
+            commit_or_id_or_raw_version, {"$select": "id"}
+        )["id"]
         return super(ReleaseTag, self).set(release_id, tag_key, value)
 
-    def remove(self, commit_or_id, tag_key):
+    def remove(
+        self,
+        commit_or_id_or_raw_version: Union[
+            str, int, ReleaseRawVersionApplicationPair
+        ],
+        tag_key: str,
+    ) -> None:
         """
         Remove a release tag.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
             tag_key (str): tag key.
 
         Examples:
             >>> balena.models.tag.release.remove(135, 'releaseTag1')
-            OK
-
         """
 
-        release_id = self.release.get(commit_or_id)["id"]
+        release_id = self.release.get(
+            commit_or_id_or_raw_version, {"$select": "id"}
+        )["id"]
         return super(ReleaseTag, self).remove(release_id, tag_key)
