@@ -363,7 +363,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.get_all_by_organization(3014)
         """
         org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
-        return super(OrganizationMembershipTag, self).get_all(
+        return super(OrganizationMembershipTag, self)._get_all(
             merge(
                 {
                     "$filter": {
@@ -398,7 +398,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
         """
 
-        return super(OrganizationMembershipTag, self).get_all_by_parent(
+        return super(OrganizationMembershipTag, self)._get_all_by_parent(
             membership_id, options
         )
 
@@ -414,7 +414,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.get_all()
         """
 
-        return super(OrganizationMembershipTag, self).get_all(options)
+        return super(OrganizationMembershipTag, self)._get_all(options)
 
     def get(self, membership_id: int, tag_key: str):
         """
@@ -428,7 +428,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.get(17608, 'mTag1')
         """
 
-        return super(OrganizationMembershipTag, self).get(
+        return super(OrganizationMembershipTag, self)._get(
             membership_id, tag_key
         )
 
@@ -445,7 +445,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
         """
 
-        return super(OrganizationMembershipTag, self).set(
+        return super(OrganizationMembershipTag, self)._set(
             membership_id, tag_key, value
         )
 
@@ -461,7 +461,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             >>> balena.models.organization.membership.tag.remove(17608, 'mTag1')
         """
 
-        return super(OrganizationMembershipTag, self).remove(
+        return super(OrganizationMembershipTag, self)._remove(
             membership_id, tag_key
         )
 

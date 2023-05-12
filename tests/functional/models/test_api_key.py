@@ -4,12 +4,6 @@ from tests.helper import TestHelper
 
 
 class TestApiKey(unittest.TestCase):
-    helper = None
-    balena = None
-    app_info = None
-    device = None
-    named_user_api_key = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -48,7 +42,7 @@ class TestApiKey(unittest.TestCase):
 
     def test_03_get_all_named_user_api_keys(self):
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
-        type(self).named_user_api_key = keys[0]
+        TestApiKey.named_user_api_key = keys[0]
         self.__assert_matching_keys(
             [
                 {
@@ -84,7 +78,7 @@ class TestApiKey(unittest.TestCase):
         self.assertIn("deviceTestKey", device_keys_names)
 
     def test_08_should_be_able_to_update_a_key_name(self):
-        app_key_id = type(self).named_user_api_key["id"]
+        app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"name": "updatedApiKeyName"})
 
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
@@ -92,7 +86,7 @@ class TestApiKey(unittest.TestCase):
         self.assertIn("updatedApiKeyName", names)
 
     def test_09_should_be_able_to_update_a_key_descr(self):
-        app_key_id = type(self).named_user_api_key["id"]
+        app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": "updatedApiKeyDescription"})
 
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
@@ -100,7 +94,7 @@ class TestApiKey(unittest.TestCase):
         self.assertEqual(new_description, "updatedApiKeyDescription")
 
     def test_10_update_to_set_null_to_key_descr(self):
-        app_key_id = type(self).named_user_api_key["id"]
+        app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": None})
 
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
@@ -108,7 +102,7 @@ class TestApiKey(unittest.TestCase):
         self.assertIsNone(new_description)
 
     def test_11_update_to_set_empty_str_to_key_descr(self):
-        app_key_id = type(self).named_user_api_key["id"]
+        app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": ""})
 
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
@@ -116,7 +110,7 @@ class TestApiKey(unittest.TestCase):
         self.assertEqual(new_description, "")
 
     def test_12_revoke(self):
-        app_key_id = type(self).named_user_api_key["id"]
+        app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.revoke(app_key_id)
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
         ids = set(map(lambda k: k["id"], keys))

@@ -56,7 +56,7 @@ class DeviceTag(DependentResource[BaseTagType]):
         app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
             "id"
         ]
-        return super(DeviceTag, self).get_all(
+        return super(DeviceTag, self)._get_all(
             merge(
                 {
                     "$filter": {
@@ -92,7 +92,7 @@ class DeviceTag(DependentResource[BaseTagType]):
         """
 
         id = self.device.get(uuid_or_id, {"$select": "id"})["id"]
-        return super(DeviceTag, self).get_all_by_parent(id, options)
+        return super(DeviceTag, self)._get_all_by_parent(id, options)
 
     def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
         """
@@ -108,7 +108,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             >>> balena.models.tag.device.get_all()
         """
 
-        return super(DeviceTag, self).get_all(options)
+        return super(DeviceTag, self)._get_all(options)
 
     def get(self, uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
         """
@@ -138,7 +138,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             if is_id(uuid_or_id)
             else self.device.get(uuid_or_id, {"$select": "id"})["id"]
         )
-        return super(DeviceTag, self).get(device_id, tag_key)
+        return super(DeviceTag, self)._get(device_id, tag_key)
 
     def set(
         self, uuid_or_id: Union[str, int], tag_key: str, value: str
@@ -167,7 +167,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             if is_id(uuid_or_id)
             else self.device.get(uuid_or_id, {"$select": "id"})["id"]
         )
-        super(DeviceTag, self).set(device_id, tag_key, value)
+        super(DeviceTag, self)._set(device_id, tag_key, value)
 
     def remove(self, uuid_or_id: Union[str, int], tag_key: str) -> None:
         """
@@ -186,7 +186,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             if is_id(uuid_or_id)
             else self.device.get(uuid_or_id, {"$select": "id"})["id"]
         )
-        super(DeviceTag, self).remove(device_id, tag_key)
+        super(DeviceTag, self)._remove(device_id, tag_key)
 
 
 class ApplicationTag(DependentResource[BaseTagType]):
@@ -220,7 +220,7 @@ class ApplicationTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.device.get_all_by_application(1005160)
         """
-        return super(ApplicationTag, self).get_all_by_parent(
+        return super(ApplicationTag, self)._get_all_by_parent(
             slug_or_uuid_or_id, options
         )
 
@@ -237,7 +237,7 @@ class ApplicationTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.application.get_all()
         """
-        return super(ApplicationTag, self).get_all(options)
+        return super(ApplicationTag, self)._get_all(options)
 
     def get(
         self, slug_or_uuid_or_id: Union[str, int], tag_key: str
@@ -255,7 +255,7 @@ class ApplicationTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.application.get(1005767, 'tag1')
         """
-        return super(ApplicationTag, self).get(slug_or_uuid_or_id, tag_key)
+        return super(ApplicationTag, self)._get(slug_or_uuid_or_id, tag_key)
 
     def set(
         self, slug_or_uuid_or_id: Union[str, int], tag_key: str, value: str
@@ -274,7 +274,7 @@ class ApplicationTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.application.set(1005767, 'tag1', 'Python SDK')
         """
-        super(ApplicationTag, self).set(slug_or_uuid_or_id, tag_key, value)
+        super(ApplicationTag, self)._set(slug_or_uuid_or_id, tag_key, value)
 
     def remove(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> None:
         """
@@ -287,7 +287,7 @@ class ApplicationTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.application.remove(1005767, 'tag1')
         """
-        super(ApplicationTag, self).remove(slug_or_uuid_or_id, tag_key)
+        super(ApplicationTag, self)._remove(slug_or_uuid_or_id, tag_key)
 
 
 class ReleaseTag(DependentResource[BaseTagType]):
@@ -326,7 +326,7 @@ class ReleaseTag(DependentResource[BaseTagType]):
         app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
             "id"
         ]
-        return super(ReleaseTag, self).get_all(
+        return super(ReleaseTag, self)._get_all(
             merge(
                 {
                     "$filter": {
@@ -387,7 +387,7 @@ class ReleaseTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.release.get_all()
         """
-        return super(ReleaseTag, self).get_all(options)
+        return super(ReleaseTag, self)._get_all(options)
 
     def set(
         self,
@@ -411,7 +411,29 @@ class ReleaseTag(DependentResource[BaseTagType]):
         Examples:
             >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
         """
-        super(ReleaseTag, self).set(commit_or_id_or_raw_version, tag_key, value)
+        super(ReleaseTag, self)._set(commit_or_id_or_raw_version, tag_key, value)
+
+    def get(
+        self,
+        commit_or_id_or_raw_version: Union[
+            str, int, ReleaseRawVersionApplicationPair
+        ],
+        tag_key: str,
+    ) -> Optional[str]:
+        """
+        Get a single release tag.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+
+        Returns:
+            BaseTagType: dict contains release
+
+        Examples:
+            >>> balena.models.tag.release.get(465307, 'releaseTag1')
+        """
+        return super(ReleaseTag, self)._get(commit_or_id_or_raw_version, tag_key)
 
     def remove(
         self,
@@ -431,4 +453,4 @@ class ReleaseTag(DependentResource[BaseTagType]):
             >>> balena.models.tag.release.remove(135, 'releaseTag1')
         """
 
-        super(ReleaseTag, self).remove(commit_or_id_or_raw_version, tag_key)
+        super(ReleaseTag, self)._remove(commit_or_id_or_raw_version, tag_key)

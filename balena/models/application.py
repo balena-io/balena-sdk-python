@@ -204,7 +204,7 @@ class Application:
         Get a single application.
 
         Args:
-            slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number)
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
             options (AnyObject): extra pine options to use
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 

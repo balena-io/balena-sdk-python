@@ -47,10 +47,10 @@ class ApplicationType(TypedDict):
     can_use__application_as_host: Any
 
 
-class APIKeyInfoType(TypedDict):
+class APIKeyInfoType(TypedDict, total=False):
     name: str
-    description: str
-    expiry_date: str
+    description: Optional[str]
+    expiry_date: Optional[str]
 
 
 class ApplicationInviteType(TypedDict):
@@ -207,4 +207,10 @@ class OrganizationMembershipTagType(TypedDict):
 class BaseTagType(TypedDict):
     id: int
     tag_key: str
+    value: str
+
+
+class EnvironmentVariableBase(TypedDict):
+    id: int
+    name: str
     value: str

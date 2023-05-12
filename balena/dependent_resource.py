@@ -20,7 +20,7 @@ class DependentResource(Generic[T]):
         self.parent_resource_name = parent_resource_name
         self.get_resource_id = get_resource_id
 
-    def get_all(self, options: AnyObject = {}) -> List[T]:
+    def _get_all(self, options: AnyObject = {}) -> List[T]:
         default_orderby = {"$orderby": {}}
         default_orderby["$orderby"][self.resource_key_field] = "asc"
 
@@ -31,7 +31,7 @@ class DependentResource(Generic[T]):
             }
         )
 
-    def get_all_by_parent(
+    def _get_all_by_parent(
         self, parent_param: Any, options: AnyObject = {}
     ) -> List[T]:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
@@ -42,9 +42,9 @@ class DependentResource(Generic[T]):
         }
         get_options["$filter"][self.parent_resource_name] = parent_id
 
-        return self.get_all(merge(get_options, options))
+        return self._get_all(merge(get_options, options))
 
-    def get(self, parent_param: Any, key: str) -> Optional[str]:
+    def _get(self, parent_param: Any, key: str) -> Optional[str]:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
         dollar_filter = {}
@@ -61,7 +61,7 @@ class DependentResource(Generic[T]):
         if len(result) == 1:
             return result[0].get("value")
 
-    def set(self, parent_param: Any, tag_key: str, value: str) -> None:
+    def _set(self, parent_param: Any, tag_key: str, value: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
         upsert_id = {}
@@ -76,7 +76,7 @@ class DependentResource(Generic[T]):
             }
         )
 
-    def remove(self, parent_param: Any, tag_key: str) -> None:
+    def _remove(self, parent_param: Any, tag_key: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
         dollar_filter = {}

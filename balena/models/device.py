@@ -187,7 +187,7 @@ class Device:
         else:
             chunk_size = 200
             chunked_devices = [
-                uuid_or_id_or_ids[i : i + chunk_size]  # noqa: E203
+                uuid_or_id_or_ids[i : i + chunk_size]  # noqa: E203 type: ignore
                 for i in range(0, len(uuid_or_id_or_ids), chunk_size)
             ]
             for chunk in chunked_devices:
@@ -380,9 +380,6 @@ class Device:
         Returns:
             TypeDevice: device info.
 
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         Examples:
             >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
             >>> balena.models.device.get('8deb12')
@@ -442,9 +439,6 @@ class Device:
         Returns:
             dict: device info with associated services details.
 
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         Examples:
             >>> balena.models.device.get_with_service_details('0fcd753af396247e035de53b4e43eec3')
         """
@@ -494,9 +488,6 @@ class Device:
         Returns:
             str: device name.
 
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         """
 
         return self.get(uuid_or_id, {"$select": "device_name"})["device_name"]
@@ -510,10 +501,6 @@ class Device:
 
         Returns:
             str: application name.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         """
 
         device = self.get(
@@ -551,10 +538,6 @@ class Device:
 
         Returns:
             bool: True if the device is online, False otherwise.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         """
 
         return self.get(uuid_or_id, {"$select": "is_online"})["is_online"]
@@ -568,11 +551,6 @@ class Device:
 
         Returns:
             List[str]: IP addresses of a device.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-            DeviceOffline: if device is offline.
-
         """
 
         device = self.get(uuid_or_id, {"$select": ["is_online", "ip_address"]})
@@ -595,10 +573,6 @@ class Device:
 
         Returns:
             List[str]: MAC addresses of a device.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         """
         device = self.get(uuid_or_id, {"$select": ["mac_address"]})
 
@@ -617,10 +591,6 @@ class Device:
 
         Returns:
             dict: metrics of the device.
-
-        Raises:
-            DeviceNotFound: if device couldn't be found.
-
         """
 
         metrics = [
