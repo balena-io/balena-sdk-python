@@ -14,7 +14,7 @@ from ..types.models import (
     OrganizationType,
 )
 from ..utils import is_id, merge
-from .base_tag import BaseTag
+from ..dependent_resource import DependentResource
 from .config import Config
 
 
@@ -332,7 +332,7 @@ class OrganizationMembership:
         return result
 
 
-class OrganizationMembershipTag(BaseTag):
+class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]):
     """
     This class implements organization membership tag model for balena python SDK.
 
@@ -340,7 +340,10 @@ class OrganizationMembershipTag(BaseTag):
 
     def __init__(self):
         super(OrganizationMembershipTag, self).__init__(
-            "organization_membership"
+            "organization_membership_tag",
+            "tag_key",
+            "organization_membership",
+            lambda id: organization.get(id)["id"]
         )
 
     def get_all_by_organization(

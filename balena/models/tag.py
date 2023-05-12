@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from ..types import AnyObject
 from ..types.models import BaseTagType
 from ..utils import is_id, merge
-from .base_tag import BaseTag
+from ..dependent_resource import DependentResource
 from .device import Application, Device
 from .release import Release, ReleaseRawVersionApplicationPair
 
@@ -20,16 +20,21 @@ class Tag:
         self.release = ReleaseTag()
 
 
-class DeviceTag(BaseTag):
+class DeviceTag(DependentResource[BaseTagType]):
     """
     This class implements device tag model for balena python SDK.
 
     """
 
     def __init__(self):
-        super(DeviceTag, self).__init__("device")
         self.device = Device()
         self.application = Application()
+        super(DeviceTag, self).__init__(
+            "device_tag",
+            "tag_key",
+            "device",
+            lambda id: self.device.get(id, {"$select": "id"})["id"]
+        )
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -184,15 +189,20 @@ class DeviceTag(BaseTag):
         super(DeviceTag, self).remove(device_id, tag_key)
 
 
-class ApplicationTag(BaseTag):
+class ApplicationTag(DependentResource[BaseTagType]):
     """
     This class implements application tag model for balena python SDK.
 
     """
 
     def __init__(self):
-        super(ApplicationTag, self).__init__("application")
         self.application = Application()
+        super(ApplicationTag, self).__init__(
+            "application_tag",
+            "tag_key",
+            "application",
+            lambda id: self.application.get(id, {"$select": "id"})["id"]
+        )
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -245,10 +255,7 @@ class ApplicationTag(BaseTag):
         Examples:
             >>> balena.models.tag.application.get(1005767, 'tag1')
         """
-        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
-            "id"
-        ]
-        return super(ApplicationTag, self).get(app_id, tag_key)
+        return super(ApplicationTag, self).get(slug_or_uuid_or_id, tag_key)
 
     def set(
         self, slug_or_uuid_or_id: Union[str, int], tag_key: str, value: str
@@ -267,10 +274,7 @@ class ApplicationTag(BaseTag):
         Examples:
             >>> balena.models.tag.application.set(1005767, 'tag1', 'Python SDK')
         """
-        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
-            "id"
-        ]
-        super(ApplicationTag, self).set(app_id, tag_key, value)
+        super(ApplicationTag, self).set(slug_or_uuid_or_id, tag_key, value)
 
     def remove(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> None:
         """
@@ -283,22 +287,24 @@ class ApplicationTag(BaseTag):
         Examples:
             >>> balena.models.tag.application.remove(1005767, 'tag1')
         """
-        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
-            "id"
-        ]
-        super(ApplicationTag, self).remove(app_id, tag_key)
+        super(ApplicationTag, self).remove(slug_or_uuid_or_id, tag_key)
 
 
-class ReleaseTag(BaseTag):
+class ReleaseTag(DependentResource[BaseTagType]):
     """
     This class implements release tag model for balena python SDK.
 
     """
 
     def __init__(self):
-        super(ReleaseTag, self).__init__("release")
-        self.release = Release()
         self.application = Application()
+        self.release = Release()
+        super(ReleaseTag, self).__init__(
+            "release_tag",
+            "tag_key",
+            "release",
+            lambda id: self.release.get(id, {"$select": "id"})["id"]
+        )
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -405,10 +411,7 @@ class ReleaseTag(BaseTag):
         Examples:
             >>> balena.models.tag.release.set(465307, 'releaseTag1', 'Python SDK')
         """
-        release_id = self.release.get(
-            commit_or_id_or_raw_version, {"$select": "id"}
-        )["id"]
-        return super(ReleaseTag, self).set(release_id, tag_key, value)
+        super(ReleaseTag, self).set(commit_or_id_or_raw_version, tag_key, value)
 
     def remove(
         self,
@@ -428,7 +431,4 @@ class ReleaseTag(BaseTag):
             >>> balena.models.tag.release.remove(135, 'releaseTag1')
         """
 
-        release_id = self.release.get(
-            commit_or_id_or_raw_version, {"$select": "id"}
-        )["id"]
-        return super(ReleaseTag, self).remove(release_id, tag_key)
+        super(ReleaseTag, self).remove(commit_or_id_or_raw_version, tag_key)
