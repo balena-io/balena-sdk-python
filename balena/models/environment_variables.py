@@ -53,7 +53,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: device environment variables.
 
         Examples:
-            >>> balena.models.environment_variables.device.get_all_by_device(8deb12a)
+            >>> balena.models.environment_variables.device.get_all_by_device('8deb12a')
         """
         return super(DeviceEnvVariable, self)._get_all_by_parent(
             uuid_or_id, options
@@ -108,7 +108,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.environment_variables.device.create('8deb12','test_env4')
+            >>> balena.models.environment_variables.device.get('8deb12','test_env4')
         """
         return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -124,7 +124,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.environment_variables.device.create('8deb12','test_env4', 'testing1')
+            >>> balena.models.environment_variables.device.set('8deb12','test_env4', 'testing1')
         """
         super(DeviceEnvVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -254,7 +254,7 @@ class DeviceServiceEnvVariable:
            Optional[str]: device service environment variables.
 
         Examples:
-            >>> balena.models.environment_variables.device_service.get_all_by_device(8deb12a)
+            >>> balena.models.environment_variables.device_service.get('8deb12a', 1234', 'VAR')
         """
         device_id = self.device.get(uuid_or_id, {"$select": "id"})["id"]
         variables = pine.get(
@@ -407,7 +407,8 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: application environment variables.
 
         Examples:
-            >>> balena.models.environment_variables.application.get_all(9020)
+            >>> balena.models.environment_variables.application.get_all_by_application(9020)
+            >>> balena.models.environment_variables.application.get_all_by_application("myorg/myslug")
         """
         return super(ApplicationEnvVariable, self)._get_all_by_parent(slug_or_uuid_or_id, options)
 
@@ -420,7 +421,7 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.environment_variables.application.create('8deb12','test_env4')
+            >>> balena.models.environment_variables.application.get('8deb12','test_env4')
         """
         return super(ApplicationEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
 
@@ -436,7 +437,7 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.environment_variables.application.create('8deb12','test_env4', 'testing1')
+            >>> balena.models.environment_variables.application.set('8deb12','test_env4', 'testing1')
         """
         super(ApplicationEnvVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
 

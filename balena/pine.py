@@ -12,7 +12,11 @@ from .settings import settings
 
 
 class PineClient(PinejsClientCore):
-    def __init__(self, params: Params = {}):
+    def __init__(self, params: Optional[Params] = None):
+
+        if params is None:
+            params = {}
+
         api_url = settings.get("api_endpoint")
         api_version = settings.get("api_version")
 

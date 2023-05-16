@@ -1,8 +1,7 @@
 import numbers
 import re
 from collections import defaultdict
-from copy import deepcopy
-from typing import Any, Callable, Dict, Literal, TypeVar
+from typing import Any, Callable, Dict, Literal, TypeVar, Optional
 
 from semver.version import Version
 
@@ -58,21 +57,81 @@ def compare(a, b):
     return 0
 
 
-def merge(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Merge two dictionaries, with conflicts resolved in favor of dict2.
-    """
-    result = deepcopy(dict1)
-    for key, value in dict2.items():
-        if (
-            key in result
-            and isinstance(result[key], dict)
-            and isinstance(value, dict)
-        ):
-            result[key] = merge(result[key], value)
+known_pine_option_keys = set(["$select", "$expand", "$filter", "$orderby", "$top", "$skip", "$count"])
+
+
+def merge(defaults, extras=None, replace_selects=False):
+    if extras is None:
+        return defaults
+
+    unknown_pine_option = next((key for key in extras if key not in known_pine_option_keys), None)
+    if unknown_pine_option is not None:
+        raise ValueError(f"Unknown pine option: {unknown_pine_option}")
+
+    result = {**defaults}
+
+    if extras.get("$select"):
+        extra_select = (
+            extras["$select"]
+            if isinstance(extras["$select"], list) or extras["$select"] == "*"
+            else [extras["$select"]]
+        )
+        if replace_selects:
+            result["$select"] = extra_select
+        elif extra_select == "*":
+            result["$select"] = "*"
         else:
-            result[key] = value
+            existing_select = result.get("$select")
+            existing_select = [existing_select] if not isinstance(existing_select, list) else existing_select
+            extra_select = extra_select or []
+            merged_select = existing_select + extra_select
+            result["$select"] = list(set(merged_select))
+
+    for key in known_pine_option_keys:
+        if key in extras:
+            result[key] = extras[key]
+
+    if extras.get("$filter"):
+        result["$filter"] = (
+            {"$and": [defaults.get("$filter", {}), extras["$filter"]]} if defaults.get("$filter") else extras["$filter"]
+        )
+
+    if extras.get("$expand"):
+        result["$expand"] = merge_expand_options(defaults.get("$expand"), extras["$expand"], replace_selects)
+
     return result
+
+
+def merge_expand_options(default_expand=None, extra_expand=None, replace_selects=False):
+    if default_expand is None:
+        return extra_expand
+
+    default_expand = convert_expand_to_object(default_expand, True)
+    extra_expand = convert_expand_to_object(extra_expand)
+
+    for expand_key in extra_expand:
+        default_expand[expand_key] = merge(
+            default_expand.get(expand_key, {}), extra_expand[expand_key], replace_selects
+        )
+
+    return default_expand
+
+
+def convert_expand_to_object(expand_option, clone_if_needed=False):
+    if expand_option is None:
+        return {}
+
+    if isinstance(expand_option, str):
+        return {expand_option: {}}
+
+    if isinstance(expand_option, list):
+        return {k: v for d in expand_option for k, v in (d.items() if isinstance(d, dict) else {d: {}}.items())}
+
+    unknown_pine_option = next((key for key in expand_option if key not in known_pine_option_keys), None)
+    if unknown_pine_option is not None:
+        raise ValueError(f"Unknown pine expand options: {unknown_pine_option}")
+
+    return {**expand_option} if clone_if_needed else expand_option
 
 
 def get_current_service_details_pine_expand(
@@ -141,18 +200,14 @@ def get_single_install_summary(raw_data: Any) -> Any:
 
 def generate_current_service_details(raw_device: Any) -> Any:
     # TODO: Please compare me to node-sdk version
-    groupedServices = defaultdict(list)
+    grouped_services = defaultdict(list)
 
-    for obj in [
-        get_single_install_summary(i)
-        for i in raw_device.get("image_install", [])
-    ]:
-        groupedServices[obj.pop("service_name", None)].append(obj)
+    for obj in [get_single_install_summary(i) for i in raw_device.get("image_install", [])]:
+        grouped_services[obj.pop("service_name", None)].append(obj)
 
-    raw_device["current_services"] = dict(groupedServices)
+    raw_device["current_services"] = dict(grouped_services)
     raw_device["current_gateway_downloads"] = [
-        get_single_install_summary(i)
-        for i in raw_device.get("gateway_download", [])
+        get_single_install_summary(i) for i in raw_device.get("gateway_download", [])
     ]
     raw_device.pop("image_install", None)
     raw_device.pop("gateway_download", None)
@@ -169,11 +224,7 @@ def is_provisioned(device: Any) -> bool:
 
 
 def normalize_device_os_version(device: Any) -> Any:
-    if (
-        device.get("os_version") is not None
-        and len(device.get("os_version")) == 0
-        and is_provisioned(device)
-    ):
+    if device.get("os_version") is not None and len(device.get("os_version")) == 0 and is_provisioned(device):
         device["os_version"] = "Resin OS 1.0.0-pre"
 
     return device
@@ -191,7 +242,7 @@ def with_supervisor_locked_error(fn: Callable[[], T]) -> T:
         raise e
 
 
-def normalize_balena_semver(os_version):
+def normalize_balena_semver(os_version: str) -> str:
     """
     safeSemver and trimOsText from resin-semver in Python.
     ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
@@ -228,10 +279,45 @@ def ensure_version_compatibility(
     min_version: str,
     version_type: Literal["supervisor", "host OS"],
 ) -> None:
-
     version = normalize_balena_semver(version)
 
     if version and Version.parse(version) < Version.parse(min_version):
-        raise ValueError(
-            f"Incompatible {version_type} version: {version} - must be >= {min_version}"
+        raise ValueError(f"Incompatible {version_type} version: {version} - must be >= {min_version}")
+
+
+def get_device_os_semver_with_variant(os_version: str, os_variant: Optional[str] = None):
+    if not os_version:
+        return None
+
+    version_info = Version.parse(normalize_balena_semver(os_version))
+
+    if not version_info:
+        return os_version
+
+    tmp = []
+    if version_info.prerelease:
+        tmp = version_info.prerelease.split(".")
+    if version_info.build:
+        tmp = tmp + version_info.build.split(".")
+
+    builds = []
+    pre_releases = []
+
+    if version_info.build:
+        builds = version_info.build.split(".")
+
+    if version_info.prerelease:
+        pre_releases = version_info.prerelease.split(".")
+
+    if os_variant and os_variant not in pre_releases and os_variant not in builds:
+        builds.append(os_variant)
+
+    return str(
+        Version(
+            version_info.major,
+            version_info.minor,
+            version_info.patch,
+            version_info.prerelease,
+            ".".join(builds),
         )
+    )

@@ -201,6 +201,8 @@ class Settings:
 
     def remove(self, key):
         """
+        Remove a setting.
+
         Args:
             key (str): setting.
 

@@ -38,9 +38,6 @@ class SupervisorLocked(BalenaException):
     """
     Exception type for supervisor locked.
 
-    Args:
-        option (str): option name.
-
     Attributes:
         message (str): error message.
 

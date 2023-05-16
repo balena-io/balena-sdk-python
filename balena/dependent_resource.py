@@ -21,8 +21,11 @@ class DependentResource(Generic[T]):
         self.get_resource_id = get_resource_id
 
     def _get_all(self, options: AnyObject = {}) -> List[T]:
-        default_orderby = {"$orderby": {}}
-        default_orderby["$orderby"][self.resource_key_field] = "asc"
+        default_orderby = {
+            "$orderby": {
+                self.resource_key_field: "asc"
+            }
+        }
 
         return pine.get(
             {
@@ -37,19 +40,21 @@ class DependentResource(Generic[T]):
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
         get_options = {
-            "$filter": {},
+            "$filter": {
+                self.parent_resource_name: parent_id
+            },
             "$orderby": f"{self.resource_key_field} asc",
         }
-        get_options["$filter"][self.parent_resource_name] = parent_id
 
         return self._get_all(merge(get_options, options))
 
     def _get(self, parent_param: Any, key: str) -> Optional[str]:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        dollar_filter = {}
-        dollar_filter[self.parent_resource_name] = parent_id
-        dollar_filter[self.resource_key_field] = key
+        dollar_filter = {
+            self.parent_resource_name: parent_id,
+            self.resource_key_field: key
+        }
 
         result = pine.get(
             {
@@ -64,9 +69,10 @@ class DependentResource(Generic[T]):
     def _set(self, parent_param: Any, tag_key: str, value: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        upsert_id = {}
-        upsert_id[self.parent_resource_name] = parent_id
-        upsert_id[self.resource_key_field] = tag_key
+        upsert_id = {
+            self.parent_resource_name: parent_id,
+            self.resource_key_field: tag_key
+        }
 
         pine.upsert(
             {
@@ -79,9 +85,10 @@ class DependentResource(Generic[T]):
     def _remove(self, parent_param: Any, tag_key: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        dollar_filter = {}
-        dollar_filter[self.parent_resource_name] = parent_id
-        dollar_filter[self.resource_key_field] = tag_key
+        dollar_filter = {
+            self.parent_resource_name: parent_id,
+            self.resource_key_field: tag_key
+        }
 
         pine.delete(
             {"resource": self.resource_name, "options": {"$filter": dollar_filter}}

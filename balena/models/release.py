@@ -95,8 +95,8 @@ class Release:
         Get a specific release.
 
         Args:
-            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
-            id (number) or an object with the unique `application` (number or string) & `rawVersion` (string)
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
+            or id (number) or an object with the unique `application` (number or string) & `rawVersion` (string)
             pair of the release options
             options(AnyObject): extra pine options to use
         Returns:

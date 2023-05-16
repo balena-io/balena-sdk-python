@@ -126,13 +126,6 @@ class BaseTagTest:
 
 
 class TestDeviceTag(unittest.TestCase):
-    helper = None
-    balena = None
-    device_tag = None
-    base_tag_test = None
-    app = None
-    device = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -151,32 +144,26 @@ class TestDeviceTag(unittest.TestCase):
         cls.helper.wipe_application()
 
     def test_01_set(self):
-        self.base_tag_test.test_set(self, type(self).device["uuid"])
+        self.base_tag_test.test_set(self, self.device["uuid"])
 
     def test_02_get_all_by_device(self):
-        device_uuid = type(self).device["uuid"]
+        device_uuid = self.device["uuid"]
 
         # should retrieve all the tags by uuid
         tags = self.device_tag.get_all_by_device(device_uuid)
         self.base_tag_test.assert_get_all_by_associated_resource(self, tags)
 
     def test_03_get_all_by_application(self):
-        self.base_tag_test.test_get_all_by_application(self, type(self).device["uuid"], type(self).app["id"])
+        self.base_tag_test.test_get_all_by_application(self, self.device["uuid"], self.app["id"])
 
     def test_04_get_all(self):
-        self.base_tag_test.test_get_all(self, type(self).device["uuid"])
+        self.base_tag_test.test_get_all(self, self.device["uuid"])
 
     def test_05_remove(self):
-        self.base_tag_test.test_remove(self, type(self).device["uuid"])
+        self.base_tag_test.test_remove(self, self.device["uuid"])
 
 
 class TestApplicationTag(unittest.TestCase):
-    helper = None
-    balena = None
-    base_tag_test = None
-    app = None
-    device = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -205,12 +192,6 @@ class TestApplicationTag(unittest.TestCase):
 
 
 class TestReleaseTag(unittest.TestCase):
-    helper = None
-    balena = None
-    release_tag = None
-    base_tag_test = None
-    app_info = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()

@@ -23,6 +23,7 @@ from ..utils import (
     is_provisioned,
     merge,
     normalize_device_os_version,
+    get_device_os_semver_with_variant
 )
 from .application import Application, application
 from .config import Config
@@ -254,7 +255,7 @@ class Device:
                 f"The os variant of the device is not available: {uuid}"
             )
 
-        current_os_version = self.device_os.get_device_os_semver_with_variant(
+        current_os_version = get_device_os_semver_with_variant(
             device_info["os_version"], device_info["os_variant"]
         )
 
@@ -483,7 +484,7 @@ class Device:
         Get device name by device uuid.
 
         Args:
-            uuid (str): device uuid (string) or id (int)
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Returns:
             str: device name.
@@ -630,7 +631,7 @@ class Device:
         """
         self.__set(uuid_or_id_or_ids, {"is_active": False})
 
-    def rename(self, uuid_or_id_or_ids: Union[str, int], new_name: str) -> None:
+    def rename(self, uuid_or_id: Union[str, int], new_name: str) -> None:
         """
         Renames a device.
 
@@ -641,7 +642,7 @@ class Device:
         Examples:
             >>> balena.models.device.rename(123, 'python-sdk-test-device')
         """
-        self.__set(uuid_or_id_or_ids, {"device_name": new_name})
+        self.__set(uuid_or_id, {"device_name": new_name})
 
     def note(
         self, uuid_or_id_or_ids: Union[str, int, List[int]], note: str
@@ -897,7 +898,7 @@ class Device:
         Register a new device with a balena application.
 
         Args:
-            application_slug_or_uuid_or_id (str): application slug (string), uuid (string) or id (number).
+            application_slug_or_uuid_or_id (Union[int, str]): application slug (string), uuid (string) or id (number).
             uuid (str): device uuid.
             device_type_slug (Optional[str]): device type slug or alias.
 
@@ -1423,13 +1424,13 @@ class Device:
         )
 
     def start_os_update(
-        self, uuid: str, target_os_version: str
+        self, uuid_or_id: Union[str, int], target_os_version: str
     ) -> HUPStatusResponse:
         """
         Start an OS update on a device.
 
         Args:
-            uuid (str): device uuid.
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
             target_os_version (str): semver-compatible version for the target device.
                 Unsupported (unpublished) version will result in rejection.
                 The version **must** be the exact version number, a "prod" variant
@@ -1443,11 +1444,11 @@ class Device:
             >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1')
         """
 
-        if target_os_version is None or uuid is None:
+        if target_os_version is None or uuid_or_id is None:
             raise exceptions.InvalidParameter("target_os_version or UUID", None)
 
         device = self.get(
-            uuid,
+            uuid_or_id,
             {
                 "$select": ["uuid", "is_online", "os_version", "os_variant"],
                 "$expand": {"is_of__device_type": {"$select": "slug"}},
@@ -1478,12 +1479,12 @@ class Device:
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
 
-    def get_os_update_status(self, uuid) -> HUPStatusResponse:
+    def get_os_update_status(self, uuid_or_id: Union[str, int]) -> HUPStatusResponse:
         """
         Get the OS update status of a device.
 
         Args:
-            uuid (str): device uuid.
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
 
         Returns:
             HUPStatusResponse: action response.
@@ -1492,7 +1493,7 @@ class Device:
             >>> balena.models.device.get_os_update_status('b6070f4f')
         """
 
-        device = self.get(uuid, {"$select": "uuid"})
+        device = self.get(uuid_or_id, {"$select": "uuid"})
         url_base = self.config.get_all()["deviceUrlsBase"]  # type: ignore
         action_api_version = settings.get("device_actions_endpoint_version")
 

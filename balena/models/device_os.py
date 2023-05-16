@@ -2,10 +2,33 @@ import re
 
 from semver.version import Version
 
+from typing import Union, List, Any, Dict, Optional, Literal, TypedDict
+from collections import defaultdict
+
 from .. import exceptions
-from ..base_request import BaseRequest
-from ..settings import Settings
-from ..utils import compare
+from .device_type import DeviceType
+from ..utils import merge, compare, normalize_balena_semver
+from ..pine import pine
+from ..types import AnyObject
+from ..balena_auth import request
+from . import application as app_module
+from .hup import Hup
+
+
+class ImgConfigOptions(TypedDict, total=False):
+    network: Optional[Literal["ethernet", "wifi"]]
+    appUpdatePollInterval: Optional[int]
+    provisioningKeyName: Optional[str]
+    provisioningKeyExpiryDate: Optional[str]
+    wifiKey: Optional[str]
+    wifiSsid: Optional[str]
+    ip: Optional[str]
+    gateway: Optional[str]
+    netmask: Optional[str]
+    deviceType: Optional[str]
+    version: str
+    developmentMode: Optional[bool]
+
 
 NETWORK_WIFI = "wifi"
 NETWORK_ETHERNET = "ethernet"
@@ -43,38 +66,6 @@ def cmp_to_key(mycmp):
             return mycmp(self.obj, other.obj) != 0
 
     return K
-
-
-def normalize_balena_semver(os_version):
-    """
-    safeSemver and trimOsText from resin-semver in Python.
-    ref: https://github.com/balena-io-modules/resin-semver/blob/master/src/index.js#L5-L24
-
-    """
-
-    # fix major.minor.patch.rev to use rev as build metadata
-    version = re.sub(r"(\.[0-9]+)\.rev", r"\1+rev", os_version)
-    # fix major.minor.patch.prod to be treat .dev & .prod as build metadata
-    version = re.sub(r"([0-9]+\.[0-9]+\.[0-9]+)\.(dev|prod)", r"\1+\2", version)
-    # if there are no build metadata, then treat the parenthesized value as one
-    version = re.sub(
-        r"([0-9]+\.[0-9]+\.[0-9]+(?:[-\.][0-9a-z]+)*) \(([0-9a-z]+)\)",
-        r"\1+\2",
-        version,
-    )
-    # if there are build metadata, then treat the parenthesized value as point value
-    version = re.sub(
-        r"([0-9]+\.[0-9]+\.[0-9]+(?:[-\+\.][0-9a-z]+)*) \(([0-9a-z]+)\)",
-        r"\1.\2",
-        version,
-    )
-    # Remove "Resin OS" and "Balena OS" text
-    version = re.sub(r"(resin|balena)\s*os\s*", "", version, flags=re.IGNORECASE)
-    # remove optional versioning, eg "(prod)", "(dev)"
-    version = re.sub(r"\s+\(\w+\)$", "", version)
-    # remove "v" prefix
-    version = re.sub(r"^v", "", version)
-    return version
 
 
 def get_rev_version(semver_version):
@@ -136,7 +127,10 @@ def compare_balena_version(version_a, version_b):
     if semver_compare_result != 0:
         return semver_compare_result
 
-    rev_result = compare(get_rev_version(version_a_semver_obj), get_rev_version(version_b_semver_obj))
+    rev_result = compare(
+        get_rev_version(version_a_semver_obj),
+        get_rev_version(version_b_semver_obj),
+    )
 
     if rev_result != 0:
         return rev_result
@@ -180,7 +174,6 @@ def bsemver_match_range(version, version_range):
     return False
 
 
-# TODO: https://github.com/balena-io/balena-sdk/pull/288
 class DeviceOs:
     """
     This class implements device os model for balena python SDK.
@@ -199,298 +192,367 @@ class DeviceOs:
     OS_VARIANTS = {"production": "prod", "development": "dev"}
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
+        self.device_type = DeviceType()
+        self.hup = Hup()
 
-    def get_config(self, app_id, options):
+    def get_available_os_versions(self, device_type: Union[str, List[str]]):
         """
-        Get an application config.json.
+        Get the supported OS versions for the provided device type(s)
 
         Args:
-            app_id (str): application id.
-            options (dict): OS configuration options to use. The available options are listed below:
-                version (str): the OS version of the image.
-                network (Optional[str]): the network type that the device will use, one of 'ethernet' or 'wifi' and defaults to 'ethernet' if not specified.
-                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
-                wifiKey (Optional[str]): the key for the wifi network the device will connect to.
-                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to.
-                ip (Optional[str]): static ip address.
-                gateway (Optional[str]): static ip gateway.
-                netmask (Optional[str]): static ip netmask.
+            device_type (Union[str, List[str]]): device type slug.
 
         Returns:
-            dict: application config.json
+            list: balenaOS versions.
 
-        """  # noqa: E501
-
-        if "version" not in options:
-            raise exceptions.MissingOption("An OS version is required when calling device_os.get_config()")
-
-        if "network" not in options:
-            options["network"] = "ethernet"
-
-        options["appId"] = app_id
-
-        return self.base_request.request(
-            "download-config",
-            "POST",
-            data=options,
-            endpoint=self.settings.get("api_endpoint"),
-        )
-
-    def download(self, raw=False, **data):
         """
-        Download an OS image. This function only works if you log in using credentials or Auth Token.
+        single_device_type = isinstance(device_type, str)
+        device_types = device_type if isinstance(device_type, list) else [device_type]
+        versions_by_dt = self.__get_all_os_versions(device_types, True)
+
+        if single_device_type:
+            return versions_by_dt.get(device_type, [])
+
+        return versions_by_dt
+
+    def get_all_os_versions(self, device_type: Union[str, List[str]], options: AnyObject = {}):
+        """
+        Get all OS versions for the provided device type(s), inlcuding invalidated ones
 
         Args:
-            raw (bool): determining function return value.
-            **data: os parameters keyword arguments.
-                version (str): the balenaOS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
-                appId (str): the application ID.
-                network (str): the network type that the device will use, one of 'ethernet' or 'wifi'.
-                fileType (Optional[str]): one of '.img' or '.zip' or '.gz', defaults to '.img'.
-                wifiKey (Optional[str]): the key for the wifi network the device will connect to if network is wifi.
-                wifiSsid (Optional[str]): the ssid for the wifi network the device will connect to if network is wifi.
-                appUpdatePollInterval (Optional[str]): how often the OS checks for updates, in minutes.
+            device_type (Union[str, List[str]]): device type slug.
+            options (AnyObject): extra pine options to use
 
         Returns:
-            object:
-                If raw is True, urllib3.HTTPResponse object is returned.
-                If raw is False, original response object is returned.
+            list: balenaOS versions.
 
-        Notes:
-            default OS image file name can be found in response headers.
+        """
+        single_device_type = isinstance(device_type, str)
+        device_types = device_type if isinstance(device_type, list) else [device_type]
 
-        Examples:
-            >>> data = {'appId': '1476418', 'network': 'ethernet', 'version': '2.43.0+rev1.prod'}
-            >>> response = balena.models.device_os.download(**data)
-            >>> type(response)
-            <class 'requests.models.Response'>
-            >>> response['headers']
-            >>> response.headers
-            {
-                "Content-Length": "134445838",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With, X-Balena-Client",
-                "content-disposition": 'attachment; filename="balena-cloud-FooBar4-raspberry-pi2-2.43.0+rev1-v10.2.2.img.zip"',
-                "X-Content-Type-Options": "nosniff",
-                "Access-Control-Max-Age": "86400",
-                "x-powered-by": "Express",
-                "Vary": "X-HTTP-Method-Override",
-                "x-transfer-length": "134445838",
-                "Connection": "keep-alive",
-                "Access-Control-Allow-Credentials": "true",
-                "Date": "Tue, 07 Jan 2020 17:40:52 GMT",
-                "X-Frame-Options": "DENY",
-                "Access-Control-Allow-Methods": "GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD",
-                "Content-Type": "application/zip",
-                "Access-Control-Allow-Origin": "*",
-            }
-
-        """  # noqa: E501
-
-        self.params = self.parse_params(**data)
-        data["version"] = self.get_device_os_semver_with_variant(data["version"])
-
-        response = self.base_request.request(
-            "download",
-            "POST",
-            data=data,
-            endpoint=self.settings.get("api_endpoint"),
-            stream=True,
-            login=True,
-        )
-        if raw:
-            # return urllib3.HTTPResponse object
-            return response.raw
+        if options == {}:
+            versions_by_dt = self.__get_all_os_versions(device_types)
         else:
-            return response
+            hostapps = self.__get_os_versions(device_types, options)
+            versions_by_dt = self.__transform_host_apps(hostapps)
 
-    def download_unconfigured_image(self, device_type, version, login=False, raw=False):
+        if single_device_type:
+            return versions_by_dt.get(device_type, [])
+
+        return versions_by_dt
+
+    def get_download_size(self, device_type: str, version: str = "latest") -> float:
         """
-        Download an unconfigured OS image.
+        Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
 
         Args:
             device_type (str): device type slug.
-            version (str): the balenaOS version of the image. The SDK will try to parse version into semver-compatible version, unsupported (unpublished) version will result in rejection.
-            login (bool): include authentication information in the request or not. Must be set to True to download private device type. Default to False.
-            raw (bool): determining method returned value. Default to False.
+            version (str): semver-compatible version or 'latest', defaults to 'latest'.
+            * The version **must** be the exact version number.
 
         Returns:
-            object:
-                If raw is True, urllib3.HTTPResponse object is returned.
-                If raw is False, original response object is returned.
-
-        Notes:
-            default OS image file name can be found in response headers.
-
-        Examples:
-            >>> response = balena.models.device_os.download_unconfigured_image('raspberrypi4-64', 'latest', login=True)
-            >>> type(response)
-            <class 'requests.models.Response'>
-            >>> response.headers
-            {'Date': 'Tue, 01 Nov 2022 11:47:52 GMT', 'Content-Type': 'application/octet-stream', 'Transfer-Encoding': 'chunked', 'Connection': 'keep-alive', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'access-control-allow-methods': 'GET, PUT, POST, PATCH, DELETE, OPTIONS, HEAD', 'access-control-allow-headers': 'Content-Type, Authorization, Application-Record-Count, MaxDataServiceVersion, X-Requested-With', 'access-control-max-age': '86400', 'content-encoding': 'gzip', 'content-disposition': 'attachment; filename="raspberrypi4-64-2.105.21-v14.2.10.img"', 'x-transfer-length': '173390850'}
-
-        """  # noqa: E501
-
-        # TODO: change the default value for `login` argument to True in next major release
-        # so that users will be authenticated by default.
-        if version != "latest":
-            version = self.get_device_os_semver_with_variant(version)
-
-        response = self.base_request.request(
-            "/download?deviceType={device_type}&version={version}".format(device_type=device_type, version=version),
-            "GET",
-            endpoint=self.settings.get("api_endpoint"),
-            stream=True,
-            auth=login,
+            float: OS image download size, in bytes.
+        """
+        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        return float(
+            request(
+                method="GET",
+                path=f"/device-types/v1/{slug}/images/{version}/download-size",
+            )["size"]
         )
 
-        if raw:
-            # return urllib3.HTTPResponse object
-            return response.raw
-        else:
-            return response
-
-    def parse_params(self, **params):
+    def get_max_satisfying_version(
+        self,
+        device_type: str,
+        version_or_range: str = "latest",
+        os_type: Optional[Literal["default", "esr"]] = None,
+    ) -> Optional[str]:
         """
-        Validate parameters for downloading device OS image.
+        Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
 
         Args:
-            **parameters: os parameters keyword arguments.
+            device_type (str): device type slug.
+            version_or_range (str): can be one of the exact version number,
+            in which case it is returned if the version is supported,
+            or `None` is returned otherwise,
+            * a [semver](https://www.npmjs.com/package/semver)-compatible
+            range specification, in which case the most recent satisfying version is returned
+            if it exists, or `None` is returned,
+            `'latest'` in which case the most recent version is returned, including pre-releases,
+            `'recommended'` in which case the recommended version is returned, i.e. the most
+            recent version excluding pre-releases, which can be `None` if only pre-release versions
+            are available,
+            `'default'` in which case the recommended version is returned if available,
+            or `latest` is returned otherwise.
+            Defaults to `'latest'`
 
         Returns:
-            dict: validated parameters.
+            float: OS image download size, in bytes.
+        """
+
+        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        os_versions: List[Any] = self.get_available_os_versions(slug)  # type: ignore
+
+        if os_type is not None:
+            os_versions = [osv for osv in os_versions if osv["os_type"] == os_type]
+
+        if version_or_range == "recommended":
+            return next(
+                (v.get("raw_version") for v in os_versions if v.get("is_recommended")),
+                None,
+            )
+
+        if version_or_range == "latest":
+            return os_versions[0].get("raw_version") if os_versions else None
+
+        if version_or_range == "default":
+            return next(
+                (v["raw_version"] for v in os_versions if v.get("is_recommended")),
+                os_versions[0]["raw_version"] if os_versions else None,
+            )
+
+        versions = [v.get("raw_version") for v in os_versions]
+
+        if version_or_range in versions:
+            return version_or_range
+
+        parsed_versions = [Version.parse(v) for v in versions if Version.is_valid(v)]
+        satisfying_versions = [v for v in parsed_versions if v.match(version_or_range)]
+        if not satisfying_versions:
+            return None
+        return str(max(satisfying_versions))
+
+    def download(
+        self,
+        device_type: str,
+        version: str = "latest",
+        options: Dict[Literal["developmentMode"], bool] = {},
+    ):
+        """
+        Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
+
+        Args:
+            device_type (str): device type slug.
+            version (str): semver-compatible version or 'latest', defaults to 'latest'.
+            * The version **must** be the exact version number.
+            options (Dict[Literal["developmentMode"], bool]): OS configuration options to use.
+
+        Returns:
+            float: OS image download size, in bytes.
+
+        Example:
+            >>> with b.models.device_os.download("raspberrypi3") as stream:
+            >>>    stream.raise_for_status()
+            >>>    with open("my-image-filename", "wb") as f:
+            >>>        for chunk in stream.iter_content(chunk_size=8192):
+            >>>            f.write(chunk)
+        """
+        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+
+        if version == "latest":
+            versions = [v for v in self.get_available_os_versions(slug) if v["os_type"] in self.OS_TYPES["default"]]
+            version = next(
+                (v["raw_version"] for v in versions if v.get("is_recommended")),
+                versions[0]["raw_version"] if versions else None,  # type: ignore
+            )
+        else:
+            version = normalize_balena_semver(version)
+
+        return request(
+            method="GET",
+            path="/download",
+            qs={**options, "deviceType": slug, "version": version},
+            return_raw=True,
+            stream=True,
+        )
+
+    def get_config(self, slug_or_uuid_or_id: Union[str, int], options: ImgConfigOptions):
+        """
+        Download application config.json.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (ImgConfigOptions): OS configuration dict to use. The available options
+            are listed below:
+                network (Optional[Literal["ethernet", "wifi"]]): The network type that
+                the device will use, one of 'ethernet' or 'wifi'.
+                appUpdatePollInterval (Optional[int]): How often the OS checks for updates, in minutes.
+                provisioningKeyName (Optional[str]): Name assigned to API key
+                provisioningKeyExpiryDate (Optional[str]): Expiry Date assigned to API key
+                wifiKey (Optional[str]): The key for the wifi network the device will connect to.
+                wifiSsid (Optional[str]): The ssid for the wifi network the device will connect to.
+                ip (Optional[str]): static ip address
+                gateway (Optional[str]): static ip gateway.
+                netmask (Optional[str]): static ip netmask.
+                deviceType (Optional[str]): The device type.
+                version (str): Required: the OS version of the image.
+                developmentMode (Optional[bool]): If the device should be in development mode.
+
+        Returns:
+            dict: application config.json content.
 
         Raises:
-            MissingOption: if mandatory option are missing.
-            InvalidOption: if appId or network are invalid (appId is not a number or parseable string. network is not in NETWORK_TYPES)
+            ApplicationNotFound: if application couldn't be found.
 
-        """  # noqa: E501
+        """
 
-        if "appId" not in params:
-            raise exceptions.MissingOption("appId")
+        if options.get("version") is None:
+            raise Exception("An OS version is required when calling os.getConfig")
+
+        options["network"] = options.get("network", "ethernet")
+        app_id = app_module.application.get_id(slug_or_uuid_or_id)
 
         try:
-            params["appId"] = int(params["appId"])
-        except ValueError:
-            raise exceptions.InvalidOption("appId")
+            return request(
+                method="POST",
+                path="/download-config",
+                body={**options, "appId": app_id},
+            )
+        except exceptions.RequestError as e:
+            if e.status_code == 404:
+                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
+            raise e
 
-        if "version" not in params:
-            raise exceptions.MissingOption("version")
-
-        if "network" not in params:
-            raise exceptions.MissingOption("network")
-
-        if params["network"] not in NETWORK_TYPES:
-            raise exceptions.InvalidOption("network")
-
-        if params["network"] == NETWORK_WIFI:
-            if "wifiSsid" not in params:
-                raise exceptions.MissingOption("wifiSsid")
-
-            # if 'wifiKey' not in params:
-            #    raise exceptions.MissingOption('wifiKey')
-        return params
-
-    def get_device_os_semver_with_variant(self, os_version, os_variant=None):
+    def is_supported_os_update(self, device_type: str, current_version: str, target_version: str) -> bool:
         """
-        Get current device os semver with variant.
+         Returns the supported OS update targets for the provided device type.
 
         Args:
-            os_version (str): current os version.
-            os_variant (Optional[str]): os variant.
-
-        Examples:
-            >>> balena.models.device_os.get_device_os_semver_with_variant('balenaOS 2.29.2+rev1', 'prod')
-            '2.29.2+rev1.prod'
-
+            device_type (str): device type slug.
+            current_version (str): emver-compatible version for the starting OS version
+            target_version (str): semver-compatible version for the target OS version
         """
+        try:
+            action_type = self.hup.get_hup_action_type(device_type, current_version, target_version)
+            if action_type is not None:
+                return True
+            return False
+        except exceptions.OsUpdateError:
+            return False
 
-        if not os_version:
-            return None
+    def get_supported_os_update_versions(self, device_type: str, current_version: str):
+        """
+        Get OS supported versions.
 
-        version_info = Version.parse(normalize_balena_semver(os_version))
+        Args:
+            device_type (str): device type slug.
+            current_version (str): device type slug.
+        """
+        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        all_versions = self.get_available_os_versions(slug)
+        all_versions = [v.get("raw_version") for v in all_versions if v.get("os_type") == self.OS_TYPES["default"]]
 
-        if not version_info:
-            return os_version
-
-        tmp = []
-        if version_info.prerelease:
-            tmp = version_info.prerelease.split(".")
-        if version_info.build:
-            tmp = tmp + version_info.build.split(".")
-
-        builds = []
-        pre_releases = []
-
-        if version_info.build:
-            builds = version_info.build.split(".")
-
-        if version_info.prerelease:
-            pre_releases = version_info.prerelease.split(".")
-
-        if os_variant and os_variant not in pre_releases and os_variant not in builds:
-            builds.append(os_variant)
-
-        return str(
-            Version(
-                version_info.major,
-                version_info.minor,
-                version_info.patch,
-                version_info.prerelease,
-                ".".join(builds),
-            )
+        current = next(
+            (v for v in all_versions if str(Version.parse(v)) == str(Version.parse(current_version))),
+            None,
         )
 
-    def __get_os_app_tag(self, app_tags):
-        tag_map = {}
-
-        for app_tag in app_tags:
-            tag_map[app_tag["tag_key"]] = app_tag["value"]
+        versions = [
+            v for v in all_versions if self.is_supported_os_update(device_type, current_version, v)
+        ]
+        recommended = next((v for v in versions if not Version.parse(v).prerelease), None)
 
         return {
-            "os_type": tag_map[self.RELEASE_POLICY_TAG_NAME]
-            if self.RELEASE_POLICY_TAG_NAME in tag_map
-            else self.OS_TYPES["default"],
-            "next_line_version_range": tag_map[self.ESR_NEXT_TAG_NAME] if self.ESR_NEXT_TAG_NAME in tag_map else "",
-            "current_line_version_range": tag_map[self.ESR_CURRENT_TAG_NAME]
-            if self.ESR_CURRENT_TAG_NAME in tag_map
-            else "",
-            "sunset_line_version_range": tag_map[self.ESR_SUNSET_TAG_NAME]
-            if self.ESR_SUNSET_TAG_NAME in tag_map
-            else "",
+            "versions": versions,
+            "recommended": recommended,
+            "current": current
         }
 
-    def __get_os_versions(self, device_type):
-        # fmt: off
-        raw_query = (
-            "$select=is_for__device_type,is_host"
-            "&$expand="
-                "application_tag($select=tag_key,value),"
-                "is_for__device_type($select=slug),"
-                "owns__release("
-                    "$select=id,raw_version,version,is_final,release_tag,known_issue_list,variant,phase"
-                    "&$filter="
-                        "is_final%20eq%20true%20and%20"
-                        "is_invalidated%20eq%20false%20and%20"
-                        "status%20eq%20'success'"
-                    "&$expand=release_tag($select=tag_key,value)"
-                ")"
-            "&$filter="
-                "is_host%20eq%20true%20and%20"
-                f"is_for__device_type/any(dt:dt/slug%20in%20('{device_type}'))"
-        )
-        # fmt: on
+    def is_architecture_compatible_with(self, os_architecture: str, application_architecture: str):
+        """
+        Returns whether the specified OS architecture is compatible with the target architecture.
 
-        return self.base_request.request(
-            "application",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
+        Args:
+            os_architecture (str): The OS's architecture as specified in its device type.
+            application_architecture (str): The application's architecture as specified in its device type.
+
+        Returns:
+            bool: Whether the specified OS architecture is capable of
+                  running applications build for the target architecture.
+        """
+
+        if os_architecture != application_architecture:
+            if (
+                os_architecture in ARCH_COMPATIBILITY_MAP
+                and application_architecture in ARCH_COMPATIBILITY_MAP[os_architecture]
+            ):
+                return True
+            return False
+
+        return True
+
+    def __tags_to_dict(self, tags: List[Any]) -> Dict[str, str]:
+        tag_map = {}
+
+        for app_tag in tags:
+            tag_map[app_tag["tag_key"]] = app_tag["value"]
+
+        return tag_map
+
+    def __get_os_app_tags(self, app_tags: List[Any]):
+        tag_map = self.__tags_to_dict(app_tags)
+        return {
+            "os_type": tag_map.get(self.RELEASE_POLICY_TAG_NAME, self.OS_TYPES["default"]),
+            "next_line_version_range": tag_map.get(self.ESR_NEXT_TAG_NAME, ""),
+            "current_line_version_range": tag_map.get(self.ESR_CURRENT_TAG_NAME, ""),
+            "sunset_line_version_range": tag_map.get(self.ESR_SUNSET_TAG_NAME, ""),
+        }
+
+    def __get_os_versions(self, device_types: List[str], options: AnyObject = {}):
+        owns_release = merge(
+            {
+                "$select": [
+                    "id",
+                    "known_issue_list",
+                    "raw_version",
+                    "variant",
+                    "phase",
+                ],
+                "$expand": {"release_tag": {"$select": ["tag_key", "value"]}},
+            },
+            options,
+        )
+
+        return pine.get(
+            {
+                "resource": "application",
+                "options": {
+                    "$select": "is_for__device_type",
+                    "$expand": {
+                        "application_tag": {"$select": ["tag_key", "value"]},
+                        "is_for__device_type": {"$select": "slug"},
+                        "owns__release": owns_release,
+                    },
+                    "$filter": {
+                        "is_host": True,
+                        "is_for__device_type": {
+                            "$any": {
+                                "$alias": "dt",
+                                "$expr": {"dt": {"slug": {"$in": device_types}}},
+                            }
+                        },
+                    },
+                },
+            }
+        )
+
+    def __get_all_os_versions(self, device_types: List[str], listed_by_default: bool = False):
+        listed_by_filter = (
+            {
+                "$filter": {
+                    "is_final": True,
+                    "is_invalidated": False,
+                    "status": "success",
+                }
+            }
+            if listed_by_default
+            else {}
+        )
+        hostapps = self.__get_os_versions(device_types, listed_by_filter)
+        return self.__transform_host_apps(hostapps)
 
     # TODO: Drop this method & just use `release.phase` in the next major
-    def __get_os_version_release_line(self, phase, version, app_tags):
+    def __get_os_version_release_line(self, phase: Optional[str], version: str, app_tags: Dict[str, str]):
         if not phase:
             # All patches belong to the same line.
             if bsemver_match_range(version, app_tags["next_line_version_range"]):
@@ -510,63 +572,52 @@ class DeviceOs:
 
         return phase
 
-    def __get_os_versions_from_releases(self, releases, app_tags):
+    def __get_os_versions_from_releases(self, releases: List[Any], app_tags: Any):
         os_variant_names = self.OS_VARIANTS.keys()
         releases_with_os_versions = []
 
         for release in releases:
-            tag_map = {}
+            tag_map = self.__tags_to_dict(release.get("release_tag", []))
 
-            for release_tag in release["release_tag"]:
-                tag_map[release_tag["tag_key"]] = release_tag["value"]
+            release_semver_obj = (
+                Version.parse(release["raw_version"]) if not release["raw_version"].startswith("0.0.0") else None
+            )
 
-            variant = release["variant"]
+            variant = release.get("variant")
+            if variant == "":
+                variant = None
 
-            if release["raw_version"].startswith("0.0.0"):
-                # TODO: Drop this `else` once we migrate all version & variant tags to release.semver field
-                # Ideally 'production' | 'development' | None.
-                full_variant_name = tag_map[self.VARIANT_TAG_NAME] if self.VARIANT_TAG_NAME in tag_map else None
-                if full_variant_name:
+            stripped_version = None
+            if release_semver_obj is None:
+                full_variant_name = tag_map.get(self.VARIANT_TAG_NAME)
+                if isinstance(full_variant_name, str):
                     if full_variant_name in os_variant_names:
                         variant = self.OS_VARIANTS[full_variant_name]
                     else:
                         variant = full_variant_name
                 else:
                     variant = None
+                stripped_version = tag_map.get(self.VERSION_TAG_NAME, "")
 
-                stripped_version = tag_map[self.VERSION_TAG_NAME] if self.VERSION_TAG_NAME in tag_map else ""
-                # Backfill the native release_version field
-                # TODO: This potentially generates an invalid semver and we should be doing
-                # something like `.join(!version.includes('+') ? '+' : '.')`,  but this needs
-                # discussion since otherwise it will break all ESR released as of writing this.
                 release["raw_version"] = ".".join([x for x in [stripped_version, variant] if x])
             else:
-                # Use the returned version object from API so we do not need to manually parse raw_version with semver
-                version = release["version"]["version"]
-                non_variant_build_parts = ".".join(
-                    [build for build in release["version"]["build"] if build != release["variant"]]
-                )
+                version = str(release_semver_obj.finalize_version())
+                builds = (release_semver_obj.build or "").split(".")
+                non_variant_build_parts = ".".join([build for build in builds if build != release["variant"]])
 
                 stripped_version = "+".join([x for x in [version, non_variant_build_parts] if x])
 
-            based_on_version = (
-                tag_map[self.BASED_ON_VERSION_TAG_NAME]
-                if self.BASED_ON_VERSION_TAG_NAME in tag_map
-                else stripped_version
-            )
             # TODO: Drop this call & just use `release.phase` in the next major
             line = self.__get_os_version_release_line(release["phase"], stripped_version, app_tags)
 
             release.update(
                 {
-                    "os_type": app_tags["os_type"],
-                    "line": line,
-                    "stripped_version": stripped_version,
-                    "based_on_version": based_on_version,
                     "variant": variant,
-                    "formatted_version": "v{version}{line}".format(
-                        version=stripped_version, line=f" ({line})" if line else ""
-                    ),
+                    "os_type": app_tags.get("os_type"),
+                    "line": line,
+                    "raw_version": release["raw_version"],
+                    "stripped_version": stripped_version,
+                    "based_on_version": tag_map.get(self.BASED_ON_VERSION_TAG_NAME, stripped_version),
                 }
             )
             releases_with_os_versions.append(release)
@@ -574,110 +625,35 @@ class DeviceOs:
         return releases_with_os_versions
 
     def __transform_host_apps(self, host_apps):
-        os_versions_by_device_type = {}
+        os_versions_by_device_type = defaultdict(list)
 
         for host_app in host_apps:
-            if host_app["is_host"]:
-                host_app_device_type = (
-                    host_app["is_for__device_type"][0]["slug"] if len(host_app["is_for__device_type"]) > 0 else None
-                )
+            host_app_device_type = host_app.get("is_for__device_type", [{}])[0].get("slug")
+            if host_app_device_type is None:
+                continue
 
-                if not host_app_device_type:
-                    return {}
+            app_tags = self.__get_os_app_tags(host_app.get("application_tag", []))
 
-                if host_app_device_type not in os_versions_by_device_type:
-                    os_versions_by_device_type[host_app_device_type] = []
-
-                app_tags = self.__get_os_app_tag(host_app["application_tag"])
-                os_versions_by_device_type[host_app_device_type].extend(
-                    self.__get_os_versions_from_releases(host_app["owns__release"], app_tags)
-                )
+            os_versions_by_device_type[host_app_device_type] += self.__get_os_versions_from_releases(
+                host_app.get("owns__release", []), app_tags
+            )
 
         for device_type in os_versions_by_device_type:
             os_versions_by_device_type[device_type].sort(reverse=True, key=cmp_to_key(sort_version))
-            recommended_per_os_type = {}
+            recommended_per_os_type: Dict[str, bool] = {}
 
             for version in os_versions_by_device_type[device_type]:
                 if version["os_type"] not in recommended_per_os_type:
                     if (
                         version["variant"] != "dev"
                         and not version["known_issue_list"]
-                        and not version["version"]["prerelease"]
+                        and not Version.parse(version["raw_version"]).prerelease
                     ):
                         additional_format = (
-                            " ({line}, recommended)".format(line=version["line"])
-                            if version["line"]
-                            else " (recommended)"
+                            f" ({version['line']}, recommended)" if version.get("line") else " (recommended)"
                         )
                         version["is_recommended"] = True
-                        version["formatted_version"] = "v{version}{additional_format}".format(
-                            version=version["stripped_version"],
-                            additional_format=additional_format,
-                        )
+                        version["formatted_version"] = f"v{version['stripped_version']}{additional_format}"
                         recommended_per_os_type[version["os_type"]] = True
 
         return os_versions_by_device_type
-
-    def get_supported_versions(self, device_type):
-        """
-        Get OS supported versions.
-
-        Args:
-            device_type (str): device type slug.
-            auth (Optional[bool]): if auth is True then auth header will be added to the request (to get private device types) otherwise no auth header and only public device types returned. Default to True.
-
-        """  # noqa: E501
-
-        host_apps = self.__get_os_versions(device_type)
-        versions_by_dt = self.__transform_host_apps(host_apps)
-
-        if device_type in versions_by_dt:
-            versions = [
-                x["raw_version"] for x in versions_by_dt[device_type] if x["os_type"] == self.OS_TYPES["default"]
-            ]
-            return versions
-
-        return []
-
-    def get_available_os_versions(self, device_type):
-        """
-        Get the supported balenaOS versions (ESR included) for the provided device type.
-
-        Args:
-            device_type (str): device type slug.
-
-        Returns:
-            list: balenaOS versions.
-
-        """
-
-        host_apps = self.__get_os_versions(device_type)
-        versions_by_dt = self.__transform_host_apps(host_apps)
-
-        if device_type in versions_by_dt:
-            return versions_by_dt[device_type]
-
-        return []
-
-    def is_architecture_compatible_with(self, os_architecture, application_architecture):
-        """
-        Returns whether the specified OS architecture is compatible with the target architecture.
-
-        Args:
-            os_architecture (str): The OS's architecture as specified in its device type.
-            application_architecture (str): The application's architecture as specified in its device type.
-
-        Returns:
-            bool: Whether the specified OS architecture is capable of running applications build for the target architecture.
-
-        """  # noqa: E501
-
-        if os_architecture != application_architecture:
-            if (
-                os_architecture in ARCH_COMPATIBILITY_MAP
-                and application_architecture in ARCH_COMPATIBILITY_MAP[os_architecture]
-            ):
-                return True
-            return False
-
-        return True

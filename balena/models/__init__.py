@@ -15,7 +15,6 @@ from .history import History
 from .image import Image
 from .key import Key
 from .organization import Organization
-from .os import OS
 from .release import Release
 from .service import Service
 from .supervisor import Supervisor
@@ -40,4 +39,3 @@ class Models:
         self.tag = Tag()
         self.organization = Organization()
         self.history = History()
-        self.os = OS()

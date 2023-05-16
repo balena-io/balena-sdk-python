@@ -17,6 +17,7 @@ Twisted = ">=18.7.0"
 service-identity = "*"
 semver = "^3.0.0"
 pine-client= "*"
+typing_extensions = "*"
 deprecated = "^1.2.13"
 
 [tool.poetry.dev-dependencies]

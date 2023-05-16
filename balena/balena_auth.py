@@ -61,7 +61,10 @@ def request(
     body: Optional[Any] = None,
     endpoint: Optional[str] = None,
     token: Optional[str] = None,
-):
+    qs: Optional[Any] = {},
+    return_raw: bool = False,
+    stream: bool = False,
+) -> Any:
     if endpoint is None:
         endpoint = settings.get("api_endpoint")
 
@@ -76,9 +79,14 @@ def request(
         req = requests.request(
             method=method,
             url=url,
+            params=qs,
             json=body,
             headers={"Authorization": f"Bearer {token}"},
+            stream=stream
         )
+
+        if return_raw:
+            return req
 
         try:
             return req.json()
