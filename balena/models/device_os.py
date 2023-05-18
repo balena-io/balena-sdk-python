@@ -12,7 +12,7 @@ from ..pine import pine
 from ..types import AnyObject
 from ..balena_auth import request
 from . import application as app_module
-from .hup import Hup
+from ..hup import get_hup_action_type
 
 
 class ImgConfigOptions(TypedDict, total=False):
@@ -193,7 +193,6 @@ class DeviceOs:
 
     def __init__(self):
         self.device_type = DeviceType()
-        self.hup = Hup()
 
     def get_available_os_versions(self, device_type: Union[str, List[str]]):
         """
@@ -423,7 +422,7 @@ class DeviceOs:
             target_version (str): semver-compatible version for the target OS version
         """
         try:
-            action_type = self.hup.get_hup_action_type(device_type, current_version, target_version)
+            action_type = get_hup_action_type(device_type, current_version, target_version)
             if action_type is not None:
                 return True
             return False

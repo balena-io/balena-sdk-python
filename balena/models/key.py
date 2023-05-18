@@ -1,9 +1,10 @@
-import json
+from typing import List
 
 from .. import exceptions
+from ..types.models import SSHKeyType
+from ..types import AnyObject
+from ..pine import pine
 from ..auth import Auth
-from ..base_request import BaseRequest
-from ..settings import Settings
 
 
 class Key:
@@ -13,89 +14,77 @@ class Key:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.auth = Auth()
+        self.__auth = Auth()
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[SSHKeyType]:
         """
         Get all ssh keys.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list of ssh keys.
-
+            List[SSHKeyType]: list of ssh keys.
         """
-        return self.base_request.request("user__has__public_key", "GET", endpoint=self.settings.get("pine_endpoint"))[
-            "d"
-        ]
+        return pine.get({
+            "resource": "user__has__public_key",
+            "options": options
+        })
 
-    def get(self, id):
+    def get(self, id: int) -> SSHKeyType:
         """
         Get a single ssh key.
 
         Args:
-            id (str): key id.
+            id (int): key id.
 
         Returns:
-            dict: ssh key info.
-
-        Raises:
-            KeyNotFound: if ssh key couldn't be found.
-
+            SSHKeyType: ssh key info.
         """
 
-        params = {"filter": "id", "eq": id}
-        key = self.base_request.request(
-            "user__has__public_key",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-        if key:
-            return key[0]
-        else:
+        key = pine.get({
+            "resource": "user__has__public_key",
+            "id": id
+        })
+
+        if key is None:
             raise exceptions.KeyNotFound(id)
 
-    def remove(self, id):
+        return key
+
+    def remove(self, id: int) -> None:
         """
-        Remove a ssh key. This function only works if you log in using credentials or Auth Token.
+        Remove a ssh key.
 
         Args:
-            id (str): key id.
-
+            id (int): key id.
         """
 
-        params = {"filter": "id", "eq": id}
-        return self.base_request.request(
-            "user__has__public_key",
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )
+        pine.delete({
+            "resource": "user__has__public_key",
+            "id": id
+        })
 
-    def create(self, title, key):
+    def create(self, title: str, key: str) -> SSHKeyType:
         """
-        Create a ssh key. This function only works if you log in using credentials or Auth Token.
+        Create a ssh key.
 
         Args:
             title (str): key title.
             key (str): the public ssh key.
 
         Returns:
-            str: new ssh key id.
-
+            SSHKeyType: new ssh key id.
         """
-
-        # Trim ugly whitespaces
+        # Avoid ugly whitespaces
         key = key.strip()
 
-        data = {"title": title, "public_key": key, "user": self.auth.get_user_id()}
-        key = self.base_request.request(
-            "user__has__public_key",
-            "POST",
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )
-        return json.loads(key)["id"]
+        user_id = self.__auth.get_user_id()
+        return pine.post({
+            "resource": "user__has__public_key",
+            "body": {
+                "title": title,
+                "public_key": key,
+                "user": user_id
+            }
+        })

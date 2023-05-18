@@ -311,3 +311,31 @@ class BasicUserInfoType(TypedDict):
 class ReleaseWithImageDetailsType(ReleaseType):
     images: List[ImageBasicInfoType]
     user: BasicUserInfoType
+
+
+class DeviceHistoryType(TypedDict):
+    created_at: str
+    id: int
+    end_timestamp: str
+    is_created_by__actor: Any
+    is_ended_by__actor: Any
+    tracks__device: Any
+    tracks__actor: Any
+    uuid: str
+    belongs_to__application: Any
+    is_active: bool
+    is_running__release: Any
+    should_be_running__release: Any
+    os_version: str
+    os_variant: str
+    supervisor_version: str
+    is_of__device_type: Any
+    should_be_managed_by__release: Any
+
+
+class SSHKeyType(TypedDict):
+    title: str
+    public_key: str
+    id: int
+    created_at: str
+    user: Any

@@ -1,5 +1,6 @@
 import binascii
 import os
+from deprecated import deprecated
 from datetime import datetime
 from typing import Any, Callable, List, Optional, TypedDict, Union
 from urllib.parse import urljoin
@@ -23,14 +24,15 @@ from ..utils import (
     is_provisioned,
     merge,
     normalize_device_os_version,
-    get_device_os_semver_with_variant
+    get_device_os_semver_with_variant,
+    with_supervisor_locked_error,
 )
 from .application import Application, application
 from .config import Config
 from .device_os import DeviceOs, normalize_balena_semver
 from .device_type import DeviceType
 from .history import DeviceHistory
-from .hup import Hup
+from ..hup import get_hup_action_type
 from .organization import Organization
 from .release import Release
 
@@ -40,6 +42,7 @@ LOCAL_MODE_ENV_VAR = "RESIN_SUPERVISOR_LOCAL_MODE"
 OVERRIDE_LOCK_ENV_VAR = "RESIN_OVERRIDE_LOCK"
 MIN_SUPERVISOR_MC_API = "7.0.0"
 MIN_OS_MC = "2.12.0"
+MIN_SUPERVISOR_APPS_API = '1.8.0-alpha.0'
 
 
 class LocationType(TypedDict):
@@ -63,6 +66,19 @@ class HUPStatusResponse(TypedDict):
     lastRun: int
     action: str
     parameters: AnyObject
+
+
+class SupervisorStateType(TypedDict):
+    api_port: str
+    ip_address: str
+    os_version: str
+    supervisor_version: str
+    update_pending: bool
+    update_failed: bool
+    update_downloaded: bool
+    status: str
+    commit: str
+    download_progress: str
 
 
 # TODO: support both device uuid and device id
@@ -91,7 +107,6 @@ class Device:
         self.release = Release()
         self.device_os = DeviceOs()
         self.device_type = DeviceType()
-        self.hup = Hup()
         self.history = DeviceHistory()
         self.organization = Organization()
         self.__local_mode_select = [
@@ -259,7 +274,7 @@ class Device:
             device_info["os_version"], device_info["os_variant"]
         )
 
-        self.hup.get_hup_action_type(
+        get_hup_action_type(
             device_info["is_of__device_type"][0]["slug"],
             current_os_version,
             target_os_version,
@@ -756,6 +771,34 @@ class Device:
 
         self.__set(uuid_or_id, {"belongs_to__application": app["id"]})
 
+    def ping(self, uuid_or_id: Union[str, int]):
+        """
+        Ping a device.
+        This is useful to signal that the supervisor is alive and responding.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+
+        Examples:
+            >>> balena.models.supervisor.ping('8f66ec7')
+            >>> balena.models.supervisor.ping(1234)
+        """
+        device_options = {
+            "$select": "id",
+            "$expand": {"belongs_to__application": {"$select": "id"}},
+        }
+
+        device = self.get(uuid_or_id, device_options)
+        request(
+            method="POST",
+            path="/supervisor/ping",
+            body={
+                "method": "GET",
+                "deviceId": device["id"],
+                "appId": device["belongs_to__application"][0]["id"],
+            },
+        )
+
     def identify(self, uuid_or_id: Union[str, int]) -> None:
         """
         Identify device.
@@ -776,7 +819,7 @@ class Device:
             path="/supervisor/v1/blink",
         )
 
-    def restart_application(self, uuid_or_id: Union[str, int]):
+    def restart_application(self, uuid_or_id: Union[str, int]) -> None:
         """
         This function restarts the Docker container running
         the application on the device, but doesn't reboot
@@ -790,37 +833,179 @@ class Device:
             >>> balena.models.device.restart_application(1234)
         """
 
+        def __restart_application():
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": ["id", "supervisor_version"],
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+            device_id = device["id"]
+
+            if not Version.is_valid(device["supervisor_version"]) or (
+                Version.parse(device["supervisor_version"])
+                < Version.parse("7.0.0")
+            ):
+                return request(
+                    method="POST",
+                    path=f"device/{device_id}/restart",
+                )
+
+            app_id = device["belongs_to__application"][0]["id"]
+
+            return request(
+                method="POST",
+                path="/supervisor/v1/restart",
+                body={
+                    "deviceId": device_id,
+                    "appId": app_id,
+                    "data": {
+                        "appId": app_id,
+                    },
+                },
+            )
+
+        with_supervisor_locked_error(__restart_application)
+
+    def reboot(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+        """
+        Reboot the device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            force (Optional[bool]): If force is True, the update lock will be overridden.
+
+        Examples:
+            >>> balena.models.supervisor.reboot('8f66ec7')
+        """
+
+        def __reboot():
+            data = {}
+            if force:
+                data = {"force": bool(force)}
+
+            device_id = (
+                uuid_or_id
+                if is_id(uuid_or_id)
+                else self.get(uuid_or_id, {"$select": "id"})["id"]
+            )
+
+            return request(
+                method="POST",
+                path="/supervisor/v1/reboot",
+                body={
+                    "deviceId": device_id,
+                    "data": data
+                }
+            )
+        with_supervisor_locked_error(__reboot)
+
+    def shutdown(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+        """
+        Shutdown the device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            force (Optional[bool]): If force is True, the update lock will be overridden.
+
+        Examples:
+            >>> balena.models.supervisor.shutdown('8f66ec7')
+        """
+
+        def __shutdown():
+            data = {}
+            if force:
+                data = {"force": bool(force)}
+
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": "id",
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+
+            return request(
+                method="POST",
+                path="/supervisor/v1/shutdown",
+                body={
+                    "deviceId": device["id"],
+                    "appId": device["belongs_to__application"][0]["id"],
+                    "data": data
+                }
+            )
+        with_supervisor_locked_error(__shutdown)
+
+    def purge(self, uuid_or_id: Union[str, int]) -> None:
+        """
+        Purge device.
+        This function clears the user application's `/data` directory.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+
+        Examples:
+            >>> balena.models.supervisor.purge('8f66ec7')
+        """
+
+        def __purge():
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": "id",
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+
+            return request(
+                method="POST",
+                path="/supervisor/v1/purge",
+                body={
+                    "deviceId": device["id"],
+                    "appId": device["belongs_to__application"][0]["id"],
+                    "data": {
+                        "appId": device["belongs_to__application"][0]["id"]
+                    }
+                }
+            )
+        with_supervisor_locked_error(__purge)
+
+    def update(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+        """
+        update the device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            force (Optional[bool]): If force is True, the update lock will be overridden.
+
+        Examples:
+            >>> balena.models.supervisor.update('8f66ec7')
+        """
+
+        data = {}
+        if force:
+            data = {"force": bool(force)}
+
         device = self.get(
             uuid_or_id,
             {
-                "$select": ["id", "supervisor_version"],
+                "$select": "id",
                 "$expand": {"belongs_to__application": {"$select": "id"}},
             },
         )
-        device_id = device["id"]
 
-        if not Version.is_valid(device["supervisor_version"]) or (
-            Version.parse(device["supervisor_version"]) < Version.parse("7.0.0")
-        ):
-            return request(
-                method="POST",
-                path=f"device/{device_id}/restart",
-            )
-
-        app_id = device["belongs_to__application"][0]["id"]
         return request(
             method="POST",
-            path="/supervisor/v1/restart",
+            path="/supervisor/v1/update",
             body={
-                "deviceId": device_id,
-                "appId": app_id,
-                "data": {
-                    "appId": app_id,
-                },
-            },
+                "deviceId": device["id"],
+                "appId": device["belongs_to__application"][0]["id"],
+                "data": data
+            }
         )
 
-    def get_supervisor_state(self, uuid_or_id: Union[str, int]) -> Any:
+    def get_supervisor_state(self, uuid_or_id: Union[str, int]) -> SupervisorStateType:
         """
         Get the supervisor state on a device
 
@@ -843,9 +1028,125 @@ class Device:
         )
 
         if isinstance(response, dict):
-            return response
+            return response  # type: ignore
 
         raise Exception(response)
+
+    def start_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+        """
+        Start a service on device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            image_id (int): id of the image to start
+
+        Examples:
+            >>> balena.models.supervisor.start_service('f3887b1')
+        """
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": ["id", "supervisor_version"],
+                "$expand": {"belongs_to__application": {"$select": "id"}},
+            },
+        )
+        ensure_version_compatibility(
+            device["supervisor_version"],
+            MIN_SUPERVISOR_MC_API,
+            "supervisor"
+        )
+        app_id = device["belongs_to__application"][0]["id"]
+        request(
+            method="POST",
+            path=f"/supervisor/v2/applications/{app_id}/start-service",
+            body={
+                "deviceId": device["id"],
+                "appId": app_id,
+                "data": {
+                    "appId": app_id,
+                    "imageId": image_id
+                }
+            }
+        )
+
+    def stop_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+        """
+        Stop a service on device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            image_id (int): id of the image to stop
+
+        Examples:
+            >>> balena.models.supervisor.stop_service('f3887b1', 392229)
+        """
+        def __stop_service():
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": ["id", "supervisor_version"],
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+            ensure_version_compatibility(
+                device["supervisor_version"],
+                MIN_SUPERVISOR_MC_API,
+                "supervisor"
+            )
+            app_id = device["belongs_to__application"][0]["id"]
+            request(
+                method="POST",
+                path=f"/supervisor/v2/applications/{app_id}/stop-service",
+                body={
+                    "deviceId": device["id"],
+                    "appId": app_id,
+                    "data": {
+                        "appId": app_id,
+                        "imageId": image_id
+                    }
+                }
+            )
+        with_supervisor_locked_error(__stop_service)
+
+    def restart_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+        """
+        Restart a service on device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            image_id (int): id of the image to restart
+
+        Examples:
+            >>> balena.models.supervisor.restart_service('f3887b', 392229)
+        """
+
+        def __restart_service():
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": ["id", "supervisor_version"],
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+            ensure_version_compatibility(
+                device["supervisor_version"],
+                MIN_SUPERVISOR_MC_API,
+                "supervisor"
+            )
+            app_id = device["belongs_to__application"][0]["id"]
+            request(
+                method="POST",
+                path=f"/supervisor/v2/applications/{app_id}/restart_service",
+                body={
+                    "deviceId": device["id"],
+                    "appId": app_id,
+                    "data": {
+                        "appId": app_id,
+                        "imageId": image_id
+                    }
+                }
+            )
+        with_supervisor_locked_error(__restart_service)
 
     def get_supervisor_target_state(self, uuid_or_id: Union[str, int]) -> Any:
         """
@@ -1479,7 +1780,9 @@ class Device:
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
 
-    def get_os_update_status(self, uuid_or_id: Union[str, int]) -> HUPStatusResponse:
+    def get_os_update_status(
+        self, uuid_or_id: Union[str, int]
+    ) -> HUPStatusResponse:
         """
         Get the OS update status of a device.
 
@@ -1502,3 +1805,122 @@ class Device:
             path=f"{device['uuid']}/{self.device_os.OS_UPDATE_ACTION_NAME}",
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
+
+    @deprecated("This is not supported on multicontainer devices, and will be removed in a future major release")
+    def get_application_info(self, uuid_or_id: Union[str, int]) -> Any:
+        """
+        ***Deprecated***
+        Return information about the application running on the device.
+        This function requires supervisor v1.8 or higher.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
+
+        Returns:
+            dict: dictionary contains application information.
+
+        Examples:
+            >>> balena.models.supervisor.get_application_info('7f66ec')
+        """
+
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": ["id", "supervisor_version"],
+                "$expand": {"belongs_to__application": {"$select": "id"}},
+            },
+        )
+
+        ensure_version_compatibility(
+            device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
+        )
+        app_id = device["belongs_to__application"][0]["id"]
+
+        return request(
+            method="POST",
+            path=f"/supervisor/v1/apps/{app_id}",
+            body={
+                "deviceId": device["id"],
+                "appId": app_id,
+                "method": "GET"
+            }
+        )
+
+    @deprecated("This is not supported on multicontainer devices, and will be removed in a future major release")
+    def start_application(self, uuid_or_id: Union[str, int]) -> None:
+        """
+        ***Deprecated***
+        Starts a user application container, usually after it has been stopped with `stop_application()`.
+        This function requires supervisor v1.8 or higher.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
+
+        Returns:
+            dict: dictionary contains started application container id.
+
+        Examples:
+            >>> balena.models.supervisor.start_application('8f66ec7')
+        """
+
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": ["id", "supervisor_version"],
+                "$expand": {"belongs_to__application": {"$select": "id"}},
+            },
+        )
+
+        ensure_version_compatibility(
+            device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
+        )
+        app_id = device["belongs_to__application"][0]["id"]
+        request(
+            method="POST",
+            path=f"/supervisor/v1/apps/{app_id}/start",
+            body={
+                "deviceId": device["id"],
+                "appId": app_id,
+            }
+        )
+
+    @deprecated("This is not supported on multicontainer devices, and will be removed in a future major release")
+    def stop_application(self, uuid_or_id: Union[str, int]):
+        """
+        ***Deprecated***
+        Temporarily stops a user application container.
+        Application container will not be removed after invoking this function and a
+        reboot or supervisor restart will cause the container to start again.
+        This function requires supervisor v1.8 or higher.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
+
+        Returns:
+            dict: dictionary contains stopped application container id.
+
+        Examples:
+            >>> balena.models.supervisor.stop_application('8f66ec')
+        """
+        def __stop_aplication():
+            device = self.get(
+                uuid_or_id,
+                {
+                    "$select": ["id", "supervisor_version"],
+                    "$expand": {"belongs_to__application": {"$select": "id"}},
+                },
+            )
+
+            ensure_version_compatibility(
+                device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
+            )
+            app_id = device["belongs_to__application"][0]["id"]
+            request(
+                method="POST",
+                path=f"/supervisor/v1/apps/{app_id}/stop",
+                body={
+                    "deviceId": device["id"],
+                    "appId": app_id,
+                }
+            )
+        with_supervisor_locked_error(__stop_aplication)

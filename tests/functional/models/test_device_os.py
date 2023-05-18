@@ -1,6 +1,6 @@
 import unittest
 
-from balena.models.hup import Hup
+from balena.hup import get_hup_action_type
 from tests.helper import TestHelper
 
 
@@ -9,7 +9,6 @@ class TestDevice(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
-        cls.hup = Hup()
 
     @classmethod
     def tearDownClass(cls):
@@ -37,7 +36,7 @@ class TestDevice(unittest.TestCase):
             "2.85.2+rev4.prod",
         ]
         for ver in testVersion:
-            self.hup.get_hup_action_type("", ver, ver)
+            get_hup_action_type("", ver, ver)
 
 
 if __name__ == "__main__":

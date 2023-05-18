@@ -11,13 +11,11 @@ from .device import Device
 from .device_os import DeviceOs
 from .device_type import DeviceType
 from .environment_variables import EnvironmentVariable
-from .history import History
 from .image import Image
 from .key import Key
 from .organization import Organization
 from .release import Release
 from .service import Service
-from .supervisor import Supervisor
 from .tag import Tag
 
 
@@ -30,7 +28,6 @@ class Models:
         self.key = Key()
         self.device_os = DeviceOs()
         self.device_type = DeviceType()
-        self.supervisor = Supervisor()
         self.image = Image()
         self.service = Service()
         self.release = Release()
@@ -38,4 +35,3 @@ class Models:
         self.api_key = ApiKey()
         self.tag = Tag()
         self.organization = Organization()
-        self.history = History()
