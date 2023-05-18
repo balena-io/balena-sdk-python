@@ -9,6 +9,7 @@ from ..dependent_resource import DependentResource
 from ..utils import merge, is_id, is_full_uuid
 from ..pine import pine
 from .device import Device
+from .service import Service
 
 
 class EnvironmentVariable:
@@ -21,6 +22,7 @@ class EnvironmentVariable:
         self.application = ApplicationEnvVariable()
         self.device = DeviceEnvVariable()
         self.device_service = DeviceServiceEnvVariable()
+        self.service = ServiceEnvVariable()
 
 
 class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
@@ -39,9 +41,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             lambda id: self.device.get(id, {"$select": "id"})["id"],
         )
 
-    def get_all_by_device(
-        self, uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[EnvironmentVariableBase]:
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
         """
         Get all device environment variables.
 
@@ -55,9 +55,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
         Examples:
             >>> balena.models.environment_variables.device.get_all_by_device('8deb12a')
         """
-        return super(DeviceEnvVariable, self)._get_all_by_parent(
-            uuid_or_id, options
-        )
+        return super(DeviceEnvVariable, self)._get_all_by_parent(uuid_or_id, options)
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -75,9 +73,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
         Examples:
             >>> balena.models.environment_variables.device.get_all_by_application(5780)
         """
-        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
-            "id"
-        ]
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceEnvVariable, self)._get_all(
             merge(
                 {
@@ -112,9 +108,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
         """
         return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
 
-    def set(
-        self, uuid_or_id: Union[str, int], env_var_name: str, value: str
-    ) -> None:
+    def set(self, uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
         """
         Set the value of a specific environment variable.
 
@@ -150,9 +144,7 @@ class DeviceServiceEnvVariable:
         self.device = Device()
         self.application = Application()
 
-    def get_all_by_device(
-        self, uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[EnvironmentVariableBase]:
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
         """
         Get all device environment variables.
 
@@ -202,9 +194,7 @@ class DeviceServiceEnvVariable:
         Examples:
             >>> balena.models.environment_variables.device_service.get_all_by_application(1043050)
         """
-        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})[
-            "id"
-        ]
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
         return pine.get(
             {
@@ -220,11 +210,7 @@ class DeviceServiceEnvVariable:
                                             "device": {
                                                 "$any": {
                                                     "$alias": "d",
-                                                    "$expr": {
-                                                        "d": {
-                                                            "belongs_to__application": app_id
-                                                        }
-                                                    },
+                                                    "$expr": {"d": {"belongs_to__application": app_id}},
                                                 }
                                             }
                                         }
@@ -239,9 +225,7 @@ class DeviceServiceEnvVariable:
             }
         )
 
-    def get(
-        self, uuid_or_id: Union[str, int], service_id: int, key: str
-    ) -> Optional[str]:
+    def get(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> Optional[str]:
         """
         Get the overriden value of a service variable on a device
 
@@ -283,9 +267,7 @@ class DeviceServiceEnvVariable:
         if isinstance(variables, list) and len(variables) == 1:
             return variables[0].get("value")
 
-    def set(
-        self, uuid_or_id: Union[str, int], service_id: int, key: str, value: str
-    ) -> None:
+    def set(self, uuid_or_id: Union[str, int], service_id: int, key: str, value: str) -> None:
         """
         Set the overriden value of a service variable on a device.
 
@@ -321,10 +303,7 @@ class DeviceServiceEnvVariable:
 
         if (
             service_installs is None
-            or (
-                isinstance(service_installs, list)
-                and len(service_installs) == 0
-            )
+            or (isinstance(service_installs, list) and len(service_installs) == 0)
             or service_installs[0] is None
         ):
             raise exceptions.ServiceNotFound(service_id)
@@ -332,16 +311,13 @@ class DeviceServiceEnvVariable:
         if len(service_installs) > 1:
             raise exceptions.AmbiguousDevice(uuid_or_id)
 
-        pine.upsert({
-            "resource": "device_service_environment_variable",
-            "id": {
-                "service_install": service_installs[0]["id"],
-                "name": key
-            },
-            "body": {
-                "value": value
+        pine.upsert(
+            {
+                "resource": "device_service_environment_variable",
+                "id": {"service_install": service_installs[0]["id"], "name": key},
+                "body": {"value": value},
             }
-        })
+        )
 
     def remove(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> None:
         """
@@ -357,25 +333,19 @@ class DeviceServiceEnvVariable:
         """
 
         device_id = self.device.get(uuid_or_id, {"$select": "id"})["id"]
-        pine.delete({
-            "resource": "device_service_environment_variable",
-            "options": {
-                "$filter": {
-                    "service_install": {
-                        "$any": {
-                            "$alias": "si",
-                            "$expr": {
-                                "si": {
-                                    "device": device_id,
-                                    "service": service_id
-                                }
-                            }
-                        }
-                    },
-                    "name": key
-                }
+        pine.delete(
+            {
+                "resource": "device_service_environment_variable",
+                "options": {
+                    "$filter": {
+                        "service_install": {
+                            "$any": {"$alias": "si", "$expr": {"si": {"device": device_id, "service": service_id}}}
+                        },
+                        "name": key,
+                    }
+                },
             }
-        })
+        )
 
 
 class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
@@ -425,9 +395,7 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
         """
         return super(ApplicationEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
 
-    def set(
-        self, slug_or_uuid_or_id: Union[str, int], env_var_name: str, value: str
-    ) -> None:
+    def set(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
         """
         Set the value of a specific application environment variable.
 
@@ -452,3 +420,113 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             >>> balena.models.environment_variables.application.remove(2184)
         """
         super(ApplicationEnvVariable, self)._remove(slug_or_uuid_or_id, key)
+
+
+class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements Service environment variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        self.service = Service()
+        self.application = Application()
+        super(ServiceEnvVariable, self).__init__(
+            "service_environment_variable",
+            "name",
+            "service",
+            lambda id: self.service._get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_service(self, id: int, options: AnyObject = {}) -> List[EnvironmentVariableBase]:
+        """
+        Get all variables for a service.
+
+        Args:
+            id (int): service id
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: service environment variables.
+
+        Examples:
+            >>> balena.models.environment_variables.service.get_all_by_service(1234)
+        """
+        return super(ServiceEnvVariable, self)._get_all_by_parent(id, options)
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all service variables by application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: application environment variables.
+
+        Examples:
+            >>> balena.models.environment_variables.service.get_all_by_application(9020)
+            >>> balena.models.environment_variables.service.get_all_by_application("myorg/myslug")
+        """
+        app_id = self.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+
+        return super(ServiceEnvVariable, self)._get_all(
+            merge({
+                "$filter": {
+                    "service": {
+                        "$any": {
+                            "$alias": "s",
+                            "$expr": {
+                                "s": {
+                                    "application": app_id
+                                }
+                            },
+                        }
+                    }
+                },
+                "$orderby": "name asc",
+            }, options)
+        )
+
+    def get(self, id: int, key: str) -> Optional[str]:
+        """
+        Get the value of a specific service variable
+
+        Args:
+            id (int): service id
+            key (str): variable name
+
+        Examples:
+            >>> balena.models.environment_variables.service.get(1234,'test_env4')
+        """
+        return super(ServiceEnvVariable, self)._get(id, key)
+
+    def set(self, id: int, key: str, value: str) -> None:
+        """
+        Set the value of a specific application environment variable.
+
+        Args:
+            id (int): service id
+            key (str): variable name
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.environment_variables.service.set(1234,'test_env4', 'value')
+        """
+        super(ServiceEnvVariable, self)._set(id, key, value)
+
+    def remove(self, id: int, key: str) -> None:
+        """
+        Clear the value of a specific service variable
+
+        Args:
+            id (int): service id
+            key (str): variable name
+
+        Examples:
+            >>> balena.models.environment_variables.service.remove(1234,'test_env4')
+        """
+        super(ServiceEnvVariable, self)._remove(id, key)

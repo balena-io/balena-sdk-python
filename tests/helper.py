@@ -50,6 +50,8 @@ class TestHelper:
 
         self.default_organization = self.balena.models.organization.get(self.balena.auth.who_am_i())
 
+        self.application_retrieval_fields = ["id", "slug", "uuid"]
+
     @classmethod
     def load_env(cls):
         env_file_name = ".env"
@@ -198,6 +200,7 @@ class TestHelper:
             "commit": "new-release-commit",
             "status": "success",
             "source": "cloud",
+            "semver": "1.1.1",
             "composition": {},
             "start_timestamp": 54321,
         }
@@ -210,6 +213,10 @@ class TestHelper:
                 endpoint=self.settings.get("pine_endpoint"),
             ).decode("utf-8")
         )
+
+        new_release = self.balena.models.release.get(new_release["id"], {
+            "$select": ["id", "commit", "raw_version", "belongs_to__application"]
+        })
 
         # Set device to the new release
 
@@ -448,6 +455,7 @@ class TestHelper:
             "commit": "old-release-commit",
             "status": "success",
             "source": "cloud",
+            "semver": "0.0.0",
             "composition": {},
             "start_timestamp": 1234,
         }
@@ -467,6 +475,7 @@ class TestHelper:
             "commit": "new-release-commit",
             "status": "success",
             "source": "cloud",
+            "semver": "1.0.0",
             "composition": {},
             "start_timestamp": 54321,
         }
@@ -479,6 +488,10 @@ class TestHelper:
                 endpoint=self.settings.get("pine_endpoint"),
             ).decode("utf-8")
         )
+
+        new_release = self.balena.models.release.get(new_release["id"], {
+            "$select": ["id", "commit", "raw_version", "belongs_to__application"]
+        })
 
         return {"app": app, "old_release": old_release, "current_release": new_release}
 

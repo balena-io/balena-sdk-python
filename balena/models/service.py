@@ -1,5 +1,11 @@
-from ..base_request import BaseRequest
-from ..settings import Settings
+from typing import Union, List
+
+from . import application as app_module
+from ..types import AnyObject
+from ..pine import pine
+from ..utils import merge
+from .. import exceptions
+from ..types.models import ServiceType
 
 
 class Service:
@@ -8,41 +14,33 @@ class Service:
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
+    def _get(self, id: int, options: AnyObject = {}):
+        service = pine.get({"resource": "service", "id": id, "options": options})
 
-    def __get_by_option(self, key, value):
-        """
-        Private function to get a specific service using any possible key.
+        if service is None:
+            raise exceptions.ServiceNotFound(id)
 
-        Args:
-            key (str): query field.
-            value (str): key's value.
+        return service
 
-        Returns:
-            list: service info.
-
-        """
-
-        params = {"filter": key, "eq": value}
-
-        services = self.base_request.request(
-            "service", "GET", params=params, endpoint=self.settings.get("pine_endpoint")
-        )
-
-        return services["d"]
-
-    def get_all_by_application(self, app_id):
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[ServiceType]:
         """
         Get all services from an application.
 
         Args:
-            app_id (str): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: service info.
-
+            List[ServiceType]: service info.
         """
 
-        return self.__get_by_option("application", app_id)
+        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+
+        return pine.get({
+            "resource": "service",
+            "options": merge({
+                "$filter": {"application": app_id}
+            }, options)
+        })

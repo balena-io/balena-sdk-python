@@ -134,7 +134,7 @@ class TestDevice(unittest.TestCase):
             self.balena.models.device.is_online("9999999999999999")
 
     def test_15_note(self):
-        self.balena.models.device.note(TestDevice.device["uuid"], "Python SDK Test")
+        self.balena.models.device.set_note(TestDevice.device["uuid"], "Python SDK Test")
         self.assertEqual(
             self.balena.models.device.get(TestDevice.device["uuid"])["note"],
             "Python SDK Test",

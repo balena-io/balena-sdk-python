@@ -644,7 +644,7 @@ class Device:
         """
         self.__set(uuid_or_id, {"device_name": new_name})
 
-    def note(
+    def set_note(
         self, uuid_or_id_or_ids: Union[str, int, List[int]], note: str
     ) -> None:
         """

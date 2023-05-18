@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, TypedDict
+from typing import Any, Literal, Optional, TypedDict, List, Union
 
 
 class APIKeyType(TypedDict):
@@ -214,3 +214,100 @@ class EnvironmentVariableBase(TypedDict):
     id: int
     name: str
     value: str
+
+
+class ImageType(TypedDict):
+    id: int
+    created_at: str
+    build_log: str
+    contract: Any
+    content_hash: str
+    project_type: str
+    status: str
+    is_stored_at__image_location: str
+    start_timestamp: str
+    end_timestamp: str
+    push_timestamp: str
+    image_size: int
+    dockerfile: str
+    error_message: str
+    is_a_build_of__service: Any
+    release_image: Any
+
+
+class ServiceType(TypedDict):
+    id: int
+    created_at: str
+    service_name: str
+    application: Any
+    is_built_by__image: Any
+    service_environment_variable: Any
+    device_service_environment_variable: Any
+
+
+ReleaseStatus = Literal["cancelled", "error", "failed", "interrupted", "local", "running", "success", "timeout"]
+
+
+class ReleaseVersion(TypedDict):
+    raw: str
+    major: int
+    minor: int
+    patch: int
+    version: str
+    build: List[str]
+    prerelease: List[Union[str, int]]
+
+
+class ReleaseType(TypedDict):
+    id: int
+    created_at: str
+    commit: str
+    composition: Any
+    contract: Any
+    status: ReleaseStatus
+    source: str
+    build_log: str
+    is_invalidated: bool
+    start_timestamp: str
+    update_timestamp: str
+    end_timestamp: str
+    phase: Literal["next", "current", "sunset", "end-of-life"]
+    semver: str
+    semver_major: int
+    semver_minor: int
+    semver_patch: int
+    semver_prerelease: str
+    semver_build: str
+    variant: str
+    revision: int
+    known_issue_list: str
+    # This is a computed term
+    raw_version: str
+    # This is a computed term
+    version: ReleaseVersion
+    is_final: bool
+    is_finalized_at__date: str
+    note: str
+    invalidation_reason: str
+    is_created_by__user: Any
+    belongs_to__application: Any
+    release_image: Any
+    should_be_running_on__application: Any
+    is_running_on__device: Any
+    should_be_running_on__device: Any
+    release_tag: Any
+
+
+class ImageBasicInfoType(TypedDict):
+    id: int
+    service_name: str
+
+
+class BasicUserInfoType(TypedDict):
+    id: int
+    username: str
+
+
+class ReleaseWithImageDetailsType(ReleaseType):
+    images: List[ImageBasicInfoType]
+    user: BasicUserInfoType
