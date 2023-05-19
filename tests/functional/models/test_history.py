@@ -5,7 +5,6 @@ from tests.helper import TestHelper
 
 
 class TestHistory(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()

@@ -13,20 +13,15 @@ from .settings import settings
 
 class PineClient(PinejsClientCore):
     def __init__(self, params: Optional[Params] = None):
-
         if params is None:
             params = {}
 
         api_url = settings.get("api_endpoint")
         api_version = settings.get("api_version")
 
-        super().__init__(
-            {**params, "api_prefix": urljoin(api_url, api_version) + "/"}
-        )
+        super().__init__({**params, "api_prefix": urljoin(api_url, api_version) + "/"})
 
-    def _request(
-        self, method: str, url: str, body: Optional[Any] = None
-    ) -> Any:
+    def _request(self, method: str, url: str, body: Optional[Any] = None) -> Any:
         token = get_token()
 
         headers = {"Content-Type": "application/json"}
@@ -45,9 +40,7 @@ class PineClient(PinejsClientCore):
             except Exception:
                 return req.content.decode()
         else:
-            raise RequestError(
-                body=req.content.decode(), status_code=req.status_code
-            )
+            raise RequestError(body=req.content.decode(), status_code=req.status_code)
 
 
 pine = PineClient()

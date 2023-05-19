@@ -4,7 +4,6 @@ from tests.helper import TestHelper
 
 
 class TestDeviceType(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()

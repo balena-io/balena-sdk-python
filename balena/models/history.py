@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-
-from typing import Union, Optional, List
+from typing import List, Optional, Union
 
 from .. import exceptions
 from ..pine import pine
-from ..utils import is_full_uuid, is_id, merge
-from ..types.models import DeviceHistoryType
 from ..types import AnyObject
+from ..types.models import DeviceHistoryType
+from ..utils import is_full_uuid, is_id, merge
 from . import application as app_module
 
 
@@ -31,9 +30,7 @@ def history_timerange_filter_with_guard(from_date=None, to_date=None):
     if filter == {}:
         return {}
 
-    return {
-        "created_at": filter
-    }
+    return {"created_at": filter}
 
 
 class DeviceHistory:
@@ -43,11 +40,11 @@ class DeviceHistory:
     """
 
     def get_all_by_device(
-            self,
-            uuid_or_id: Union[str, int],
-            from_date: datetime = datetime.utcnow() + timedelta(days=-7),
-            to_date: Optional[datetime] = None,
-            options: AnyObject = {}
+        self,
+        uuid_or_id: Union[str, int],
+        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        to_date: Optional[datetime] = None,
+        options: AnyObject = {},
     ) -> List[DeviceHistoryType]:
         """
         Get all device history entries for a device.
@@ -82,17 +79,14 @@ class DeviceHistory:
         else:
             raise exceptions.InvalidParameter("uuid_or_id", uuid_or_id)
 
-        return pine.get({
-            "resource": "device_history",
-            "options": merge({"$filter": dollar_filter}, options)
-        })
+        return pine.get({"resource": "device_history", "options": merge({"$filter": dollar_filter}, options)})
 
     def get_all_by_application(
-            self,
-            slug_or_uuid_or_id: Union[str, int],
-            from_date: datetime = datetime.utcnow() + timedelta(days=-7),
-            to_date: Optional[datetime] = None,
-            options: AnyObject = {}
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        to_date: Optional[datetime] = None,
+        options: AnyObject = {},
     ) -> List[DeviceHistoryType]:
         """
         Get all device history entries for an application.
@@ -120,12 +114,17 @@ class DeviceHistory:
         """
         app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        return pine.get({
-            "resource": "device_history",
-            "options": merge({
-                "$filter": {
-                    **history_timerange_filter_with_guard(from_date, to_date),
-                    "belongs_to__application": app_id
-                }
-            }, options)
-        })
+        return pine.get(
+            {
+                "resource": "device_history",
+                "options": merge(
+                    {
+                        "$filter": {
+                            **history_timerange_filter_with_guard(from_date, to_date),
+                            "belongs_to__application": app_id,
+                        }
+                    },
+                    options,
+                ),
+            }
+        )

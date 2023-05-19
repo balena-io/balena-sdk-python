@@ -1,8 +1,8 @@
 import unittest
 from datetime import datetime
 
-from tests.helper import TestHelper
 from balena.models.device import LocationType
+from tests.helper import TestHelper
 
 
 class TestDevice(unittest.TestCase):

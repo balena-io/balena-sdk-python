@@ -1,11 +1,9 @@
 from typing import List, Optional, Union
 
 from .. import exceptions
-from ..auth import Auth
 from ..balena_auth import request
-from ..base_request import BaseRequest
+from ..dependent_resource import DependentResource
 from ..pine import pine
-from ..settings import Settings
 from ..types import AnyObject, ResourceKey
 from ..types.models import (
     OrganizationInviteType,
@@ -14,8 +12,6 @@ from ..types.models import (
     OrganizationType,
 )
 from ..utils import is_id, merge
-from ..dependent_resource import DependentResource
-from .config import Config
 
 
 class Organization:
@@ -25,16 +21,10 @@ class Organization:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
         self.invite = OrganizationInvite()
         self.membership = OrganizationMembership()
 
-    def create(
-        self, name: str, handle: Optional[str] = None
-    ) -> OrganizationType:
+    def create(self, name: str, handle: Optional[str] = None) -> OrganizationType:
         """
         Creates a new organization.
 
@@ -76,9 +66,7 @@ class Organization:
             }
         )
 
-    def get(
-        self, handle_or_id: Union[str, int], options: AnyObject = {}
-    ) -> OrganizationType:
+    def get(self, handle_or_id: Union[str, int], options: AnyObject = {}) -> OrganizationType:
         """
         Get a single organization.
 
@@ -103,9 +91,7 @@ class Organization:
         org = pine.get(
             {
                 "resource": "organization",
-                "id": handle_or_id
-                if is_id(handle_or_id)
-                else {"handle": handle_or_id},
+                "id": handle_or_id if is_id(handle_or_id) else {"handle": handle_or_id},
                 "options": options,
             }
         )
@@ -136,10 +122,6 @@ class OrganizationInvite:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
         self.RESOURCE = "invitee__is_invited_to__organization"
 
     def get_all(self, options: AnyObject = {}) -> List[OrganizationInviteType]:
@@ -174,9 +156,7 @@ class OrganizationInvite:
             >>> balena.models.organization.invite.get_all_by_organization(26474)
         """
         org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
-        return self.get_all(
-            merge({"$filter": {"is_invited_to__organization": org_id}}, options)
-        )
+        return self.get_all(merge({"$filter": {"is_invited_to__organization": org_id}}, options))
 
     def create(
         self,
@@ -221,9 +201,7 @@ class OrganizationInvite:
         }
         if roles is not None:
             if len(roles) == 0 and role_name is not None:
-                raise exceptions.BalenaOrganizationMembershipRoleNotFound(
-                    role_name
-                )
+                raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name)
             body["organization_membership_role"] = roles[0].get("id")
 
         return pine.post({"resource": self.RESOURCE, "body": body})
@@ -259,16 +237,10 @@ class OrganizationMembership:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
-        self.tag = OrganizationMembershipTag()
+        self.tags = OrganizationMembershipTag()
         self.RESOURCE = "organization_membership"
 
-    def get_all(
-        self, options: AnyObject = {}
-    ) -> List[OrganizationMembershipType]:
+    def get_all(self, options: AnyObject = {}) -> List[OrganizationMembershipType]:
         """
         Get all organization memberships.
 
@@ -279,7 +251,7 @@ class OrganizationMembership:
             List[OrganizationMembershipType]: organization memberships.
 
         Examples:
-            >>> balena.models.organization.membership.get_all()
+            >>> balena.models.organization.memberships.tags.get_all()
         """
 
         return pine.get({"resource": self.RESOURCE, "options": options})
@@ -298,7 +270,7 @@ class OrganizationMembership:
             List[OrganizationMembershipType]: organization memberships.
 
         Examples:
-            >>> balena.models.organization.membership.get_all_by_organization(3014)
+            >>> balena.models.organization.memberships.get_all_by_organization(3014)
         """
 
         org_id = organization.get(handle_or_id, {"$select": "id"})
@@ -317,7 +289,7 @@ class OrganizationMembership:
             Organization membership.
 
         Examples:
-            >>> balena.models.organization.membership.get(17608)
+            >>> balena.models.organization.memberships.get(17608)
         """
         result = pine.get(
             {
@@ -340,10 +312,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
 
     def __init__(self):
         super(OrganizationMembershipTag, self).__init__(
-            "organization_membership_tag",
-            "tag_key",
-            "organization_membership",
-            lambda id: organization.get(id)["id"]
+            "organization_membership_tag", "tag_key", "organization_membership", lambda id: organization.get(id)["id"]
         )
 
     def get_all_by_organization(
@@ -360,7 +329,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             List[OrganizationMembershipTagType]: organization membership tags.
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all_by_organization(3014)
+            >>> balena.models.organization.memberships.tags.get_all_by_organization(3014)
         """
         org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
         return super(OrganizationMembershipTag, self)._get_all(
@@ -370,9 +339,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
                         "organization_membership": {
                             "$any": {
                                 "$alias": "om",
-                                "$expr": {
-                                    "om": {"is_member_of__organization": org_id}
-                                },
+                                "$expr": {"om": {"is_member_of__organization": org_id}},
                             }
                         }
                     }
@@ -395,12 +362,10 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             list: organization membership tags.
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
+            >>> balena.models.organization.memberships.tags.get_all_by_organization_membership(17608)
         """
 
-        return super(OrganizationMembershipTag, self)._get_all_by_parent(
-            membership_id, options
-        )
+        return super(OrganizationMembershipTag, self)._get_all_by_parent(membership_id, options)
 
     def get_all(self, options: AnyObject = {}):
         """
@@ -411,7 +376,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
 
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all()
+            >>> balena.models.organization.memberships.tags.get_all()
         """
 
         return super(OrganizationMembershipTag, self)._get_all(options)
@@ -425,12 +390,10 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.organization.membership.tag.get(17608, 'mTag1')
+            >>> balena.models.organization.memberships.tags.get(17608, 'mTag1')
         """
 
-        return super(OrganizationMembershipTag, self)._get(
-            membership_id, tag_key
-        )
+        return super(OrganizationMembershipTag, self)._get(membership_id, tag_key)
 
     def set(self, membership_id: int, tag_key: str, value: str):
         """
@@ -442,12 +405,10 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             value (str): tag value.
 
         Examples:
-            >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
+            >>> balena.models.organization.memberships.tags.set(17608, 'mTag1', 'Python SDK')
         """
 
-        return super(OrganizationMembershipTag, self)._set(
-            membership_id, tag_key, value
-        )
+        return super(OrganizationMembershipTag, self)._set(membership_id, tag_key, value)
 
     def remove(self, membership_id: int, tag_key: str):
         """
@@ -458,12 +419,10 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.organization.membership.tag.remove(17608, 'mTag1')
+            >>> balena.models.organization.memberships.tags.remove(17608, 'mTag1')
         """
 
-        return super(OrganizationMembershipTag, self)._remove(
-            membership_id, tag_key
-        )
+        return super(OrganizationMembershipTag, self)._remove(membership_id, tag_key)
 
 
 organization = Organization()

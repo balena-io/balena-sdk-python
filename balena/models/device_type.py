@@ -13,6 +13,59 @@ class DeviceType(object):
 
     """
 
+    def get(self, id_or_slug: Union[str, int], options: AnyObject = {}) -> DeviceTypeType:
+        """
+        Get a single device type.
+
+        Args:
+            id_or_slug (Union[str, int]): device type slug or alias (string) or id (int).
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            DeviceTypeType: Returns the device type
+        """
+
+        if id_or_slug is None:
+            raise exceptions.InvalidDeviceType(id_or_slug)
+
+        if isinstance(id_or_slug, str):
+            device_types = self.get_all(
+                merge(
+                    {
+                        "$top": 1,
+                        "$filter": {
+                            "device_type_alias": {
+                                "$any": {
+                                    "$alias": "dta",
+                                    "$expr": {
+                                        "dta": {
+                                            "is_referenced_by__alias": id_or_slug,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    options,
+                )
+            )
+            device_type = None
+            if len(device_types) > 0:
+                device_type = device_types[0]
+        else:
+            device_type = pine.get(
+                {
+                    "resource": "device_type",
+                    "id": id_or_slug,
+                    "options": options,
+                }
+            )
+
+        if device_type is None:
+            raise exceptions.InvalidDeviceType(id_or_slug)
+
+        return device_type
+
     def get_all(self, options: AnyObject = {}) -> List[DeviceTypeType]:
         """
         Get all device types.
@@ -75,64 +128,7 @@ class DeviceType(object):
             )
         )
 
-    def get(
-        self, id_or_slug: Union[str, int], options: AnyObject = {}
-    ) -> DeviceTypeType:
-        """
-        Get a single device type.
-
-        Args:
-            id_or_slug (Union[str, int]): device type slug or alias (string) or id (int).
-            options (AnyObject): extra pine options to use.
-
-        Returns:
-            DeviceTypeType: Returns the device type
-        """
-
-        if id_or_slug is None:
-            raise exceptions.InvalidDeviceType(id_or_slug)
-
-        if isinstance(id_or_slug, str):
-            device_types = self.get_all(
-                merge(
-                    {
-                        "$top": 1,
-                        "$filter": {
-                            "device_type_alias": {
-                                "$any": {
-                                    "$alias": "dta",
-                                    "$expr": {
-                                        "dta": {
-                                            "is_referenced_by__alias": id_or_slug,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    options,
-                )
-            )
-            device_type = None
-            if len(device_types) > 0:
-                device_type = device_types[0]
-        else:
-            device_type = pine.get(
-                {
-                    "resource": "device_type",
-                    "id": id_or_slug,
-                    "options": options,
-                }
-            )
-
-        if device_type is None:
-            raise exceptions.InvalidDeviceType(id_or_slug)
-
-        return device_type
-
-    def get_by_slug_or_name(
-        self, slug_or_name: str, options: AnyObject = {}
-    ) -> DeviceTypeType:
+    def get_by_slug_or_name(self, slug_or_name: str, options: AnyObject = {}) -> DeviceTypeType:
         """
         Get a single device type by slug or name.
 
@@ -148,9 +144,7 @@ class DeviceType(object):
             merge(
                 {
                     "$top": 1,
-                    "$filter": {
-                        "$or": [{"name": slug_or_name}, {"slug": slug_or_name}]
-                    },
+                    "$filter": {"$or": [{"name": slug_or_name}, {"slug": slug_or_name}]},
                 },
                 options,
             )

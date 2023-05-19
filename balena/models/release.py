@@ -1,10 +1,11 @@
-from typing import TypedDict, Union, Any, List, Optional
+from typing import Any, List, Optional, TypedDict, Union
 
 from .. import exceptions
 from ..builder import build_from_url
+from ..dependent_resource import DependentResource
 from ..pine import pine
 from ..types import AnyObject
-from ..types.models import ReleaseType, ReleaseWithImageDetailsType
+from ..types.models import BaseTagType, ReleaseType, ReleaseWithImageDetailsType
 from ..utils import is_id, merge
 from . import application as app_module
 
@@ -19,6 +20,9 @@ class Release:
     This class implements release model for balena python SDK.
 
     """
+
+    def __init__(self):
+        self.tags = ReleaseTag()
 
     def __set(
         self,
@@ -137,9 +141,7 @@ class Release:
 
         return release
 
-    def get_all_by_application(
-        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[ReleaseType]:
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[ReleaseType]:
         """
         Get all releases from an application.
 
@@ -273,3 +275,153 @@ class Release:
             known_issue_list (Optional[str]): the known issue list.
         """
         self.__set(commit_or_id_or_raw_version, {"known_issue_list": known_issue_list})
+
+
+class ReleaseTag(DependentResource[BaseTagType]):
+    """
+    This class implements release tag model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(ReleaseTag, self).__init__(
+            "release_tag",
+            "tag_key",
+            "release",
+            lambda id: release.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all device tags for an application.
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.release.tag.get_all_by_application(1005160)
+        """
+
+        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        return super(ReleaseTag, self)._get_all(
+            merge(
+                {
+                    "$filter": {
+                        "release": {
+                            "$any": {
+                                "$alias": "r",
+                                "$expr": {"r": {"belongs_to__application": app_id}},
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
+
+    def get_all_by_release(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        options: AnyObject = {},
+    ) -> List[BaseTagType]:
+        """
+        Get all release tags for a release.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.release.tags.get_all_by_release(135)
+        """
+
+        release_opts = {
+            "$select": "id",
+            "$expand": {"release_tag": merge({"$orderby": "tag_key asc"}, options)},
+        }
+        return release.get(commit_or_id_or_raw_version, release_opts)["release_tag"]
+
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all release tags.
+
+        Args:
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.release.tags.get_all()
+        """
+        return super(ReleaseTag, self)._get_all(options)
+
+    def set(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+        value: str,
+    ) -> None:
+        """
+        Set a release tag (update tag value if it exists).
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            BaseTagType: dict contains release
+
+        Examples:
+            >>> balena.models.release.tags.set(465307, 'releaseTag1', 'Python SDK')
+        """
+        super(ReleaseTag, self)._set(commit_or_id_or_raw_version, tag_key, value)
+
+    def get(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+    ) -> Optional[str]:
+        """
+        Get a single release tag.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+
+        Returns:
+            BaseTagType: dict contains release
+
+        Examples:
+            >>> balena.models.release.tags.get(465307, 'releaseTag1')
+        """
+        return super(ReleaseTag, self)._get(commit_or_id_or_raw_version, tag_key)
+
+    def remove(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+    ) -> None:
+        """
+        Remove a release tag.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.release.tags.remove(135, 'releaseTag1')
+        """
+
+        super(ReleaseTag, self)._remove(commit_or_id_or_raw_version, tag_key)
+
+
+release = Release()

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from ..balena_auth import request
+from typing import List, TypedDict
 
-from typing import TypedDict, List
 from typing_extensions import NotRequired
+
+from ..balena_auth import request
+from ..utils import normalize_device_os_version
 
 
 class GaConfig(TypedDict):
@@ -43,4 +45,4 @@ class Config:
             >>> balena.models.config.get_all()
         """
 
-        return request(method="GET", path="/config")
+        return normalize_device_os_version(request(method="GET", path="/config"))

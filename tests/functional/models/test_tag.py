@@ -130,7 +130,7 @@ class TestDeviceTag(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
-        cls.device_tag = cls.balena.models.tag.device
+        cls.device_tag = cls.balena.models.device.tags
         cls.base_tag_test = BaseTagTest(cls.device_tag, "device")
         # Wipe all apps before every test case.
         cls.helper.wipe_application()
@@ -168,7 +168,7 @@ class TestApplicationTag(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
-        cls.base_tag_test = BaseTagTest(cls.balena.models.tag.application, "application")
+        cls.base_tag_test = BaseTagTest(cls.balena.models.application.tags, "application")
         app, device = cls.helper.create_device()
         cls.app = app
         cls.device = device
@@ -196,7 +196,7 @@ class TestReleaseTag(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
-        cls.release_tag = cls.balena.models.tag.release
+        cls.release_tag = cls.balena.models.release.tags
         cls.base_tag_test = BaseTagTest(cls.release_tag, "release")
         # Wipe all apps before every test case.
         cls.helper.wipe_application()

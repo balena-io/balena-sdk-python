@@ -1,7 +1,7 @@
 import numbers
 import re
 from collections import defaultdict
-from typing import Any, Callable, Dict, Literal, TypeVar, Optional
+from typing import Any, Callable, Dict, Literal, Optional, TypeVar
 
 from semver.version import Version
 

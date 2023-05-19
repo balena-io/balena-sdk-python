@@ -1,4 +1,5 @@
 from typing import Literal, Optional
+
 from semver.version import Version
 
 from . import exceptions
@@ -31,16 +32,12 @@ def get_hup_action_type(device_type: str, current_version: Optional[str], target
         raise exceptions.OsUpdateError("Invalid target balenaOS version")
 
     if parsed_current_ver.prerelease or parsed_target_ver.prerelease:
-        raise exceptions.OsUpdateError(
-            "Updates cannot be performed on pre-release balenaOS versions"
-        )
+        raise exceptions.OsUpdateError("Updates cannot be performed on pre-release balenaOS versions")
 
     cur_variant = __get_variant(parsed_current_ver)
     target_variant = __get_variant(parsed_target_ver)
 
-    if target_variant is not None and (
-        (cur_variant == "dev") != (target_variant == "dev")
-    ):
+    if target_variant is not None and ((cur_variant == "dev") != (target_variant == "dev")):
         raise exceptions.OsUpdateError(
             "Updates cannot be performed between development and production balenaOS variants"
         )
@@ -49,17 +46,7 @@ def get_hup_action_type(device_type: str, current_version: Optional[str], target
         raise exceptions.OsUpdateError("OS downgrades are not allowed")
 
     # For 1.x -> 2.x or 2.x to 2.x only
-    if (
-        parsed_target_ver.major > 1
-        and Version.parse(target_version).compare(MIN_TARGET_VERSION)
-        < 0
-    ):
-        raise exceptions.OsUpdateError(
-            "Target balenaOS version must be greater than {0}".format(
-                MIN_TARGET_VERSION
-            )
-        )
+    if parsed_target_ver.major > 1 and Version.parse(target_version).compare(MIN_TARGET_VERSION) < 0:
+        raise exceptions.OsUpdateError("Target balenaOS version must be greater than {0}".format(MIN_TARGET_VERSION))
 
-    return "resinhup{from_v}{to_v}".format(
-        from_v=parsed_current_ver.major, to_v=parsed_target_ver.major
-    )
+    return "resinhup{from_v}{to_v}".format(from_v=parsed_current_ver.major, to_v=parsed_target_ver.major)

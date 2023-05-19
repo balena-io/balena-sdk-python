@@ -18,9 +18,9 @@ class ApiKey:
     """
 
     def __init__(self):
-        self.application = Application()
-        self.auth = Auth()
-        self.device = Device()
+        self.__application = Application()
+        self.__auth = Auth()
+        self.__device = Device()
 
     def create(
         self,
@@ -51,9 +51,7 @@ class ApiKey:
         if expiry_date is not None and isinstance(expiry_date, str):
             api_key_body["expiry_date"] = expiry_date
 
-        return request(
-            method="POST", path="/api-key/user/full", body=api_key_body
-        ).strip('"')
+        return request(method="POST", path="/api-key/user/full", body=api_key_body).strip('"')
 
     def get_all(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
@@ -90,13 +88,8 @@ class ApiKey:
         if api_key_info is None:
             raise exceptions.InvalidParameter("apiKeyInfo", api_key_info)
 
-        if (
-            api_key_info.get("name") is not None
-            and api_key_info.get("name") == ""
-        ):
-            raise exceptions.InvalidParameter(
-                "apiKeyInfo.name", api_key_info.get("name")
-            )
+        if api_key_info.get("name") is not None and api_key_info.get("name") == "":
+            raise exceptions.InvalidParameter("apiKeyInfo.name", api_key_info.get("name"))
 
         body = {
             "description": api_key_info.get("description"),
@@ -137,14 +130,10 @@ class ApiKey:
             >>> balena.models.api_key.get_provisioning_api_keys_by_application("myorg/myapp")
         """
 
-        app = self.application.get(slug_or_uuid_or_id, {"$select": "actor"})
-        return self.get_all(
-            merge({"$filter": {"is_of__actor": app.get("actor")}}, options)
-        )
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "actor"})
+        return self.get_all(merge({"$filter": {"is_of__actor": app.get("actor")}}, options))
 
-    def get_device_api_keys_by_device(
-        self, uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[APIKeyType]:
+    def get_device_api_keys_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[APIKeyType]:
         """
         Get all API keys for a device.
 
@@ -157,14 +146,10 @@ class ApiKey:
             >>> balena.models.api_key.get_device_api_keys_by_device(1111386)
         """
 
-        dev = self.device.get(uuid_or_id, {"$select": "actor"})
-        return self.get_all(
-            merge({"$filter": {"is_of__actor": dev["actor"]}}, options)
-        )
+        dev = self.__device.get(uuid_or_id, {"$select": "actor"})
+        return self.get_all(merge({"$filter": {"is_of__actor": dev["actor"]}}, options))
 
-    def get_all_named_user_api_keys(
-        self, options: AnyObject = {}
-    ) -> List[APIKeyType]:
+    def get_all_named_user_api_keys(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
         Get all named user API keys of the current user.
 
@@ -179,7 +164,7 @@ class ApiKey:
             merge(
                 {
                     "$filter": {
-                        "is_of__actor": self.auth.get_user_actor_id(),
+                        "is_of__actor": self.__auth.get_user_actor_id(),
                         "name": {"$ne": None},
                     }
                 },

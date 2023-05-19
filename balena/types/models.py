@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, TypedDict, List, Union
+from typing import Any, List, Literal, Optional, TypedDict, Union
 
 
 class APIKeyType(TypedDict):

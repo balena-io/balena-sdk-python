@@ -1,8 +1,8 @@
+from .. import exceptions
 from ..pine import pine
 from ..types import AnyObject
 from ..types.models import ImageType
 from ..utils import merge
-from .. import exceptions
 
 
 class Image:
@@ -16,31 +16,28 @@ class Image:
 
         Args:
             id (int): image id.
+            options (AnyObject): extra pine options to use.
 
         Returns:
             ImageType: image info.
         """
         base_options = {
             "$select": [
-                    "id",
-                    "content_hash",
-                    "dockerfile",
-                    "project_type",
-                    "status",
-                    "error_message",
-                    "image_size",
-                    "created_at",
-                    "push_timestamp",
-                    "start_timestamp",
-                    "end_timestamp"
-                ]
+                "id",
+                "content_hash",
+                "dockerfile",
+                "project_type",
+                "status",
+                "error_message",
+                "image_size",
+                "created_at",
+                "push_timestamp",
+                "start_timestamp",
+                "end_timestamp",
+            ]
         }
 
-        image = pine.get({
-            "resource": "image",
-            "id": id,
-            "options": merge(base_options, options, True)
-        })
+        image = pine.get({"resource": "image", "id": id, "options": merge(base_options, options, True)})
 
         if image is None:
             raise exceptions.ImageNotFound(id)

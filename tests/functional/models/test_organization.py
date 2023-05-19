@@ -30,9 +30,7 @@ class TestOrganization(unittest.TestCase):
         self.assertIsInstance(TestOrganization.org1["handle"], str)
 
         # should be able to create a new organization with handle
-        TestOrganization.org2 = self.balena.models.organization.create(
-            self.test_org_name, self.test_org_custom_handle
-        )
+        TestOrganization.org2 = self.balena.models.organization.create(self.test_org_name, self.test_org_custom_handle)
         self.assertEqual(TestOrganization.org2["name"], self.test_org_name)
         self.assertEqual(TestOrganization.org2["handle"], self.test_org_custom_handle)
 
@@ -54,9 +52,7 @@ class TestOrganization(unittest.TestCase):
 
     def test_get(self):
         # should be rejected if the organization id does not exist and raise balena.exceptions.OrganizationNotFound.
-        with self.assertRaises(
-            self.helper.balena_exceptions.OrganizationNotFound
-        ) as cm:
+        with self.assertRaises(self.helper.balena_exceptions.OrganizationNotFound) as cm:
             self.balena.models.organization.get("999999999")
         self.assertIn("Organization not found: 999999999", cm.exception.message)
 
@@ -83,16 +79,12 @@ class TestOrganization(unittest.TestCase):
             "Python SDK test invite",
         )
         self.assertEqual(invite["message"], "Python SDK test invite")
-        self.assertEqual(
-            invite["is_invited_to__organization"]["__id"], TestOrganization.org1["id"]
-        )
+        self.assertEqual(invite["is_invited_to__organization"]["__id"], TestOrganization.org1["id"])
         self.balena.models.organization.invite.revoke(invite["id"])
 
         # should throw an error when role is not found
         # raise balena.exceptions.BalenaOrganizationMembershipRoleNotFound if  role is not found.
-        with self.assertRaises(
-            self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound
-        ):
+        with self.assertRaises(self.helper.balena_exceptions.BalenaOrganizationMembershipRoleNotFound):
             invite = self.balena.models.organization.invite.create(
                 TestOrganization.org1["id"],
                 self.helper.credentials["email"],
@@ -116,23 +108,15 @@ class TestOrganization(unittest.TestCase):
         self.assertEqual(1, len(invite_list))
 
     def test_invite_get_all_by_organization(self):
-        invite_list = self.balena.models.organization.invite.get_all_by_organization(
-            TestOrganization.org1["id"]
-        )
+        invite_list = self.balena.models.organization.invite.get_all_by_organization(TestOrganization.org1["id"])
         self.assertEqual(1, len(invite_list))
 
     def test_membership_get_all_by_organization(self):
         # shoud return only the user's own membership
-        memberships = (
-            self.balena.models.organization.membership.get_all_by_organization(
-                TestOrganization.org1["id"]
-            )
-        )
+        memberships = self.balena.models.organization.membership.get_all_by_organization(TestOrganization.org1["id"])
         self.assertEqual(1, len(memberships))
         self.assertEqual(memberships[0]["user"]["__id"], self.balena.auth.get_user_id())
-        self.assertEqual(
-            memberships[0]["is_member_of__organization"]["__id"], TestOrganization.org1["id"]
-        )
+        self.assertEqual(memberships[0]["is_member_of__organization"]["__id"], TestOrganization.org1["id"])
         self.assertEqual(
             memberships[0]["organization_membership_role"]["__id"],
             self.test_org_admin_role["id"],
@@ -140,12 +124,10 @@ class TestOrganization(unittest.TestCase):
 
     def test_membership_tags(self):
         org_id = TestOrganization.org1["id"]
-        memberships = (
-            self.balena.models.organization.membership.get_all_by_organization(org_id)
-        )
+        memberships = self.balena.models.organization.membership.get_all_by_organization(org_id)
         membership_id = memberships[0]["id"]
 
-        membership_tag_model = self.balena.models.organization.membership.tag
+        membership_tag_model = self.balena.models.organization.membership.tags
         self.assertEqual(0, len(membership_tag_model.get_all_by_organization(org_id)))
         self.assertEqual(
             0,
@@ -163,7 +145,7 @@ class TestOrganization(unittest.TestCase):
         self.__assert_tags_changed(org_id, membership_id, "test", None)
 
     def __assert_tags_changed(self, org_id, membership_id, key, value):
-        membership_tag_model = self.balena.models.organization.membership.tag
+        membership_tag_model = self.balena.models.organization.membership.tags
 
         if value is not None:
             self.assertEqual(1, len(membership_tag_model.get_all_by_organization(org_id)))
@@ -180,9 +162,7 @@ class TestOrganization(unittest.TestCase):
                 value,
             )
             self.assertEqual(
-                membership_tag_model.get_all_by_organization_membership(membership_id)[
-                    0
-                ].get("value"),
+                membership_tag_model.get_all_by_organization_membership(membership_id)[0].get("value"),
                 value,
             )
 

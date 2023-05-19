@@ -16,9 +16,7 @@ def __request_new_token() -> str:
     response = requests.get(url, headers=headers)
 
     if not response.ok:
-        raise exceptions.RequestError(
-            response.content.decode(), response.status_code
-        )
+        raise exceptions.RequestError(response.content.decode(), response.status_code)
 
     return response.content.decode()
 
@@ -26,9 +24,7 @@ def __request_new_token() -> str:
 def __should_update_token(token: str, interval: str) -> bool:
     try:
         # Auth token
-        token_data = jwt.decode(
-            token, algorithms=["HS256"], options={"verify_signature": False}
-        )
+        token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
         # dt will be the same as Date.now() in Javascript but converted to
         # milliseconds for consistency with js/sc sdk
         dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
@@ -48,9 +44,7 @@ def get_token() -> Optional[str]:
         api_key = settings.get("token")
 
     else:
-        api_key = os.environ.get("BALENA_API_KEY") or os.environ.get(
-            "RESIN_API_KEY"
-        )
+        api_key = os.environ.get("BALENA_API_KEY") or os.environ.get("RESIN_API_KEY")
 
     return api_key
 
@@ -77,12 +71,7 @@ def request(
         raise exceptions.NotLoggedIn()
     try:
         req = requests.request(
-            method=method,
-            url=url,
-            params=qs,
-            json=body,
-            headers={"Authorization": f"Bearer {token}"},
-            stream=stream
+            method=method, url=url, params=qs, json=body, headers={"Authorization": f"Bearer {token}"}, stream=stream
         )
 
         if return_raw:

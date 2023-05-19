@@ -1,19 +1,19 @@
-from typing import Any, Callable, Optional, TypeVar, Generic, List
+from typing import Any, Callable, Generic, List, Optional, TypeVar
+
 from .pine import pine
 from .types import AnyObject
-from .utils import merge, is_id
+from .utils import is_id, merge
 
-
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DependentResource(Generic[T]):
     def __init__(
-            self,
-            resource_name: str,
-            resource_key_field: str,
-            parent_resource_name: str,
-            get_resource_id: Callable[[Any], int]
+        self,
+        resource_name: str,
+        resource_key_field: str,
+        parent_resource_name: str,
+        get_resource_id: Callable[[Any], int],
     ):
         self.resource_name = resource_name
         self.resource_key_field = resource_key_field
@@ -21,11 +21,7 @@ class DependentResource(Generic[T]):
         self.get_resource_id = get_resource_id
 
     def _get_all(self, options: AnyObject = {}) -> List[T]:
-        default_orderby = {
-            "$orderby": {
-                self.resource_key_field: "asc"
-            }
-        }
+        default_orderby = {"$orderby": {self.resource_key_field: "asc"}}
 
         return pine.get(
             {
@@ -34,15 +30,11 @@ class DependentResource(Generic[T]):
             }
         )
 
-    def _get_all_by_parent(
-        self, parent_param: Any, options: AnyObject = {}
-    ) -> List[T]:
+    def _get_all_by_parent(self, parent_param: Any, options: AnyObject = {}) -> List[T]:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
         get_options = {
-            "$filter": {
-                self.parent_resource_name: parent_id
-            },
+            "$filter": {self.parent_resource_name: parent_id},
             "$orderby": f"{self.resource_key_field} asc",
         }
 
@@ -51,10 +43,7 @@ class DependentResource(Generic[T]):
     def _get(self, parent_param: Any, key: str) -> Optional[str]:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        dollar_filter = {
-            self.parent_resource_name: parent_id,
-            self.resource_key_field: key
-        }
+        dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: key}
 
         result = pine.get(
             {
@@ -69,10 +58,7 @@ class DependentResource(Generic[T]):
     def _set(self, parent_param: Any, tag_key: str, value: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        upsert_id = {
-            self.parent_resource_name: parent_id,
-            self.resource_key_field: tag_key
-        }
+        upsert_id = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
 
         pine.upsert(
             {
@@ -85,11 +71,6 @@ class DependentResource(Generic[T]):
     def _remove(self, parent_param: Any, tag_key: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        dollar_filter = {
-            self.parent_resource_name: parent_id,
-            self.resource_key_field: tag_key
-        }
+        dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
 
-        pine.delete(
-            {"resource": self.resource_name, "options": {"$filter": dollar_filter}}
-        )
+        pine.delete({"resource": self.resource_name, "options": {"$filter": dollar_filter}})

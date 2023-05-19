@@ -1,39 +1,40 @@
 import binascii
+import datetime
 import os
-from deprecated import deprecated
-from datetime import datetime
 from typing import Any, Callable, List, Optional, TypedDict, Union
 from urllib.parse import urljoin
 
+from deprecated import deprecated
 from semver.version import Version
 
 from .. import exceptions
 from ..auth import Auth
 from ..balena_auth import request
+from ..dependent_resource import DependentResource
+from ..hup import get_hup_action_type
 from ..pine import pine
 from ..resources import Message
 from ..settings import settings
 from ..types import AnyObject
-from ..types.models import DeviceMetricsType, TypeDevice
+from ..types.models import BaseTagType, DeviceMetricsType, EnvironmentVariableBase, TypeDevice
 from ..utils import (
     ensure_version_compatibility,
     generate_current_service_details,
     get_current_service_details_pine_expand,
+    get_device_os_semver_with_variant,
     is_full_uuid,
     is_id,
     is_provisioned,
     merge,
     normalize_device_os_version,
-    get_device_os_semver_with_variant,
     with_supervisor_locked_error,
 )
-from .application import Application, application
+from .application import application
 from .config import Config
-from .device_os import DeviceOs, normalize_balena_semver
 from .device_type import DeviceType
 from .history import DeviceHistory
-from ..hup import get_hup_action_type
 from .organization import Organization
+from .os import DeviceOs, normalize_balena_semver
 from .release import Release
 
 LOCAL_MODE_MIN_OS_VERSION = "2.0.0"
@@ -42,7 +43,7 @@ LOCAL_MODE_ENV_VAR = "RESIN_SUPERVISOR_LOCAL_MODE"
 OVERRIDE_LOCK_ENV_VAR = "RESIN_OVERRIDE_LOCK"
 MIN_SUPERVISOR_MC_API = "7.0.0"
 MIN_OS_MC = "2.12.0"
-MIN_SUPERVISOR_APPS_API = '1.8.0-alpha.0'
+MIN_SUPERVISOR_APPS_API = "1.8.0-alpha.0"
 
 
 class LocationType(TypedDict):
@@ -81,7 +82,6 @@ class SupervisorStateType(TypedDict):
     download_progress: str
 
 
-# TODO: support both device uuid and device id
 class DeviceStatus:
     """
     Balena device statuses.
@@ -101,15 +101,13 @@ class Device:
     """
 
     def __init__(self):
-        self.config = Config()
-        self.application = Application()
-        self.auth = Auth()
-        self.release = Release()
-        self.device_os = DeviceOs()
-        self.device_type = DeviceType()
-        self.history = DeviceHistory()
-        self.organization = Organization()
-        self.__local_mode_select = [
+        self.__config = Config()
+        self.__auth = Auth()
+        self.__release = Release()
+        self.__device_os = DeviceOs()
+        self.__device_type = DeviceType()
+        self.__organization = Organization()
+        self.__LOCAL_MODE_SELECT = [
             "id",
             "os_version",
             "os_variant",
@@ -117,20 +115,13 @@ class Device:
             "last_connectivity_event",
         ]
 
-    def __upsert_device_config_variable(
-        self, device_id: int, name: str, value: str
-    ):
-        pine.upsert(
-            {
-                "resource": "device_config_variable",
-                "id": {"device": device_id, "name": name},
-                "body": {"value": value},
-            }
-        )
+        self.tags = DeviceTag()
+        self.config_var = DeviceConfigVariable()
+        self.env_var = DeviceEnvVariable()
+        self.service_var = DeviceServiceEnvVariable()
+        self.history = DeviceHistory()
 
-    def __get_applied_device_config_variable_value(
-        self, uuid_or_id: Union[str, int], name: str
-    ):
+    def __get_applied_device_config_variable_value(self, uuid_or_id: Union[str, int], name: str):
         options = {
             "$expand": {
                 "device_config_variable": {
@@ -153,11 +144,7 @@ class Device:
 
         device_config = next(iter(result["device_config_variable"]), None)
         app_config = next(
-            iter(
-                result["belongs_to__application"][0][
-                    "application_config_variable"
-                ]
-            ),
+            iter(result["belongs_to__application"][0]["application_config_variable"]),
             None,
         )
 
@@ -181,9 +168,7 @@ class Device:
                 fn(
                     {
                         "resource": "device",
-                        "id": uuid_or_id_or_ids
-                        if is_id(uuid_or_id_or_ids)
-                        else {"uuid": uuid_or_id_or_ids},
+                        "id": uuid_or_id_or_ids if is_id(uuid_or_id_or_ids) else {"uuid": uuid_or_id_or_ids},
                         "body": body,
                     }
                 )
@@ -191,11 +176,7 @@ class Device:
                 fn(
                     {
                         "resource": "device",
-                        "options": {
-                            "$filter": {
-                                "uuid": {"$startswith": uuid_or_id_or_ids}
-                            }
-                        },
+                        "options": {"$filter": {"uuid": {"$startswith": uuid_or_id_or_ids}}},
                         "body": body,
                     }
                 )
@@ -220,59 +201,37 @@ class Device:
             raise exceptions.LocalModeError(Message.DEVICE_NOT_PROVISIONED)
 
         if not (
-            Version.parse(normalize_balena_semver(device["os_version"]))
-            >= Version.parse(LOCAL_MODE_MIN_OS_VERSION)
+            Version.parse(normalize_balena_semver(device["os_version"])) >= Version.parse(LOCAL_MODE_MIN_OS_VERSION)
         ):
-            raise exceptions.LocalModeError(
-                Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE
-            )
+            raise exceptions.LocalModeError(Message.DEVICE_OS_NOT_SUPPORT_LOCAL_MODE)
 
         if not (
             Version.parse(normalize_balena_semver(device["supervisor_version"]))
             >= Version.parse(LOCAL_MODE_MIN_SUPERVISOR_VERSION)
         ):
-            raise exceptions.LocalModeError(
-                Message.DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE
-            )
+            raise exceptions.LocalModeError(Message.DEVICE_SUPERVISOR_NOT_SUPPORT_LOCAL_MODE)
 
         if device["os_variant"] != "dev":
-            raise exceptions.LocalModeError(
-                Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE
-            )
+            raise exceptions.LocalModeError(Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE)
 
-    def __check_os_update_target(
-        self, device_info: TypeDevice, target_os_version: str
-    ):
+    def __check_os_update_target(self, device_info: TypeDevice, target_os_version: str):
         if "uuid" not in device_info or not device_info["uuid"]:
-            raise exceptions.OsUpdateError(
-                "The uuid of the device is not available"
-            )
+            raise exceptions.OsUpdateError("The uuid of the device is not available")
 
         uuid = device_info["uuid"]
         if "is_online" not in device_info or not device_info["is_online"]:
             raise exceptions.OsUpdateError(f"The device is offline: {uuid}")
 
         if "os_version" not in device_info or not device_info["os_version"]:
-            raise exceptions.OsUpdateError(
-                f"The current os version of the device is not available: {uuid}"
-            )
+            raise exceptions.OsUpdateError(f"The current os version of the device is not available: {uuid}")
 
-        if (
-            "is_of__device_type" not in device_info
-            or not device_info["is_of__device_type"]
-        ):
-            raise exceptions.OsUpdateError(
-                f"The device type of the device is not available: {uuid}"
-            )
+        if "is_of__device_type" not in device_info or not device_info["is_of__device_type"]:
+            raise exceptions.OsUpdateError(f"The device type of the device is not available: {uuid}")
 
         if "os_variant" not in device_info:
-            raise exceptions.OsUpdateError(
-                f"The os variant of the device is not available: {uuid}"
-            )
+            raise exceptions.OsUpdateError(f"The os variant of the device is not available: {uuid}")
 
-        current_os_version = get_device_os_semver_with_variant(
-            device_info["os_version"], device_info["os_variant"]
-        )
+        current_os_version = get_device_os_semver_with_variant(device_info["os_version"], device_info["os_variant"])
 
         get_hup_action_type(
             device_info["is_of__device_type"][0]["slug"],
@@ -323,9 +282,7 @@ class Device:
 
         return list(map(normalize_device_os_version, devices))
 
-    def get_all_by_application(
-        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[TypeDevice]:
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[TypeDevice]:
         """
         Get devices by application slug, uuid or id.
 
@@ -349,9 +306,7 @@ class Device:
             )
         )
 
-    def get_all_by_organization(
-        self, handle_or_id: Union[str, int], options: AnyObject = {}
-    ) -> List[TypeDevice]:
+    def get_all_by_organization(self, handle_or_id: Union[str, int], options: AnyObject = {}) -> List[TypeDevice]:
         """
         Get devices by organization slug, uuid or id.
 
@@ -366,7 +321,7 @@ class Device:
             >>> balena.models.device.get_all_by_organization('my_org')
             >>> balena.models.device.get_all_by_organization(123)
         """
-        org = self.organization.get(handle_or_id, {"$select": "id"})
+        org = self.__organization.get(handle_or_id, {"$select": "id"})
         return self.get_all(
             merge(
                 {
@@ -383,9 +338,7 @@ class Device:
             )
         )
 
-    def get(
-        self, uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> TypeDevice:
+    def get(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> TypeDevice:
         """
         This method returns a single device by id or uuid.
 
@@ -410,9 +363,7 @@ class Device:
             device = pine.get(
                 {
                     "resource": "device",
-                    "id": {"uuid": uuid_or_id}
-                    if is_potentially_full_uuid
-                    else uuid_or_id,
+                    "id": {"uuid": uuid_or_id} if is_potentially_full_uuid else uuid_or_id,
                     "options": options,
                 }
             )
@@ -439,9 +390,7 @@ class Device:
 
         return normalize_device_os_version(device)
 
-    def get_with_service_details(
-        self, uuid_or_id: Union[str, int], options: AnyObject = {}
-    ) -> TypeDevice:
+    def get_with_service_details(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> TypeDevice:
         """
         This method does not map exactly to the underlying model: it runs a
         larger prebuilt query, and reformats it into an easy to use and
@@ -469,9 +418,7 @@ class Device:
 
         return generate_current_service_details(device)
 
-    def get_by_name(
-        self, name: str, options: AnyObject = {}
-    ) -> List[TypeDevice]:
+    def get_by_name(self, name: str, options: AnyObject = {}) -> List[TypeDevice]:
         """
         Get devices by device name.
 
@@ -485,9 +432,7 @@ class Device:
             >>> balena.models.device.get_by_name('floral-mountain')
         """
 
-        devices = self.get_all(
-            merge({"$filter": {"device_name": name}}, options)
-        )
+        devices = self.get_all(merge({"$filter": {"device_name": name}}, options))
 
         if len(devices) == 0:
             raise exceptions.DeviceNotFound(name)
@@ -659,9 +604,7 @@ class Device:
         """
         self.__set(uuid_or_id, {"device_name": new_name})
 
-    def set_note(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]], note: str
-    ) -> None:
+    def set_note(self, uuid_or_id_or_ids: Union[str, int, List[int]], note: str) -> None:
         """
         Note a device.
 
@@ -697,9 +640,7 @@ class Device:
             },
         )
 
-    def unset_custom_location(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]]
-    ) -> None:
+    def unset_custom_location(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Clear the custom location of a device.
 
@@ -710,9 +651,7 @@ class Device:
             >>> balena.models.device.unset_custom_location(123)
         """
 
-        self.set_custom_location(
-            uuid_or_id_or_ids, {"latitude": "", "longitude": ""}
-        )
+        self.set_custom_location(uuid_or_id_or_ids, {"latitude": "", "longitude": ""})
 
     # TODO: enable device batching
     def move(
@@ -740,10 +679,8 @@ class Device:
             },
         }
 
-        app = self.application.get(app_slug_or_uuid_or_id, application_options)
-        app_cpu_arch_slug = app["is_for__device_type"][0][
-            "is_of__cpu_architecture"
-        ][0]["slug"]
+        app = application.get(app_slug_or_uuid_or_id, application_options)
+        app_cpu_arch_slug = app["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
 
         device_options = {
             "$select": "is_of__device_type",
@@ -760,13 +697,9 @@ class Device:
         }
 
         device = self.get(uuid_or_id, device_options)
-        device_cpu_arch_slug = device["is_of__device_type"][0][
-            "is_of__cpu_architecture"
-        ][0]["slug"]
+        device_cpu_arch_slug = device["is_of__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
 
-        if not self.device_os.is_architecture_compatible_with(
-            app_cpu_arch_slug, device_cpu_arch_slug
-        ):
+        if not self.__device_os.is_architecture_compatible_with(app_cpu_arch_slug, device_cpu_arch_slug):
             raise exceptions.IncompatibleApplication(app_slug_or_uuid_or_id)
 
         self.__set(uuid_or_id, {"belongs_to__application": app["id"]})
@@ -844,8 +777,7 @@ class Device:
             device_id = device["id"]
 
             if not Version.is_valid(device["supervisor_version"]) or (
-                Version.parse(device["supervisor_version"])
-                < Version.parse("7.0.0")
+                Version.parse(device["supervisor_version"]) < Version.parse("7.0.0")
             ):
                 return request(
                     method="POST",
@@ -885,20 +817,14 @@ class Device:
             if force:
                 data = {"force": bool(force)}
 
-            device_id = (
-                uuid_or_id
-                if is_id(uuid_or_id)
-                else self.get(uuid_or_id, {"$select": "id"})["id"]
-            )
+            device_id = uuid_or_id if is_id(uuid_or_id) else self.get(uuid_or_id, {"$select": "id"})["id"]
 
             return request(
                 method="POST",
                 path="/supervisor/v1/reboot",
-                body={
-                    "deviceId": device_id,
-                    "data": data
-                }
+                body={"deviceId": device_id, "data": data},
             )
+
         with_supervisor_locked_error(__reboot)
 
     def shutdown(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
@@ -932,9 +858,10 @@ class Device:
                 body={
                     "deviceId": device["id"],
                     "appId": device["belongs_to__application"][0]["id"],
-                    "data": data
-                }
+                    "data": data,
+                },
             )
+
         with_supervisor_locked_error(__shutdown)
 
     def purge(self, uuid_or_id: Union[str, int]) -> None:
@@ -964,11 +891,10 @@ class Device:
                 body={
                     "deviceId": device["id"],
                     "appId": device["belongs_to__application"][0]["id"],
-                    "data": {
-                        "appId": device["belongs_to__application"][0]["id"]
-                    }
-                }
+                    "data": {"appId": device["belongs_to__application"][0]["id"]},
+                },
             )
+
         with_supervisor_locked_error(__purge)
 
     def update(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
@@ -1001,8 +927,8 @@ class Device:
             body={
                 "deviceId": device["id"],
                 "appId": device["belongs_to__application"][0]["id"],
-                "data": data
-            }
+                "data": data,
+            },
         )
 
     def get_supervisor_state(self, uuid_or_id: Union[str, int]) -> SupervisorStateType:
@@ -1050,11 +976,7 @@ class Device:
                 "$expand": {"belongs_to__application": {"$select": "id"}},
             },
         )
-        ensure_version_compatibility(
-            device["supervisor_version"],
-            MIN_SUPERVISOR_MC_API,
-            "supervisor"
-        )
+        ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
         app_id = device["belongs_to__application"][0]["id"]
         request(
             method="POST",
@@ -1062,11 +984,8 @@ class Device:
             body={
                 "deviceId": device["id"],
                 "appId": app_id,
-                "data": {
-                    "appId": app_id,
-                    "imageId": image_id
-                }
-            }
+                "data": {"appId": app_id, "imageId": image_id},
+            },
         )
 
     def stop_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
@@ -1080,6 +999,7 @@ class Device:
         Examples:
             >>> balena.models.supervisor.stop_service('f3887b1', 392229)
         """
+
         def __stop_service():
             device = self.get(
                 uuid_or_id,
@@ -1091,7 +1011,7 @@ class Device:
             ensure_version_compatibility(
                 device["supervisor_version"],
                 MIN_SUPERVISOR_MC_API,
-                "supervisor"
+                "supervisor",
             )
             app_id = device["belongs_to__application"][0]["id"]
             request(
@@ -1100,12 +1020,10 @@ class Device:
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
-                    "data": {
-                        "appId": app_id,
-                        "imageId": image_id
-                    }
-                }
+                    "data": {"appId": app_id, "imageId": image_id},
+                },
             )
+
         with_supervisor_locked_error(__stop_service)
 
     def restart_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
@@ -1131,7 +1049,7 @@ class Device:
             ensure_version_compatibility(
                 device["supervisor_version"],
                 MIN_SUPERVISOR_MC_API,
-                "supervisor"
+                "supervisor",
             )
             app_id = device["belongs_to__application"][0]["id"]
             request(
@@ -1140,12 +1058,10 @@ class Device:
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
-                    "data": {
-                        "appId": app_id,
-                        "imageId": image_id
-                    }
-                }
+                    "data": {"appId": app_id, "imageId": image_id},
+                },
             )
+
         with_supervisor_locked_error(__restart_service)
 
     def get_supervisor_target_state(self, uuid_or_id: Union[str, int]) -> Any:
@@ -1222,16 +1138,12 @@ class Device:
         }
 
         # TODO: paralelize this 4 requests
-        user_id = self.auth.get_user_id()
-        api_key = self.application.generate_provisioning_key(
-            application_slug_or_uuid_or_id
-        )
+        user_id = self.__auth.get_user_id()
+        api_key = application.generate_provisioning_key(application_slug_or_uuid_or_id)
 
-        app = self.application.get(
-            application_slug_or_uuid_or_id, application_options
-        )
+        app = application.get(application_slug_or_uuid_or_id, application_options)
         if isinstance(device_type_slug, str):
-            device_type = self.device_type.get(
+            device_type = self.__device_type.get(
                 device_type_slug,
                 {
                     "$select": "slug",
@@ -1242,19 +1154,13 @@ class Device:
             device_type = None
 
         if device_type is not None:
-            is_compatible_parameter = (
-                self.device_os.is_architecture_compatible_with(
-                    device_type["is_of__cpu_architecture"][0]["slug"],
-                    app["is_for__device_type"][0]["is_of__cpu_architecture"][0][
-                        "slug"
-                    ],
-                )
+            is_compatible_parameter = self.__device_os.is_architecture_compatible_with(
+                device_type["is_of__cpu_architecture"][0]["slug"],
+                app["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"],
             )
 
             if not is_compatible_parameter:
-                app_type_slug = app["is_for__device_type"][0][
-                    "is_of__cpu_architecture"
-                ][0]["slug"]
+                app_type_slug = app["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
 
                 err_msg = f"{device_type_slug} is not compactible with application {app_type_slug} device typ"
                 raise exceptions.InvalidDeviceType(err_msg)
@@ -1322,9 +1228,7 @@ class Device:
             >>> balena.models.device.has_device_url('8deb12a')
         """
 
-        return self.get(uuid_or_id, {"$select": "is_web_accessible"})[
-            "is_web_accessible"
-        ]
+        return self.get(uuid_or_id, {"$select": "is_web_accessible"})["is_web_accessible"]
 
     def get_device_url(self, uuid_or_id: Union[str, int]) -> str:
         """
@@ -1336,19 +1240,15 @@ class Device:
         Examples:
             >>> balena.models.device.get_device_url('8deb12a')
         """
-        device = self.get(
-            uuid_or_id, {"$select": ["uuid", "is_web_accessible"]}
-        )
+        device = self.get(uuid_or_id, {"$select": ["uuid", "is_web_accessible"]})
         if not device["is_web_accessible"]:
             raise exceptions.DeviceNotWebAccessible(uuid_or_id)
 
-        device_url_base = self.config.get_all()["deviceUrlsBase"]  # type: ignore
+        device_url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
         uuid = device["uuid"]
         return f"https://{uuid}.{device_url_base}"
 
-    def enable_device_url(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]]
-    ) -> None:
+    def enable_device_url(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Enable device url for a device.
 
@@ -1361,9 +1261,7 @@ class Device:
         """
         self.__set(uuid_or_id_or_ids, {"is_web_accessible": True})
 
-    def disable_device_url(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]]
-    ) -> None:
+    def disable_device_url(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Disable device url for a device.
 
@@ -1376,7 +1274,6 @@ class Device:
         """
         self.__set(uuid_or_id_or_ids, {"is_web_accessible": False})
 
-    # TODO: refactor once config_var uses proper upsert
     def enable_local_mode(self, uuid_or_id: Union[str, int]) -> None:
         """
         Enable local mode.
@@ -1388,14 +1285,10 @@ class Device:
             >>> balena.models.device.enable_local_mode('b6070f4f')
         """
 
-        device = self.get(uuid_or_id, {"$select": self.__local_mode_select})
-
+        device = self.get(uuid_or_id, {"$select": self.__LOCAL_MODE_SELECT})
         self.__check_local_mode_supported(device)
-        self.__upsert_device_config_variable(
-            device["id"], LOCAL_MODE_ENV_VAR, "1"
-        )
+        self.config_var.set(uuid_or_id, LOCAL_MODE_ENV_VAR, "1")
 
-    # TODO: refactor once config_var uses proper upsert
     def disable_local_mode(self, uuid_or_id: Union[str, int]) -> None:
         """
         Disable local mode.
@@ -1409,13 +1302,8 @@ class Device:
         Examples:
             >>> balena.models.device.disable_local_mode('b6070f4f')
         """
+        self.config_var.set(uuid_or_id, LOCAL_MODE_ENV_VAR, "0")
 
-        device = self.get(uuid_or_id, {"$select": "id"})
-        self.__upsert_device_config_variable(
-            device["id"], LOCAL_MODE_ENV_VAR, "0"
-        )
-
-    # TODO: refactor once config_var does the id checking
     def is_in_local_mode(self, uuid_or_id: Union[str, int]) -> bool:
         """
         Check if local mode is enabled on the device.
@@ -1440,9 +1328,7 @@ class Device:
 
         return result is not None and result.get("value") == "1"
 
-    def get_local_mode_support(
-        self, uuid_or_id: Union[str, int]
-    ) -> LocalModeResponse:
+    def get_local_mode_support(self, uuid_or_id: Union[str, int]) -> LocalModeResponse:
         """
         Returns whether local mode is supported and a message describing the reason why local mode is not supported.
 
@@ -1456,7 +1342,7 @@ class Device:
             >>> balena.models.device.get_local_mode_support('b6070f4')
         """
 
-        device = self.get(uuid_or_id, {"$select": self.__local_mode_select})
+        device = self.get(uuid_or_id, {"$select": self.__LOCAL_MODE_SELECT})
         try:
             self.__check_local_mode_supported(device)
             return {"supported": True, "message": "Supported"}
@@ -1470,11 +1356,7 @@ class Device:
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
         """
-
-        device = self.get(uuid_or_id, {"$select": "id"})
-        self.__upsert_device_config_variable(
-            device["id"], OVERRIDE_LOCK_ENV_VAR, "1"
-        )
+        self.config_var.set(uuid_or_id, OVERRIDE_LOCK_ENV_VAR, "1")
 
     def disable_lock_override(self, uuid_or_id: Union[str, int]) -> None:
         """
@@ -1483,11 +1365,7 @@ class Device:
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
         """
-
-        device = self.get(uuid_or_id, {"$select": "id"})
-        self.__upsert_device_config_variable(
-            device["id"], OVERRIDE_LOCK_ENV_VAR, "0"
-        )
+        self.config_var.set(uuid_or_id, OVERRIDE_LOCK_ENV_VAR, "0")
 
     def has_lock_override(self, uuid_or_id: Union[str, int]) -> bool:
         """
@@ -1500,12 +1378,7 @@ class Device:
             bool: lock override status.
         """
 
-        return (
-            self.__get_applied_device_config_variable_value(
-                uuid_or_id, OVERRIDE_LOCK_ENV_VAR
-            )
-            == "1"
-        )
+        return self.__get_applied_device_config_variable_value(uuid_or_id, OVERRIDE_LOCK_ENV_VAR) == "1"
 
     def get_status(self, uuid_or_id: Union[str, int]) -> str:
         """
@@ -1521,9 +1394,7 @@ class Device:
             >>> balena.models.device.get_status('8deb12')
         """
 
-        return self.get(uuid_or_id, {"$select": "overall_status"})[
-            "overall_status"
-        ]
+        return self.get(uuid_or_id, {"$select": "overall_status"})["overall_status"]
 
     def grant_support_access(
         self,
@@ -1542,21 +1413,16 @@ class Device:
         """
 
         if expiry_timestamp is None or expiry_timestamp <= int(
-            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
-            * 1000
+            (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000
         ):
-            raise exceptions.InvalidParameter(
-                "expiry_timestamp", expiry_timestamp
-            )
+            raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
 
         self.__set(
             uuid_or_id_or_ids,
             {"is_accessible_by_support_until__date": expiry_timestamp},
         )
 
-    def revoke_support_access(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]]
-    ) -> None:
+    def revoke_support_access(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Revoke support access to a device.
 
@@ -1571,9 +1437,7 @@ class Device:
             {"is_accessible_by_support_until__date": None},
         )
 
-    def is_tracking_application_release(
-        self, uuid_or_id: Union[str, int]
-    ) -> bool:
+    def is_tracking_application_release(self, uuid_or_id: Union[str, int]) -> bool:
         """
         Get whether the device is configured to track the current application release.
 
@@ -1584,11 +1448,7 @@ class Device:
             bool: is tracking the current application release.
         """
 
-        return not bool(
-            self.get(uuid_or_id, {"$select": "should_be_running__release"})[
-                "should_be_running__release"
-            ]
-        )
+        return not bool(self.get(uuid_or_id, {"$select": "should_be_running__release"})["should_be_running__release"])
 
     # TODO: enable device batching
     def pin_to_release(
@@ -1630,7 +1490,7 @@ class Device:
         else:
             release_options["$filter"]["commit"] = full_release_hash_or_id
 
-        release = self.release.get(full_release_hash_or_id, release_options)
+        release = self.__release.get(full_release_hash_or_id, release_options)
         pine.patch(
             {
                 "resource": "device",
@@ -1639,9 +1499,7 @@ class Device:
             }
         )
 
-    def track_application_release(
-        self, uuid_or_id_or_ids: Union[str, int, List[int]]
-    ) -> None:
+    def track_application_release(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Configure a specific device to track the current application release.
 
@@ -1696,37 +1554,25 @@ class Device:
         if is_id(supervisor_version_or_id):
             release_options["$filter"]["id"] = supervisor_version_or_id
         else:
-            release_options["$filter"][
-                "supervisor_version"
-            ] = supervisor_version_or_id
+            release_options["$filter"]["supervisor_version"] = supervisor_version_or_id
 
         try:
-            release = pine.get(
-                {"resource": "supervisor_release", "options": release_options}
-            )[0]
+            release = pine.get({"resource": "supervisor_release", "options": release_options})[0]
         except IndexError:
-            raise Exception(
-                f"Supervisor release not found {supervisor_version_or_id}"
-            )
+            raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
 
-        ensure_version_compatibility(
-            device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor"
-        )
+        ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
         ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
 
         pine.patch(
             {
                 "resource": "device",
                 "id": device["id"],
-                "body": {
-                    "should_be_managed_by__supervisor_release": release["id"]
-                },
+                "body": {"should_be_managed_by__supervisor_release": release["id"]},
             }
         )
 
-    def start_os_update(
-        self, uuid_or_id: Union[str, int], target_os_version: str
-    ) -> HUPStatusResponse:
+    def start_os_update(self, uuid_or_id: Union[str, int], target_os_version: str) -> HUPStatusResponse:
         """
         Start an OS update on a device.
 
@@ -1758,31 +1604,23 @@ class Device:
 
         self.__check_os_update_target(device, target_os_version)
 
-        all_versions = self.device_os.get_available_os_versions(
-            device["is_of__device_type"][0]["slug"]
-        )
-        if not [
-            v for v in all_versions if target_os_version == v["raw_version"]
-        ]:
-            raise exceptions.InvalidParameter(
-                "target_os_version", target_os_version
-            )
+        all_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
+        if not [v for v in all_versions if target_os_version == v["raw_version"]]:
+            raise exceptions.InvalidParameter("target_os_version", target_os_version)
 
         data = {"parameters": {"target_version": target_os_version}}
 
-        url_base = self.config.get_all()["deviceUrlsBase"]  # type: ignore
+        url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
         action_api_version = settings.get("device_actions_endpoint_version")
 
         return request(  # type: ignore
             method="POST",
-            path=f"{device['uuid']}/{self.device_os.OS_UPDATE_ACTION_NAME}",
+            path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             body=data,
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
 
-    def get_os_update_status(
-        self, uuid_or_id: Union[str, int]
-    ) -> HUPStatusResponse:
+    def get_os_update_status(self, uuid_or_id: Union[str, int]) -> HUPStatusResponse:
         """
         Get the OS update status of a device.
 
@@ -1797,12 +1635,12 @@ class Device:
         """
 
         device = self.get(uuid_or_id, {"$select": "uuid"})
-        url_base = self.config.get_all()["deviceUrlsBase"]  # type: ignore
+        url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
         action_api_version = settings.get("device_actions_endpoint_version")
 
         return request(  # type: ignore
             method="GET",
-            path=f"{device['uuid']}/{self.device_os.OS_UPDATE_ACTION_NAME}",
+            path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
 
@@ -1831,19 +1669,13 @@ class Device:
             },
         )
 
-        ensure_version_compatibility(
-            device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
-        )
+        ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor")
         app_id = device["belongs_to__application"][0]["id"]
 
         return request(
             method="POST",
             path=f"/supervisor/v1/apps/{app_id}",
-            body={
-                "deviceId": device["id"],
-                "appId": app_id,
-                "method": "GET"
-            }
+            body={"deviceId": device["id"], "appId": app_id, "method": "GET"},
         )
 
     @deprecated("This is not supported on multicontainer devices, and will be removed in a future major release")
@@ -1871,9 +1703,7 @@ class Device:
             },
         )
 
-        ensure_version_compatibility(
-            device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
-        )
+        ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor")
         app_id = device["belongs_to__application"][0]["id"]
         request(
             method="POST",
@@ -1881,7 +1711,7 @@ class Device:
             body={
                 "deviceId": device["id"],
                 "appId": app_id,
-            }
+            },
         )
 
     @deprecated("This is not supported on multicontainer devices, and will be removed in a future major release")
@@ -1902,6 +1732,7 @@ class Device:
         Examples:
             >>> balena.models.supervisor.stop_application('8f66ec')
         """
+
         def __stop_aplication():
             device = self.get(
                 uuid_or_id,
@@ -1912,7 +1743,9 @@ class Device:
             )
 
             ensure_version_compatibility(
-                device["supervisor_version"], MIN_SUPERVISOR_APPS_API, "supervisor"
+                device["supervisor_version"],
+                MIN_SUPERVISOR_APPS_API,
+                "supervisor",
             )
             app_id = device["belongs_to__application"][0]["id"]
             request(
@@ -1921,6 +1754,591 @@ class Device:
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
-                }
+                },
             )
+
         with_supervisor_locked_error(__stop_aplication)
+
+
+class DeviceTag(DependentResource[BaseTagType]):
+    """
+    This class implements device tag model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(DeviceTag, self).__init__(
+            "device_tag",
+            "tag_key",
+            "device",
+            lambda id: device.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all device tags for an application.
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.devices.tag.get_all_by_application(1005160)
+        """
+
+        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceTag, self)._get_all(
+            merge(
+                {
+                    "$filter": {
+                        "device": {
+                            "$any": {
+                                "$alias": "d",
+                                "$expr": {"d": {"belongs_to__application": app_id}},
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
+
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all device tags for a device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.devices.tag.get_all_by_device('a03ab646c')
+        """
+
+        id = device.get(uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceTag, self)._get_all_by_parent(id, options)
+
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all device tags.
+
+        Args:
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.devices.tag.get_all()
+        """
+
+        return super(DeviceTag, self)._get_all(options)
+
+    def get(self, uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
+        """
+        Set a device tag (update tag value if it exists).
+        ___Note___: Notice that when using the device ID rather than UUID,
+        it will avoid one extra API roundtrip.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid or device id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            Optional[str]: tag value
+
+        Examples:
+            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+        """
+
+        # Trying to avoid an extra HTTP request
+        # when the provided parameter looks like an id.
+        # Note that this throws an exception for missing names/uuids,
+        # but not for missing ids
+        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceTag, self)._get(device_id, tag_key)
+
+    def set(self, uuid_or_id: Union[str, int], tag_key: str, value: str) -> None:
+        """
+        Set a device tag (update tag value if it exists).
+        ___Note___: Notice that when using the device ID rather than UUID,
+        it will avoid one extra API roundtrip.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid or device id.
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Examples:
+            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+        """
+
+        # Trying to avoid an extra HTTP request
+        # when the provided parameter looks like an id.
+        # Note that this throws an exception for missing names/uuids,
+        # but not for missing ids
+        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        super(DeviceTag, self)._set(device_id, tag_key, value)
+
+    def remove(self, uuid_or_id: Union[str, int], tag_key: str) -> None:
+        """
+        Remove a device tag.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid or device id.
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.devices.tag.remove('f5213eac0d63ac477', 'testtag')
+        """
+
+        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        super(DeviceTag, self)._remove(device_id, tag_key)
+
+
+class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements device config variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(DeviceConfigVariable, self).__init__(
+            "device_config_variable",
+            "name",
+            "device",
+            lambda id: device.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
+        """
+        Get all device config variables belong to a device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: device config variables.
+
+        Examples:
+            >>> balena.models.devices.config_var.get_all_by_device('f5213ea')
+        """
+        return super(DeviceConfigVariable, self)._get_all_by_parent(uuid_or_id, options)
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all device config variables for an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: list of device environment variables.
+
+        Examples:
+            >>> balena.models.devices.config_var.device.get_all_by_application(5780)
+        """
+        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceConfigVariable, self)._get_all(
+            merge(
+                {
+                    "$filter": {
+                        "device": {
+                            "$any": {
+                                "$alias": "d",
+                                "$expr": {
+                                    "d": {
+                                        "belongs_to__application": app_id,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    "$orderby": "name asc",
+                },
+                options,
+            )
+        )
+
+    def get(self, uuid_or_id: Union[str, int], env_var_name: str) -> Optional[str]:
+        """
+        Get a device config variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            env_var_name (str): environment variable name.
+
+        Examples:
+            >>> balena.models.devices.config_var.device.get('8deb12','test_env4')
+        """
+        return super(DeviceConfigVariable, self)._get(uuid_or_id, env_var_name)
+
+    def set(self, uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
+        """
+        Set the value of a device config variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.devices.config_var.device.set('8deb12','test_env4', 'testing1')
+        """
+        super(DeviceConfigVariable, self)._set(uuid_or_id, env_var_name, value)
+
+    def remove(self, uuid_or_id: Union[str, int], key: str) -> None:
+        """
+        Remove a device environment variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+
+        Examples:
+            >>> balena.models.devices.config_var.device.remove(2184)
+        """
+        super(DeviceConfigVariable, self)._remove(uuid_or_id, key)
+
+
+class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements device environment variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(DeviceEnvVariable, self).__init__(
+            "device_environment_variable",
+            "name",
+            "device",
+            lambda id: device.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
+        """
+        Get all device environment variables.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: device environment variables.
+
+        Examples:
+            >>> balena.models.devices.env_var.get_all_by_device('8deb12a')
+        """
+        return super(DeviceEnvVariable, self)._get_all_by_parent(uuid_or_id, options)
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all device environment variables for an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: list of device environment variables.
+
+        Examples:
+            >>> balena.models.devices.env_var.get_all_by_application(5780)
+        """
+        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        return super(DeviceEnvVariable, self)._get_all(
+            merge(
+                {
+                    "$filter": {
+                        "device": {
+                            "$any": {
+                                "$alias": "d",
+                                "$expr": {
+                                    "d": {
+                                        "belongs_to__application": app_id,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    "$orderby": "name asc",
+                },
+                options,
+            )
+        )
+
+    def get(self, uuid_or_id: Union[str, int], env_var_name: str) -> Optional[str]:
+        """
+        Get device environment variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            env_var_name (str): environment variable name.
+
+        Examples:
+            >>> balena.models.devices.env_var.get('8deb12','test_env4')
+        """
+        return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
+
+    def set(self, uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
+        """
+        Set the value of a specific environment variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.devices.env_var.set('8deb12','test_env4', 'testing1')
+        """
+        super(DeviceEnvVariable, self)._set(uuid_or_id, env_var_name, value)
+
+    def remove(self, uuid_or_id: Union[str, int], key: str) -> None:
+        """
+        Remove a device environment variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+
+        Examples:
+            >>> balena.models.devices.env_var.remove(2184)
+        """
+        super(DeviceEnvVariable, self)._remove(uuid_or_id, key)
+
+
+class DeviceServiceEnvVariable:
+    """
+    This class implements device service variable model for balena python SDK.
+    """
+
+    def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
+        """
+        Get all device environment variables.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: device service environment variables.
+
+        Examples:
+            >>> balena.models.devices.service_var.get_all_by_device(8deb12a)
+        """
+        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
+        return pine.get(
+            {
+                "resource": "device_service_environment_variable",
+                "options": merge(
+                    {
+                        "$filter": {
+                            "service_install": {
+                                "$any": {
+                                    "$alias": "si",
+                                    "$expr": {"si": {"device": device_id}},
+                                }
+                            }
+                        }
+                    },
+                    options,
+                ),
+            }
+        )
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all device service environment variables belong to an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: device service environment variables.
+
+        Examples:
+            >>> balena.models.devices.service_var.get_all_by_application(1043050)
+        """
+        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+
+        return pine.get(
+            {
+                "resource": "device_service_environment_variable",
+                "options": merge(
+                    {
+                        "$filter": {
+                            "service_install": {
+                                "$any": {
+                                    "$alias": "si",
+                                    "$expr": {
+                                        "si": {
+                                            "device": {
+                                                "$any": {
+                                                    "$alias": "d",
+                                                    "$expr": {"d": {"belongs_to__application": app_id}},
+                                                }
+                                            }
+                                        }
+                                    },
+                                }
+                            }
+                        },
+                        "$orderby": "name asc",
+                    },
+                    options,
+                ),
+            }
+        )
+
+    def get(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> Optional[str]:
+        """
+        Get the overriden value of a service variable on a device
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            service_id (int): service id
+            key (str): variable name
+
+        Returns:
+           Optional[str]: device service environment variables.
+
+        Examples:
+            >>> balena.models.devices.service_var.get('8deb12a', 1234', 'VAR')
+        """
+        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
+        variables = pine.get(
+            {
+                "resource": "device_service_environment_variable",
+                "options": {
+                    "$select": "value",
+                    "$filter": {
+                        "service_install": {
+                            "$any": {
+                                "$alias": "si",
+                                "$expr": {
+                                    "si": {
+                                        "device": device_id,
+                                        "installs__service": service_id,
+                                    }
+                                },
+                            }
+                        },
+                        "name": key,
+                    },
+                },
+            }
+        )
+
+        if isinstance(variables, list) and len(variables) == 1:
+            return variables[0].get("value")
+
+    def set(self, uuid_or_id: Union[str, int], service_id: int, key: str, value: str) -> None:
+        """
+        Set the overriden value of a service variable on a device.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            service_id (int): service id
+            key (str): variable name
+            value (str): variable value
+
+        Examples:
+            >>> balena.models.devices.service_var.set('7cf02a6', 123, 'VAR', 'override')
+        """
+
+        if is_id(uuid_or_id):
+            device_filter = uuid_or_id
+        elif is_full_uuid(uuid_or_id):
+            device_filter = {"$any": {"$alias": "d", "$expr": {"d": {"uuid": uuid_or_id}}}}
+        else:
+            device_filter = device.get(uuid_or_id, {"$select": "id"})["id"]
+
+        service_installs = pine.get(
+            {
+                "resource": "service_install",
+                "options": {
+                    "$select": "id",
+                    "$filter": {
+                        "device": device_filter,
+                        "installs__service": service_id,
+                    },
+                },
+            }
+        )
+
+        if (
+            service_installs is None
+            or (isinstance(service_installs, list) and len(service_installs) == 0)
+            or service_installs[0] is None
+        ):
+            raise exceptions.ServiceNotFound(service_id)
+
+        if len(service_installs) > 1:
+            raise exceptions.AmbiguousDevice(uuid_or_id)
+
+        pine.upsert(
+            {
+                "resource": "device_service_environment_variable",
+                "id": {
+                    "service_install": service_installs[0]["id"],
+                    "name": key,
+                },
+                "body": {"value": value},
+            }
+        )
+
+    def remove(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> None:
+        """
+        Remove a device service environment variable.
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            service_id (int): service id
+            key (str): variable name
+
+        Examples:
+            >>> balena.models.devices.service_var.remove(28970)
+        """
+
+        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
+        pine.delete(
+            {
+                "resource": "device_service_environment_variable",
+                "options": {
+                    "$filter": {
+                        "service_install": {
+                            "$any": {
+                                "$alias": "si",
+                                "$expr": {
+                                    "si": {
+                                        "device": device_id,
+                                        "service": service_id,
+                                    }
+                                },
+                            }
+                        },
+                        "name": key,
+                    }
+                },
+            }
+        )
+
+
+device = Device()

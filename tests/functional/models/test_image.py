@@ -4,7 +4,6 @@ from tests.helper import TestHelper
 
 
 class TestImage(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -16,7 +15,6 @@ class TestImage(unittest.TestCase):
         cls.helper.wipe_application()
 
     def test_01_should_reject_if_image_id_does_not_exist(self):
-
         with self.assertRaises(self.helper.balena_exceptions.ImageNotFound):
             self.balena.models.image.get(123)
 

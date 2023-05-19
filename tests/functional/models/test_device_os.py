@@ -16,9 +16,9 @@ class TestDevice(unittest.TestCase):
 
     def test_01_get_supported_os_versions_by_device_type_slug(self):
         # should become the manifest if the slug is valid.
-        supported_device_os_versions = self.balena.models.device_os.get_supported_os_update_versions(
+        supported_device_os_versions = self.balena.models.os.get_supported_os_update_versions(
             "raspberrypi3", "2.9.6+rev1.prod"
-            )
+        )
         self.assertEqual(supported_device_os_versions["current"], "2.9.6+rev1.prod")
         self.assertIsInstance(supported_device_os_versions["recommended"], str)
         self.assertIsInstance(supported_device_os_versions["versions"], list)

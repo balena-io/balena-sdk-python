@@ -1,18 +1,17 @@
 import re
+from collections import defaultdict
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from semver.version import Version
 
-from typing import Union, List, Any, Dict, Optional, Literal, TypedDict
-from collections import defaultdict
-
 from .. import exceptions
-from .device_type import DeviceType
-from ..utils import merge, compare, normalize_balena_semver
+from ..balena_auth import request
+from ..hup import get_hup_action_type
 from ..pine import pine
 from ..types import AnyObject
-from ..balena_auth import request
+from ..utils import compare, merge, normalize_balena_semver
 from . import application as app_module
-from ..hup import get_hup_action_type
+from .device_type import DeviceType
 
 
 class ImgConfigOptions(TypedDict, total=False):
@@ -192,7 +191,7 @@ class DeviceOs:
     OS_VARIANTS = {"production": "prod", "development": "dev"}
 
     def __init__(self):
-        self.device_type = DeviceType()
+        self.__device_type = DeviceType()
 
     def get_available_os_versions(self, device_type: Union[str, List[str]]):
         """
@@ -252,7 +251,7 @@ class DeviceOs:
         Returns:
             float: OS image download size, in bytes.
         """
-        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        slug = self.__device_type.get(device_type, {"$select": "slug"})["slug"]
         return float(
             request(
                 method="GET",
@@ -289,7 +288,7 @@ class DeviceOs:
             float: OS image download size, in bytes.
         """
 
-        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        slug = self.__device_type.get(device_type, {"$select": "slug"})["slug"]
         os_versions: List[Any] = self.get_available_os_versions(slug)  # type: ignore
 
         if os_type is not None:
@@ -346,7 +345,7 @@ class DeviceOs:
             >>>        for chunk in stream.iter_content(chunk_size=8192):
             >>>            f.write(chunk)
         """
-        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        slug = self.__device_type.get(device_type, {"$select": "slug"})["slug"]
 
         if version == "latest":
             versions = [v for v in self.get_available_os_versions(slug) if v["os_type"] in self.OS_TYPES["default"]]
@@ -437,7 +436,7 @@ class DeviceOs:
             device_type (str): device type slug.
             current_version (str): device type slug.
         """
-        slug = self.device_type.get(device_type, {"$select": "slug"})["slug"]
+        slug = self.__device_type.get(device_type, {"$select": "slug"})["slug"]
         all_versions = self.get_available_os_versions(slug)
         all_versions = [v.get("raw_version") for v in all_versions if v.get("os_type") == self.OS_TYPES["default"]]
 
@@ -446,16 +445,10 @@ class DeviceOs:
             None,
         )
 
-        versions = [
-            v for v in all_versions if self.is_supported_os_update(device_type, current_version, v)
-        ]
+        versions = [v for v in all_versions if self.is_supported_os_update(device_type, current_version, v)]
         recommended = next((v for v in versions if not Version.parse(v).prerelease), None)
 
-        return {
-            "versions": versions,
-            "recommended": recommended,
-            "current": current
-        }
+        return {"versions": versions, "recommended": recommended, "current": current}
 
     def is_architecture_compatible_with(self, os_architecture: str, application_architecture: str):
         """

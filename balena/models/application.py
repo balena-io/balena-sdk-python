@@ -5,20 +5,16 @@ from urllib.parse import urljoin
 
 from .. import exceptions
 from ..balena_auth import request
-from ..base_request import BaseRequest
+from ..dependent_resource import DependentResource
 from ..pine import pine
 from ..settings import settings
-from ..types import (
-    AnyObject,
-    ApplicationInviteOptions,
-    ApplicationMembershipRoles,
-    ResourceKey,
-    ShutdownOptions,
-)
+from ..types import AnyObject, ApplicationInviteOptions, ApplicationMembershipRoles, ResourceKey, ShutdownOptions
 from ..types.models import (
     ApplicationInviteType,
     ApplicationMembershipType,
     ApplicationType,
+    BaseTagType,
+    EnvironmentVariableBase,
 )
 from ..utils import (
     generate_current_service_details,
@@ -38,10 +34,14 @@ class Application:
     """
 
     def __init__(self):
-        self.device_type = DeviceType()
-        self.release = Release()
-        self.invite = ApplicationInvite()
+        self.__device_type = DeviceType()
+        self.__release = Release()
+        self.tags = ApplicationTag()
+        self.config_var = ApplicationConfigVariable()
+        self.env_var = ApplicationEnvVariable()
+        self.build_var = BuildEnvVariable()
         self.membership = ApplicationMembership()
+        self.invite = ApplicationInvite()
 
     def __get_access_filter(self):
         return {
@@ -56,7 +56,7 @@ class Application:
         }
 
     def __get_device_type_id(self, device_type: str) -> int:
-        dt = self.device_type.get(
+        dt = self.__device_type.get(
             device_type,
             {
                 "$select": "id",
@@ -72,9 +72,7 @@ class Application:
         )
 
         host_apps = dt.get("is_default_for__application", [])
-        if len(host_apps) > 0 and all(
-            map(lambda ha: ha["is_archived"], host_apps)
-        ):
+        if len(host_apps) > 0 and all(map(lambda ha: ha["is_archived"], host_apps)):
             raise exceptions.BalenaDiscontinuedDeviceType(device_type)
 
         return dt["id"]
@@ -97,14 +95,10 @@ class Application:
 
         return org["id"]
 
-    def __normalize_application(
-        self, application: ApplicationType
-    ) -> ApplicationType:
+    def __normalize_application(self, application: ApplicationType) -> ApplicationType:
         owned_devices = application.get("owns__device")
         if isinstance(owned_devices, list):
-            application["owns__device"] = list(
-                map(normalize_device_os_version, owned_devices)
-            )
+            application["owns__device"] = list(map(normalize_device_os_version, owned_devices))
         return application
 
     def get_id(self, slug_or_uuid_or_id: Union[str, int]) -> int:
@@ -161,11 +155,7 @@ class Application:
                 "resource": "application",
                 "options": merge(
                     {
-                        **(
-                            {"$filter": self.__get_access_filter()}
-                            if context == "directly_accessible"
-                            else {}
-                        ),
+                        **({"$filter": self.__get_access_filter()} if context == "directly_accessible" else {}),
                         "$orderby": "app_name asc",
                     },
                     options,
@@ -228,9 +218,7 @@ class Application:
                     "resource": "application",
                     "id": slug_or_uuid_or_id,
                     "options": merge(
-                        {}
-                        if access_filter is None
-                        else {"$filter": access_filter},
+                        {} if access_filter is None else {"$filter": access_filter},
                         options,
                     ),
                 }
@@ -315,17 +303,7 @@ class Application:
             >>> balena.models.application.get_with_device_service_details('my_org_handle/my_app_name')
         """
         service_options = merge(
-            {
-                "$expand": [
-                    {
-                        "owns__device": {
-                            "$expand": get_current_service_details_pine_expand(
-                                True
-                            )
-                        }
-                    }
-                ]
-            },
+            {"$expand": [{"owns__device": {"$expand": get_current_service_details_pine_expand(True)}}]},
             options,
         )
 
@@ -333,9 +311,7 @@ class Application:
 
         devices = app.get("owns__device")
         if app is not None and devices is not None:
-            app["owns__device"] = list(
-                map(generate_current_service_details, devices)
-            )
+            app["owns__device"] = list(map(generate_current_service_details, devices))
 
         return app
 
@@ -365,11 +341,7 @@ class Application:
                 "options": merge(
                     {
                         "$filter": {
-                            **(
-                                self.__get_access_filter()
-                                if context == "directly_accessible"
-                                else {}
-                            ),
+                            **(self.__get_access_filter() if context == "directly_accessible" else {}),
                             "app_name": app_name,
                         }
                     },
@@ -386,9 +358,7 @@ class Application:
 
         return self.__normalize_application(apps[0])
 
-    def get_by_owner(
-        self, app_name: str, owner: str, options: AnyObject = {}
-    ) -> ApplicationType:
+    def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> ApplicationType:
         """
         Get a single application using the appname and the handle of the owning organization.
 
@@ -519,9 +489,7 @@ class Application:
                 raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
             raise e
 
-    def rename(
-        self, slug_or_uuid_or_id: Union[str, int], new_name: str
-    ) -> None:
+    def rename(self, slug_or_uuid_or_id: Union[str, int], new_name: str) -> None:
         """
         Rename application.
 
@@ -561,9 +529,7 @@ class Application:
         def __restart():
             try:
                 application_id = self.get_id(slug_or_uuid_or_id)
-                request(
-                    method="POST", path=f"/applcation/{application_id}/restart"
-                )
+                request(method="POST", path=f"/applcation/{application_id}/restart")
             except exceptions.RequestError as e:
                 if e.status_code == 404:
                     raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
@@ -676,9 +642,7 @@ class Application:
             )
         )
 
-    def will_track_new_releases(
-        self, slug_or_uuid_or_id: Union[str, int]
-    ) -> bool:
+    def will_track_new_releases(self, slug_or_uuid_or_id: Union[str, int]) -> bool:
         """
          Get whether the application is configured to receive updates whenever a new release is available.
 
@@ -692,14 +656,10 @@ class Application:
             >>> balena.models.application.will_track_new_releases(5685)
         """
 
-        app = self.get(
-            slug_or_uuid_or_id, {"$select": "should_track_latest_release"}
-        )
+        app = self.get(slug_or_uuid_or_id, {"$select": "should_track_latest_release"})
         return bool(app.get("should_track_latest_release"))
 
-    def is_tracking_latest_release(
-        self, slug_or_uuid_or_id: Union[str, int]
-    ) -> bool:
+    def is_tracking_latest_release(self, slug_or_uuid_or_id: Union[str, int]) -> bool:
         """
         Get whether the application is up to date and is tracking the latest finalized release for updates
 
@@ -736,15 +696,10 @@ class Application:
 
         return bool(
             app.get("should_track_latest_release")
-            and (
-                not latest_release
-                or tracked_release.get("id") == latest_release["id"]
-            )
+            and (not latest_release or tracked_release.get("id") == latest_release["id"])
         )
 
-    def pin_to_release(
-        self, slug_or_uuid_or_id: Union[str, int], full_release_hash: str
-    ) -> None:
+    def pin_to_release(self, slug_or_uuid_or_id: Union[str, int], full_release_hash: str) -> None:
         """
         Configures the application to run a particular release
         and not get updated when the latest release changes.
@@ -758,7 +713,7 @@ class Application:
         """
 
         application_id = self.get_id(slug_or_uuid_or_id)
-        release = self.release.get(
+        release = self.__release.get(
             full_release_hash,
             {
                 "$select": "id",
@@ -781,9 +736,7 @@ class Application:
             }
         )
 
-    def get_target_release_hash(
-        self, slug_or_uuid_or_id: Union[str, int]
-    ) -> Optional[str]:
+    def get_target_release_hash(self, slug_or_uuid_or_id: Union[str, int]) -> Optional[str]:
         """
         Get the hash of the current release for a specific application.
 
@@ -802,9 +755,7 @@ class Application:
         }
         application = self.get(slug_or_uuid_or_id, app_options)
 
-        return application.get("should_be_running__release", [{}])[0].get(
-            "commit"
-        )
+        return application.get("should_be_running__release", [{}])[0].get("commit")
 
     def track_latest_release(self, slug_or_uuid_or_id: Union[str, int]) -> None:
         """
@@ -888,9 +839,7 @@ class Application:
             }
         )
 
-    def grant_support_access(
-        self, slug_or_uuid_or_id: Union[str, int], expiry_timestamp: int
-    ):
+    def grant_support_access(self, slug_or_uuid_or_id: Union[str, int], expiry_timestamp: int):
         """
         Grant support access to an application until a specified time.
 
@@ -903,12 +852,9 @@ class Application:
         """
 
         if expiry_timestamp is None or expiry_timestamp <= int(
-            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
-            * 1000
+            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000
         ):
-            raise exceptions.InvalidParameter(
-                "expiry_timestamp", expiry_timestamp
-            )
+            raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
 
         try:
             application_id = self.get_id(slug_or_uuid_or_id)
@@ -916,9 +862,7 @@ class Application:
                 {
                     "resource": "application",
                     "id": application_id,
-                    "body": {
-                        "is_accessible_by_support_until__date": expiry_timestamp
-                    },
+                    "body": {"is_accessible_by_support_until__date": expiry_timestamp},
                 }
             )
         except exceptions.RequestError as e:
@@ -952,6 +896,316 @@ class Application:
             raise e
 
 
+class ApplicationTag(DependentResource[BaseTagType]):
+    """
+    This class implements application tag model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(ApplicationTag, self).__init__(
+            "application_tag",
+            "tag_key",
+            "application",
+            lambda id: application.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all application tags for an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.application.tags.get_all_by_application(1005160)
+        """
+        return super(ApplicationTag, self)._get_all_by_parent(slug_or_uuid_or_id, options)
+
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all application tags.
+
+        Args:
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.application.tags.get_all()
+        """
+        return super(ApplicationTag, self)._get_all(options)
+
+    def get(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
+        """
+        Set an application tag (update tag value if it exists).
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            tag_key (str): tag key.
+
+        Returns:
+            Optional[str]: tag value.
+
+        Examples:
+            >>> balena.models.application.tags.get(1005767, 'tag1')
+        """
+        return super(ApplicationTag, self)._get(slug_or_uuid_or_id, tag_key)
+
+    def set(self, slug_or_uuid_or_id: Union[str, int], tag_key: str, value: str) -> None:
+        """
+        Set an application tag (update tag value if it exists).
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.application.tags.set(1005767, 'tag1', 'Python SDK')
+        """
+        super(ApplicationTag, self)._set(slug_or_uuid_or_id, tag_key, value)
+
+    def remove(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> None:
+        """
+        Remove an application tag.
+
+        Args:
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.application.tags.remove(1005767, 'tag1')
+        """
+        super(ApplicationTag, self)._remove(slug_or_uuid_or_id, tag_key)
+
+
+class ApplicationConfigVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements application config variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(ApplicationConfigVariable, self).__init__(
+            "application_config_variable",
+            "name",
+            "application",
+            lambda id: application.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all application config variables by application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: application config variables.
+
+        Examples:
+            >>> balena.models.application.config_var.get_all_by_application(9020)
+        """
+        return super(ApplicationConfigVariable, self)._get_all_by_parent(slug_or_uuid_or_id, options)
+
+    def get(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str) -> Optional[str]:
+        """
+        Get application config variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+
+        Examples:
+            >>> balena.models.application.config_var.get('8deb12','test_env4')
+        """
+        return super(ApplicationConfigVariable, self)._get(slug_or_uuid_or_id, env_var_name)
+
+    def set(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
+        """
+        Set the value of a specific application config variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.application.config_var.set('8deb12','test_env', 'testing1')
+        """
+        super(ApplicationConfigVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
+
+    def remove(self, slug_or_uuid_or_id: Union[str, int], key: str) -> None:
+        """
+        Remove an application config variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+
+        Examples:
+            >>> balena.models.application.config_var.remove(2184)
+        """
+        super(ApplicationConfigVariable, self)._remove(slug_or_uuid_or_id, key)
+
+
+class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements application environment variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(ApplicationEnvVariable, self).__init__(
+            "application_environment_variable",
+            "name",
+            "application",
+            lambda id: application.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all application environment variables by application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: application environment variables.
+
+        Examples:
+            >>> balena.models.application.env_var.get_all_by_application(9020)
+            >>> balena.models.application.env_var.get_all_by_application("myorg/myslug")
+        """
+        return super(ApplicationEnvVariable, self)._get_all_by_parent(slug_or_uuid_or_id, options)
+
+    def get(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str) -> Optional[str]:
+        """
+        Get application environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+
+        Examples:
+            >>> balena.models.application.env_var.get('8deb12','test_env4')
+        """
+        return super(ApplicationEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
+
+    def set(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
+        """
+        Set the value of a specific application environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.application.env_var.set('8deb12','test_env4', 'testing1')
+        """
+        super(ApplicationEnvVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
+
+    def remove(self, slug_or_uuid_or_id: Union[str, int], key: str) -> None:
+        """
+        Remove an application environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+
+        Examples:
+            >>> balena.models.application.env_var.remove(2184)
+        """
+        super(ApplicationEnvVariable, self)._remove(slug_or_uuid_or_id, key)
+
+
+class BuildEnvVariable(DependentResource[EnvironmentVariableBase]):
+    """
+    This class implements build environment variable model for balena python SDK.
+
+    """
+
+    def __init__(self):
+        super(BuildEnvVariable, self).__init__(
+            "build_environment_variable",
+            "name",
+            "application",
+            lambda id: application.get(id, {"$select": "id"})["id"],
+        )
+
+    def get_all_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
+        """
+        Get all build environment variables by application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[EnvironmentVariableBase]: build environment variables.
+
+        Examples:
+            >>> balena.models.application.build_var.get_all_by_application(9020)
+            >>> balena.models.application.build_var.get_all_by_application("myorg/myslug")
+        """
+        return super(BuildEnvVariable, self)._get_all_by_parent(slug_or_uuid_or_id, options)
+
+    def get(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str) -> Optional[str]:
+        """
+        Get build environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+
+        Examples:
+            >>> balena.models.application.build_var.get('8deb12','test_env4')
+        """
+        return super(BuildEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
+
+    def set(self, slug_or_uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
+        """
+        Set the value of a specific build environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            env_var_name (str): environment variable name.
+            value (str): environment variable value.
+
+        Examples:
+            >>> balena.models.application.build_var.set('8deb12','test_env4', 'testing1')
+        """
+        super(BuildEnvVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
+
+    def remove(self, slug_or_uuid_or_id: Union[str, int], key: str) -> None:
+        """
+        Remove an build environment variable.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+
+        Examples:
+            >>> balena.models.application.build_var.remove(2184)
+        """
+        super(BuildEnvVariable, self)._remove(slug_or_uuid_or_id, key)
+
+
 class ApplicationInvite:
     """
     This class implements application invite model for balena python SDK.
@@ -980,17 +1234,26 @@ class ApplicationInvite:
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
     ) -> List[ApplicationInviteType]:
         """
-        Get all invites by application.
+                from typing import List, Union
 
-        Args:
-            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
-            options (AnyObject): extra pine options to use
+        from .. import exceptions
+        from ..balena_auth import request
+        from ..pine import pine
+        from ..types import (
+            AnyObject,
+            ApplicationInviteOptions,
+        )
+        from ..types.models import ApplicationInviteType
+        from ..utils import merge
+         Args:
+                    slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+                    options (AnyObject): extra pine options to use
 
-        Returns:
-            List[ApplicationInviteType]: list contains info of invites.
+                Returns:
+                    List[ApplicationInviteType]: list contains info of invites.
 
-        Examples:
-            >>> balena.models.application.invite.get_all_by_application(1681618)
+                Examples:
+                    >>> balena.models.application.invite.get_all_by_application(1681618)
         """
         app = application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(
@@ -1050,9 +1313,7 @@ class ApplicationInvite:
         if roles is not None:
             role_id = (roles[0] if len(roles) > 0 else {}).get("id", None)
             if role_id is None:
-                raise exceptions.BalenaApplicationMembershipRoleNotFound(
-                    role_name
-                )
+                raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
             body["application_membership_role"] = role_id
 
         return pine.post({"resource": self.RESOURCE, "body": body})
@@ -1093,7 +1354,6 @@ class ApplicationMembership:
     """
 
     def __init__(self):
-        self.base_request = BaseRequest()
         self.RESOURCE = "user__is_member_of__application"
 
     def __get_role_id(self, role_name: str) -> Optional[int]:
@@ -1110,9 +1370,7 @@ class ApplicationMembership:
 
         return role["id"]
 
-    def get_all(
-        self, options: AnyObject = {}
-    ) -> List[ApplicationMembershipType]:
+    def get_all(self, options: AnyObject = {}) -> List[ApplicationMembershipType]:
         """
         Get all application memberships.
 
@@ -1128,9 +1386,7 @@ class ApplicationMembership:
 
         return pine.get({"resource": self.RESOURCE, "options": options})
 
-    def get(
-        self, membership_id: ResourceKey, options: AnyObject = {}
-    ) -> ApplicationMembershipType:
+    def get(self, membership_id: ResourceKey, options: AnyObject = {}) -> ApplicationMembershipType:
         """
         Get a single application membership.
 
@@ -1147,9 +1403,7 @@ class ApplicationMembership:
             >>> balena.models.application.membership.get({"user": 123, "is_member_of__application": 125})
         """
 
-        if not isinstance(membership_id, int) and not isinstance(
-            membership_id, dict
-        ):
+        if not isinstance(membership_id, int) and not isinstance(membership_id, dict):
             raise exceptions.InvalidParameter("membershipId", membership_id)
 
         result = pine.get(

@@ -7,7 +7,6 @@ PUBLIC_KEY = """ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMBWf5hwmL97rtCD8Gljz30+25
 
 
 class TestKey(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -44,9 +43,11 @@ class TestKey(unittest.TestCase):
         self.assertEqual(result[0]["public_key"].strip(" \n"), PUBLIC_KEY.strip(" \n"))
 
     def test_04_should_support_pinejs_options(self):
-        [key] = self.balena.models.key.get_all({
-            "$select": ["public_key"],
-        })
+        [key] = self.balena.models.key.get_all(
+            {
+                "$select": ["public_key"],
+            }
+        )
 
         self.assertEqual(key["public_key"].strip(" \n"), PUBLIC_KEY.strip(" \n"))
         self.assertIsNone(key.get("title"))

@@ -144,7 +144,9 @@ class TestHelper:
         """
 
         app = self.balena.models.application.create(
-            app_name, device_type, self.default_organization["id"],
+            app_name,
+            device_type,
+            self.default_organization["id"],
         )
         dev = self.balena.models.device.register(app["id"], self.balena.models.device.generate_uuid())
         user_id = self.balena.auth.get_user_id()
@@ -214,9 +216,9 @@ class TestHelper:
             ).decode("utf-8")
         )
 
-        new_release = self.balena.models.release.get(new_release["id"], {
-            "$select": ["id", "commit", "raw_version", "belongs_to__application"]
-        })
+        new_release = self.balena.models.release.get(
+            new_release["id"], {"$select": ["id", "commit", "raw_version", "belongs_to__application"]}
+        )
 
         # Set device to the new release
 
@@ -442,9 +444,7 @@ class TestHelper:
         Create a multicontainer application with  two releases.
         """
 
-        app = self.balena.models.application.create(
-            app_name, device_type, self.default_organization["id"]
-        )
+        app = self.balena.models.application.create(app_name, device_type, self.default_organization["id"])
         user_id = self.balena.auth.get_user_id()
 
         # Register an old & new release of this application
@@ -489,9 +489,9 @@ class TestHelper:
             ).decode("utf-8")
         )
 
-        new_release = self.balena.models.release.get(new_release["id"], {
-            "$select": ["id", "commit", "raw_version", "belongs_to__application"]
-        })
+        new_release = self.balena.models.release.get(
+            new_release["id"], {"$select": ["id", "commit", "raw_version", "belongs_to__application"]}
+        )
 
         return {"app": app, "old_release": old_release, "current_release": new_release}
 

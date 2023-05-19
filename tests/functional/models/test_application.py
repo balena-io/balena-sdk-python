@@ -247,9 +247,7 @@ class TestApplication(unittest.TestCase):
 
         with self.assertRaises(self.helper.balena_exceptions.BalenaApplicationMembershipRoleNotFound):
             self.balena.models.application.membership.create(
-                app["id"],
-                self.helper.credentials["email"],
-                "developer1"  # type: ignore
+                app["id"], self.helper.credentials["email"], "developer1"  # type: ignore
             )
 
     def test_32_membership_get_all(self):
