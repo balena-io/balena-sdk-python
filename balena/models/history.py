@@ -62,13 +62,13 @@ class DeviceHistory:
             >>> balena.models.device.history.get_all_by_device('6046335305c8142883a4466d30abe211')
             >>> balena.models.device.history.get_all_by_device(11196426)
             >>> balena.models.device.history.get_all_by_device(
-            >>>     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
-            >>> )
+            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ... )
             >>> balena.models.device.history.get_all_by_device(
-            >>>     11196426,
-            >>>     from_date=datetime.utcnow() + timedelta(days=-10),
-            >>>     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
-            >>> )
+            ...     11196426,
+            ...     from_date=datetime.utcnow() + timedelta(days=-10),
+            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ... )
 
         """
         dollar_filter = history_timerange_filter_with_guard(from_date, to_date)
@@ -104,13 +104,13 @@ class DeviceHistory:
             >>> balena.models.device.history.get_all_by_application('myorg/myapp')
             >>> balena.models.device.history.get_all_by_application(11196426)
             >>> balena.models.device.history.get_all_by_application(
-            >>>     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
-            >>> )
+            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ... )
             >>> balena.models.device.history.get_all_by_application(
-            >>>     11196426,
-            >>>     from_date=datetime.utcnow() + timedelta(days=-10),
-            >>>     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
-            >>> )
+            ...     11196426,
+            ...     from_date=datetime.utcnow() + timedelta(days=-10),
+            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ... )
         """
         app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 

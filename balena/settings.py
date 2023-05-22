@@ -168,15 +168,6 @@ class Settings:
 
         Examples:
             >>> balena.settings.get_all()
-            {
-                "image_cache_time": "604800000",
-                "api_endpoint": "https://api.balena-cloud.com/",
-                "data_directory": "/root/.balena",
-                "token_refresh_interval": "3600000",
-                "cache_directory": "/root/.balena/cache",
-                "pine_endpoint": "https://api.balena-cloud.com/ewa/",
-            }
-
         """
 
         self.__read_settings()
@@ -192,8 +183,6 @@ class Settings:
 
         Examples:
             >>> balena.settings.set(key='tmp',value='123456')
-            (Empty Return)
-
         """
 
         self._setting[key] = str(value)
@@ -212,11 +201,8 @@ class Settings:
         Examples:
             # Remove an existing key from settings
             >>> balena.settings.remove('tmp')
-            True
             # Remove a non-existing key from settings
             >>> balena.settings.remove('tmp1')
-            False
-
         """
 
         # if key is not in settings, return False

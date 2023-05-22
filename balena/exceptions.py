@@ -598,3 +598,17 @@ class BalenaInvalidDeviceType(BalenaException):
     def __init__(self, device_type):
         super(BalenaInvalidDeviceType, self).__init__()
         self.message = Message.BALENA_INVALID_DEVICE_TYPE.format(device_type=device_type)
+
+
+class TooManyRequests(BalenaException):
+    """
+    Exception type for too many requests.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(TooManyRequests, self).__init__()
+        self.message = Message.TOO_MANY_REQUESTS

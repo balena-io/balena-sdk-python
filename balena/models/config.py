@@ -1,8 +1,4 @@
-from __future__ import annotations
-
-from typing import List, TypedDict
-
-from typing_extensions import NotRequired
+from typing import List, TypedDict, Optional
 
 from ..balena_auth import request
 from ..utils import normalize_device_os_version
@@ -14,14 +10,14 @@ class GaConfig(TypedDict):
 
 
 class ConfigType(TypedDict):
-    deployment: NotRequired[str]
+    deployment: Optional[str]
     deviceUrlsBase: str
     adminUrl: str
     gitServerUrl: str
-    ga: NotRequired[GaConfig]
-    mixpanelToken: NotRequired[str]
-    intercomAppId: NotRequired[str]
-    recurlyPublicKey: NotRequired[str]
+    ga: Optional[GaConfig]
+    mixpanelToken: Optional[str]
+    intercomAppId: Optional[str]
+    recurlyPublicKey: Optional[str]
     DEVICE_ONLINE_ICON: str
     DEVICE_OFFLINE_ICON: str
     signupCodeRequired: bool

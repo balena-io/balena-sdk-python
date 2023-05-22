@@ -340,10 +340,10 @@ class DeviceOs:
 
         Example:
             >>> with b.models.device_os.download("raspberrypi3") as stream:
-            >>>    stream.raise_for_status()
-            >>>    with open("my-image-filename", "wb") as f:
-            >>>        for chunk in stream.iter_content(chunk_size=8192):
-            >>>            f.write(chunk)
+            ...    stream.raise_for_status()
+            ...    with open("my-image-filename", "wb") as f:
+            ...        for chunk in stream.iter_content(chunk_size=8192):
+            ...            f.write(chunk)
         """
         slug = self.__device_type.get(device_type, {"$select": "slug"})["slug"]
 

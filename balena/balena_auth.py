@@ -58,20 +58,25 @@ def request(
     qs: Optional[Any] = {},
     return_raw: bool = False,
     stream: bool = False,
+    send_token: bool = True,
 ) -> Any:
     if endpoint is None:
         endpoint = settings.get("api_endpoint")
 
-    if token is None:
+    if token is None and send_token:
         token = get_token()
 
     url = urljoin(endpoint, path)
 
-    if token is None:
+    if token is None and send_token:
         raise exceptions.NotLoggedIn()
     try:
+        headers = {}
+        if send_token:
+            headers["Authorization"] = f"Bearer {token}"
+
         req = requests.request(
-            method=method, url=url, params=qs, json=body, headers={"Authorization": f"Bearer {token}"}, stream=stream
+            method=method, url=url, params=qs, json=body, headers=headers, stream=stream
         )
 
         if return_raw:
@@ -82,5 +87,7 @@ def request(
         except Exception:
             return req.content.decode()
 
-    except Exception:
+    except Exception as e:
+        if not send_token:
+            raise e
         raise exceptions.NotLoggedIn()

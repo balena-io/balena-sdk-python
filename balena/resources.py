@@ -10,6 +10,7 @@ class Message:
 
     # Exception Error Message
     NOT_LOGGED_IN = "You have to log in!"
+    TOO_MANY_REQUESTS = "Too Many Requests"
     UNAUTHORIZED = "You have to log in or BALENA_API_KEY environment variable must be set!"
     REQUEST_ERROR = "Request error: {body}"
     KEY_NOT_FOUND = "Key not found: {key}"
