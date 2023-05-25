@@ -34,7 +34,6 @@ from .logs import Logs
 from .models import Models
 from .pine import pine as pine_client
 from .settings import settings
-from .twofactor_auth import TwoFactorAuth
 
 __version__ = "12.7.0"
 
@@ -55,5 +54,4 @@ class Balena:
         self.logs = Logs()
         self.auth = Auth()
         self.models = Models()
-        self.twofactor_auth = TwoFactorAuth()
         self.pine = pine_client

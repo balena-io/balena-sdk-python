@@ -470,7 +470,7 @@ class Application:
     # TODO: enable batch operations
     def remove(self, slug_or_uuid_or_id: Union[str, int]) -> None:
         """
-        Remove application(s).
+        Remove application.
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).

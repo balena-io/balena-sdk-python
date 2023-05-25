@@ -128,3 +128,12 @@ class TestAuth(unittest.TestCase):
         self.assertFalse(self.balena.auth.is_logged_in())
 
         self.assertIsNone(self.balena.auth.get_token())
+
+    def test_16_2fa(self):
+        self.balena.auth.login(**TestAuth.creds)
+
+        self.assertFalse(self.balena.auth.two_factor.is_enabled())
+        self.assertTrue(self.balena.auth.two_factor.is_passed())
+
+        secret = self.balena.auth.two_factor.get_setup_key()
+        self.assertEqual(len(secret), 32)

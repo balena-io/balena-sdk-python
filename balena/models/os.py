@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing_extensions import NotRequired
 
 from semver.version import Version
 
@@ -12,6 +13,17 @@ from ..types import AnyObject
 from ..utils import compare, merge, normalize_balena_semver
 from . import application as app_module
 from .device_type import DeviceType
+
+
+class DownloadConfig(TypedDict):
+    developmentMode: NotRequired[bool]
+    appUpdatePollInterval: NotRequired[int]
+    network: NotRequired[Union[Literal["ethernet"], Literal["wifi"]]]
+    wifiKey: NotRequired[str]
+    wifiSsid: NotRequired[str]
+    appId: NotRequired[int]
+    fileType: NotRequired[Union[Literal[".img"], Literal[".zip"], Literal[".gz"]]]
+    imageType: NotRequired[Union[Literal["raw"], Literal["flasher"]]]
 
 
 class ImgConfigOptions(TypedDict, total=False):
@@ -324,7 +336,7 @@ class DeviceOs:
         self,
         device_type: str,
         version: str = "latest",
-        options: Dict[Literal["developmentMode"], bool] = {},
+        options: DownloadConfig = {},
     ):
         """
         Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
@@ -333,7 +345,7 @@ class DeviceOs:
             device_type (str): device type slug.
             version (str): semver-compatible version or 'latest', defaults to 'latest'.
             * The version **must** be the exact version number.
-            options (Dict[Literal["developmentMode"], bool]): OS configuration options to use.
+            options (DownloadConfig): OS configuration options to use.
 
         Returns:
             float: OS image download size, in bytes.

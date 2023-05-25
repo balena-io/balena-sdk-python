@@ -4,6 +4,8 @@ from .settings import settings
 from typing import TypedDict, Optional, Literal, Union, cast
 from typing_extensions import Unpack
 from .pine import pine
+from .twofactor_auth import TwoFactorAuth
+
 
 TOKEN_KEY = "token"
 
@@ -27,6 +29,9 @@ class Auth:
 
     _user_detail_cache: Optional[WhoamiResult] = None
     _user_actor_id_cache: Optional[int] = None
+
+    def __init__(self):
+        self.two_factor = TwoFactorAuth()
 
     def __get_user_details(
         self, no_cache: bool = False
