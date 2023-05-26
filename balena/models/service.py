@@ -16,7 +16,7 @@ class Service:
     """
 
     def __init__(self):
-        self.env_var = ServiceEnvVariable()
+        self.var = ServiceEnvVariable()
 
     def _get(self, id: int, options: AnyObject = {}):
         service = pine.get({"resource": "service", "id": id, "options": options})

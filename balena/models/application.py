@@ -102,6 +102,19 @@ class Application:
         return application
 
     def get_id(self, slug_or_uuid_or_id: Union[str, int]) -> int:
+        """
+        Given an application slug or uuid or id, returns it numeric id.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+
+        Returns:
+            int: The id.
+
+        Examples:
+            >>> balena.models.application.get_dashboard_url(1476418)
+
+        """
         if is_id(slug_or_uuid_or_id):
             return int(slug_or_uuid_or_id)
         app = self.get(slug_or_uuid_or_id, {"$select": "id"})
@@ -442,7 +455,7 @@ class Application:
             application_class (Optional[Literal["app", "fleet", "block"]]): application class.
 
         Returns:
-            dict: application info.
+            ApplicationType: application info.
 
         Examples:
             >>> balena.models.application.create('foo', 'raspberry-pi', 12345)
@@ -926,37 +939,6 @@ class ApplicationTag(DependentResource[BaseTagType]):
         """
         return super(ApplicationTag, self)._get_all_by_parent(slug_or_uuid_or_id, options)
 
-    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
-        """
-        Get all application tags.
-
-        Args:
-            options (AnyObject): extra pine options to use
-
-        Returns:
-            List[BaseTagType]: tags list.
-
-        Examples:
-            >>> balena.models.application.tags.get_all()
-        """
-        return super(ApplicationTag, self)._get_all(options)
-
-    def get(self, slug_or_uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
-        """
-        Set an application tag (update tag value if it exists).
-
-        Args:
-            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
-            tag_key (str): tag key.
-
-        Returns:
-            Optional[str]: tag value.
-
-        Examples:
-            >>> balena.models.application.tags.get(1005767, 'tag1')
-        """
-        return super(ApplicationTag, self)._get(slug_or_uuid_or_id, tag_key)
-
     def set(self, slug_or_uuid_or_id: Union[str, int], tag_key: str, value: str) -> None:
         """
         Set an application tag (update tag value if it exists).
@@ -1234,26 +1216,17 @@ class ApplicationInvite:
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
     ) -> List[ApplicationInviteType]:
         """
-                from typing import List, Union
+        Get all invites by application.
 
-        from .. import exceptions
-        from ..balena_auth import request
-        from ..pine import pine
-        from ..types import (
-            AnyObject,
-            ApplicationInviteOptions,
-        )
-        from ..types.models import ApplicationInviteType
-        from ..utils import merge
-         Args:
-                    slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
-                    options (AnyObject): extra pine options to use
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (AnyObject): extra pine options to use
 
-                Returns:
-                    List[ApplicationInviteType]: list contains info of invites.
+        Returns:
+            List[ApplicationInviteType]: list contains info of invites.
 
-                Examples:
-                    >>> balena.models.application.invite.get_all_by_application(1681618)
+        Examples:
+            >>> balena.models.application.invite.get_all_by_application(1681618)
         """
         app = application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(

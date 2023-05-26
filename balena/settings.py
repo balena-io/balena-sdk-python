@@ -3,6 +3,7 @@ import os
 import os.path as Path
 import shutil
 import sys
+from typing import Dict
 
 from . import exceptions
 from .resources import Message
@@ -113,7 +114,7 @@ class Settings:
                 config_data[option] = None
         self._setting = config_data
 
-    def has(self, key):
+    def has(self, key: str) -> bool:
         """
         Check if a setting exists.
 
@@ -125,8 +126,6 @@ class Settings:
 
         Examples:
             >>> balena.settings.has('api_endpoint')
-            True
-
         """
 
         self.__read_settings()
@@ -134,7 +133,7 @@ class Settings:
             return True
         return False
 
-    def get(self, key):
+    def get(self, key: str) -> str:
         """
         Get a setting value.
 
@@ -149,8 +148,6 @@ class Settings:
 
         Examples:
             >>> balena.settings.get('api_endpoint')
-            'https://api.balena-cloud.com/'
-
         """
 
         try:
@@ -159,7 +156,7 @@ class Settings:
         except KeyError:
             raise exceptions.InvalidOption(key)
 
-    def get_all(self):
+    def get_all(self) -> Dict[str, str]:
         """
         Get all settings.
 
@@ -173,7 +170,7 @@ class Settings:
         self.__read_settings()
         return self._setting
 
-    def set(self, key, value):
+    def set(self, key: str, value: str) -> None:
         """
         Set value for a setting.
 
@@ -188,7 +185,7 @@ class Settings:
         self._setting[key] = str(value)
         self.__write_settings()
 
-    def remove(self, key):
+    def remove(self, key: str) -> bool:
         """
         Remove a setting.
 
