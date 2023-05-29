@@ -154,9 +154,6 @@ class TestOrganization(unittest.TestCase):
                 len(membership_tag_model.get_all_by_organization_membership(membership_id)),
             )
 
-        self.assertEqual(membership_tag_model.get(membership_id, key), value)
-
-        if value is not None:
             self.assertEqual(
                 membership_tag_model.get_all_by_organization(org_id)[0].get("value"),
                 value,
@@ -165,6 +162,8 @@ class TestOrganization(unittest.TestCase):
                 membership_tag_model.get_all_by_organization_membership(membership_id)[0].get("value"),
                 value,
             )
+
+        self.assertEqual(membership_tag_model.get(membership_id, key), value)
 
 
 if __name__ == "__main__":

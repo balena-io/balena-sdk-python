@@ -33,9 +33,7 @@ class Auth:
     def __init__(self):
         self.two_factor = TwoFactorAuth()
 
-    def __get_user_details(
-        self, no_cache: bool = False
-    ) -> Optional[WhoamiResult]:
+    def __get_user_details(self, no_cache: bool = False) -> Optional[WhoamiResult]:
         """
         Get user details from token.
 
@@ -51,9 +49,7 @@ class Auth:
 
         return self._user_detail_cache
 
-    def __get_property(
-        self, element: Literal["id", "username", "email"]
-    ) -> Union[str, int]:
+    def __get_property(self, element: Literal["id", "username", "email"]) -> Union[str, int]:
         """
         Get a property from user details.
 
@@ -97,9 +93,7 @@ class Auth:
         Examples:
             >>> balena.auth.authenticate(username='<your email>', password='<your password>')
         """
-        req = request(
-            method="POST", path="login_", body=credentials, send_token=False, return_raw=True
-        )
+        req = request(method="POST", path="login_", body=credentials, send_token=False, return_raw=True)
 
         if not req.ok:
             if req.status_code == 401:

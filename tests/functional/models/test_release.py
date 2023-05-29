@@ -18,7 +18,11 @@ class TestRelease(unittest.TestCase):
         cls.mc_app = cls.helper.create_multicontainer_app()
         cls.TEST_SOURCE_URL = "https://github.com/balena-io-examples/balena-node-hello-world/archive/v1.0.0.tar.gz"
         cls.TEST_SOURCE_CONTAINER_COUNT = 1
-        cls.UNIQUE_PROPERTY_NAMES = ["id", "commit", "__belongs_to__hash__"]
+
+        # releases can be queried by id, commit or a dict containing application and raw_version
+        # we use the property called __belongs_to_application_and_raw_version__ to build this dict
+        # with the application and raw_version for each release on each test
+        cls.UNIQUE_PROPERTY_NAMES = ["id", "commit", "__belongs_to_application_and_raw_version__"]
 
     @classmethod
     def tearDownClass(cls):
@@ -118,7 +122,6 @@ class TestRelease(unittest.TestCase):
                 {"$select": ["id", "commit", "raw_version", "belongs_to__application"]},
             )
 
-        for field in self.UNIQUE_PROPERTY_NAMES:
             draft_release = TestRelease.test_release_by_field[field]
             finalize_param = self.__get_param(field, draft_release)
             self.balena.models.release.finalize(finalize_param)  # type: ignore
@@ -352,7 +355,7 @@ class TestRelease(unittest.TestCase):
         self.assertEqual(release["images"][1].get("build_log"), build_logs[1])
 
     def __get_param(self, field: str, draft_release: Any):
-        if field == "__belongs_to__hash__":
+        if field == "__belongs_to_application_and_raw_version__":
             return {
                 "application": draft_release["belongs_to__application"]["__id"],
                 "raw_version": draft_release["raw_version"],

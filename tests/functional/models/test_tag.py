@@ -115,14 +115,22 @@ class BaseTagTest:
         test_runner.assertEqual(tag1["value"], "BarBar")
         test_runner.assertEqual(tag2["value"], "Bar1")
 
-    def test_remove(self, test_runner, resource_id):
+    def test_remove(self, test_runner, resource_id, get_resources_func=None):
         # should be able to remove a tag by resource id
         self.test_obj.set(resource_id, "Foo_remove", "Bar")
-        current_length = len(self.test_obj.get_all())
+        if get_resources_func is not None:
+            previous_length = len(get_resources_func(resource_id))
+        else:
+            previous_length = len(self.test_obj.get_all())
 
         self.test_obj.remove(resource_id, "Foo_remove")
         # after removing a tag, current_length should be reduced by 1
-        test_runner.assertEqual(len(self.test_obj.get_all()), (current_length - 1))
+        if get_resources_func is not None:
+            current_length = len(get_resources_func(resource_id))
+        else:
+            current_length = len(self.test_obj.get_all())
+
+        test_runner.assertEqual(current_length, previous_length - 1)
 
 
 class TestDeviceTag(unittest.TestCase):
@@ -178,17 +186,15 @@ class TestApplicationTag(unittest.TestCase):
         # Wipe all apps after every test case.
         cls.helper.wipe_application()
 
-    def test_01_set(self):
-        self.base_tag_test.test_set(self, type(self).app["id"])
-
-    def test_02_get_all_by_application(self):
+    def test_01_get_all_by_application(self):
         self.base_tag_test.test_get_all_by_application(self, type(self).app["id"], type(self).app["id"])
 
-    def test_03_get_all(self):
-        self.base_tag_test.test_get_all(self, type(self).app["id"])
-
-    def test_04_remove(self):
-        self.base_tag_test.test_remove(self, type(self).app["id"])
+    def test_03_remove(self):
+        self.base_tag_test.test_remove(
+            self,
+            type(self).app["id"],
+            self.balena.models.application.tags.get_all_by_application
+        )
 
 
 class TestReleaseTag(unittest.TestCase):

@@ -8,6 +8,7 @@ import jwt
 from balena import Balena
 from balena import exceptions as balena_exceptions
 from balena.settings import settings
+import time
 
 
 class TestHelper:
@@ -77,7 +78,7 @@ class TestHelper:
         """
         Wipe all user's apps
         """
-        self.balena.pine.delete({"resource": "application", "options": {"filter": "1", "eq": 1}})
+        self.balena.pine.delete({"resource": "application", "options": {"$filter": {"1": 1}}})
 
     def wipe_organization(self):
         """
@@ -93,7 +94,7 @@ class TestHelper:
         if self.balena.auth.is_logged_in():
             self.wipe_application()
 
-            self.balena.pine.delete({"resource": "user__has__public_key", "options": {"filter": "1", "eq": 1}})
+            self.balena.pine.delete({"resource": "user__has__public_key", "options": {"$filter": {"1": 1}}})
 
             for key in self.balena.models.api_key.get_all_named_user_api_keys():
                 self.balena.models.api_key.revoke(key["id"])
@@ -112,6 +113,10 @@ class TestHelper:
         """
         Create a multicontainer application with a device and two releases.
         """
+
+        old_timestamp = int(datetime.strptime("2017-01-01", "%Y-%m-%d").timestamp())
+        now_timestamp = int(time.time())
+
         app_with_releases = self.create_app_with_releases(app_name, device_type)
 
         app, old_release, new_release = (
@@ -147,8 +152,8 @@ class TestHelper:
                     "project_type": "dockerfile",
                     "content_hash": "abc",
                     "build_log": "old web log",
-                    "start_timestamp": 1234,
-                    "push_timestamp": 1234,
+                    "start_timestamp": old_timestamp,
+                    "push_timestamp": old_timestamp,
                     "status": "success",
                 },
             }
@@ -162,8 +167,8 @@ class TestHelper:
                     "project_type": "dockerfile",
                     "content_hash": "def",
                     "build_log": "new web log",
-                    "start_timestamp": 54321,
-                    "push_timestamp": 54321,
+                    "start_timestamp": now_timestamp,
+                    "push_timestamp": now_timestamp,
                     "status": "success",
                 },
             }
@@ -177,8 +182,8 @@ class TestHelper:
                     "project_type": "dockerfile",
                     "content_hash": "jkl",
                     "build_log": "old db log",
-                    "start_timestamp": 123,
-                    "push_timestamp": 123,
+                    "start_timestamp": old_timestamp,
+                    "push_timestamp": old_timestamp,
                     "status": "success",
                 },
             }
@@ -192,8 +197,8 @@ class TestHelper:
                     "project_type": "dockerfile",
                     "content_hash": "ghi",
                     "build_log": "new db log",
-                    "start_timestamp": 54321,
-                    "push_timestamp": 54321,
+                    "start_timestamp": now_timestamp,
+                    "push_timestamp": now_timestamp,
                     "status": "success",
                 },
             }
@@ -359,13 +364,9 @@ class TestHelper:
 
         """
 
-        return self.balena.pine.get({
-            "resource": "organization_membership_role",
-            "options": {
-                "$top": 1,
-                "$select": ["id"],
-                "$filter": {
-                    "name": "administrator"
-                }
+        return self.balena.pine.get(
+            {
+                "resource": "organization_membership_role",
+                "options": {"$top": 1, "$select": ["id"], "$filter": {"name": "administrator"}},
             }
-        })[0]
+        )[0]

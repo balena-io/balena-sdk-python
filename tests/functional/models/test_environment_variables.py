@@ -3,7 +3,7 @@ import unittest
 from tests.helper import TestHelper
 
 
-class TestAppEnvironmentVariables(unittest.TestCase):
+class TestAppVars(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -12,55 +12,71 @@ class TestAppEnvironmentVariables(unittest.TestCase):
         cls.helper.wipe_application()
         cls.app = cls.balena.models.application.create("FooBar", "raspberry-pi2", cls.helper.default_organization["id"])
         cls.__app_fetch_resources = ["id", "slug", "uuid"]
-        cls.app_env_var = cls.balena.models.application.env_var
+        cls.app_vars = [
+            cls.balena.models.application.env_var,
+            cls.balena.models.application.build_var,
+            cls.balena.models.application.config_var,
+        ]
+
+        cls.app_var_prefix = [
+            "EDITOR_BY_",
+            "EDITOR_BY_",
+            "BALENA_"
+        ]
 
     @classmethod
     def tearDownClass(cls):
         cls.helper.wipe_organization()
 
-    def test_01_get_emtpy_application_env_var(self):
-        self.assertIsNone(self.app_env_var.get(self.app["id"], "DOES_NOT_EXIST"))
+    def test_01_get_emtpy_application_vars(self):
+        for app_var in self.app_vars:
+            self.assertIsNone(app_var.get(self.app["id"], "DOES_NOT_EXIST"))
 
-        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
-            self.assertIsNone(self.app_env_var.get("org-does-not/exist", "DOES_NOT_EXIST"))
+            with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+                self.assertIsNone(app_var.get("org-does-not/exist", "DOES_NOT_EXIST"))
 
-    def test_02_can_create_and_retrieve_application_env_var(self):
-        for resource in self.__app_fetch_resources:
-            self.app_env_var.set(self.app[resource], f"EDITOR_BY_{resource}", f"VIM{resource}")
-            self.assertEqual(
-                self.app_env_var.get(self.app[resource], f"EDITOR_BY_{resource}"),
-                f"VIM{resource}",
-            )
+    def test_02_can_create_and_retrieve_application_vars(self):
+        for app_var, var_prefix in zip(self.app_vars, self.app_var_prefix):
+            for resource in self.__app_fetch_resources:
+                app_var.set(self.app[resource], f"{var_prefix}{resource}", f"VIM{resource}")
+                self.assertEqual(
+                    app_var.get(self.app[resource], f"{var_prefix}{resource}"),
+                    f"VIM{resource}",
+                )
 
     def test_03_can_get_all_app_vars(self):
-        for resource in self.__app_fetch_resources:
-            app_vars = self.app_env_var.get_all_by_application(self.app[resource])
-            expected_vars = [
-                {"name": f"EDITOR_BY_{resource}", "value": f"VIM{resource}"} for resource in self.__app_fetch_resources
-            ]
-            app_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in app_vars]
+        for app_var, var_prefix in zip(self.app_vars, self.app_var_prefix):
+            for resource in self.__app_fetch_resources:
+                app_vars = app_var.get_all_by_application(self.app[resource])
+                expected_vars = [
+                    {"name": f"{var_prefix}{resource}", "value": f"VIM{resource}"}
+                    for resource in self.__app_fetch_resources
+                ]
+                app_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in app_vars]
 
-            for var in expected_vars:
-                self.assertIn(var, app_vars_wo_id)
+                for var in expected_vars:
+                    self.assertIn(var, app_vars_wo_id)
 
     def test_04_can_update_app_vars(self):
-        for resource in self.__app_fetch_resources:
-            self.app_env_var.set(
-                self.app[resource],
-                f"EDITOR_BY_{resource}",
-                f"VIM{resource}_edit",
-            )
-            self.assertEqual(
-                self.app_env_var.get(self.app[resource], f"EDITOR_BY_{resource}"),
-                f"VIM{resource}_edit",
-            )
+        for app_var, var_prefix in zip(self.app_vars, self.app_var_prefix):
+            for resource in self.__app_fetch_resources:
+                app_var.set(
+                    self.app[resource],
+                    f"{var_prefix}{resource}",
+                    f"VIM{resource}_edit",
+                )
+                self.assertEqual(
+                    app_var.get(self.app[resource], f"{var_prefix}{resource}"),
+                    f"VIM{resource}_edit",
+                )
 
     def test_05_can_remove_application_env_vars(self):
-        for resource in self.__app_fetch_resources:
-            self.app_env_var.remove(self.app[resource], f"EDITOR_BY_{resource}")
-            self.assertIsNone(
-                self.app_env_var.get(self.app[resource], f"EDITOR_BY_{resource}"),
-            )
+        for app_var, var_prefix in zip(self.app_vars, self.app_var_prefix):
+            for resource in self.__app_fetch_resources:
+                app_var.remove(self.app[resource], f"{var_prefix}{resource}")
+                self.assertIsNone(
+                    app_var.get(self.app[resource], f"{var_prefix}{resource}"),
+                )
 
 
 class TestDeviceEnvironmentVariables(unittest.TestCase):

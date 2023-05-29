@@ -105,7 +105,7 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(user_actor_id, int)
         self.assertGreater(user_actor_id, 0)
 
-    def test_14_should_be_able_to_login(self):
+    def test_14_should_not_return_logged_in_when_logged_out(self):
         self.balena.auth.logout()
         self.assertFalse(self.balena.auth.is_logged_in())
 

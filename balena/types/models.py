@@ -339,3 +339,17 @@ class SSHKeyType(TypedDict):
     id: int
     created_at: str
     user: Any
+
+
+class CreditBundleType(TypedDict):
+    id: int
+    created_at: str
+    is_created_by__user: Any
+    original_quantity: float
+    total_balance: float
+    total_cost: float
+    payment_status: Literal["processing", "paid", "failed", "complimentary", "cancelled", "refunded"]
+    belongs_to__organization: Any
+    is_for__feature: Any
+    is_associated_with__invoice_id: Optional[str]
+    error_message: Optional[str]

@@ -59,29 +59,30 @@ def print_newline():
     print("")
 
 
-def print_functions(baseclass, hints):
+def print_functions(baseclass, model_hints):
     for func_name, blah in inspect.getmembers(baseclass, predicate=inspect.isfunction):
         if func_name != "__init__" and not func_name.startswith("_"):
             func = getattr(baseclass, func_name)
             print(f'\n<a name="{baseclass.__name__.lower()}.{func_name}"></a>')
 
-            print_name, hint = doc2md.make_function_name(func, func_name)
+            print_name, func_output_hint = doc2md.make_function_name(func, func_name)
 
             hint_ref = None
-            for h in hints:
-                if h in hint:
-                    hint_ref = h.lower()
+            for model_hint in model_hints:
+                # if the func_output_hint includes the name of a type, create the reference for that type
+                # for example, when child_hint is List[AType] we want it to be able to navigate to AType ref
+                if model_hint in func_output_hint:
+                    hint_ref = model_hint.lower()
 
             if hint_ref:
-                print_name = f"{print_name} ⇒ [<code>{hint}</code>](#{hint_ref})"
+                print_name = f"{print_name} ⇒ [<code>{func_output_hint}</code>](#{hint_ref})"
             else:
-                print_name = f"{print_name} ⇒ <code>{hint}</code>"
+                print_name = f"{print_name} ⇒ <code>{func_output_hint}</code>"
 
             print(doc2md.doc2md(func.__doc__, print_name, type=1))
 
 
 def main():
-
     hints = []
     model_hints = inspect.getmembers(balena.types.models)
     for type_tuple in model_hints:

@@ -5,6 +5,8 @@ This module implements all models for balena python SDK.
 
 from .api_key import ApiKey
 from .application import Application
+from .billing import Billing
+from .credit_bundle import CreditBundle
 from .config import Config
 from .device import Device
 from .device_type import DeviceType
@@ -19,6 +21,8 @@ from .service import Service
 class Models:
     def __init__(self):
         self.application = Application()
+        self.billing = Billing()
+        self.credit_bundle = CreditBundle()
         self.device = Device()
         self.device_type = DeviceType()
         self.api_key = ApiKey()

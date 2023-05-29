@@ -75,9 +75,7 @@ def request(
         if send_token:
             headers["Authorization"] = f"Bearer {token}"
 
-        req = requests.request(
-            method=method, url=url, params=qs, json=body, headers=headers, stream=stream
-        )
+        req = requests.request(method=method, url=url, params=qs, json=body, headers=headers, stream=stream)
 
         if return_raw:
             return req

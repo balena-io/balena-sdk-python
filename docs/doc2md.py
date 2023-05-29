@@ -5,8 +5,6 @@ This script is from https://github.com/nghiant2710/doc2md
 import inspect
 import re
 import sys
-import json
-import pprint
 
 
 import typing
@@ -14,44 +12,33 @@ from typing import Any, get_type_hints
 
 
 def simplify_type_hint(type_hint: Any) -> str:
-
-    # print(type_hint)
-
     if isinstance(type_hint, str):
         return f'"{type_hint}"'
     elif type_hint is None or type_hint.__name__ == "NoneType":
-        # print("A")
-        return 'None'
+        return "None"
     elif inspect.isclass(type_hint) or type(type_hint) == type(Ellipsis):
-        # print("B")
         return type_hint.__name__  # type: ignore
     elif type_hint is Any:
-        # print("C")
-        return 'Any'
-    elif hasattr(type_hint, '_name') and type_hint._name:
-        # print("D")
-
+        return "Any"
+    elif hasattr(type_hint, "_name") and type_hint._name:
         if not hasattr(type_hint, "__args__"):
             return type_hint._name
 
-        inner_types = [simplify_type_hint(t) for t in type_hint.__args__]
+        inner_types = [simplify_type_hint(hint) for hint in type_hint.__args__]
 
         # Handle Optional[...]
-        if type_hint._name == 'Optional' and 'None' in inner_types:
-            inner_types.remove('None')
+        if type_hint._name == "Optional" and "None" in inner_types:
+            inner_types.remove("None")
             return f'Optional[{", ".join(inner_types)}]'
 
         return f'{type_hint._name}[{", ".join(inner_types)}]'
     elif isinstance(type_hint, typing._GenericAlias):  # type: ignore
-        # print("E")
-        inner_types = [simplify_type_hint(t) for t in type_hint.__args__]
+        inner_types = [simplify_type_hint(hint) for hint in type_hint.__args__]
         base = simplify_type_hint(type_hint.__origin__)
         return f'{base}[{", ".join(inner_types)}]'
     elif isinstance(type_hint, typing._SpecialForm):
-        # print("F")
         return str(type_hint)
     else:
-        # print("G")
         return str(type_hint)
 
 
@@ -147,7 +134,7 @@ def find_sections(lines):
     return sections
 
 
-def make_toc(sections, hints=[]):
+def make_toc(sections, model_hints=[]):
     """
     Generate table of contents for array of section names.
     """
@@ -156,36 +143,40 @@ def make_toc(sections, hints=[]):
         return []
     refs = []
     for sec, ind, ref in sections:
-        sons = []
+        children = []
         if ref is None:
             ref = sec.lower()
         else:
             if isinstance(ref, str):
                 ref = ref.lower()
             else:
-                sons = get_funcs(ref)
-                ref = ref.__name__.lower().split('.')[-1]
+                children = get_funcs(ref)
+                ref = ref.__name__.lower().split(".")[-1]
 
         ref = ref.replace(" ", "-")
         ref = ref.replace("?", "")
         refs.append(INDENT * (ind) + "- [%s](#%s)" % (sec, ref))
 
-        for (son_name, hint, son_ref) in sons:
+        for child_name, child_hint, child_ref in children:
             hint_ref = None
-            for h in hints:
-                if h in hint:
-                    hint_ref = h.lower()
+            for model_hint in model_hints:
+                # if the child_hint includes the name of a type, create the reference for that type
+                # for example, when child_hint is List[AType] we want it to be able to navigate to AType ref
+                if model_hint in child_hint:
+                    hint_ref = model_hint.lower()
 
             if hint_ref:
-                refs.append(INDENT * (ind+1) + f"- [{son_name}](#{son_ref}) ⇒ [<code>{hint}</code>](#{hint_ref})")
+                refs.append(
+                    INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ [<code>{child_hint}</code>](#{hint_ref})"
+                )
             else:
-                refs.append(INDENT * (ind+1) + f"- [{son_name}](#{son_ref}) ⇒ <code>{hint}</code>")
+                refs.append(INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ <code>{child_hint}</code>")
 
     return "\n".join(refs)
 
 
 def get_funcs(baseclass):
-    sons = []
+    children = []
     for func_name, _ in inspect.getmembers(baseclass, predicate=inspect.isfunction):
         if func_name != "__init__" and not func_name.startswith("_"):
             func = getattr(baseclass, func_name)
@@ -193,8 +184,8 @@ def get_funcs(baseclass):
                 print_name, hint = make_function_name(func, func_name)
                 ref_name = f"{baseclass.__name__.lower()}.{func_name}"
 
-                sons.append((print_name, hint, ref_name))
-    return sons
+                children.append((print_name, hint, ref_name))
+    return children
 
 
 def make_function_name(func, func_name):
@@ -204,9 +195,9 @@ def make_function_name(func, func_name):
 
     f_args = ", ".join(args_list)
 
-    fqh = get_type_hints(func).get("return")
-    if fqh:
-        hint = simplify_type_hint(fqh)
+    fully_qualified_hint = get_type_hints(func).get("return")
+    if fully_qualified_hint:
+        hint = simplify_type_hint(fully_qualified_hint)
     else:
         hint = "None"
     return f"{func_name}({f_args})", hint
@@ -401,7 +392,7 @@ def typed_dict_to_dict(typed_dict_cls):
 
 
 def pretty_print_python_dict(d):
-    items = [f'    "{k}": {v}' for k, v in d.items()]
+    items = [f'    "{property_name}": {property_type}' for property_name, property_type in d.items()]
     p_dict = "{\n" + ",\n".join(items) + "\n}"
     print(p_dict)
 
@@ -419,6 +410,7 @@ def print_types(types):
             pretty_print_python_dict(typed_dict_to_dict(type_tuple[1]))
             print("```")
             print("\n")
+
 
 if __name__ == "__main__":
     main()
