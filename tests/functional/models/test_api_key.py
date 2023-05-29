@@ -1,4 +1,5 @@
 import unittest
+import datetime
 
 from tests.helper import TestHelper
 
@@ -40,7 +41,19 @@ class TestApiKey(unittest.TestCase):
         key = self.balena.models.api_key.create("apiKey2", "apiKey2Description")
         self.assertIsInstance(key, str)
 
-    def test_03_get_all_named_user_api_keys(self):
+    def test_03_should_be_able_to_create_key_with_expiry_date(self):
+        tomorrow = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).isoformat()
+        key = self.balena.models.api_key.create(
+            'apiKeyWithExpiry',
+            'apiKeyDescription',
+            tomorrow,
+        )
+        self.assertIsInstance(key, str)
+        user_keys = self.balena.models.api_key.get_all_named_user_api_keys()
+        expiry_key = [key for key in user_keys if key["name"] == "apiKeyWithExpiry"]
+        self.assertEqual(expiry_key[0]["expiry_date"][0:10], tomorrow[0:10])  # type: ignore
+
+    def test_04_get_all_named_user_api_keys(self):
         keys = self.balena.models.api_key.get_all_named_user_api_keys()
         TestApiKey.named_user_api_key = keys[0]
         self.__assert_matching_keys(
@@ -57,27 +70,27 @@ class TestApiKey(unittest.TestCase):
             keys,
         )
 
-    def test_04_get_provisioning_api_keys_by_application_for_non_existing(self):
+    def test_05_get_provisioning_api_keys_by_application_for_non_existing(self):
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
             self.balena.models.api_key.get_provisioning_api_keys_by_application(
                 "nonExistentOrganization/nonExistentApp"
             )
 
-    def test_05_get_provisioning_api_keys_by_application(self):
+    def test_06_get_provisioning_api_keys_by_application(self):
         keys = self.balena.models.api_key.get_provisioning_api_keys_by_application(self.app_info["app"]["id"])
         provisioning_keys_names = set(map(lambda k: k["name"], keys))
         self.assertIn("provisionTestKey", provisioning_keys_names)
 
-    def test_06_get_device_api_keys_by_device_for_non_existing(self):
+    def test_07_get_device_api_keys_by_device_for_non_existing(self):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.api_key.get_device_api_keys_by_device("nonexistentuuid")
 
-    def test_07_get_device_api_keys_by_device_for_non_existing(self):
+    def test_08_get_device_api_keys_by_device_for_non_existing(self):
         keys = self.balena.models.api_key.get_device_api_keys_by_device(self.device["uuid"])
         device_keys_names = set(map(lambda k: k["name"], keys))
         self.assertIn("deviceTestKey", device_keys_names)
 
-    def test_08_should_be_able_to_update_a_key_name(self):
+    def test_09_should_be_able_to_update_a_key_name(self):
         app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"name": "updatedApiKeyName"})
 
@@ -85,7 +98,7 @@ class TestApiKey(unittest.TestCase):
         names = set(map(lambda k: k["name"], keys))
         self.assertIn("updatedApiKeyName", names)
 
-    def test_09_should_be_able_to_update_a_key_descr(self):
+    def test_10_should_be_able_to_update_a_key_descr(self):
         app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": "updatedApiKeyDescription"})
 
@@ -93,7 +106,7 @@ class TestApiKey(unittest.TestCase):
         new_description = [k for k in keys if k["name"] == "updatedApiKeyName"][0]["description"]
         self.assertEqual(new_description, "updatedApiKeyDescription")
 
-    def test_10_update_to_set_null_to_key_descr(self):
+    def test_11_update_to_set_null_to_key_descr(self):
         app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": None})
 
@@ -101,7 +114,7 @@ class TestApiKey(unittest.TestCase):
         new_description = [k for k in keys if k["name"] == "updatedApiKeyName"][0]["description"]
         self.assertIsNone(new_description)
 
-    def test_11_update_to_set_empty_str_to_key_descr(self):
+    def test_12_update_to_set_empty_str_to_key_descr(self):
         app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.update(app_key_id, {"description": ""})
 
@@ -109,7 +122,7 @@ class TestApiKey(unittest.TestCase):
         new_description = [k for k in keys if k["name"] == "updatedApiKeyName"][0]["description"]
         self.assertEqual(new_description, "")
 
-    def test_12_revoke(self):
+    def test_13_revoke(self):
         app_key_id = TestApiKey.named_user_api_key["id"]
         self.balena.models.api_key.revoke(app_key_id)
         keys = self.balena.models.api_key.get_all_named_user_api_keys()

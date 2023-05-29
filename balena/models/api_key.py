@@ -49,7 +49,7 @@ class ApiKey:
             api_key_body["description"] = description
 
         if expiry_date is not None and isinstance(expiry_date, str):
-            api_key_body["expiry_date"] = expiry_date
+            api_key_body["expiryDate"] = expiry_date
 
         return request(method="POST", path="/api-key/user/full", body=api_key_body).strip('"')
 
