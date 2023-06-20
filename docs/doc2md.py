@@ -12,9 +12,10 @@ from typing import Any, get_type_hints
 
 
 def simplify_type_hint(type_hint: Any) -> str:
+    # print(type_hint)
     if isinstance(type_hint, str):
         return f'"{type_hint}"'
-    elif type_hint is None or type_hint.__name__ == "NoneType":
+    elif type_hint is None or (hasattr(type_hint,  '__name__') and type_hint.__name__ == "NoneType"):
         return "None"
     elif inspect.isclass(type_hint) or type(type_hint) == type(Ellipsis):
         return type_hint.__name__  # type: ignore
@@ -391,10 +392,9 @@ def typed_dict_to_dict(typed_dict_cls):
     return {k: simplify_type_hint(v) for k, v in get_type_hints(typed_dict_cls).items()}
 
 
-def pretty_print_python_dict(d):
+def get_python_dict_to_print(d):
     items = [f'    "{property_name}": {property_type}' for property_name, property_type in d.items()]
-    p_dict = "{\n" + ",\n".join(items) + "\n}"
-    print(p_dict)
+    return "{\n" + ",\n".join(items) + "\n}"
 
 
 def print_types(types):
@@ -404,12 +404,16 @@ def print_types(types):
     for type_tuple in members:
         if not type_tuple[0].startswith("__") and not str(type_tuple[1]).startswith("typing"):
             # print(type_tuple)
-            print("### " + type_tuple[0])
-            print("\n")
-            print("```python")
-            pretty_print_python_dict(typed_dict_to_dict(type_tuple[1]))
-            print("```")
-            print("\n")
+            try:
+                prettyprint_dict = get_python_dict_to_print(typed_dict_to_dict(type_tuple[1]))
+                print("### " + type_tuple[0])
+                print("\n")
+                print("```python")
+                print(prettyprint_dict)
+                print("```")
+                print("\n")
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

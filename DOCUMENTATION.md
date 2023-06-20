@@ -33,20 +33,20 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
 - [balena](#balena)
     - [.models](#models)
         - [.application](#application)
-            - [create(name, device_type, organization, application_class)](#application.create) ⇒ [<code>ApplicationType</code>](#applicationtype)
+            - [create(name, device_type, organization, application_class)](#application.create) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [disable_device_urls(slug_or_uuid_or_id)](#application.disable_device_urls) ⇒ <code>None</code>
             - [enable_device_urls(slug_or_uuid_or_id)](#application.enable_device_urls) ⇒ <code>None</code>
             - [generate_provisioning_key(slug_or_uuid_or_id, key_name, description, expiry_date)](#application.generate_provisioning_key) ⇒ <code>str</code>
-            - [get(slug_or_uuid_or_id, options, context)](#application.get) ⇒ [<code>ApplicationType</code>](#applicationtype)
-            - [get_all(options, context)](#application.get_all) ⇒ [<code>List[ApplicationType]</code>](#applicationtype)
-            - [get_all_directly_accessible(options)](#application.get_all_directly_accessible) ⇒ [<code>List[ApplicationType]</code>](#applicationtype)
-            - [get_by_name(app_name, options, context)](#application.get_by_name) ⇒ [<code>ApplicationType</code>](#applicationtype)
-            - [get_by_owner(app_name, owner, options)](#application.get_by_owner) ⇒ [<code>ApplicationType</code>](#applicationtype)
+            - [get(slug_or_uuid_or_id, options, context)](#application.get) ⇒ [<code>TypeApplication</code>](#typeapplication)
+            - [get_all(options, context)](#application.get_all) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
+            - [get_all_directly_accessible(options)](#application.get_all_directly_accessible) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
+            - [get_by_name(app_name, options, context)](#application.get_by_name) ⇒ [<code>TypeApplication</code>](#typeapplication)
+            - [get_by_owner(app_name, owner, options)](#application.get_by_owner) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_dashboard_url(app_id)](#application.get_dashboard_url) ⇒ <code>str</code>
-            - [get_directly_accessible(slug_or_uuid_or_id, options)](#application.get_directly_accessible) ⇒ [<code>ApplicationType</code>](#applicationtype)
+            - [get_directly_accessible(slug_or_uuid_or_id, options)](#application.get_directly_accessible) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_id(slug_or_uuid_or_id)](#application.get_id) ⇒ <code>int</code>
-            - [get_target_release_hash(slug_or_uuid_or_id)](#application.get_target_release_hash) ⇒ <code>Optional[str]</code>
-            - [get_with_device_service_details(slug_or_uuid_or_id, options)](#application.get_with_device_service_details) ⇒ [<code>ApplicationType</code>](#applicationtype)
+            - [get_target_release_hash(slug_or_uuid_or_id)](#application.get_target_release_hash) ⇒ <code>Union[str, None]</code>
+            - [get_with_device_service_details(slug_or_uuid_or_id, options)](#application.get_with_device_service_details) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [grant_support_access(slug_or_uuid_or_id, expiry_timestamp)](#application.grant_support_access) ⇒ <code>None</code>
             - [has(slug_or_uuid_or_id)](#application.has) ⇒ <code>bool</code>
             - [has_any()](#application.has_any) ⇒ <code>bool</code>
@@ -66,17 +66,17 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
                 - [remove(slug_or_uuid_or_id, tag_key)](#applicationtag.remove) ⇒ <code>None</code>
                 - [set(slug_or_uuid_or_id, tag_key, value)](#applicationtag.set) ⇒ <code>None</code>
             - [.config_var](#applicationconfigvariable)
-                - [get(slug_or_uuid_or_id, env_var_name)](#applicationconfigvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(slug_or_uuid_or_id, env_var_name)](#applicationconfigvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#applicationconfigvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(slug_or_uuid_or_id, key)](#applicationconfigvariable.remove) ⇒ <code>None</code>
                 - [set(slug_or_uuid_or_id, env_var_name, value)](#applicationconfigvariable.set) ⇒ <code>None</code>
             - [.env_var](#applicationenvvariable)
-                - [get(slug_or_uuid_or_id, env_var_name)](#applicationenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(slug_or_uuid_or_id, env_var_name)](#applicationenvvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#applicationenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(slug_or_uuid_or_id, key)](#applicationenvvariable.remove) ⇒ <code>None</code>
                 - [set(slug_or_uuid_or_id, env_var_name, value)](#applicationenvvariable.set) ⇒ <code>None</code>
             - [.build_var](#buildenvvariable)
-                - [get(slug_or_uuid_or_id, env_var_name)](#buildenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(slug_or_uuid_or_id, env_var_name)](#buildenvvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#buildenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(slug_or_uuid_or_id, key)](#buildenvvariable.remove) ⇒ <code>None</code>
                 - [set(slug_or_uuid_or_id, env_var_name, value)](#buildenvvariable.set) ⇒ <code>None</code>
@@ -154,26 +154,26 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [unset_custom_location(uuid_or_id_or_ids)](#device.unset_custom_location) ⇒ <code>None</code>
             - [update(uuid_or_id, force)](#device.update) ⇒ <code>None</code>
             - [.tags](#devicetag)
-                - [get(uuid_or_id, tag_key)](#devicetag.get) ⇒ <code>Optional[str]</code>
+                - [get(uuid_or_id, tag_key)](#devicetag.get) ⇒ <code>Union[str, None]</code>
                 - [get_all(options)](#devicetag.get_all) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#devicetag.get_all_by_application) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
                 - [get_all_by_device(uuid_or_id, options)](#devicetag.get_all_by_device) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
                 - [remove(uuid_or_id, tag_key)](#devicetag.remove) ⇒ <code>None</code>
                 - [set(uuid_or_id, tag_key, value)](#devicetag.set) ⇒ <code>None</code>
             - [.config_var](#deviceconfigvariable)
-                - [get(uuid_or_id, env_var_name)](#deviceconfigvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(uuid_or_id, env_var_name)](#deviceconfigvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#deviceconfigvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [get_all_by_device(uuid_or_id, options)](#deviceconfigvariable.get_all_by_device) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(uuid_or_id, key)](#deviceconfigvariable.remove) ⇒ <code>None</code>
                 - [set(uuid_or_id, env_var_name, value)](#deviceconfigvariable.set) ⇒ <code>None</code>
             - [.env_var](#deviceenvvariable)
-                - [get(uuid_or_id, env_var_name)](#deviceenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(uuid_or_id, env_var_name)](#deviceenvvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#deviceenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [get_all_by_device(uuid_or_id, options)](#deviceenvvariable.get_all_by_device) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(uuid_or_id, key)](#deviceenvvariable.remove) ⇒ <code>None</code>
                 - [set(uuid_or_id, env_var_name, value)](#deviceenvvariable.set) ⇒ <code>None</code>
             - [.service_var](#deviceserviceenvvariable)
-                - [get(uuid_or_id, service_id, key)](#deviceserviceenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(uuid_or_id, service_id, key)](#deviceserviceenvvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#deviceserviceenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [get_all_by_device(uuid_or_id, options)](#deviceserviceenvvariable.get_all_by_device) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(uuid_or_id, service_id, key)](#deviceserviceenvvariable.remove) ⇒ <code>None</code>
@@ -229,7 +229,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_available_os_versions(device_type)](#deviceos.get_available_os_versions) ⇒ <code>None</code>
             - [get_config(slug_or_uuid_or_id, options)](#deviceos.get_config) ⇒ <code>None</code>
             - [get_download_size(device_type, version)](#deviceos.get_download_size) ⇒ <code>float</code>
-            - [get_max_satisfying_version(device_type, version_or_range, os_type)](#deviceos.get_max_satisfying_version) ⇒ <code>Optional[str]</code>
+            - [get_max_satisfying_version(device_type, version_or_range, os_type)](#deviceos.get_max_satisfying_version) ⇒ <code>Union[str, None]</code>
             - [get_supported_os_update_versions(device_type, current_version)](#deviceos.get_supported_os_update_versions) ⇒ <code>None</code>
             - [is_architecture_compatible_with(os_architecture, application_architecture)](#deviceos.is_architecture_compatible_with) ⇒ <code>None</code>
             - [is_supported_os_update(device_type, current_version, target_version)](#deviceos.is_supported_os_update) ⇒ <code>bool</code>
@@ -240,13 +240,13 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [finalize(commit_or_id_or_raw_version)](#release.finalize) ⇒ <code>None</code>
             - [get(commit_or_id_or_raw_version, options)](#release.get) ⇒ [<code>ReleaseType</code>](#releasetype)
             - [get_all_by_application(slug_or_uuid_or_id, options)](#release.get_all_by_application) ⇒ [<code>List[ReleaseType]</code>](#releasetype)
-            - [get_latest_by_application(slug_or_uuid_or_id, options)](#release.get_latest_by_application) ⇒ [<code>Optional[ReleaseType]</code>](#releasetype)
+            - [get_latest_by_application(slug_or_uuid_or_id, options)](#release.get_latest_by_application) ⇒ [<code>Union[ReleaseType, None]</code>](#releasetype)
             - [get_with_image_details(commit_or_id_or_raw_version, image_options, release_options)](#release.get_with_image_details) ⇒ [<code>ReleaseWithImageDetailsType</code>](#releasewithimagedetailstype)
             - [set_is_invalidated(commit_or_id_or_raw_version, is_invalidated)](#release.set_is_invalidated) ⇒ <code>None</code>
             - [set_known_issue_list(commit_or_id_or_raw_version, known_issue_list)](#release.set_known_issue_list) ⇒ <code>None</code>
             - [set_note(commit_or_id_or_raw_version, note)](#release.set_note) ⇒ <code>None</code>
             - [.tags](#releasetag)
-                - [get(commit_or_id_or_raw_version, tag_key)](#releasetag.get) ⇒ <code>Optional[str]</code>
+                - [get(commit_or_id_or_raw_version, tag_key)](#releasetag.get) ⇒ <code>Union[str, None]</code>
                 - [get_all(options)](#releasetag.get_all) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#releasetag.get_all_by_application) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
                 - [get_all_by_release(commit_or_id_or_raw_version, options)](#releasetag.get_all_by_release) ⇒ [<code>List[BaseTagType]</code>](#basetagtype)
@@ -255,7 +255,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
         - [.service](#service)
             - [get_all_by_application(slug_or_uuid_or_id, options)](#service.get_all_by_application) ⇒ [<code>List[ServiceType]</code>](#servicetype)
             - [.var](#serviceenvvariable)
-                - [get(id, key)](#serviceenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(id, key)](#serviceenvvariable.get) ⇒ <code>Union[str, None]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#serviceenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [get_all_by_service(id, options)](#serviceenvvariable.get_all_by_service) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [remove(id, key)](#serviceenvvariable.remove) ⇒ <code>None</code>
@@ -266,7 +266,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
     - [.auth](#auth)
         - [authenticate()](#auth.authenticate) ⇒ <code>str</code>
         - [get_email()](#auth.get_email) ⇒ <code>str</code>
-        - [get_token()](#auth.get_token) ⇒ <code>Optional[str]</code>
+        - [get_token()](#auth.get_token) ⇒ <code>Union[str, None]</code>
         - [get_user_actor_id()](#auth.get_user_actor_id) ⇒ <code>int</code>
         - [get_user_id()](#auth.get_user_id) ⇒ <code>int</code>
         - [is_logged_in()](#auth.is_logged_in) ⇒ <code>bool</code>
@@ -305,7 +305,7 @@ This module implements all models for balena python SDK.
 This class implements application model for balena python SDK.
 
 <a name="application.create"></a>
-### Function: create(name, device_type, organization, application_class) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: create(name, device_type, organization, application_class) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
 Create an application.
 
@@ -316,7 +316,7 @@ Create an application.
     application_class (Optional[Literal["app", "fleet", "block"]]): application class.
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -370,7 +370,7 @@ Generate a device provisioning key for a specific application.
 ```
 
 <a name="application.get"></a>
-### Function: get(slug_or_uuid_or_id, options, context) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: get(slug_or_uuid_or_id, options, context) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
 Get a single application.
 
@@ -380,7 +380,7 @@ Get a single application.
     context (Optional[str]): extra access filters, None or 'directly_accessible'
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -389,7 +389,7 @@ Get a single application.
 ```
 
 <a name="application.get_all"></a>
-### Function: get_all(options, context) ⇒ [<code>List[ApplicationType]</code>](#applicationtype)
+### Function: get_all(options, context) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
 
 Get all applications
 
@@ -406,7 +406,7 @@ Get all applications
 ```
 
 <a name="application.get_all_directly_accessible"></a>
-### Function: get_all_directly_accessible(options) ⇒ [<code>List[ApplicationType]</code>](#applicationtype)
+### Function: get_all_directly_accessible(options) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
 
 Get all applications directly accessible by the user
 
@@ -422,7 +422,7 @@ Get all applications directly accessible by the user
 ```
 
 <a name="application.get_by_name"></a>
-### Function: get_by_name(app_name, options, context) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: get_by_name(app_name, options, context) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
  Get a single application using the appname.
 
@@ -432,7 +432,7 @@ Get all applications directly accessible by the user
     context (Optional[str]): extra access filters, None or 'directly_accessible'
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -440,7 +440,7 @@ Get all applications directly accessible by the user
 ```
 
 <a name="application.get_by_owner"></a>
-### Function: get_by_owner(app_name, owner, options) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: get_by_owner(app_name, owner, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
 Get a single application using the appname and the handle of the owning organization.
 
@@ -450,7 +450,7 @@ Get a single application using the appname and the handle of the owning organiza
     options (AnyObject): extra pine options to use.
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -474,7 +474,7 @@ Get Dashboard URL for a specific application.
 ```
 
 <a name="application.get_directly_accessible"></a>
-### Function: get_directly_accessible(slug_or_uuid_or_id, options) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: get_directly_accessible(slug_or_uuid_or_id, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
 Get a single application directly accessible by the user
 
@@ -483,7 +483,7 @@ Get a single application directly accessible by the user
     options (AnyObject): extra pine options to use
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -508,7 +508,7 @@ Given an application slug or uuid or id, returns it numeric id.
 ```
 
 <a name="application.get_target_release_hash"></a>
-### Function: get_target_release_hash(slug_or_uuid_or_id) ⇒ <code>Optional[str]</code>
+### Function: get_target_release_hash(slug_or_uuid_or_id) ⇒ <code>Union[str, None]</code>
 
 Get the hash of the current release for a specific application.
 
@@ -524,7 +524,7 @@ Get the hash of the current release for a specific application.
 ```
 
 <a name="application.get_with_device_service_details"></a>
-### Function: get_with_device_service_details(slug_or_uuid_or_id, options) ⇒ [<code>ApplicationType</code>](#applicationtype)
+### Function: get_with_device_service_details(slug_or_uuid_or_id, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
 
 This method does not map exactly to the underlying model: it runs a
 larger prebuilt query, and reformats it into an easy to use and
@@ -536,7 +536,7 @@ directly, use `application.get(uuidOrId, options)` instead.
     options (AnyObject): extra pine options to use
 
 #### Returns:
-    ApplicationType: application info.
+    TypeApplication: application info.
 
 #### Examples:
 ```python
@@ -800,7 +800,7 @@ Set an application tag (update tag value if it exists).
 This class implements application config variable model for balena python SDK.
 
 <a name="applicationconfigvariable.get"></a>
-### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Optional[str]</code>
+### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Union[str, None]</code>
 
 Get application config variable.
 
@@ -862,7 +862,7 @@ Set the value of a specific application config variable.
 This class implements application environment variable model for balena python SDK.
 
 <a name="applicationenvvariable.get"></a>
-### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Optional[str]</code>
+### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Union[str, None]</code>
 
 Get application environment variable.
 
@@ -925,7 +925,7 @@ Set the value of a specific application environment variable.
 This class implements build environment variable model for balena python SDK.
 
 <a name="buildenvvariable.get"></a>
-### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Optional[str]</code>
+### Function: get(slug_or_uuid_or_id, env_var_name) ⇒ <code>Union[str, None]</code>
 
 Get build environment variable.
 
@@ -2010,7 +2010,7 @@ update the device.
 This class implements device tag model for balena python SDK.
 
 <a name="devicetag.get"></a>
-### Function: get(uuid_or_id, tag_key) ⇒ <code>Optional[str]</code>
+### Function: get(uuid_or_id, tag_key) ⇒ <code>Union[str, None]</code>
 
 Set a device tag (update tag value if it exists).
 ___Note___: Notice that when using the device ID rather than UUID,
@@ -2116,7 +2116,7 @@ it will avoid one extra API roundtrip.
 This class implements device config variable model for balena python SDK.
 
 <a name="deviceconfigvariable.get"></a>
-### Function: get(uuid_or_id, env_var_name) ⇒ <code>Optional[str]</code>
+### Function: get(uuid_or_id, env_var_name) ⇒ <code>Union[str, None]</code>
 
 Get a device config variable.
 
@@ -2195,7 +2195,7 @@ Set the value of a device config variable.
 This class implements device environment variable model for balena python SDK.
 
 <a name="deviceenvvariable.get"></a>
-### Function: get(uuid_or_id, env_var_name) ⇒ <code>Optional[str]</code>
+### Function: get(uuid_or_id, env_var_name) ⇒ <code>Union[str, None]</code>
 
 Get device environment variable.
 
@@ -2274,7 +2274,7 @@ Set the value of a specific environment variable.
 This class implements device service variable model for balena python SDK.
 
 <a name="deviceserviceenvvariable.get"></a>
-### Function: get(uuid_or_id, service_id, key) ⇒ <code>Optional[str]</code>
+### Function: get(uuid_or_id, service_id, key) ⇒ <code>Union[str, None]</code>
 
 Get the overriden value of a service variable on a device
 
@@ -3018,7 +3018,7 @@ Get OS download size estimate. Currently only the raw (uncompressed) size is rep
     float: OS image download size, in bytes.
 
 <a name="deviceos.get_max_satisfying_version"></a>
-### Function: get_max_satisfying_version(device_type, version_or_range, os_type) ⇒ <code>Optional[str]</code>
+### Function: get_max_satisfying_version(device_type, version_or_range, os_type) ⇒ <code>Union[str, None]</code>
 
 Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
 
@@ -3141,7 +3141,7 @@ Get all releases from an application.
     List[ReleaseType]: release info.
 
 <a name="release.get_latest_by_application"></a>
-### Function: get_latest_by_application(slug_or_uuid_or_id, options) ⇒ [<code>Optional[ReleaseType]</code>](#releasetype)
+### Function: get_latest_by_application(slug_or_uuid_or_id, options) ⇒ [<code>Union[ReleaseType, None]</code>](#releasetype)
 
 Get the latest successful release for an application.
 
@@ -3199,7 +3199,7 @@ Set a note for a release.
 This class implements release tag model for balena python SDK.
 
 <a name="releasetag.get"></a>
-### Function: get(commit_or_id_or_raw_version, tag_key) ⇒ <code>Optional[str]</code>
+### Function: get(commit_or_id_or_raw_version, tag_key) ⇒ <code>Union[str, None]</code>
 
 Get a single release tag.
 
@@ -3316,7 +3316,7 @@ Get all services from an application.
 This class implements Service environment variable model for balena python SDK.
 
 <a name="serviceenvvariable.get"></a>
-### Function: get(id, key) ⇒ <code>Optional[str]</code>
+### Function: get(id, key) ⇒ <code>Union[str, None]</code>
 
 Get the value of a specific service variable
 
@@ -3456,7 +3456,7 @@ This function retrieves current logged in user's get_email
 ```
 
 <a name="auth.get_token"></a>
-### Function: get_token() ⇒ <code>Optional[str]</code>
+### Function: get_token() ⇒ <code>Union[str, None]</code>
 
 This function retrieves Auth Token.
 
@@ -3851,8 +3851,8 @@ Set value for a setting.
 ```python
 {
     "name": str,
-    "description": Optional[str],
-    "expiry_date": Optional[str]
+    "description": Union[str, None],
+    "expiry_date": Union[str, None]
 }
 ```
 
@@ -3865,9 +3865,35 @@ Set value for a setting.
     "id": int,
     "created_at": str,
     "name": str,
-    "description": Optional[str],
-    "expiry_date": Optional[str],
-    "is_of__actor": Any
+    "description": Union[str, None],
+    "expiry_date": Union[str, None],
+    "is_of__actor": Union[List[ActorType], PineDeferred]
+}
+```
+
+
+### ActorType
+
+
+```python
+{
+    "id": int,
+    "is_of__user": Union[List[UserType], PineDeferred, None],
+    "is_of__application": Union[List[TypeApplication], PineDeferred, None],
+    "is_of__device": Union[List[TypeDevice], PineDeferred, None],
+    "is_of__public_device": Union[List[PublicDeviceType], PineDeferred, None],
+    "api_key": Union[List[APIKeyType], PineDeferred, None]
+}
+```
+
+
+### ApplicationHostedOnApplication
+
+
+```python
+{
+    "application": Union[List[TypeApplication], PineDeferred],
+    "can_use__application_as_host": Union[List[TypeApplication], PineDeferred]
 }
 ```
 
@@ -3881,9 +3907,20 @@ Set value for a setting.
     "message": str,
     "created_at": str,
     "invitationToken": str,
-    "application_membership_role": Any,
-    "invitee": Any,
-    "is_invited_to__application": Any
+    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred],
+    "invitee": Union[List[InviteeType], PineDeferred],
+    "is_invited_to__application": Union[List[ApplicationType], PineDeferred]
+}
+```
+
+
+### ApplicationMembershipRoleType
+
+
+```python
+{
+    "id": int,
+    "name": Literal["developer", "operator", "observer"]
 }
 ```
 
@@ -3894,9 +3931,9 @@ Set value for a setting.
 ```python
 {
     "id": int,
-    "user": Any,
-    "is_member_of__application": Any,
-    "application_membership_role": Any
+    "user": Union[List[UserType], PineDeferred],
+    "is_member_of__application": Union[List[TypeApplication], PineDeferred],
+    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred]
 }
 ```
 
@@ -3907,38 +3944,15 @@ Set value for a setting.
 ```python
 {
     "id": int,
-    "created_at": str,
-    "app_name": str,
-    "actor": Any,
+    "name": str,
     "slug": str,
-    "uuid": str,
-    "is_accessible_by_support_until__date": str,
-    "is_host": bool,
-    "should_track_latest_release": bool,
-    "is_public": bool,
-    "is_of__class": Literal["fleet", "block", "app"],
-    "is_archived": bool,
-    "is_discoverable": bool,
-    "is_stored_at__repository_url": str,
-    "public_organization": Any,
-    "application_type": Any,
-    "is_for__device_type": Any,
-    "depends_on__application": Any,
-    "organization": Any,
-    "should_be_running__release": Any,
-    "application_config_variable": Any,
-    "application_environment_variable": Any,
-    "build_environment_variable": Any,
-    "application_tag": Any,
-    "owns__device": Any,
-    "owns__public_device": Any,
-    "owns__release": Any,
-    "service": Any,
-    "is_depended_on_by__application": Any,
-    "is_directly_accessible_by__user": Any,
-    "user_application_membership": Any,
-    "team_application_access": Any,
-    "can_use__application_as_host": Any
+    "description": Union[str, None],
+    "supports_multicontainer": bool,
+    "supports_web_url": bool,
+    "is_legacy": bool,
+    "requires_payment": bool,
+    "needs__os_version_range": Union[str, None],
+    "maximum_device_count": Union[int, None]
 }
 ```
 
@@ -3966,6 +3980,53 @@ Set value for a setting.
 ```
 
 
+### CpuArchitectureType
+
+
+```python
+{
+    "id": int,
+    "slug": str,
+    "is_supported_by__device_type": Union[List[CpuArchitectureType], None]
+}
+```
+
+
+### CreditBundleType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "is_created_by__user": Union[List[UserType], PineDeferred, None],
+    "original_quantity": float,
+    "total_balance": float,
+    "total_cost": float,
+    "payment_status": Literal["processing", "paid", "failed", "complimentary", "cancelled", "refunded"],
+    "belongs_to__organization": Union[List[OrganizationType], PineDeferred],
+    "is_for__feature": Any,
+    "is_associated_with__invoice_id": Union[str, None],
+    "error_message": Union[str, None]
+}
+```
+
+
+### DeviceFamilyType
+
+
+```python
+{
+    "created_at": str,
+    "modified_at": str,
+    "id": int,
+    "slug": str,
+    "name": str,
+    "is_manufactured_by__device_manufacturer": Union[List[DeviceManufacturerType], PineDeferred, None]
+}
+```
+
+
 ### DeviceHistoryType
 
 
@@ -3974,20 +4035,34 @@ Set value for a setting.
     "created_at": str,
     "id": int,
     "end_timestamp": str,
-    "is_created_by__actor": Any,
-    "is_ended_by__actor": Any,
-    "tracks__device": Any,
-    "tracks__actor": Any,
-    "uuid": str,
-    "belongs_to__application": Any,
+    "is_created_by__actor": Union[List[ActorType], PineDeferred, None],
+    "is_ended_by__actor": Union[List[ActorType], PineDeferred, None],
+    "tracks__device": Union[List[TypeDevice], PineDeferred],
+    "tracks__actor": Union[List[ActorType], PineDeferred, None],
+    "uuid": Union[str, None],
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
     "is_active": bool,
-    "is_running__release": Any,
-    "should_be_running__release": Any,
-    "os_version": str,
-    "os_variant": str,
-    "supervisor_version": str,
-    "is_of__device_type": Any,
-    "should_be_managed_by__release": Any
+    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "os_version": Union[str, None],
+    "os_variant": Union[str, None],
+    "supervisor_version": Union[str, None],
+    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred, None],
+    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None]
+}
+```
+
+
+### DeviceManufacturerType
+
+
+```python
+{
+    "created_at": str,
+    "modified_at": str,
+    "id": int,
+    "slug": str,
+    "name": str
 }
 ```
 
@@ -4010,6 +4085,18 @@ Set value for a setting.
 ```
 
 
+### DeviceTypeAliasType
+
+
+```python
+{
+    "id": int,
+    "is_referenced_by__alias": str,
+    "references__device_type": Union[List[DeviceTypeType], PineDeferred]
+}
+```
+
+
 ### DeviceTypeType
 
 
@@ -4021,12 +4108,12 @@ Set value for a setting.
     "is_private": bool,
     "logo": str,
     "contract": Any,
-    "belongs_to__device_family": Any,
-    "is_default_for__application": Any,
-    "is_of__cpu_architecture": Any,
-    "is_accessible_privately_by__organization": Any,
-    "describes_device": Any,
-    "device_type_alias": Any
+    "belongs_to__device_family": Union[List[DeviceFamilyType], PineDeferred, None],
+    "is_default_for__application": Union[List[TypeApplication], None],
+    "is_of__cpu_architecture": Union[List[CpuArchitectureType], PineDeferred],
+    "is_accessible_privately_by__organization": Union[List[OrganizationType], None],
+    "describes_device": Union[List[TypeDevice], None],
+    "device_type_alias": Union[List[DeviceTypeAliasType], None]
 }
 ```
 
@@ -4054,6 +4141,22 @@ Set value for a setting.
 ```
 
 
+### ImageInstallType
+
+
+```python
+{
+    "id": int,
+    "download_progress": Union[float, None],
+    "status": str,
+    "install_date": str,
+    "installs__image": Union[List[ImageType], PineDeferred],
+    "device": Union[List[TypeDevice], PineDeferred],
+    "is_provided_by__release": Union[List[ReleaseType], PineDeferred]
+}
+```
+
+
 ### ImageType
 
 
@@ -4073,8 +4176,20 @@ Set value for a setting.
     "image_size": int,
     "dockerfile": str,
     "error_message": str,
-    "is_a_build_of__service": Any,
-    "release_image": Any
+    "is_a_build_of__service": Union[List[ServiceType], PineDeferred],
+    "release_image": Union[List[ReleaseImageType], None]
+}
+```
+
+
+### InviteeType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "email": str
 }
 ```
 
@@ -4088,9 +4203,20 @@ Set value for a setting.
     "message": str,
     "created_at": str,
     "invitationToken": str,
-    "organization_membership_role": Any,
-    "invitee": Any,
-    "is_invited_to__organization": Any
+    "organization_membership_role": Union[List[OrganizationMembershipRoleType], PineDeferred],
+    "invitee": Union[List[InviteeType], PineDeferred],
+    "is_invited_to__organization": Union[List[OrganizationType], PineDeferred]
+}
+```
+
+
+### OrganizationMembershipRoleType
+
+
+```python
+{
+    "id": int,
+    "name": Literal["administrator", "member"]
 }
 ```
 
@@ -4100,7 +4226,7 @@ Set value for a setting.
 
 ```python
 {
-    "organization_membership": Any
+    "organization_membership": Union[List[OrganizationMembershipType], PineDeferred]
 }
 ```
 
@@ -4112,11 +4238,23 @@ Set value for a setting.
 {
     "id": int,
     "created_at": str,
-    "user": Any,
-    "is_member_of__organization": Any,
-    "organization_membership_role": Any,
+    "user": Union[List[UserType], PineDeferred],
+    "is_member_of__organization": Union[List[OrganizationType], PineDeferred],
+    "organization_membership_role": Union[List[OrganizationMembershipRoleType], PineDeferred],
     "effective_seat_role": str,
-    "organization_membership_tag": Any
+    "organization_membership_tag": Union[List[OrganizationMembershipTagType], None]
+}
+```
+
+
+### OrganizationPrivateDeviceTypeAccess
+
+
+```python
+{
+    "id": int,
+    "organization": Union[List[OrganizationType], PineDeferred],
+    "has_private_access_to__device_type": Union[List[TypeDevice], PineDeferred]
 }
 ```
 
@@ -4131,10 +4269,59 @@ Set value for a setting.
     "name": str,
     "handle": str,
     "has_past_due_invoice_since__date": str,
-    "application": Any,
-    "organization_membership": Any,
-    "owns__team": Any,
-    "organization__has_private_access_to__device_type": Any
+    "application": Union[List[TypeApplication], None],
+    "organization_membership": Union[List[OrganizationMembershipType], None],
+    "owns__team": Union[List[TeamType], None],
+    "organization__has_private_access_to__device_type": Union[List[OrganizationPrivateDeviceTypeAccess], None]
+}
+```
+
+
+### PineDeferred
+
+
+```python
+{
+    "_PineDeferred__id": int
+}
+```
+
+
+### PublicDeviceType
+
+
+```python
+{
+    "latitude": str,
+    "longitude": str,
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "is_of__device_type": Union[List[TypeDevice], PineDeferred],
+    "was_recently_online": bool
+}
+```
+
+
+### PublicOrganizationType
+
+
+```python
+{
+    "id": int,
+    "name": str,
+    "handle": str
+}
+```
+
+
+### ReleaseImageType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "image": Union[List[ImageType], PineDeferred],
+    "is_part_of__release": Union[List[ReleaseType], PineDeferred]
 }
 ```
 
@@ -4172,13 +4359,13 @@ Set value for a setting.
     "is_finalized_at__date": str,
     "note": str,
     "invalidation_reason": str,
-    "is_created_by__user": Any,
-    "belongs_to__application": Any,
-    "release_image": Any,
-    "should_be_running_on__application": Any,
-    "is_running_on__device": Any,
-    "should_be_running_on__device": Any,
-    "release_tag": Any
+    "is_created_by__user": Union[List[UserType], PineDeferred, None],
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "release_image": Union[List[ReleaseImageType], None],
+    "should_be_running_on__application": Union[List[TypeApplication], None],
+    "is_running_on__device": Union[List[TypeDevice], None],
+    "should_be_running_on__device": Union[List[TypeDevice], None],
+    "release_tag": Union[List[BaseTagType], None]
 }
 ```
 
@@ -4232,13 +4419,13 @@ Set value for a setting.
     "is_finalized_at__date": str,
     "note": str,
     "invalidation_reason": str,
-    "is_created_by__user": Any,
-    "belongs_to__application": Any,
-    "release_image": Any,
-    "should_be_running_on__application": Any,
-    "is_running_on__device": Any,
-    "should_be_running_on__device": Any,
-    "release_tag": Any,
+    "is_created_by__user": Union[List[UserType], PineDeferred, None],
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "release_image": Union[List[ReleaseImageType], None],
+    "should_be_running_on__application": Union[List[TypeApplication], None],
+    "is_running_on__device": Union[List[TypeDevice], None],
+    "should_be_running_on__device": Union[List[TypeDevice], None],
+    "release_tag": Union[List[BaseTagType], None],
     "images": List[ImageBasicInfoType],
     "user": BasicUserInfoType
 }
@@ -4254,7 +4441,21 @@ Set value for a setting.
     "public_key": str,
     "id": int,
     "created_at": str,
-    "user": Any
+    "user": Union[List[UserType], PineDeferred]
+}
+```
+
+
+### ServiceInstanceType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "service_type": str,
+    "ip_address": str,
+    "last_heartbeat": str
 }
 ```
 
@@ -4267,10 +4468,109 @@ Set value for a setting.
     "id": int,
     "created_at": str,
     "service_name": str,
-    "application": Any,
-    "is_built_by__image": Any,
-    "service_environment_variable": Any,
-    "device_service_environment_variable": Any
+    "application": Union[List[TypeApplication], PineDeferred],
+    "is_built_by__image": Union[List[ImageType], None],
+    "service_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "device_service_environment_variable": Union[List[EnvironmentVariableBase], None]
+}
+```
+
+
+### SupervisorReleaseType
+
+
+```python
+{
+    "created_at": str,
+    "id": int,
+    "supervisor_version": str,
+    "image_name": str,
+    "is_public": bool,
+    "note": Union[str, None],
+    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred]
+}
+```
+
+
+### TeamApplicationAccessType
+
+
+```python
+{
+    "id": int,
+    "team": Union[List[TeamType], PineDeferred],
+    "grants_access_to__application": Union[List[TypeApplication], PineDeferred],
+    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred]
+}
+```
+
+
+### TeamMembershipType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "user": Union[List[UserType], PineDeferred],
+    "is_member_of__team": Union[List[TeamType], PineDeferred]
+}
+```
+
+
+### TeamType
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "name": str,
+    "belongs_to__organization": Union[List[OrganizationType], PineDeferred],
+    "team_membership": Union[List[TeamMembershipType], None],
+    "team_application_access": Union[List[TeamApplicationAccessType], None]
+}
+```
+
+
+### TypeApplication
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "app_name": str,
+    "actor": Union[List[ActorType], int],
+    "slug": str,
+    "uuid": str,
+    "is_accessible_by_support_until__date": str,
+    "is_host": bool,
+    "should_track_latest_release": bool,
+    "is_public": bool,
+    "is_of__class": Literal["fleet", "block", "app"],
+    "is_archived": bool,
+    "is_discoverable": bool,
+    "is_stored_at__repository_url": str,
+    "public_organization": Union[List[PublicOrganizationType], PineDeferred, None],
+    "application_type": Union[List[ApplicationType], PineDeferred],
+    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred],
+    "depends_on__application": Union[List[ApplicationType], PineDeferred, None],
+    "organization": Union[List[OrganizationType], PineDeferred],
+    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "application_config_variable": Union[List[EnvironmentVariableBase], None],
+    "application_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "build_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "application_tag": Union[List[BaseTagType], None],
+    "owns__device": Union[List[DeviceTypeType], None],
+    "owns__public_device": Union[List[PublicDeviceType], None],
+    "owns__release": Union[List[ReleaseType], None],
+    "service": Union[List[ServiceType], None],
+    "is_depended_on_by__application": Union[List[ApplicationType], None],
+    "is_directly_accessible_by__user": Union[List[UserType], None],
+    "user_application_membership": Union[List[ApplicationMembershipType], None],
+    "team_application_access": Union[List[TeamApplicationAccessType], None],
+    "can_use__application_as_host": Union[List[ApplicationHostedOnApplication], None]
 }
 ```
 
@@ -4281,7 +4581,7 @@ Set value for a setting.
 ```python
 {
     "id": int,
-    "actor": Any,
+    "actor": Union[List[ActorType], int],
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4327,18 +4627,18 @@ Set value for a setting.
     "is_undervolted": bool,
     "overall_status": Any,
     "overall_progress": int,
-    "is_of__device_type": Any,
-    "belongs_to__application": Any,
-    "belongs_to__user": Any,
-    "is_running__release": Any,
-    "should_be_running__release": Any,
-    "is_managed_by__service_instance": Any,
-    "should_be_managed_by__supervisor_release": Any,
-    "device_config_variable": Any,
-    "device_environment_variable": Any,
-    "device_tag": Any,
-    "service_install": Any,
-    "image_install": Any
+    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "belongs_to__user": Union[List[UserType], PineDeferred, None],
+    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
+    "should_be_managed_by__supervisor_release": Union[List[SupervisorReleaseType], PineDeferred, None],
+    "device_config_variable": Union[List[EnvironmentVariableBase], None],
+    "device_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "device_tag": Union[List[BaseTagType], None],
+    "service_install": Union[List[ServiceInstanceType], None],
+    "image_install": Union[List[ImageInstallType], None]
 }
 ```
 
@@ -4354,12 +4654,39 @@ Set value for a setting.
 ```
 
 
+### TypeVar
+
+
+```python
+{
+
+}
+```
+
+
 ### TypedDict
 
 
 ```python
 {
 
+}
+```
+
+
+### UserType
+
+
+```python
+{
+    "id": int,
+    "actor": Union[List[ActorType], int],
+    "created_at": str,
+    "username": str,
+    "organization_membership": Union[List[OrganizationMembershipType], None],
+    "user_application_membership": Union[List[ApplicationMembershipType], None],
+    "team_membership": Union[List[TeamMembershipType], None],
+    "has_direct_access_to__application": Union[List[TypeApplication], None]
 }
 ```
 

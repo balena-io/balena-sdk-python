@@ -12,7 +12,7 @@ from ..types import AnyObject, ApplicationInviteOptions, ApplicationMembershipRo
 from ..types.models import (
     ApplicationInviteType,
     ApplicationMembershipType,
-    ApplicationType,
+    TypeApplication,
     BaseTagType,
     EnvironmentVariableBase,
 )
@@ -95,7 +95,7 @@ class Application:
 
         return org["id"]
 
-    def __normalize_application(self, application: ApplicationType) -> ApplicationType:
+    def __normalize_application(self, application: TypeApplication) -> TypeApplication:
         owned_devices = application.get("owns__device")
         if isinstance(owned_devices, list):
             application["owns__device"] = list(map(normalize_device_os_version, owned_devices))
@@ -148,7 +148,7 @@ class Application:
         self,
         options: AnyObject = {},
         context: Optional[str] = "directly_accessible",
-    ) -> List[ApplicationType]:
+    ) -> List[TypeApplication]:
         """
         Get all applications
 
@@ -181,7 +181,7 @@ class Application:
     def get_all_directly_accessible(
         self,
         options: AnyObject = {},
-    ) -> List[ApplicationType]:
+    ) -> List[TypeApplication]:
         """
         Get all applications directly accessible by the user
 
@@ -202,7 +202,7 @@ class Application:
         slug_or_uuid_or_id: Union[str, int],
         options: AnyObject = {},
         context: Optional[str] = "directly_accessible",
-    ) -> ApplicationType:
+    ) -> TypeApplication:
         """
         Get a single application.
 
@@ -212,7 +212,7 @@ class Application:
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.get("myorganization/myapp")
@@ -277,7 +277,7 @@ class Application:
         self,
         slug_or_uuid_or_id: Union[str, int],
         options: AnyObject = {},
-    ) -> ApplicationType:
+    ) -> TypeApplication:
         """
         Get a single application directly accessible by the user
 
@@ -286,7 +286,7 @@ class Application:
             options (AnyObject): extra pine options to use
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.get_directly_accessible("myorganization/myapp")
@@ -298,7 +298,7 @@ class Application:
         self,
         slug_or_uuid_or_id: Union[str, int],
         options: AnyObject = {},
-    ) -> ApplicationType:
+    ) -> TypeApplication:
         """
         This method does not map exactly to the underlying model: it runs a
         larger prebuilt query, and reformats it into an easy to use and
@@ -310,7 +310,7 @@ class Application:
             options (AnyObject): extra pine options to use
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.get_with_device_service_details('my_org_handle/my_app_name')
@@ -333,7 +333,7 @@ class Application:
         app_name: str,
         options: AnyObject = {},
         context: Optional[str] = "directly_accessible",
-    ) -> ApplicationType:
+    ) -> TypeApplication:
         """
          Get a single application using the appname.
 
@@ -343,7 +343,7 @@ class Application:
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.get("myapp")
@@ -371,7 +371,7 @@ class Application:
 
         return self.__normalize_application(apps[0])
 
-    def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> ApplicationType:
+    def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> TypeApplication:
         """
         Get a single application using the appname and the handle of the owning organization.
 
@@ -381,7 +381,7 @@ class Application:
             options (AnyObject): extra pine options to use.
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.get_by_owner('foo', 'my_org')
@@ -444,7 +444,7 @@ class Application:
         device_type: str,
         organization: Union[str, int],
         application_class: Optional[Literal["app", "fleet", "block"]] = None,
-    ) -> ApplicationType:
+    ) -> TypeApplication:
         """
         Create an application.
 
@@ -455,7 +455,7 @@ class Application:
             application_class (Optional[Literal["app", "fleet", "block"]]): application class.
 
         Returns:
-            ApplicationType: application info.
+            TypeApplication: application info.
 
         Examples:
             >>> balena.models.application.create('foo', 'raspberry-pi', 12345)
