@@ -2,9 +2,10 @@ from typing import List
 
 from .. import exceptions
 from ..auth import Auth
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import SSHKeyType
+from ..settings import Settings
 
 
 class Key:
@@ -13,8 +14,9 @@ class Key:
 
     """
 
-    def __init__(self):
-        self.__auth = Auth()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__auth = Auth(pine, settings)
 
     def get_all(self, options: AnyObject = {}) -> List[SSHKeyType]:
         """
@@ -26,7 +28,7 @@ class Key:
         Returns:
             List[SSHKeyType]: list of ssh keys.
         """
-        return pine.get({"resource": "user__has__public_key", "options": options})
+        return self.__pine.get({"resource": "user__has__public_key", "options": options})
 
     def get(self, id: int) -> SSHKeyType:
         """
@@ -39,7 +41,7 @@ class Key:
             SSHKeyType: ssh key info.
         """
 
-        key = pine.get({"resource": "user__has__public_key", "id": id})
+        key = self.__pine.get({"resource": "user__has__public_key", "id": id})
 
         if key is None:
             raise exceptions.KeyNotFound(id)
@@ -54,7 +56,7 @@ class Key:
             id (int): key id.
         """
 
-        pine.delete({"resource": "user__has__public_key", "id": id})
+        self.__pine.delete({"resource": "user__has__public_key", "id": id})
 
     def create(self, title: str, key: str) -> SSHKeyType:
         """
@@ -71,6 +73,6 @@ class Key:
         key = key.strip()
 
         user_id = self.__auth.get_user_id()
-        return pine.post(
+        return self.__pine.post(
             {"resource": "user__has__public_key", "body": {"title": title, "public_key": key, "user": user_id}}
         )

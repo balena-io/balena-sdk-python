@@ -2,6 +2,7 @@ from typing import List, TypedDict, Optional
 
 from ..balena_auth import request
 from ..utils import normalize_device_os_version
+from ..settings import Settings
 
 
 class GaConfig(TypedDict):
@@ -30,6 +31,9 @@ class Config:
 
     """
 
+    def __init__(self, settings: Settings):
+        self.__settings = settings
+
     def get_all(self) -> ConfigType:
         """
         Get all configuration.
@@ -41,4 +45,4 @@ class Config:
             >>> balena.models.config.get_all()
         """
 
-        return normalize_device_os_version(request(method="GET", path="/config"))
+        return normalize_device_os_version(request(method="GET", path="/config", settings=self.__settings))

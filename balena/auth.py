@@ -1,9 +1,9 @@
 from . import exceptions
 from .balena_auth import request
-from .settings import settings
+from .settings import Settings
 from typing import TypedDict, Optional, Literal, Union, cast
 from typing_extensions import Unpack
-from .pine import pine
+from .pine import PineClient
 from .twofactor_auth import TwoFactorAuth
 
 
@@ -30,8 +30,10 @@ class Auth:
     _user_detail_cache: Optional[WhoamiResult] = None
     _user_actor_id_cache: Optional[int] = None
 
-    def __init__(self):
-        self.two_factor = TwoFactorAuth()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.two_factor = TwoFactorAuth(settings)
+        self.__pine = pine
+        self.__settings = settings
 
     def __get_user_details(self, no_cache: bool = False) -> Optional[WhoamiResult]:
         """
@@ -41,7 +43,7 @@ class Auth:
             Optional[WhoamiResult]: user details.
         """
         if not self._user_detail_cache or no_cache:
-            whoami = request(method="GET", path="/user/v1/whoami")
+            whoami = request(method="GET", settings=self.__settings, path="/user/v1/whoami")
             if isinstance(whoami, dict) and set(whoami.keys()) == set(["id", "username", "email"]):
                 self._user_detail_cache = cast(WhoamiResult, whoami)
             else:
@@ -93,7 +95,9 @@ class Auth:
         Examples:
             >>> balena.auth.authenticate(username='<your email>', password='<your password>')
         """
-        req = request(method="POST", path="login_", body=credentials, send_token=False, return_raw=True)
+        req = request(
+            method="POST", settings=self.__settings, path="login_", body=credentials, send_token=False, return_raw=True
+        )
 
         if not req.ok:
             if req.status_code == 401:
@@ -123,7 +127,7 @@ class Auth:
         token = self.authenticate(**credentials)
         self._user_detail_cache = None
         self._user_actor_id_cache = None
-        settings.set(TOKEN_KEY, token)
+        self.__settings.set(TOKEN_KEY, token)
 
     def login_with_token(self, token: str) -> None:
         """
@@ -145,7 +149,7 @@ class Auth:
         """
         self._user_detail_cache = None
         self._user_actor_id_cache = None
-        settings.set(TOKEN_KEY, token)
+        self.__settings.set(TOKEN_KEY, token)
 
     def is_logged_in(self) -> bool:
         """
@@ -182,7 +186,7 @@ class Auth:
             >>> balena.auth.get_token()
         """
         try:
-            return settings.get(TOKEN_KEY)
+            return self.__settings.get(TOKEN_KEY)
         except exceptions.InvalidOption:
             return None
 
@@ -210,7 +214,7 @@ class Auth:
             # If you are logged in.
             >>> balena.auth.get_user_actor_id()
         """
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "user",
                 "id": self.get_user_id(),
@@ -241,7 +245,7 @@ class Auth:
         """
         self._user_detail_cache = None
         self._user_actor_id_cache = None
-        settings.remove(TOKEN_KEY)
+        self.__settings.remove(TOKEN_KEY)
 
     def register(self, **creentials: Unpack[CredentialsType]) -> str:
         """
@@ -261,6 +265,7 @@ class Auth:
         """
         return request(
             method="POST",
+            settings=self.__settings,
             path="/user/register",
             body=creentials,
             send_token=False,

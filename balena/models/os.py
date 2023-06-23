@@ -8,9 +8,10 @@ from semver.version import Version
 from .. import exceptions
 from ..balena_auth import request
 from ..hup import get_hup_action_type
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..utils import compare, merge, normalize_balena_semver
+from ..settings import Settings
 from . import application as app_module
 from .device_type import DeviceType
 
@@ -202,8 +203,10 @@ class DeviceOs:
     OS_TYPES = {"default": "default", "esr": "esr"}
     OS_VARIANTS = {"production": "prod", "development": "dev"}
 
-    def __init__(self):
-        self.__device_type = DeviceType()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__settings = settings
+        self.__device_type = DeviceType(pine, settings)
 
     def get_available_os_versions(self, device_type: Union[str, List[str]]):
         """
@@ -267,6 +270,7 @@ class DeviceOs:
         return float(
             request(
                 method="GET",
+                settings=self.__settings,
                 path=f"/device-types/v1/{slug}/images/{version}/download-size",
             )["size"]
         )
@@ -517,7 +521,7 @@ class DeviceOs:
             options,
         )
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "application",
                 "options": {

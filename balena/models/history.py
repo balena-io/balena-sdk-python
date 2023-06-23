@@ -2,11 +2,12 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
 from .. import exceptions
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import DeviceHistoryType
 from ..utils import is_full_uuid, is_id, merge
-from . import application as app_module
+from ..settings import Settings
+from .application import Application
 
 
 def history_timerange_filter_with_guard(from_date=None, to_date=None):
@@ -38,6 +39,10 @@ class DeviceHistory:
     This class implements device history model for balena python SDK.
 
     """
+
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__application = Application(pine, settings)
 
     def get_all_by_device(
         self,
@@ -79,7 +84,7 @@ class DeviceHistory:
         else:
             raise exceptions.InvalidParameter("uuid_or_id", uuid_or_id)
 
-        return pine.get({"resource": "device_history", "options": merge({"$filter": dollar_filter}, options)})
+        return self.__pine.get({"resource": "device_history", "options": merge({"$filter": dollar_filter}, options)})
 
     def get_all_by_application(
         self,
@@ -112,9 +117,9 @@ class DeviceHistory:
             ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
             ... )
         """
-        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "device_history",
                 "options": merge(

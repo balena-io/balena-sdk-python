@@ -1,6 +1,6 @@
 from typing import Any, Callable, Generic, List, Optional, TypeVar
 
-from .pine import pine
+from .pine import PineClient
 from .types import AnyObject
 from .utils import is_id, merge
 
@@ -14,16 +14,18 @@ class DependentResource(Generic[T]):
         resource_key_field: str,
         parent_resource_name: str,
         get_resource_id: Callable[[Any], int],
+        pine: PineClient,
     ):
         self.resource_name = resource_name
         self.resource_key_field = resource_key_field
         self.parent_resource_name = parent_resource_name
         self.get_resource_id = get_resource_id
+        self.__pine = pine
 
     def _get_all(self, options: AnyObject = {}) -> List[T]:
         default_orderby = {"$orderby": {self.resource_key_field: "asc"}}
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": self.resource_name,
                 "options": merge(default_orderby, options),
@@ -45,7 +47,7 @@ class DependentResource(Generic[T]):
 
         dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: key}
 
-        result = pine.get(
+        result = self.__pine.get(
             {
                 "resource": self.resource_name,
                 "options": {"$select": "value", "$filter": dollar_filter},
@@ -60,7 +62,7 @@ class DependentResource(Generic[T]):
 
         upsert_id = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
 
-        pine.upsert(
+        self.__pine.upsert(
             {
                 "resource": self.resource_name,
                 "id": upsert_id,
@@ -73,4 +75,4 @@ class DependentResource(Generic[T]):
 
         dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
 
-        pine.delete({"resource": self.resource_name, "options": {"$filter": dollar_filter}})
+        self.__pine.delete({"resource": self.resource_name, "options": {"$filter": dollar_filter}})

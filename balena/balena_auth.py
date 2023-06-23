@@ -7,10 +7,10 @@ import jwt
 import requests
 
 from . import exceptions
-from .settings import settings
+from .settings import Settings
 
 
-def __request_new_token() -> str:
+def __request_new_token(settings: Settings) -> str:
     headers = {"Authorization": f"Bearer {settings.get('token')}"}
     url = urljoin(settings.get("api_endpoint"), "whoami")
     response = requests.get(url, headers=headers)
@@ -35,12 +35,12 @@ def __should_update_token(token: str, interval: str) -> bool:
         return False
 
 
-def get_token() -> Optional[str]:
+def get_token(settings: Settings) -> Optional[str]:
     if settings.has("token"):
         token = settings.get("token")
         interval = settings.get("token_refresh_interval")
         if __should_update_token(token, interval):
-            settings.set("token", __request_new_token())
+            settings.set("token", __request_new_token(settings))
         api_key = settings.get("token")
 
     else:
@@ -52,6 +52,7 @@ def get_token() -> Optional[str]:
 def request(
     method: str,
     path: str,
+    settings: Settings,
     body: Optional[Any] = None,
     endpoint: Optional[str] = None,
     token: Optional[str] = None,
@@ -64,7 +65,7 @@ def request(
         endpoint = settings.get("api_endpoint")
 
     if token is None and send_token:
-        token = get_token()
+        token = get_token(settings)
 
     url = urljoin(endpoint, path)
 

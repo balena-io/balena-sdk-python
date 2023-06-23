@@ -191,9 +191,7 @@ class TestApplicationTag(unittest.TestCase):
 
     def test_03_remove(self):
         self.base_tag_test.test_remove(
-            self,
-            type(self).app["id"],
-            self.balena.models.application.tags.get_all_by_application
+            self, type(self).app["id"], self.balena.models.application.tags.get_all_by_application
         )
 
 

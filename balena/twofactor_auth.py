@@ -2,8 +2,8 @@ from urllib.parse import parse_qs
 import jwt
 
 from . import exceptions
-from .settings import settings
 from .balena_auth import request
+from .settings import Settings
 
 TOKEN_KEY = "token"
 
@@ -13,6 +13,9 @@ class TwoFactorAuth:
     This class implements basic 2FA functionalities for balena python SDK.
 
     """
+
+    def __init__(self, settings: Settings):
+        self.__settings = settings
 
     def is_enabled(self) -> bool:
         """
@@ -25,7 +28,7 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.is_enabled()
         """
         try:
-            token = settings.get(TOKEN_KEY)
+            token = self.__settings.get(TOKEN_KEY)
             token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             return "twoFactorRequired" in token_data
         except jwt.InvalidTokenError:
@@ -43,7 +46,7 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.is_passed()
         """
         try:
-            token = settings.get(TOKEN_KEY)
+            token = self.__settings.get(TOKEN_KEY)
             token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             if "twoFactorRequired" in token_data:
                 return not token_data["twoFactorRequired"]
@@ -68,6 +71,7 @@ class TwoFactorAuth:
         """
         return request(
             method="POST",
+            settings=self.__settings,
             path="auth/totp/verify",
             body={"code": code},
         )
@@ -86,6 +90,7 @@ class TwoFactorAuth:
         """
         otp_auth_url = request(
             method="GET",
+            settings=self.__settings,
             path="auth/totp/setup",
         )
         return parse_qs(otp_auth_url)["secret"][0]
@@ -104,7 +109,7 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.enable('123456')
         """
         token = self.verify(code)
-        settings.set(TOKEN_KEY, token)
+        self.__settings.set(TOKEN_KEY, token)
         return token
 
     def challenge(self, code: str) -> None:
@@ -127,7 +132,7 @@ class TwoFactorAuth:
             True
         """
         token = self.verify(code)
-        settings.set(TOKEN_KEY, token)
+        self.__settings.set(TOKEN_KEY, token)
 
     def disable(self, password: str) -> str:
         """
@@ -145,9 +150,10 @@ class TwoFactorAuth:
         """
         token = request(
             method="POST",
+            settings=self.__settings,
             path="auth/totp/disable",
             body={"password": password},
         )
 
-        settings.set(TOKEN_KEY, token)
+        self.__settings.set(TOKEN_KEY, token)
         return token

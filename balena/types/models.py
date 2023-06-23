@@ -1,6 +1,6 @@
 from typing import Any, List, Literal, Optional, TypedDict, Union, TypeVar
 
-__T = TypeVar('__T')
+__T = TypeVar("__T")
 
 
 class PineDeferred(TypedDict):
@@ -15,18 +15,18 @@ OptionalNavigationResource = Union[List[__T], PineDeferred, None]
 
 class UserType(TypedDict):
     id: int
-    actor: ConceptTypeNavigationResource['ActorType']
+    actor: ConceptTypeNavigationResource["ActorType"]
     created_at: str
     username: str
 
-    organization_membership: ReverseNavigationResource['OrganizationMembershipType']
-    user_application_membership: ReverseNavigationResource['ApplicationMembershipType']
-    team_membership: ReverseNavigationResource['TeamMembershipType']
-    has_direct_access_to__application: ReverseNavigationResource['TypeApplication']
+    organization_membership: ReverseNavigationResource["OrganizationMembershipType"]
+    user_application_membership: ReverseNavigationResource["ApplicationMembershipType"]
+    team_membership: ReverseNavigationResource["TeamMembershipType"]
+    has_direct_access_to__application: ReverseNavigationResource["TypeApplication"]
 
 
-ApplicationMembershipRoles = Literal['developer', 'operator', 'observer']
-OrganizationMembershipRoles = Literal['administrator', 'member']
+ApplicationMembershipRoles = Literal["developer", "operator", "observer"]
+OrganizationMembershipRoles = Literal["administrator", "member"]
 
 
 class ApplicationMembershipRoleType(TypedDict):
@@ -41,10 +41,10 @@ class OrganizationMembershipRoleType(TypedDict):
 
 class TeamApplicationAccessType(TypedDict):
     id: int
-    team: NavigationResource['TeamType']
+    team: NavigationResource["TeamType"]
     # application
-    grants_access_to__application: NavigationResource['TypeApplication']
-    application_membership_role: NavigationResource['ApplicationMembershipRoleType']
+    grants_access_to__application: NavigationResource["TypeApplication"]
+    application_membership_role: NavigationResource["ApplicationMembershipRoleType"]
 
 
 class TeamType(TypedDict):
@@ -52,12 +52,12 @@ class TeamType(TypedDict):
     created_at: str
     name: str
 
-    belongs_to__organization: NavigationResource['OrganizationType']
+    belongs_to__organization: NavigationResource["OrganizationType"]
 
     # includes__user
-    team_membership: ReverseNavigationResource['TeamMembershipType']
+    team_membership: ReverseNavigationResource["TeamMembershipType"]
     # grants_access_to__application
-    team_application_access: ReverseNavigationResource['TeamApplicationAccessType']
+    team_application_access: ReverseNavigationResource["TeamApplicationAccessType"]
 
 
 class TeamMembershipType(TypedDict):
@@ -66,14 +66,14 @@ class TeamMembershipType(TypedDict):
 
     user: NavigationResource[UserType]
     # team
-    is_member_of__team: NavigationResource['TeamType']
+    is_member_of__team: NavigationResource["TeamType"]
 
 
 class PublicDeviceType(TypedDict):
     latitude: str
     longitude: str
-    belongs_to__application: NavigationResource['TypeApplication']
-    is_of__device_type: NavigationResource['TypeDevice']
+    belongs_to__application: NavigationResource["TypeApplication"]
+    is_of__device_type: NavigationResource["TypeDevice"]
     was_recently_online: bool
 
 
@@ -87,10 +87,10 @@ class ActorType(TypedDict):
     id: int
 
     is_of__user: OptionalNavigationResource[UserType]
-    is_of__application: OptionalNavigationResource['TypeApplication']
-    is_of__device: OptionalNavigationResource['TypeDevice']
+    is_of__application: OptionalNavigationResource["TypeApplication"]
+    is_of__device: OptionalNavigationResource["TypeDevice"]
     is_of__public_device: OptionalNavigationResource[PublicDeviceType]
-    api_key: OptionalNavigationResource['APIKeyType']
+    api_key: OptionalNavigationResource["APIKeyType"]
 
 
 class ApplicationType:
@@ -116,8 +116,8 @@ class APIKeyType(TypedDict):
 
 
 class ApplicationHostedOnApplication:
-    application: NavigationResource['TypeApplication']
-    can_use__application_as_host: NavigationResource['TypeApplication']
+    application: NavigationResource["TypeApplication"]
+    can_use__application_as_host: NavigationResource["TypeApplication"]
 
 
 class TypeApplication(TypedDict):
@@ -137,22 +137,22 @@ class TypeApplication(TypedDict):
     is_stored_at__repository_url: str
     public_organization: OptionalNavigationResource[PublicOrganizationType]
     application_type: NavigationResource[ApplicationType]
-    is_for__device_type: NavigationResource['DeviceTypeType']
+    is_for__device_type: NavigationResource["DeviceTypeType"]
     depends_on__application: OptionalNavigationResource[ApplicationType]
-    organization: NavigationResource['OrganizationType']
-    should_be_running__release: OptionalNavigationResource['ReleaseType']
+    organization: NavigationResource["OrganizationType"]
+    should_be_running__release: OptionalNavigationResource["ReleaseType"]
 
-    application_config_variable: ReverseNavigationResource['EnvironmentVariableBase']
-    application_environment_variable: ReverseNavigationResource['EnvironmentVariableBase']
-    build_environment_variable: ReverseNavigationResource['EnvironmentVariableBase']
-    application_tag: ReverseNavigationResource['BaseTagType']
-    owns__device: ReverseNavigationResource['DeviceTypeType']
+    application_config_variable: ReverseNavigationResource["EnvironmentVariableBase"]
+    application_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
+    build_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
+    application_tag: ReverseNavigationResource["BaseTagType"]
+    owns__device: ReverseNavigationResource["DeviceTypeType"]
     owns__public_device: ReverseNavigationResource[PublicDeviceType]
-    owns__release: ReverseNavigationResource['ReleaseType']
-    service: ReverseNavigationResource['ServiceType']
+    owns__release: ReverseNavigationResource["ReleaseType"]
+    service: ReverseNavigationResource["ServiceType"]
     is_depended_on_by__application: ReverseNavigationResource[ApplicationType]
     is_directly_accessible_by__user: ReverseNavigationResource[UserType]
-    user_application_membership: ReverseNavigationResource['ApplicationMembershipType']
+    user_application_membership: ReverseNavigationResource["ApplicationMembershipType"]
     team_application_access: ReverseNavigationResource[TeamApplicationAccessType]
     can_use__application_as_host: ReverseNavigationResource[ApplicationHostedOnApplication]
 
@@ -206,13 +206,13 @@ class DeviceFamilyType(TypedDict):
 class CpuArchitectureType(TypedDict):
     id: int
     slug: str
-    is_supported_by__device_type: ReverseNavigationResource['CpuArchitectureType']
+    is_supported_by__device_type: ReverseNavigationResource["CpuArchitectureType"]
 
 
 class DeviceTypeAliasType(TypedDict):
     id: int
     is_referenced_by__alias: str
-    references__device_type: NavigationResource['DeviceTypeType']
+    references__device_type: NavigationResource["DeviceTypeType"]
 
 
 class DeviceTypeType(TypedDict):
@@ -225,9 +225,9 @@ class DeviceTypeType(TypedDict):
     belongs_to__device_family: OptionalNavigationResource[DeviceFamilyType]
     is_default_for__application: ReverseNavigationResource[TypeApplication]
     is_of__cpu_architecture: NavigationResource[CpuArchitectureType]
-    is_accessible_privately_by__organization: ReverseNavigationResource['OrganizationType']
-    describes_device: ReverseNavigationResource['TypeDevice']
-    device_type_alias: ReverseNavigationResource['DeviceTypeAliasType']
+    is_accessible_privately_by__organization: ReverseNavigationResource["OrganizationType"]
+    describes_device: ReverseNavigationResource["TypeDevice"]
+    device_type_alias: ReverseNavigationResource["DeviceTypeAliasType"]
 
 
 class TypeDeviceState(TypedDict):
@@ -260,9 +260,9 @@ class ImageInstallType(TypedDict):
     status: str
     install_date: str
 
-    installs__image: NavigationResource['ImageType']
-    device: NavigationResource['TypeDevice']
-    is_provided_by__release: NavigationResource['ReleaseType']
+    installs__image: NavigationResource["ImageType"]
+    device: NavigationResource["TypeDevice"]
+    is_provided_by__release: NavigationResource["ReleaseType"]
 
 
 class TypeDevice(TypedDict):
@@ -320,13 +320,13 @@ class TypeDevice(TypedDict):
     is_of__device_type: NavigationResource[DeviceTypeType]
     belongs_to__application: NavigationResource[TypeApplication]
     belongs_to__user: OptionalNavigationResource[UserType]
-    is_running__release: OptionalNavigationResource['ReleaseType']
-    should_be_running__release: OptionalNavigationResource['ReleaseType']
+    is_running__release: OptionalNavigationResource["ReleaseType"]
+    should_be_running__release: OptionalNavigationResource["ReleaseType"]
     is_managed_by__service_instance: OptionalNavigationResource[ServiceInstanceType]
     should_be_managed_by__supervisor_release: OptionalNavigationResource[SupervisorReleaseType]
-    device_config_variable: ReverseNavigationResource['EnvironmentVariableBase']
-    device_environment_variable: ReverseNavigationResource['EnvironmentVariableBase']
-    device_tag: ReverseNavigationResource['BaseTagType']
+    device_config_variable: ReverseNavigationResource["EnvironmentVariableBase"]
+    device_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
+    device_tag: ReverseNavigationResource["BaseTagType"]
     service_install: ReverseNavigationResource[ServiceInstanceType]
     image_install: ReverseNavigationResource[ImageInstallType]
 
@@ -345,7 +345,7 @@ class DeviceMetricsType(TypedDict):
 
 class OrganizationPrivateDeviceTypeAccess(TypedDict):
     id: int
-    organization: NavigationResource['OrganizationType']
+    organization: NavigationResource["OrganizationType"]
     has_private_access_to__device_type: NavigationResource[TypeDevice]
 
 
@@ -356,7 +356,7 @@ class OrganizationType(TypedDict):
     handle: str
     has_past_due_invoice_since__date: str
     application: ReverseNavigationResource[TypeApplication]
-    organization_membership: ReverseNavigationResource['OrganizationMembershipType']
+    organization_membership: ReverseNavigationResource["OrganizationMembershipType"]
     owns__team: ReverseNavigationResource[TeamType]
     organization__has_private_access_to__device_type: ReverseNavigationResource[OrganizationPrivateDeviceTypeAccess]
 
@@ -378,7 +378,7 @@ class OrganizationMembershipType(TypedDict):
     is_member_of__organization: NavigationResource[OrganizationType]
     organization_membership_role: NavigationResource[OrganizationMembershipRoleType]
     effective_seat_role: str
-    organization_membership_tag: ReverseNavigationResource['OrganizationMembershipTagType']
+    organization_membership_tag: ReverseNavigationResource["OrganizationMembershipTagType"]
 
 
 class OrganizationMembershipTagType(TypedDict):
@@ -400,8 +400,8 @@ class EnvironmentVariableBase(TypedDict):
 class ReleaseImageType(TypedDict):
     id: int
     created_at: str
-    image: NavigationResource['ImageType']
-    is_part_of__release: NavigationResource['ReleaseType']
+    image: NavigationResource["ImageType"]
+    is_part_of__release: NavigationResource["ReleaseType"]
 
 
 class ImageType(TypedDict):
@@ -419,7 +419,7 @@ class ImageType(TypedDict):
     image_size: int
     dockerfile: str
     error_message: str
-    is_a_build_of__service: NavigationResource['ServiceType']
+    is_a_build_of__service: NavigationResource["ServiceType"]
     release_image: ReverseNavigationResource[ReleaseImageType]
 
 

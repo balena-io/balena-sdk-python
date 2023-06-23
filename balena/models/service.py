@@ -2,11 +2,12 @@ from typing import List, Optional, Union
 
 from .. import exceptions
 from ..dependent_resource import DependentResource
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import EnvironmentVariableBase, ServiceType
 from ..utils import merge
-from . import application as app_module
+from ..settings import Settings
+from .application import Application
 
 
 class Service:
@@ -15,11 +16,13 @@ class Service:
 
     """
 
-    def __init__(self):
-        self.var = ServiceEnvVariable()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__application = Application(pine, settings, False)
+        self.var = ServiceEnvVariable(pine, self, settings)
 
     def _get(self, id: int, options: AnyObject = {}):
-        service = pine.get({"resource": "service", "id": id, "options": options})
+        service = self.__pine.get({"resource": "service", "id": id, "options": options})
 
         if service is None:
             raise exceptions.ServiceNotFound(id)
@@ -38,9 +41,9 @@ class Service:
             List[ServiceType]: service info.
         """
 
-        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        return pine.get({"resource": "service", "options": merge({"$filter": {"application": app_id}}, options)})
+        return self.__pine.get({"resource": "service", "options": merge({"$filter": {"application": app_id}}, options)})
 
 
 class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
@@ -49,12 +52,15 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, service: Service, settings: Settings):
+        self.__service = service
+        self.__application = Application(pine, settings, False)
         super(ServiceEnvVariable, self).__init__(
             "service_environment_variable",
             "name",
             "service",
-            lambda id: service._get(id, {"$select": "id"})["id"],
+            lambda id: self.__service._get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_service(self, id: int, options: AnyObject = {}) -> List[EnvironmentVariableBase]:
@@ -90,7 +96,7 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             >>> balena.models.service.env_var.get_all_by_application(9020)
             >>> balena.models.service.env_var.get_all_by_application("myorg/myslug")
         """
-        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
         return super(ServiceEnvVariable, self)._get_all(
             merge(
@@ -148,6 +154,3 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             >>> balena.models.service.env_var.remove(1234,'test_env4')
         """
         super(ServiceEnvVariable, self)._remove(id, key)
-
-
-service = Service()

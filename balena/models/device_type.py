@@ -1,17 +1,22 @@
 from typing import List, Union
 
 from .. import exceptions
-from ..pine import pine
+from ..pine import PineClient
+from ..settings import Settings
 from ..types import AnyObject
 from ..types.models import DeviceTypeType
 from ..utils import merge
 
 
-class DeviceType(object):
+class DeviceType:
     """
     This class implements user API key model for balena python SDK.
 
     """
+
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__settings = settings
 
     def get(self, id_or_slug: Union[str, int], options: AnyObject = {}) -> DeviceTypeType:
         """
@@ -53,7 +58,7 @@ class DeviceType(object):
             if len(device_types) > 0:
                 device_type = device_types[0]
         else:
-            device_type = pine.get(
+            device_type = self.__pine.get(
                 {
                     "resource": "device_type",
                     "id": id_or_slug,
@@ -77,7 +82,7 @@ class DeviceType(object):
             List[DeviceTypeType]: list contains info of device types.
         """
         opts = merge({"$orderby": "name asc"}, options)
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "device_type",
                 "options": opts,

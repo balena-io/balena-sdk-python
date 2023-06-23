@@ -8,13 +8,15 @@ from pine_client.client import Params
 
 from .balena_auth import get_token
 from .exceptions import RequestError
-from .settings import settings
+from .settings import Settings
 
 
 class PineClient(PinejsClientCore):
-    def __init__(self, params: Optional[Params] = None):
+    def __init__(self, settings: Settings, params: Optional[Params] = None):
         if params is None:
             params = {}
+
+        self.__settings = settings
 
         api_url = settings.get("api_endpoint")
         api_version = settings.get("api_version")
@@ -22,7 +24,7 @@ class PineClient(PinejsClientCore):
         super().__init__({**params, "api_prefix": urljoin(api_url, api_version) + "/"})
 
     def _request(self, method: str, url: str, body: Optional[Any] = None) -> Any:
-        token = get_token()
+        token = get_token(self.__settings)
 
         headers = {"Content-Type": "application/json"}
         if token is not None:
@@ -41,6 +43,3 @@ class PineClient(PinejsClientCore):
                 return req.content.decode()
         else:
             raise RequestError(body=req.content.decode(), status_code=req.status_code)
-
-
-pine = PineClient()

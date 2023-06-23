@@ -1,14 +1,19 @@
 from .. import exceptions
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import ImageType
 from ..utils import merge
+from ..settings import Settings
 
 
 class Image:
     """
     This class implements image model for balena python SDK.
     """
+
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__settings = settings
 
     def get(self, id: int, options: AnyObject = {}) -> ImageType:
         """
@@ -37,7 +42,7 @@ class Image:
             ]
         }
 
-        image = pine.get({"resource": "image", "id": id, "options": merge(base_options, options, True)})
+        image = self.__pine.get({"resource": "image", "id": id, "options": merge(base_options, options, True)})
 
         if image is None:
             raise exceptions.ImageNotFound(id)

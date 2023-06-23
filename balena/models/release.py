@@ -3,11 +3,11 @@ from typing import Any, List, Optional, TypedDict, Union
 from .. import exceptions
 from ..builder import build_from_url
 from ..dependent_resource import DependentResource
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import BaseTagType, ReleaseType, ReleaseWithImageDetailsType
 from ..utils import is_id, merge
-from . import application as app_module
+from ..settings import Settings
 
 
 class ReleaseRawVersionApplicationPair(TypedDict, total=True):
@@ -21,8 +21,11 @@ class Release:
 
     """
 
-    def __init__(self):
-        self.tags = ReleaseTag()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__application = Application(pine, settings, False)
+        self.__settings = settings
+        self.tags = ReleaseTag(pine, self, settings)
 
     def __set(
         self,
@@ -30,7 +33,7 @@ class Release:
         body: AnyObject,
     ) -> None:
         id = self.get(commit_or_id_or_raw_version, {"$select": "id"})["id"]
-        pine.patch({"resource": "release", "id": id, "body": body})
+        self.__pine.patch({"resource": "release", "id": id, "body": body})
 
     def get(
         self,
@@ -54,7 +57,7 @@ class Release:
             raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
 
         if is_id(commit_or_id_or_raw_version):
-            release = pine.get(
+            release = self.__pine.get(
                 {"resource": "release", "id": commit_or_id_or_raw_version, "options": options}  # type: ignore
             )
 
@@ -65,14 +68,14 @@ class Release:
             if isinstance(commit_or_id_or_raw_version, dict):
                 raw_version = commit_or_id_or_raw_version["raw_version"]
                 app = commit_or_id_or_raw_version["application"]
-                app_id = app_module.application.get(app, {"$select": "id"})["id"]
+                app_id = self.__application.get(app, {"$select": "id"})["id"]
                 dollar_filter = {
                     "raw_version": raw_version,
                     "belongs_to__application": app_id,
                 }
             else:
                 dollar_filter = {"commit": {"$startswith": commit_or_id_or_raw_version}}
-            releases = pine.get(
+            releases = self.__pine.get(
                 {
                     "resource": "release",
                     "options": merge({"$filter": dollar_filter}, options),
@@ -152,9 +155,9 @@ class Release:
         Returns:
             List[ReleaseType]: release info.
         """
-        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "release",
                 "options": merge(
@@ -213,12 +216,13 @@ class Release:
             "$select": "app_name",
             "$expand": {"organization": {"$select": "handle"}},
         }
-        app = app_module.application.get(slug_or_uuid_or_id, app_options)
+        app = self.__application.get(slug_or_uuid_or_id, app_options)
         return build_from_url(
             app["organization"][0]["handle"],
             app["app_name"],
             url,
             flatten_tarball,
+            self.__settings,
         )
 
     def finalize(
@@ -283,12 +287,11 @@ class ReleaseTag(DependentResource[BaseTagType]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, release: Release, settings: Settings):
+        self.__release = release
+        self.__application = Application(pine, settings, False)
         super(ReleaseTag, self).__init__(
-            "release_tag",
-            "tag_key",
-            "release",
-            lambda id: release.get(id, {"$select": "id"})["id"],
+            "release_tag", "tag_key", "release", lambda id: self.__release.get(id, {"$select": "id"})["id"], pine
         )
 
     def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
@@ -306,7 +309,7 @@ class ReleaseTag(DependentResource[BaseTagType]):
             >>> balena.models.release.tag.get_all_by_application(1005160)
         """
 
-        app_id = app_module.application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(ReleaseTag, self)._get_all(
             merge(
                 {
@@ -346,7 +349,7 @@ class ReleaseTag(DependentResource[BaseTagType]):
             "$select": "id",
             "$expand": {"release_tag": merge({"$orderby": "tag_key asc"}, options)},
         }
-        return release.get(commit_or_id_or_raw_version, release_opts)["release_tag"]
+        return self.__release.get(commit_or_id_or_raw_version, release_opts)["release_tag"]
 
     def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
         """
@@ -424,4 +427,4 @@ class ReleaseTag(DependentResource[BaseTagType]):
         super(ReleaseTag, self)._remove(commit_or_id_or_raw_version, tag_key)
 
 
-release = Release()
+from .application import Application  # noqa: E402

@@ -15,7 +15,7 @@ def simplify_type_hint(type_hint: Any) -> str:
     # print(type_hint)
     if isinstance(type_hint, str):
         return f'"{type_hint}"'
-    elif type_hint is None or (hasattr(type_hint,  '__name__') and type_hint.__name__ == "NoneType"):
+    elif type_hint is None or (hasattr(type_hint, "__name__") and type_hint.__name__ == "NoneType"):
         return "None"
     elif inspect.isclass(type_hint) or type(type_hint) == type(Ellipsis):
         return type_hint.__name__  # type: ignore

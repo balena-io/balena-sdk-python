@@ -12,9 +12,9 @@ from ..auth import Auth
 from ..balena_auth import request
 from ..dependent_resource import DependentResource
 from ..hup import get_hup_action_type
-from ..pine import pine
+from ..pine import PineClient
 from ..resources import Message
-from ..settings import settings
+from ..settings import Settings
 from ..types import AnyObject
 from ..types.models import BaseTagType, DeviceMetricsType, EnvironmentVariableBase, TypeDevice
 from ..utils import (
@@ -29,7 +29,7 @@ from ..utils import (
     normalize_device_os_version,
     with_supervisor_locked_error,
 )
-from .application import application
+from .application import Application
 from .config import Config
 from .device_type import DeviceType
 from .history import DeviceHistory
@@ -100,13 +100,16 @@ class Device:
     This class implements device model for balena python SDK.
     """
 
-    def __init__(self):
-        self.__config = Config()
-        self.__auth = Auth()
-        self.__release = Release()
-        self.__device_os = DeviceOs()
-        self.__device_type = DeviceType()
-        self.__organization = Organization()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__settings = settings
+        self.__config = Config(settings)
+        self.__auth = Auth(pine, settings)
+        self.__application = Application(pine, settings)
+        self.__release = Release(pine, settings)
+        self.__device_os = DeviceOs(pine, settings)
+        self.__device_type = DeviceType(pine, settings)
+        self.__organization = Organization(pine, settings)
         self.__LOCAL_MODE_SELECT = [
             "id",
             "os_version",
@@ -115,11 +118,11 @@ class Device:
             "last_connectivity_event",
         ]
 
-        self.tags = DeviceTag()
-        self.config_var = DeviceConfigVariable()
-        self.env_var = DeviceEnvVariable()
-        self.service_var = DeviceServiceEnvVariable()
-        self.history = DeviceHistory()
+        self.tags = DeviceTag(pine, self, self.__application)
+        self.config_var = DeviceConfigVariable(pine, self, self.__application)
+        self.env_var = DeviceEnvVariable(pine, self, self.__application)
+        self.service_var = DeviceServiceEnvVariable(pine, self, self.__application)
+        self.history = DeviceHistory(pine, settings)
 
     def __get_applied_device_config_variable_value(self, uuid_or_id: Union[str, int], name: str):
         options = {
@@ -149,10 +152,10 @@ class Device:
         )
 
         if device_config is not None:
-            return device_config.get("value")  # type: ignore
+            return device_config.get("value")
 
         if app_config is not None:
-            return app_config.get("value")  # type: ignore
+            return app_config.get("value")
 
         return None
 
@@ -160,8 +163,11 @@ class Device:
         self,
         uuid_or_id_or_ids: Union[str, int, List[int]],
         body: Any,
-        fn: Callable = pine.patch,
+        fn: Optional[Callable] = None,
     ) -> None:
+        if fn is None:
+            fn = self.__pine.patch
+
         if isinstance(uuid_or_id_or_ids, (int, str)):
             is_potentially_full_uuid = is_full_uuid(uuid_or_id_or_ids)
             if is_potentially_full_uuid or is_id(uuid_or_id_or_ids):
@@ -252,7 +258,7 @@ class Device:
 
         if not isinstance(uuid, str) or len(uuid) == 0:
             raise ValueError("Device UUID must be a non empty string")
-        dashboard_url = settings.get("api_endpoint").replace("api", "dashboard")
+        dashboard_url = self.__settings.get("api_endpoint").replace("api", "dashboard")
         return urljoin(dashboard_url, f"/devices/{uuid}/summary")
 
     def get_all(self, options: AnyObject = {}) -> List[TypeDevice]:
@@ -273,7 +279,7 @@ class Device:
         Examples:
             >>> balena.models.device.get_all()
         """
-        devices = pine.get(
+        devices = self.__pine.get(
             {
                 "resource": "device",
                 "options": merge({"$orderby": "device_name asc"}, options),
@@ -297,7 +303,7 @@ class Device:
             >>> balena.models.device.get_all_by_application('my_org/RPI1')
         """
 
-        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
 
         return self.get_all(
             merge(
@@ -360,7 +366,7 @@ class Device:
 
         is_potentially_full_uuid = is_full_uuid(uuid_or_id)
         if is_potentially_full_uuid or is_id(uuid_or_id):
-            device = pine.get(
+            device = self.__pine.get(
                 {
                     "resource": "device",
                     "id": {"uuid": uuid_or_id} if is_potentially_full_uuid else uuid_or_id,
@@ -368,7 +374,7 @@ class Device:
                 }
             )
         else:
-            devices = pine.get(
+            devices = self.__pine.get(
                 {
                     "resource": "device",
                     "options": merge(
@@ -566,7 +572,7 @@ class Device:
             "is_undervolted",
         ]
         device = self.get(uuid_or_id, {"$select": metrics})
-        return {k: device.get(k, "") for k in metrics}  # type: ignore
+        return {k: device.get(k, "") for k in metrics}
 
     def remove(self, uuid_or_id_or_ids: Union[str, int, List[int]]):
         """
@@ -576,7 +582,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int])
         """
 
-        self.__set(uuid_or_id_or_ids, body=None, fn=pine.delete)
+        self.__set(uuid_or_id_or_ids, body=None, fn=self.__pine.delete)
 
     def deactivate(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
@@ -679,7 +685,7 @@ class Device:
             },
         }
 
-        app = application.get(app_slug_or_uuid_or_id, application_options)
+        app = self.__application.get(app_slug_or_uuid_or_id, application_options)
         app_cpu_arch_slug = app["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
 
         device_options = {
@@ -725,6 +731,7 @@ class Device:
         request(
             method="POST",
             path="/supervisor/ping",
+            settings=self.__settings,
             body={
                 "method": "GET",
                 "deviceId": device["id"],
@@ -748,6 +755,7 @@ class Device:
 
         request(
             method="POST",
+            settings=self.__settings,
             body={"uuid": device_uuid},
             path="/supervisor/v1/blink",
         )
@@ -782,6 +790,7 @@ class Device:
                 return request(
                     method="POST",
                     path=f"device/{device_id}/restart",
+                    settings=self.__settings,
                 )
 
             app_id = device["belongs_to__application"][0]["id"]
@@ -789,6 +798,7 @@ class Device:
             return request(
                 method="POST",
                 path="/supervisor/v1/restart",
+                settings=self.__settings,
                 body={
                     "deviceId": device_id,
                     "appId": app_id,
@@ -822,6 +832,7 @@ class Device:
             return request(
                 method="POST",
                 path="/supervisor/v1/reboot",
+                settings=self.__settings,
                 body={"deviceId": device_id, "data": data},
             )
 
@@ -855,6 +866,7 @@ class Device:
             return request(
                 method="POST",
                 path="/supervisor/v1/shutdown",
+                settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": device["belongs_to__application"][0]["id"],
@@ -888,6 +900,7 @@ class Device:
             return request(
                 method="POST",
                 path="/supervisor/v1/purge",
+                settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": device["belongs_to__application"][0]["id"],
@@ -924,6 +937,7 @@ class Device:
         return request(
             method="POST",
             path="/supervisor/v1/update",
+            settings=self.__settings,
             body={
                 "deviceId": device["id"],
                 "appId": device["belongs_to__application"][0]["id"],
@@ -950,11 +964,12 @@ class Device:
         response = request(
             method="POST",
             path="/supervisor/v1/device",
+            settings=self.__settings,
             body={"uuid": uuid, "method": "GET"},
         )
 
         if isinstance(response, dict):
-            return response  # type: ignore
+            return response
 
         raise Exception(response)
 
@@ -981,6 +996,7 @@ class Device:
         request(
             method="POST",
             path=f"/supervisor/v2/applications/{app_id}/start-service",
+            settings=self.__settings,
             body={
                 "deviceId": device["id"],
                 "appId": app_id,
@@ -1017,6 +1033,7 @@ class Device:
             request(
                 method="POST",
                 path=f"/supervisor/v2/applications/{app_id}/stop-service",
+                settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
@@ -1055,6 +1072,7 @@ class Device:
             request(
                 method="POST",
                 path=f"/supervisor/v2/applications/{app_id}/restart_service",
+                settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
@@ -1082,6 +1100,7 @@ class Device:
 
         return request(
             method="GET",
+            settings=self.__settings,
             path=f"/device/v2/{device_uuid}/state",
         )
 
@@ -1139,9 +1158,9 @@ class Device:
 
         # TODO: paralelize this 4 requests
         user_id = self.__auth.get_user_id()
-        api_key = application.generate_provisioning_key(application_slug_or_uuid_or_id)
+        api_key = self.__application.generate_provisioning_key(application_slug_or_uuid_or_id)
 
-        app = application.get(application_slug_or_uuid_or_id, application_options)
+        app = self.__application.get(application_slug_or_uuid_or_id, application_options)
         if isinstance(device_type_slug, str):
             device_type = self.__device_type.get(
                 device_type_slug,
@@ -1169,9 +1188,10 @@ class Device:
         else:
             device_type = app["is_for__device_type"][0]["slug"]
 
-        return request(  # type: ignore
+        return request(
             method="POST",
             path="/device/register",
+            settings=self.__settings,
             body={
                 "user": user_id,
                 "application": app["id"],
@@ -1210,6 +1230,7 @@ class Device:
         return request(
             method="POST",
             path=f"/api-key/device/{device_id}/device-key",
+            settings=self.__settings,
             body={
                 "name": name,
                 "description": description,
@@ -1244,7 +1265,7 @@ class Device:
         if not device["is_web_accessible"]:
             raise exceptions.DeviceNotWebAccessible(uuid_or_id)
 
-        device_url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
+        device_url_base = self.__config.get_all()["deviceUrlsBase"]
         uuid = device["uuid"]
         return f"https://{uuid}.{device_url_base}"
 
@@ -1319,7 +1340,7 @@ class Device:
         """
 
         device = self.get(uuid_or_id, {"$select": "id"})
-        result = pine.get(
+        result = self.__pine.get(
             {
                 "resource": "device_config_variable",
                 "id": {"device": device["id"], "name": LOCAL_MODE_ENV_VAR},
@@ -1491,7 +1512,7 @@ class Device:
             release_options["$filter"]["commit"] = full_release_hash_or_id
 
         release = self.__release.get(full_release_hash_or_id, release_options)
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "device",
                 "id": device["id"],
@@ -1557,14 +1578,14 @@ class Device:
             release_options["$filter"]["supervisor_version"] = supervisor_version_or_id
 
         try:
-            release = pine.get({"resource": "supervisor_release", "options": release_options})[0]
+            release = self.__pine.get({"resource": "supervisor_release", "options": release_options})[0]
         except IndexError:
             raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
 
         ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
         ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
 
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "device",
                 "id": device["id"],
@@ -1610,11 +1631,12 @@ class Device:
 
         data = {"parameters": {"target_version": target_os_version}}
 
-        url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
-        action_api_version = settings.get("device_actions_endpoint_version")
+        url_base = self.__config.get_all()["deviceUrlsBase"]
+        action_api_version = self.__settings.get("device_actions_endpoint_version")
 
-        return request(  # type: ignore
+        return request(
             method="POST",
+            settings=self.__settings,
             path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             body=data,
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
@@ -1635,11 +1657,12 @@ class Device:
         """
 
         device = self.get(uuid_or_id, {"$select": "uuid"})
-        url_base = self.__config.get_all()["deviceUrlsBase"]  # type: ignore
-        action_api_version = settings.get("device_actions_endpoint_version")
+        url_base = self.__config.get_all()["deviceUrlsBase"]
+        action_api_version = self.__settings.get("device_actions_endpoint_version")
 
-        return request(  # type: ignore
+        return request(
             method="GET",
+            settings=self.__settings,
             path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
@@ -1675,6 +1698,7 @@ class Device:
         return request(
             method="POST",
             path=f"/supervisor/v1/apps/{app_id}",
+            settings=self.__settings,
             body={"deviceId": device["id"], "appId": app_id, "method": "GET"},
         )
 
@@ -1708,6 +1732,7 @@ class Device:
         request(
             method="POST",
             path=f"/supervisor/v1/apps/{app_id}/start",
+            settings=self.__settings,
             body={
                 "deviceId": device["id"],
                 "appId": app_id,
@@ -1751,6 +1776,7 @@ class Device:
             request(
                 method="POST",
                 path=f"/supervisor/v1/apps/{app_id}/stop",
+                settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": app_id,
@@ -1766,12 +1792,11 @@ class DeviceTag(DependentResource[BaseTagType]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, device: Device, application: Application):
+        self.__device = device
+        self.__application = application
         super(DeviceTag, self).__init__(
-            "device_tag",
-            "tag_key",
-            "device",
-            lambda id: device.get(id, {"$select": "id"})["id"],
+            "device_tag", "tag_key", "device", lambda id: self.__device.get(id, {"$select": "id"})["id"], pine
         )
 
     def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
@@ -1789,7 +1814,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             >>> balena.models.devices.tag.get_all_by_application(1005160)
         """
 
-        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceTag, self)._get_all(
             merge(
                 {
@@ -1821,7 +1846,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             >>> balena.models.devices.tag.get_all_by_device('a03ab646c')
         """
 
-        id = device.get(uuid_or_id, {"$select": "id"})["id"]
+        id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceTag, self)._get_all_by_parent(id, options)
 
     def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
@@ -1863,7 +1888,7 @@ class DeviceTag(DependentResource[BaseTagType]):
         # when the provided parameter looks like an id.
         # Note that this throws an exception for missing names/uuids,
         # but not for missing ids
-        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        device_id = uuid_or_id if is_id(uuid_or_id) else self.__device.get(uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceTag, self)._get(device_id, tag_key)
 
     def set(self, uuid_or_id: Union[str, int], tag_key: str, value: str) -> None:
@@ -1886,7 +1911,7 @@ class DeviceTag(DependentResource[BaseTagType]):
         # when the provided parameter looks like an id.
         # Note that this throws an exception for missing names/uuids,
         # but not for missing ids
-        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        device_id = uuid_or_id if is_id(uuid_or_id) else self.__device.get(uuid_or_id, {"$select": "id"})["id"]
         super(DeviceTag, self)._set(device_id, tag_key, value)
 
     def remove(self, uuid_or_id: Union[str, int], tag_key: str) -> None:
@@ -1901,7 +1926,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             >>> balena.models.devices.tag.remove('f5213eac0d63ac477', 'testtag')
         """
 
-        device_id = uuid_or_id if is_id(uuid_or_id) else device.get(uuid_or_id, {"$select": "id"})["id"]
+        device_id = uuid_or_id if is_id(uuid_or_id) else self.__device.get(uuid_or_id, {"$select": "id"})["id"]
         super(DeviceTag, self)._remove(device_id, tag_key)
 
 
@@ -1911,12 +1936,11 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, device: Device, application: Application):
+        self.__device = device
+        self.__application = application
         super(DeviceConfigVariable, self).__init__(
-            "device_config_variable",
-            "name",
-            "device",
-            lambda id: device.get(id, {"$select": "id"})["id"],
+            "device_config_variable", "name", "device", lambda id: self.__device.get(id, {"$select": "id"})["id"], pine
         )
 
     def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
@@ -1951,7 +1975,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
         Examples:
             >>> balena.models.devices.config_var.device.get_all_by_application(5780)
         """
-        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceConfigVariable, self)._get_all(
             merge(
                 {
@@ -2019,12 +2043,15 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, device: Device, application: Application):
+        self.__device = device
+        self.__application = application
         super(DeviceEnvVariable, self).__init__(
             "device_environment_variable",
             "name",
             "device",
-            lambda id: device.get(id, {"$select": "id"})["id"],
+            lambda id: self.__device.get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
@@ -2059,7 +2086,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
         Examples:
             >>> balena.models.devices.env_var.get_all_by_application(5780)
         """
-        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceEnvVariable, self)._get_all(
             merge(
                 {
@@ -2126,6 +2153,11 @@ class DeviceServiceEnvVariable:
     This class implements device service variable model for balena python SDK.
     """
 
+    def __init__(self, pine: PineClient, device: Device, application: Application):
+        self.__pine = pine
+        self.__device = device
+        self.__application = application
+
     def get_all_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[EnvironmentVariableBase]:
         """
         Get all device environment variables.
@@ -2140,8 +2172,8 @@ class DeviceServiceEnvVariable:
         Examples:
             >>> balena.models.devices.service_var.get_all_by_device(8deb12a)
         """
-        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
-        return pine.get(
+        device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
+        return self.__pine.get(
             {
                 "resource": "device_service_environment_variable",
                 "options": merge(
@@ -2176,9 +2208,9 @@ class DeviceServiceEnvVariable:
         Examples:
             >>> balena.models.devices.service_var.get_all_by_application(1043050)
         """
-        app_id = application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "device_service_environment_variable",
                 "options": merge(
@@ -2222,8 +2254,8 @@ class DeviceServiceEnvVariable:
         Examples:
             >>> balena.models.devices.service_var.get('8deb12a', 1234', 'VAR')
         """
-        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
-        variables = pine.get(
+        device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
+        variables = self.__pine.get(
             {
                 "resource": "device_service_environment_variable",
                 "options": {
@@ -2268,9 +2300,9 @@ class DeviceServiceEnvVariable:
         elif is_full_uuid(uuid_or_id):
             device_filter = {"$any": {"$alias": "d", "$expr": {"d": {"uuid": uuid_or_id}}}}
         else:
-            device_filter = device.get(uuid_or_id, {"$select": "id"})["id"]
+            device_filter = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
 
-        service_installs = pine.get(
+        service_installs = self.__pine.get(
             {
                 "resource": "service_install",
                 "options": {
@@ -2293,7 +2325,7 @@ class DeviceServiceEnvVariable:
         if len(service_installs) > 1:
             raise exceptions.AmbiguousDevice(uuid_or_id)
 
-        pine.upsert(
+        self.__pine.upsert(
             {
                 "resource": "device_service_environment_variable",
                 "id": {
@@ -2317,8 +2349,8 @@ class DeviceServiceEnvVariable:
             >>> balena.models.devices.service_var.remove(28970)
         """
 
-        device_id = device.get(uuid_or_id, {"$select": "id"})["id"]
-        pine.delete(
+        device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
+        self.__pine.delete(
             {
                 "resource": "device_service_environment_variable",
                 "options": {
@@ -2339,6 +2371,3 @@ class DeviceServiceEnvVariable:
                 },
             }
         )
-
-
-device = Device()

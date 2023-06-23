@@ -3,10 +3,11 @@ from typing import List, Optional, Union
 from .. import exceptions
 from ..auth import Auth
 from ..balena_auth import request
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject
 from ..types.models import APIKeyInfoType, APIKeyType
 from ..utils import merge
+from ..settings import Settings
 from .application import Application
 from .device import Device
 
@@ -17,10 +18,12 @@ class ApiKey:
 
     """
 
-    def __init__(self):
-        self.__application = Application()
-        self.__auth = Auth()
-        self.__device = Device()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__application = Application(pine, settings)
+        self.__auth = Auth(pine, settings)
+        self.__device = Device(pine, settings)
+        self.__pine = pine
+        self.__settings = settings
 
     def create(
         self,
@@ -51,7 +54,7 @@ class ApiKey:
         if expiry_date is not None and isinstance(expiry_date, str):
             api_key_body["expiryDate"] = expiry_date
 
-        return request(method="POST", path="/api-key/user/full", body=api_key_body).strip('"')
+        return request(method="POST", path="/api-key/user/full", settings=self.__settings, body=api_key_body).strip('"')
 
     def get_all(self, options: AnyObject = {}) -> List[APIKeyType]:
         """
@@ -66,7 +69,7 @@ class ApiKey:
         Examples:
             >>> balena.models.api_key.get_all()
         """
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "api_key",
                 "options": merge({"$orderby": "name asc"}, options),
@@ -100,7 +103,7 @@ class ApiKey:
         if name is not None:
             body["name"] = name
 
-        pine.patch({"resource": "api_key", "id": id, "body": body})
+        self.__pine.patch({"resource": "api_key", "id": id, "body": body})
 
     def revoke(self, id: int):
         """
@@ -113,7 +116,7 @@ class ApiKey:
             >>> balena.models.api_key.revoke(1296047)
         """
 
-        pine.delete({"resource": "api_key", "id": id})
+        self.__pine.delete({"resource": "api_key", "id": id})
 
     def get_provisioning_api_keys_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}

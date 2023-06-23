@@ -9,9 +9,10 @@ from twisted.internet.protocol import Protocol
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 
-from .settings import settings
+from .settings import Settings
 from .models.device import Device
 from .balena_auth import request, get_token
+from .pine import PineClient
 
 
 class Log(TypedDict):
@@ -74,6 +75,9 @@ class Subscription:
     This is low level class and is not meant to be used by end users directly.
     """
 
+    def __init__(self, settings: Settings):
+        self.__settings = settings
+
     def add(
         self,
         uuid: str,
@@ -85,8 +89,8 @@ class Subscription:
         if count:
             query = f"stream=1&count={count}"
 
-        url = urljoin(settings.get("api_endpoint"), f"/device/v2/{uuid}/logs?{query}")
-        headers = Headers({"Authorization": [f"Bearer {get_token()}"]})
+        url = urljoin(self.__settings.get("api_endpoint"), f"/device/v2/{uuid}/logs?{query}")
+        headers = Headers({"Authorization": [f"Bearer {get_token(self.__settings)}"]})
 
         agent = Agent(reactor)
         req = agent.request(b"GET", url.encode(), headers, None)
@@ -112,10 +116,11 @@ class Logs:
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, settings: Settings):
         self.__subscriptions = defaultdict(list)
-        self.__device = Device()
-        self.__subscription_handler = Subscription()
+        self.__settings = settings
+        self.__device = Device(pine, settings)
+        self.__subscription_handler = Subscription(settings)
 
     def __exit__(self, exc_type, exc_value, traceback):
         reactor.stop()  # type: ignore
@@ -153,7 +158,7 @@ class Logs:
         if count is not None:
             qs["count"] = count
 
-        return request(method="GET", path=f"/device/v2/{uuid}/logs", qs=qs)
+        return request(method="GET", settings=self.__settings, path=f"/device/v2/{uuid}/logs", qs=qs)
 
     def unsubscribe(self, uuid_or_id: Union[str, int]) -> None:
         """

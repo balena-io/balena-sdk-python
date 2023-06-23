@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 from .. import exceptions
 from ..balena_auth import request
 from ..dependent_resource import DependentResource
-from ..pine import pine
-from ..settings import settings
+from ..pine import PineClient
+from ..settings import Settings
 from ..types import AnyObject, ApplicationInviteOptions, ApplicationMembershipRoles, ResourceKey, ShutdownOptions
 from ..types.models import (
     ApplicationInviteType,
@@ -25,7 +25,6 @@ from ..utils import (
     with_supervisor_locked_error,
 )
 from .device_type import DeviceType
-from .release import Release
 
 
 class Application:
@@ -33,15 +32,19 @@ class Application:
     This class implements application model for balena python SDK.
     """
 
-    def __init__(self):
-        self.__device_type = DeviceType()
-        self.__release = Release()
-        self.tags = ApplicationTag()
-        self.config_var = ApplicationConfigVariable()
-        self.env_var = ApplicationEnvVariable()
-        self.build_var = BuildEnvVariable()
-        self.membership = ApplicationMembership()
-        self.invite = ApplicationInvite()
+    def __init__(self, pine: PineClient, settings: Settings, load_inner_models=True):
+        if load_inner_models:
+            self.__device_type = DeviceType(pine, settings)
+            self.__release = Release(pine, settings)
+
+        self.__pine = pine
+        self.__settings = settings
+        self.tags = ApplicationTag(pine, self)
+        self.config_var = ApplicationConfigVariable(pine, self)
+        self.env_var = ApplicationEnvVariable(pine, self)
+        self.build_var = BuildEnvVariable(pine, self)
+        self.membership = ApplicationMembership(pine, self)
+        self.invite = ApplicationInvite(pine, self, settings)
 
     def __get_access_filter(self):
         return {
@@ -82,7 +85,7 @@ class Application:
         if is_id(organization):
             id_filter = {"id": organization}
 
-        org = pine.get(
+        org = self.__pine.get(
             {
                 "resource": "organization",
                 "id": id_filter,
@@ -140,7 +143,7 @@ class Application:
             raise exceptions.InvalidParameter("app_id", app_id)
 
         return urljoin(
-            settings.get("api_endpoint").replace("api", "dashboard"),
+            self.__settings.get("api_endpoint").replace("api", "dashboard"),
             f"/apps/{app_id}",
         )
 
@@ -163,7 +166,7 @@ class Application:
             >>> balena.models.application.get_all()
         """
 
-        apps = pine.get(
+        apps = self.__pine.get(
             {
                 "resource": "application",
                 "options": merge(
@@ -226,7 +229,7 @@ class Application:
 
         application = None
         if is_id(slug_or_uuid_or_id):
-            application = pine.get(
+            application = self.__pine.get(
                 {
                     "resource": "application",
                     "id": slug_or_uuid_or_id,
@@ -254,7 +257,7 @@ class Application:
                         "uuid": lower_case_slug_or_uuid,
                     }
                 }
-            applications = pine.get(
+            applications = self.__pine.get(
                 {
                     "resource": "application",
                     "options": merge({"$filter": app_filter}, options),
@@ -348,7 +351,7 @@ class Application:
         Examples:
             >>> balena.models.application.get("myapp")
         """
-        apps = pine.get(
+        apps = self.__pine.get(
             {
                 "resource": "application",
                 "options": merge(
@@ -388,7 +391,7 @@ class Application:
         """
 
         slug = f"{owner.lower()}/{app_name.lower()}"
-        app = pine.get(
+        app = self.__pine.get(
             {
                 "resource": "application",
                 "id": {"slug": slug},
@@ -478,7 +481,7 @@ class Application:
         if application_class is not None:
             body["is_of__class"] = application_class
 
-        return pine.post({"resource": "application", "body": body})
+        return self.__pine.post({"resource": "application", "body": body})
 
     # TODO: enable batch operations
     def remove(self, slug_or_uuid_or_id: Union[str, int]) -> None:
@@ -496,7 +499,7 @@ class Application:
 
         try:
             application_id = self.get_id(slug_or_uuid_or_id)
-            pine.delete({"resource": "application", "id": application_id})
+            self.__pine.delete({"resource": "application", "id": application_id})
         except exceptions.RequestError as e:
             if e.status_code == 404:
                 raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
@@ -516,7 +519,7 @@ class Application:
 
         try:
             application_id = self.get_id(slug_or_uuid_or_id)
-            pine.patch(
+            self.__pine.patch(
                 {
                     "resource": "application",
                     "id": application_id,
@@ -542,7 +545,7 @@ class Application:
         def __restart():
             try:
                 application_id = self.get_id(slug_or_uuid_or_id)
-                request(method="POST", path=f"/applcation/{application_id}/restart")
+                request(method="POST", path=f"/applcation/{application_id}/restart", settings=self.__settings)
             except exceptions.RequestError as e:
                 if e.status_code == 404:
                     raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
@@ -577,6 +580,7 @@ class Application:
             return request(
                 method="POST",
                 path="/api-key/v1/",
+                settings=self.__settings,
                 body={
                     "actorType": "application",
                     "actorTypeId": application_id,
@@ -605,6 +609,7 @@ class Application:
             lambda: request(
                 method="POST",
                 path="/supervisor/v1/purge",
+                settings=self.__settings,
                 body={"appId": app_id, "data": {"appId": f"{app_id}"}},
             )
         )
@@ -625,6 +630,7 @@ class Application:
             lambda: request(
                 method="POST",
                 path="/supervisor/v1/shutdown",
+                settings=self.__settings,
                 body={
                     "appId": app_id,
                     "data": {"force": bool(options.get("force"))},
@@ -648,6 +654,7 @@ class Application:
             lambda: request(
                 method="POST",
                 path="/supervisor/v1/reboot",
+                settings=self.__settings,
                 body={
                     "appId": app_id,
                     "data": {"force": bool(options.get("force"))},
@@ -738,7 +745,7 @@ class Application:
             },
         )
 
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "application",
                 "id": application_id,
@@ -804,7 +811,7 @@ class Application:
         if latest_release is not None:
             body["should_be_running__release"] = latest_release.get("id")
 
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "application",
                 "id": application["id"],
@@ -824,7 +831,7 @@ class Application:
         """
 
         app = self.get(slug_or_uuid_or_id, {"$select": "id"})
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "device",
                 "body": {"is_web_accessible": True},
@@ -844,7 +851,7 @@ class Application:
         """
 
         app = self.get(slug_or_uuid_or_id, {"$select": "id"})
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": "device",
                 "body": {"is_web_accessible": False},
@@ -871,7 +878,7 @@ class Application:
 
         try:
             application_id = self.get_id(slug_or_uuid_or_id)
-            pine.patch(
+            self.__pine.patch(
                 {
                     "resource": "application",
                     "id": application_id,
@@ -896,7 +903,7 @@ class Application:
 
         try:
             application_id = self.get_id(slug_or_uuid_or_id)
-            pine.patch(
+            self.__pine.patch(
                 {
                     "resource": "application",
                     "id": application_id,
@@ -915,12 +922,14 @@ class ApplicationTag(DependentResource[BaseTagType]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application):
+        self.__application = application
         super(ApplicationTag, self).__init__(
             "application_tag",
             "tag_key",
             "application",
-            lambda id: application.get(id, {"$select": "id"})["id"],
+            lambda id: self.__application.get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
@@ -976,12 +985,14 @@ class ApplicationConfigVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application):
+        self.__application = application
         super(ApplicationConfigVariable, self).__init__(
             "application_config_variable",
             "name",
             "application",
-            lambda id: application.get(id, {"$select": "id"})["id"],
+            lambda id: self.__application.get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_application(
@@ -1048,12 +1059,14 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application):
+        self.__application = application
         super(ApplicationEnvVariable, self).__init__(
             "application_environment_variable",
             "name",
             "application",
-            lambda id: application.get(id, {"$select": "id"})["id"],
+            lambda id: self.__application.get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_application(
@@ -1121,12 +1134,14 @@ class BuildEnvVariable(DependentResource[EnvironmentVariableBase]):
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application):
+        self.__application = application
         super(BuildEnvVariable, self).__init__(
             "build_environment_variable",
             "name",
             "application",
-            lambda id: application.get(id, {"$select": "id"})["id"],
+            lambda id: self.__application.get(id, {"$select": "id"})["id"],
+            pine,
         )
 
     def get_all_by_application(
@@ -1194,7 +1209,10 @@ class ApplicationInvite:
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application, settings: Settings):
+        self.__application = application
+        self.__pine = pine
+        self.__settings = settings
         self.RESOURCE = "invitee__is_invited_to__application"
 
     def get_all(self, options: AnyObject = {}) -> List[ApplicationInviteType]:
@@ -1210,7 +1228,7 @@ class ApplicationInvite:
         Examples:
             >>> balena.models.application.invite.get_all()
         """
-        return pine.get({"resource": self.RESOURCE, "options": options})
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -1228,7 +1246,7 @@ class ApplicationInvite:
         Examples:
             >>> balena.models.application.invite.get_all_by_application(1681618)
         """
-        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(
             merge(
                 {"$filter": {"is_invited_to__application": app["id"]}},
@@ -1265,8 +1283,8 @@ class ApplicationInvite:
         role_name = options.get("roleName", "developer")
 
         # TODO: paralelize me
-        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
-        roles = pine.get(
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
+        roles = self.__pine.get(
             {
                 "resource": "application_membership_role",
                 "options": {
@@ -1289,7 +1307,7 @@ class ApplicationInvite:
                 raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
             body["application_membership_role"] = role_id
 
-        return pine.post({"resource": self.RESOURCE, "body": body})
+        return self.__pine.post({"resource": self.RESOURCE, "body": body})
 
     def revoke(self, invite_id: int) -> None:
         """
@@ -1301,7 +1319,7 @@ class ApplicationInvite:
         Examples:
             >>> balena.models.application.invite.revoke(5860)
         """
-        pine.delete({"resource": self.RESOURCE, "id": invite_id})
+        self.__pine.delete({"resource": self.RESOURCE, "id": invite_id})
 
     def accept(self, invite_token: str) -> None:
         """
@@ -1314,7 +1332,7 @@ class ApplicationInvite:
             >>> balena.models.application.invite.accept("qwerty-invitation-token")
         """
         try:
-            request(method="POST", path=f"/user/v1/invitation/{invite_token}")
+            request(method="POST", settings=self.__settings, path=f"/user/v1/invitation/{invite_token}")
         except exceptions.RequestError as e:
             if e.status_code == 401:
                 raise exceptions.NotLoggedIn()
@@ -1326,11 +1344,13 @@ class ApplicationMembership:
     This class implements application membership model for balena python SDK.
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, application: Application):
+        self.__application = application
+        self.__pine = pine
         self.RESOURCE = "user__is_member_of__application"
 
     def __get_role_id(self, role_name: str) -> Optional[int]:
-        role = pine.get(
+        role = self.__pine.get(
             {
                 "resource": "application_membership_role",
                 "id": {"name": role_name},
@@ -1357,7 +1377,7 @@ class ApplicationMembership:
             >>> balena.models.application.membership.get_all()
         """
 
-        return pine.get({"resource": self.RESOURCE, "options": options})
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
     def get(self, membership_id: ResourceKey, options: AnyObject = {}) -> ApplicationMembershipType:
         """
@@ -1379,7 +1399,7 @@ class ApplicationMembership:
         if not isinstance(membership_id, int) and not isinstance(membership_id, dict):
             raise exceptions.InvalidParameter("membershipId", membership_id)
 
-        result = pine.get(
+        result = self.__pine.get(
             {
                 "resource": self.RESOURCE,
                 "id": membership_id,  # type: ignore
@@ -1408,7 +1428,7 @@ class ApplicationMembership:
         Examples:
             >>> balena.models.application.membership.get_all_by_application(1681618)
         """
-        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
         return self.get_all(
             merge(
                 {"$filter": {"is_member_of__application": app["id"]}},
@@ -1437,7 +1457,7 @@ class ApplicationMembership:
             >>> balena.models.application.membership.create(1681618, 'testuser')
         """
 
-        app = application.get(slug_or_uuid_or_id, {"$select": "id"})
+        app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
         role_id = self.__get_role_id(role_name)
         body = {
             "username": username,
@@ -1445,7 +1465,7 @@ class ApplicationMembership:
             "application_membership_role": role_id,
         }
 
-        return pine.post({"resource": self.RESOURCE, "body": body})
+        return self.__pine.post({"resource": self.RESOURCE, "body": body})
 
     def change_role(self, membership_id: ResourceKey, role_name: str) -> None:
         """
@@ -1461,7 +1481,7 @@ class ApplicationMembership:
         """
 
         role_id = self.__get_role_id(role_name)
-        pine.patch(
+        self.__pine.patch(
             {
                 "resource": self.RESOURCE,
                 "id": membership_id,  # type: ignore
@@ -1476,7 +1496,7 @@ class ApplicationMembership:
         Args:
             membership_id (ResourceKey): the id or an object with the unique `user` & `is_member_of__application`
         """
-        pine.delete({"resource": self.RESOURCE, "id": membership_id})  # type: ignore
+        self.__pine.delete({"resource": self.RESOURCE, "id": membership_id})  # type: ignore
 
 
-application = Application()
+from .release import Release  # noqa: E402

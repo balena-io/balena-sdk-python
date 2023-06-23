@@ -7,7 +7,6 @@ import jwt
 
 from balena import Balena
 from balena import exceptions as balena_exceptions
-from balena.settings import settings
 import time
 
 
@@ -29,7 +28,7 @@ class TestHelper:
 
         # Stop the test if it's run by an admin user account.
         token_data = jwt.decode(
-            settings.get("token"),
+            self.balena.settings.get("token"),
             algorithms=["HS256"],
             options={"verify_signature": False},
         )

@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from .. import exceptions
 from ..balena_auth import request
 from ..dependent_resource import DependentResource
-from ..pine import pine
+from ..pine import PineClient
 from ..types import AnyObject, ResourceKey
 from ..types.models import (
     OrganizationInviteType,
@@ -12,6 +12,7 @@ from ..types.models import (
     OrganizationType,
 )
 from ..utils import is_id, merge
+from ..settings import Settings
 
 
 class Organization:
@@ -20,9 +21,10 @@ class Organization:
 
     """
 
-    def __init__(self):
-        self.invite = OrganizationInvite()
-        self.membership = OrganizationMembership()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.invite = OrganizationInvite(pine, self, settings)
+        self.membership = OrganizationMembership(pine, self)
 
     def create(self, name: str, handle: Optional[str] = None) -> OrganizationType:
         """
@@ -43,7 +45,7 @@ class Organization:
         if handle is not None:
             data["handle"] = handle
 
-        return pine.post({"resource": "organization", "body": data})
+        return self.__pine.post({"resource": "organization", "body": data})
 
     def get_all(self, options: AnyObject = {}) -> List[OrganizationType]:
         """
@@ -59,7 +61,7 @@ class Organization:
             >>> balena.models.organization.get_all()
         """
 
-        return pine.get(
+        return self.__pine.get(
             {
                 "resource": "organization",
                 "options": merge({"$orderby": "name asc"}, options),
@@ -88,7 +90,7 @@ class Organization:
         if handle_or_id is None:
             raise exceptions.InvalidParameter("handle_or_id", handle_or_id)
 
-        org = pine.get(
+        org = self.__pine.get(
             {
                 "resource": "organization",
                 "id": handle_or_id if is_id(handle_or_id) else {"handle": handle_or_id},
@@ -112,7 +114,7 @@ class Organization:
             >>> balena.models.organization.remove(148003)
         """
         org_id = self.get(handle_or_id, {"$select": "id"})["id"]
-        pine.delete({"resource": "organization", "id": org_id})
+        self.__pine.delete({"resource": "organization", "id": org_id})
 
 
 class OrganizationInvite:
@@ -121,7 +123,10 @@ class OrganizationInvite:
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, organization: Organization, settings: Settings):
+        self.__pine = pine
+        self.__organization = organization
+        self.__settings = settings
         self.RESOURCE = "invitee__is_invited_to__organization"
 
     def get_all(self, options: AnyObject = {}) -> List[OrganizationInviteType]:
@@ -137,7 +142,7 @@ class OrganizationInvite:
         Examples:
             >>> balena.models.organization.invite.get_all()
         """
-        return pine.get({"resource": self.RESOURCE, "options": options})
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
     def get_all_by_organization(
         self, handle_or_id: Union[str, int], options: AnyObject = {}
@@ -155,7 +160,7 @@ class OrganizationInvite:
         Examples:
             >>> balena.models.organization.invite.get_all_by_organization(26474)
         """
-        org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
         return self.get_all(merge({"$filter": {"is_invited_to__organization": org_id}}, options))
 
     def create(
@@ -181,10 +186,10 @@ class OrganizationInvite:
             >>> balena.models.organization.invite.create(26474, 'invitee@example.org', 'member', 'Test invite')
         """
 
-        org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
         roles = None
         if role_name is not None:
-            roles = pine.get(
+            roles = self.__pine.get(
                 {
                     "resource": "organization_membership_role",
                     "options": {
@@ -204,7 +209,7 @@ class OrganizationInvite:
                 raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name)
             body["organization_membership_role"] = roles[0].get("id")
 
-        return pine.post({"resource": self.RESOURCE, "body": body})
+        return self.__pine.post({"resource": self.RESOURCE, "body": body})
 
     def revoke(self, invite_id: int) -> None:
         """
@@ -217,7 +222,7 @@ class OrganizationInvite:
             >>> balena.models.organization.invite.revoke(2862)
         """
 
-        pine.delete({"resource": self.RESOURCE, "id": invite_id})
+        self.__pine.delete({"resource": self.RESOURCE, "id": invite_id})
 
     def accept(self, invite_token: str) -> None:
         """
@@ -227,7 +232,7 @@ class OrganizationInvite:
             invite_token (str): invitation Token - invite token.
 
         """
-        request(method="POST", path=f"/org/v1/invitation/{invite_token}")
+        request(method="POST", settings=self.__settings, path=f"/org/v1/invitation/{invite_token}")
 
 
 class OrganizationMembership:
@@ -236,8 +241,10 @@ class OrganizationMembership:
 
     """
 
-    def __init__(self):
-        self.tags = OrganizationMembershipTag()
+    def __init__(self, pine: PineClient, organization: Organization):
+        self.__pine = pine
+        self.__organization = organization
+        self.tags = OrganizationMembershipTag(pine, organization)
         self.RESOURCE = "organization_membership"
 
     def get_all(self, options: AnyObject = {}) -> List[OrganizationMembershipType]:
@@ -254,7 +261,7 @@ class OrganizationMembership:
             >>> balena.models.organization.memberships.tags.get_all()
         """
 
-        return pine.get({"resource": self.RESOURCE, "options": options})
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
     def get_all_by_organization(
         self, handle_or_id: Union[str, int], options: AnyObject = {}
@@ -273,7 +280,7 @@ class OrganizationMembership:
             >>> balena.models.organization.memberships.get_all_by_organization(3014)
         """
 
-        org_id = organization.get(handle_or_id, {"$select": "id"})
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})
         org_filter = {"$filter": {"is_member_of__organization": org_id}}
         return self.get_all(merge(org_filter, options))
 
@@ -291,7 +298,7 @@ class OrganizationMembership:
         Examples:
             >>> balena.models.organization.memberships.get(17608)
         """
-        result = pine.get(
+        result = self.__pine.get(
             {
                 "resource": self.RESOURCE,
                 "id": membership_id,  # type: ignore
@@ -310,9 +317,14 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
 
     """
 
-    def __init__(self):
+    def __init__(self, pine: PineClient, organization: Organization):
+        self.__organization = organization
         super(OrganizationMembershipTag, self).__init__(
-            "organization_membership_tag", "tag_key", "organization_membership", lambda id: organization.get(id)["id"]
+            "organization_membership_tag",
+            "tag_key",
+            "organization_membership",
+            lambda id: self.__organization.get(id)["id"],
+            pine,
         )
 
     def get_all_by_organization(
@@ -331,7 +343,7 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
         Examples:
             >>> balena.models.organization.memberships.tags.get_all_by_organization(3014)
         """
-        org_id = organization.get(handle_or_id, {"$select": "id"})["id"]
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
         return super(OrganizationMembershipTag, self)._get_all(
             merge(
                 {
@@ -423,6 +435,3 @@ class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]
         """
 
         return super(OrganizationMembershipTag, self)._remove(membership_id, tag_key)
-
-
-organization = Organization()

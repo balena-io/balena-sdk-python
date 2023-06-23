@@ -18,11 +18,7 @@ class TestAppVars(unittest.TestCase):
             cls.balena.models.application.config_var,
         ]
 
-        cls.app_var_prefix = [
-            "EDITOR_BY_",
-            "EDITOR_BY_",
-            "BALENA_"
-        ]
+        cls.app_var_prefix = ["EDITOR_BY_", "EDITOR_BY_", "BALENA_"]
 
     @classmethod
     def tearDownClass(cls):

@@ -6,8 +6,8 @@ from tests.helper import TestHelper
 import time
 
 
-def send_log_messages(uuid: str, device_api_key: str, messages: List[Any]):
-    request(method="POST", path=f"/device/v2/{uuid}/logs", token=device_api_key, body=messages)
+def send_log_messages(uuid: str, device_api_key: str, messages: List[Any], settings):
+    request(method="POST", settings=settings, path=f"/device/v2/{uuid}/logs", token=device_api_key, body=messages)
 
 
 class TestAuth(unittest.TestCase):
@@ -56,6 +56,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
 
         time.sleep(2)
@@ -73,6 +74,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
         time.sleep(2)
 
@@ -87,6 +89,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
         time.sleep(2)
 
@@ -101,6 +104,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
         time.sleep(2)
 
@@ -123,6 +127,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
 
         time.sleep(4)
@@ -147,6 +152,7 @@ class TestAuth(unittest.TestCase):
                 {"message": "First message", "timestamp": int(time.time() * 1000)},
                 {"message": "Second message", "timestamp": int(time.time() * 1000)},
             ],
+            self.balena.settings,
         )
 
         time.sleep(2)

@@ -1,5 +1,7 @@
 from typing import Union, TypedDict, Literal, Optional, List
-from .organization import organization as org_model
+from .organization import Organization
+from ..pine import PineClient
+from ..settings import Settings
 from ..balena_auth import request
 
 
@@ -134,8 +136,12 @@ class Billing:
     This class implements billing model for balena python SDK.
     """
 
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__settings = settings
+        self.__organization = Organization(pine, settings)
+
     def __get_org_id(self, organization: Union[str, int]) -> int:
-        return org_model.get(organization, {"$select": "id"})["id"]
+        return self.__organization.get(organization, {"$select": "id"})["id"]
 
     def get_account(self, organization: Union[str, int]) -> BillingAccountInfo:
         """
@@ -151,7 +157,7 @@ class Billing:
             >>> balena.models.billing.get_account('myorghandle')
         """
         org_id = self.__get_org_id(organization)
-        return request(method="GET", path=f"/billing/v1/account/{org_id}")
+        return request(method="GET", settings=self.__settings, path=f"/billing/v1/account/{org_id}")
 
     def get_plan(self, organization: Union[str, int]) -> BillingPlanInfo:
         """
@@ -167,7 +173,7 @@ class Billing:
             >>> balena.models.billing.get_plan('myorghandle')
         """
         org_id = self.__get_org_id(organization)
-        return request(method="GET", path=f"/billing/v1/account/{org_id}/plan")
+        return request(method="GET", settings=self.__settings, path=f"/billing/v1/account/{org_id}/plan")
 
     def get_billing_info(self, organization: Union[str, int]) -> BillingInfo:
         """
@@ -183,7 +189,7 @@ class Billing:
             >>> balena.models.billing.get_billing_info('myorghandle')
         """
         org_id = self.__get_org_id(organization)
-        return request(method="GET", path=f"/billing/v1/account/{org_id}/info")
+        return request(method="GET", settings=self.__settings, path=f"/billing/v1/account/{org_id}/info")
 
     def update_billing_info(self, organization: Union[str, int], billing_info: TokenBillingSubmitInfo) -> BillingInfo:
         """
@@ -200,7 +206,9 @@ class Billing:
             >>> balena.models.billing.update_billing_info('myorghandle', { token_id: 'xxxxxxx' })
         """
         org_id = self.__get_org_id(organization)
-        return request(method="PATCH", path=f"/billing/v1/account/{org_id}/info", body=billing_info)
+        return request(
+            method="PATCH", settings=self.__settings, path=f"/billing/v1/account/{org_id}/info", body=billing_info
+        )
 
     def update_account_info(self, organization: Union[str, int], account_info: UpdateAccountBody) -> None:
         """
@@ -214,7 +222,9 @@ class Billing:
             >>> balena.models.billing.update_account_info('myorghandle', { email: 'hello@balena.io' })
         """
         org_id = self.__get_org_id(organization)
-        return request(method="PATCH", path=f"/billing/v1/account/{org_id}", body=account_info)
+        return request(
+            method="PATCH", settings=self.__settings, path=f"/billing/v1/account/{org_id}", body=account_info
+        )
 
     def change_plan(self, organization: Union[str, int], plan_change_options: PlanChangeOptions) -> None:
         """
@@ -229,7 +239,7 @@ class Billing:
         """
         org_id = self.__get_org_id(organization)
         body = {**plan_change_options, "annual": plan_change_options["cycle"] == "annual"}
-        return request(method="PATCH", path=f"/billing/v1/account/{org_id}", body=body)
+        return request(method="PATCH", settings=self.__settings, path=f"/billing/v1/account/{org_id}", body=body)
 
     def get_invoices(self, organization: Union[str, int]) -> List[InvoiceInfo]:
         """
@@ -242,7 +252,7 @@ class Billing:
             >>> balena.models.billing.get_invoices('myorghandle')
         """
         org_id = self.__get_org_id(organization)
-        return request(method="GET", path=f"/billing/v1/account/{org_id}/invoices")
+        return request(method="GET", settings=self.__settings, path=f"/billing/v1/account/{org_id}/invoices")
 
     def download_invoice(self, organization: Union[str, int], invoice_number: Union[str, int]):
         """
@@ -263,6 +273,7 @@ class Billing:
         return request(
             method="GET",
             path=f"/billing/v1/account/{org_id}/invoices/{invoice_number}/download",
+            settings=self.__settings,
             stream=True,
             return_raw=True,
         )
