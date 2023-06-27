@@ -12,11 +12,12 @@ from .settings import Settings
 
 
 class PineClient(PinejsClientCore):
-    def __init__(self, settings: Settings, params: Optional[Params] = None):
+    def __init__(self, settings: Settings, sdk_version: str, params: Optional[Params] = None):
         if params is None:
             params = {}
 
         self.__settings = settings
+        self.__sdk_version = sdk_version
 
         api_url = settings.get("api_endpoint")
         api_version = settings.get("api_version")
@@ -26,7 +27,7 @@ class PineClient(PinejsClientCore):
     def _request(self, method: str, url: str, body: Optional[Any] = None) -> Any:
         token = get_token(self.__settings)
 
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "X-Balena-Client": f"balena-python-sdk/{self.__sdk_version}"}
         if token is not None:
             headers["Authorization"] = f"Bearer {token}"
 

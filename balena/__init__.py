@@ -52,7 +52,7 @@ class Balena:
 
     def __init__(self, settings: Optional[SettingsConfig] = None):
         self.settings = Settings(settings)
-        self.pine = PineClient(self.settings)
+        self.pine = PineClient(self.settings, __version__)
         self.logs = Logs(self.pine, self.settings)
         self.auth = Auth(self.pine, self.settings)
         self.models = Models(self.pine, self.settings)

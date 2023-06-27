@@ -8,6 +8,7 @@ import requests
 
 from . import exceptions
 from .settings import Settings
+import balena
 
 
 def __request_new_token(settings: Settings) -> str:
@@ -72,7 +73,9 @@ def request(
     if token is None and send_token:
         raise exceptions.NotLoggedIn()
     try:
-        headers = {}
+        headers = {
+             "X-Balena-Client": f"balena-python-sdk/{balena.__version__}"
+        }
         if send_token:
             headers["Authorization"] = f"Bearer {token}"
 
