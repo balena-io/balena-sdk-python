@@ -56,8 +56,8 @@ class DeviceHistory:
 
         Args:
             uuid_or_id (str): device uuid (32 / 62 digits string) or id (number) __note__: No short IDs supported
-            from_date (datetime): history entries older or equal to this date. Defaults to 7 days ago
-            from_date (datetime): history entries younger or equal to this date.
+            from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+            to_date (datetime): history entries younger or equal to this date.
             options (AnyObject): extra pine options to use
 
         Returns:
@@ -98,8 +98,8 @@ class DeviceHistory:
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
-            from_date (datetime): history entries older or equal to this date. Defaults to 7 days ago
-            from_date (datetime): history entries younger or equal to this date.
+            from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+            to_date (datetime): history entries younger or equal to this date.
             options (AnyObject): extra pine options to use
 
         Returns:

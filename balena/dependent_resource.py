@@ -54,13 +54,13 @@ class DependentResource(Generic[T]):
             }
         )
 
-        if len(result) == 1:
+        if len(result) >= 1:
             return result[0].get("value")
 
-    def _set(self, parent_param: Any, tag_key: str, value: str) -> None:
+    def _set(self, parent_param: Any, key: str, value: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        upsert_id = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
+        upsert_id = {self.parent_resource_name: parent_id, self.resource_key_field: key}
 
         self.__pine.upsert(
             {
@@ -70,9 +70,9 @@ class DependentResource(Generic[T]):
             }
         )
 
-    def _remove(self, parent_param: Any, tag_key: str) -> None:
+    def _remove(self, parent_param: Any, key: str) -> None:
         parent_id = parent_param if is_id(parent_param) else self.get_resource_id(parent_param)
 
-        dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: tag_key}
+        dollar_filter = {self.parent_resource_name: parent_id, self.resource_key_field: key}
 
         self.__pine.delete({"resource": self.resource_name, "options": {"$filter": dollar_filter}})

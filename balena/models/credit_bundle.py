@@ -45,7 +45,7 @@ class CreditBundle:
 
     def create(self, organization: Union[str, int], feature_id: int, credits_to_purchase: float) -> CreditBundleType:
         """
-        Get all of the credit bundles purchased by the given org
+        Purchase a credit bundle for the given feature and org of the given quantity
 
         Args:
             organization (Union[str, int]): handle (string) or id (number) of the target organization.

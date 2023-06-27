@@ -32,8 +32,8 @@ class Release:
         commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
         body: AnyObject,
     ) -> None:
-        id = self.get(commit_or_id_or_raw_version, {"$select": "id"})["id"]
-        self.__pine.patch({"resource": "release", "id": id, "body": body})
+        release_id = self.get(commit_or_id_or_raw_version, {"$select": "id"})["id"]
+        self.__pine.patch({"resource": "release", "id": release_id, "body": body})
 
     def get(
         self,

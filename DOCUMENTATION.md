@@ -207,12 +207,12 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_all(options)](#organization.get_all) ⇒ [<code>List[OrganizationType]</code>](#organizationtype)
             - [remove(handle_or_id)](#organization.remove) ⇒ <code>None</code>
             - [.membership](#organizationmembership)
-                - [get(membership_id, options)](#organizationmembership.get) ⇒ <code>None</code>
+                - [get(membership_id, options)](#organizationmembership.get) ⇒ [<code>OrganizationMembershipType</code>](#organizationmembershiptype)
                 - [get_all(options)](#organizationmembership.get_all) ⇒ [<code>List[OrganizationMembershipType]</code>](#organizationmembershiptype)
                 - [get_all_by_organization(handle_or_id, options)](#organizationmembership.get_all_by_organization) ⇒ [<code>List[OrganizationMembershipType]</code>](#organizationmembershiptype)
                 - [.tags](#organizationmembershiptag)
-                    - [get(membership_id, tag_key)](#organizationmembershiptag.get) ⇒ <code>None</code>
-                    - [get_all(options)](#organizationmembershiptag.get_all) ⇒ <code>None</code>
+                    - [get(membership_id, tag_key)](#organizationmembershiptag.get) ⇒ <code>Union[str, None]</code>
+                    - [get_all(options)](#organizationmembershiptag.get_all) ⇒ [<code>List[OrganizationMembershipTagType]</code>](#organizationmembershiptagtype)
                     - [get_all_by_organization(handle_or_id, options)](#organizationmembershiptag.get_all_by_organization) ⇒ [<code>List[OrganizationMembershipTagType]</code>](#organizationmembershiptagtype)
                     - [get_all_by_organization_membership(membership_id, options)](#organizationmembershiptag.get_all_by_organization_membership) ⇒ [<code>List[OrganizationMembershipTagType]</code>](#organizationmembershiptagtype)
                     - [remove(membership_id, tag_key)](#organizationmembershiptag.remove) ⇒ <code>None</code>
@@ -289,12 +289,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
         - [subscribe(uuid_or_id, callback, error, count)](#logs.subscribe) ⇒ <code>None</code>
         - [unsubscribe(uuid_or_id)](#logs.unsubscribe) ⇒ <code>None</code>
         - [unsubscribe_all()](#logs.unsubscribe_all) ⇒ <code>None</code>
-    - [.settings](#settings)
-        - [get(key)](#settings.get) ⇒ <code>str</code>
-        - [get_all()](#settings.get_all) ⇒ <code>Dict[str, str]</code>
-        - [has(key)](#settings.has) ⇒ <code>bool</code>
-        - [remove(key)](#settings.remove) ⇒ <code>bool</code>
-        - [set(key, value)](#settings.set) ⇒ <code>None</code>
+    - [.settings](#module)
     - [.types](#types)
 
 ## Models
@@ -2366,8 +2361,8 @@ Get all device history entries for an application.
 
 #### Args:
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
-    from_date (datetime): history entries older or equal to this date. Defaults to 7 days ago
-    from_date (datetime): history entries younger or equal to this date.
+    from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+    to_date (datetime): history entries younger or equal to this date.
     options (AnyObject): extra pine options to use
 
 #### Returns:
@@ -2394,8 +2389,8 @@ Get all device history entries for a device.
 
 #### Args:
     uuid_or_id (str): device uuid (32 / 62 digits string) or id (number) __note__: No short IDs supported
-    from_date (datetime): history entries older or equal to this date. Defaults to 7 days ago
-    from_date (datetime): history entries younger or equal to this date.
+    from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+    to_date (datetime): history entries younger or equal to this date.
     options (AnyObject): extra pine options to use
 
 #### Returns:
@@ -2500,6 +2495,7 @@ This method registers a new api key for the current user with the name given.
 ```python
 >>> balena.models.api_key.create_api_key("myApiKey")
 >>> balena.models.api_key.create_api_key("myApiKey", "my api key description")
+>>> balena.models.api_key.create_api_key("myApiKey", "my descr", datetime.datetime.utcnow().isoformat())
 ```
 
 <a name="apikey.get_all"></a>
@@ -2707,13 +2703,14 @@ Remove an organization.
 This class implements organization membership model for balena python SDK.
 
 <a name="organizationmembership.get"></a>
-### Function: get(membership_id, options) ⇒ <code>None</code>
+### Function: get(membership_id, options) ⇒ [<code>OrganizationMembershipType</code>](#organizationmembershiptype)
 
 Get a single organization membership.
 
 #### Args:
     membership_id (ResourceKey): the id (int) or an object with the unique
     `user` & `is_member_of__organization` numeric pair of the membership
+    options (AnyObject): extra pine options to use
 
 #### Returns:
     Organization membership.
@@ -2760,7 +2757,7 @@ Get all memberships by organization.
 This class implements organization membership tag model for balena python SDK.
 
 <a name="organizationmembershiptag.get"></a>
-### Function: get(membership_id, tag_key) ⇒ <code>None</code>
+### Function: get(membership_id, tag_key) ⇒ <code>Union[str, None]</code>
 
 Get an organization membership tag.
 
@@ -2774,7 +2771,7 @@ Get an organization membership tag.
 ```
 
 <a name="organizationmembershiptag.get_all"></a>
-### Function: get_all(options) ⇒ <code>None</code>
+### Function: get_all(options) ⇒ [<code>List[OrganizationMembershipTagType]</code>](#organizationmembershiptagtype)
 
 Get all organization membership tags.
 
@@ -3037,6 +3034,7 @@ Get OS download size estimate. Currently only the raw (uncompressed) size is rep
     `'default'` in which case the recommended version is returned if available,
     or `latest` is returned otherwise.
     Defaults to `'latest'`
+    os_type (Optional[Literal["default", "esr"]]): The used OS type.
 
 #### Returns:
     float: OS image download size, in bytes.
@@ -3756,94 +3754,9 @@ Unsubscribe from device logs for a specific device.
 Unsubscribe all subscribed devices.
 ## Settings
 
-This class handles settings for balena python SDK.
+Create a module object.
 
-#### Attributes:
-    HOME_DIRECTORY (str): home directory path.
-    CONFIG_SECTION (str): section name in configuration file.
-    CONFIG_FILENAME (str): configuration file name.
-    _setting (dict): default value to settings.
-
-<a name="settings.get"></a>
-### Function: get(key) ⇒ <code>str</code>
-
-Get a setting value.
-
-#### Args:
-    key (str): setting.
-
-#### Returns:
-    str: setting value.
-
-#### Raises:
-    InvalidOption: If getting a non-existent setting.
-
-#### Examples:
-```python
->>> balena.settings.get('api_endpoint')
-```
-
-<a name="settings.get_all"></a>
-### Function: get_all() ⇒ <code>Dict[str, str]</code>
-
-Get all settings.
-
-#### Returns:
-    dict: all settings.
-
-#### Examples:
-```python
->>> balena.settings.get_all()
-```
-
-<a name="settings.has"></a>
-### Function: has(key) ⇒ <code>bool</code>
-
-Check if a setting exists.
-
-#### Args:
-    key (str): setting.
-
-#### Returns:
-    bool: True if exists, False otherwise.
-
-#### Examples:
-```python
->>> balena.settings.has('api_endpoint')
-```
-
-<a name="settings.remove"></a>
-### Function: remove(key) ⇒ <code>bool</code>
-
-Remove a setting.
-
-#### Args:
-    key (str): setting.
-
-#### Returns:
-    bool: True if successful, False otherwise.
-
-#### Examples:
-```python
-# Remove an existing key from settings
->>> balena.settings.remove('tmp')
-# Remove a non-existing key from settings
->>> balena.settings.remove('tmp1')
-```
-
-<a name="settings.set"></a>
-### Function: set(key, value) ⇒ <code>None</code>
-
-Set value for a setting.
-
-#### Args:
-    key (str): setting.
-    value (str): setting value.
-
-#### Examples:
-```python
->>> balena.settings.set(key='tmp',value='123456')
-```
+The name must be a string; the optional doc argument can have any type.
 ## Types
 ### APIKeyInfoType
 

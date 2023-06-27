@@ -12,14 +12,14 @@ from ..pine import PineClient
 from ..types import AnyObject
 from ..utils import compare, merge, normalize_balena_semver
 from ..settings import Settings
-from . import application as app_module
+from .application import Application
 from .device_type import DeviceType
 
 
 class DownloadConfig(TypedDict):
     developmentMode: NotRequired[bool]
     appUpdatePollInterval: NotRequired[int]
-    network: NotRequired[Union[Literal["ethernet"], Literal["wifi"]]]
+    network: NotRequired[Literal["ethernet", "wifi"]]
     wifiKey: NotRequired[str]
     wifiSsid: NotRequired[str]
     appId: NotRequired[int]
@@ -207,6 +207,7 @@ class DeviceOs:
         self.__pine = pine
         self.__settings = settings
         self.__device_type = DeviceType(pine, settings)
+        self.__application = Application(pine, settings, False)
 
     def get_available_os_versions(self, device_type: Union[str, List[str]]):
         """
@@ -299,6 +300,7 @@ class DeviceOs:
             `'default'` in which case the recommended version is returned if available,
             or `latest` is returned otherwise.
             Defaults to `'latest'`
+            os_type (Optional[Literal["default", "esr"]]): The used OS type.
 
         Returns:
             float: OS image download size, in bytes.
@@ -374,6 +376,7 @@ class DeviceOs:
 
         return request(
             method="GET",
+            settings=self.__settings,
             path="/download",
             qs={**options, "deviceType": slug, "version": version},
             return_raw=True,
@@ -414,11 +417,12 @@ class DeviceOs:
             raise Exception("An OS version is required when calling os.getConfig")
 
         options["network"] = options.get("network", "ethernet")
-        app_id = app_module.application.get_id(slug_or_uuid_or_id)
+        app_id = self.__application.get_id(slug_or_uuid_or_id)
 
         try:
             return request(
                 method="POST",
+                settings=self.__settings,
                 path="/download-config",
                 body={**options, "appId": app_id},
             )

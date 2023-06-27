@@ -45,6 +45,7 @@ class ApiKey:
         Examples:
             >>> balena.models.api_key.create_api_key("myApiKey")
             >>> balena.models.api_key.create_api_key("myApiKey", "my api key description")
+            >>> balena.models.api_key.create_api_key("myApiKey", "my descr", datetime.datetime.utcnow().isoformat())
         """
         api_key_body = {"name": name}
 
