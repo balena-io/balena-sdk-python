@@ -6,6 +6,43 @@ import inspect
 import re
 import sys
 
+
+import typing
+from typing import Any, get_type_hints
+
+
+def simplify_type_hint(type_hint: Any) -> str:
+    # print(type_hint)
+    if isinstance(type_hint, str):
+        return f'"{type_hint}"'
+    elif type_hint is None or (hasattr(type_hint, "__name__") and type_hint.__name__ == "NoneType"):
+        return "None"
+    elif inspect.isclass(type_hint) or type(type_hint) == type(Ellipsis):
+        return type_hint.__name__  # type: ignore
+    elif type_hint is Any:
+        return "Any"
+    elif hasattr(type_hint, "_name") and type_hint._name:
+        if not hasattr(type_hint, "__args__"):
+            return type_hint._name
+
+        inner_types = [simplify_type_hint(hint) for hint in type_hint.__args__]
+
+        # Handle Optional[...]
+        if type_hint._name == "Optional" and "None" in inner_types:
+            inner_types.remove("None")
+            return f'Optional[{", ".join(inner_types)}]'
+
+        return f'{type_hint._name}[{", ".join(inner_types)}]'
+    elif isinstance(type_hint, typing._GenericAlias):  # type: ignore
+        inner_types = [simplify_type_hint(hint) for hint in type_hint.__args__]
+        base = simplify_type_hint(type_hint.__origin__)
+        return f'{base}[{", ".join(inner_types)}]'
+    elif isinstance(type_hint, typing._SpecialForm):
+        return str(type_hint)
+    else:
+        return str(type_hint)
+
+
 __all__ = ["doctrim", "doc2md"]
 
 SECTIONS = ["Args:", "Attributes:", "Returns:", "Raises:", "Notes:", "Examples:"]
@@ -98,19 +135,73 @@ def find_sections(lines):
     return sections
 
 
-def make_toc(sections):
+def make_toc(sections, model_hints=[]):
     """
     Generate table of contents for array of section names.
     """
+
     if not sections:
         return []
     refs = []
-    for sec, ind in sections:
-        ref = sec.lower()
+    for sec, ind, ref in sections:
+        children = []
+        if ref is None:
+            ref = sec.lower()
+        else:
+            if isinstance(ref, str):
+                ref = ref.lower()
+            else:
+                children = get_funcs(ref)
+                ref = ref.__name__.lower().split(".")[-1]
+
         ref = ref.replace(" ", "-")
         ref = ref.replace("?", "")
         refs.append(INDENT * (ind) + "- [%s](#%s)" % (sec, ref))
+
+        for child_name, child_hint, child_ref in children:
+            hint_ref = None
+            for model_hint in model_hints:
+                # if the child_hint includes the name of a type, create the reference for that type
+                # for example, when child_hint is List[AType] we want it to be able to navigate to AType ref
+                if model_hint in child_hint:
+                    hint_ref = model_hint.lower()
+
+            if hint_ref:
+                refs.append(
+                    INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ [<code>{child_hint}</code>](#{hint_ref})"
+                )
+            else:
+                refs.append(INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ <code>{child_hint}</code>")
+
     return "\n".join(refs)
+
+
+def get_funcs(baseclass):
+    children = []
+    for func_name, _ in inspect.getmembers(baseclass, predicate=inspect.isfunction):
+        if func_name != "__init__" and not func_name.startswith("_"):
+            func = getattr(baseclass, func_name)
+            if "self" in inspect.getfullargspec(func)[0]:
+                print_name, hint = make_function_name(func, func_name)
+                ref_name = f"{baseclass.__name__.lower()}.{func_name}"
+
+                children.append((print_name, hint, ref_name))
+    return children
+
+
+def make_function_name(func, func_name):
+    args_list = inspect.getfullargspec(func)[0]
+    if "self" in args_list:
+        args_list.remove("self")
+
+    f_args = ", ".join(args_list)
+
+    fully_qualified_hint = get_type_hints(func).get("return")
+    if fully_qualified_hint:
+        hint = simplify_type_hint(fully_qualified_hint)
+    else:
+        hint = "None"
+    return f"{func_name}({f_args})", hint
 
 
 def _get_class_intro(lines):
@@ -295,6 +386,34 @@ def main(args=None):
             docstr = module.__doc__
 
         print(doc2md(docstr, title, toc=args.toc))
+
+
+def typed_dict_to_dict(typed_dict_cls):
+    return {k: simplify_type_hint(v) for k, v in get_type_hints(typed_dict_cls).items()}
+
+
+def get_python_dict_to_print(d):
+    items = [f'    "{property_name}": {property_type}' for property_name, property_type in d.items()]
+    return "{\n" + ",\n".join(items) + "\n}"
+
+
+def print_types(types):
+    print("## Types")
+    members = inspect.getmembers(types)
+
+    for type_tuple in members:
+        if not type_tuple[0].startswith("__") and not str(type_tuple[1]).startswith("typing"):
+            # print(type_tuple)
+            try:
+                prettyprint_dict = get_python_dict_to_print(typed_dict_to_dict(type_tuple[1]))
+                print("### " + type_tuple[0])
+                print("\n")
+                print("```python")
+                print(prettyprint_dict)
+                print("```")
+                print("\n")
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

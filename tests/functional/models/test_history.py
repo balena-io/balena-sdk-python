@@ -5,9 +5,6 @@ from tests.helper import TestHelper
 
 
 class TestHistory(unittest.TestCase):
-    helper = None
-    balena = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
@@ -44,9 +41,9 @@ class TestHistory(unittest.TestCase):
                 )
 
         # should set the device to track the current application release.
-        self.balena.models.device.set_to_release(app_info["device"]["uuid"], app_info["old_release"]["commit"])
-        self.balena.models.device.set_to_release(deviceOne["uuid"], app_info["old_release"]["commit"])
-        self.balena.models.device.set_to_release(deviceTwo["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(app_info["device"]["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(deviceOne["uuid"], app_info["old_release"]["commit"])
+        self.balena.models.device.pin_to_release(deviceTwo["uuid"], app_info["old_release"]["commit"])
 
         # get by device uuid
         device_history = test_model.get_all_by_device(app_info["device"]["uuid"])
@@ -62,7 +59,7 @@ class TestHistory(unittest.TestCase):
 
         with self.assertRaises(Exception) as cm:
             test_model.get_all_by_device(app_info["device"]["uuid"] + "toManyDigits")
-        self.assertIn("Invalid parameter:", cm.exception.message)
+        self.assertIn("Invalid parameter:", cm.exception.message)  # type: ignore
 
         for test_set in [
             {
@@ -84,33 +81,30 @@ class TestHistory(unittest.TestCase):
             # set time range to return device history entries
             device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
-                fromDate=datetime.utcnow() + timedelta(days=-10),
-                toDate=datetime.utcnow() + timedelta(days=+1),
+                from_date=datetime.utcnow() + timedelta(days=-10),
+                to_date=datetime.utcnow() + timedelta(days=+1),
             )
             test_set["checker"](device_history)
 
             # set time range to return now data
             device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
-                fromDate=datetime.utcnow() + timedelta(days=-3000),
-                toDate=datetime.utcnow() + timedelta(days=-2000),
+                from_date=datetime.utcnow() + timedelta(days=-3000),
+                to_date=datetime.utcnow() + timedelta(days=-2000),
             )
             self.assertEqual(len(device_history), 0)
 
             for invalidParameter in [[], {}, "invalid", 1]:
                 with self.assertRaises(Exception) as cm:
-                    device_history = method_under_test(app_info[test_set["by"]]["id"], fromDate=invalidParameter)
-                self.assertIn("Invalid parameter:", cm.exception.message)
+                    device_history = method_under_test(app_info[test_set["by"]]["id"], from_date=invalidParameter)
+                self.assertIn("Invalid parameter:", cm.exception.message)  # type: ignore
 
                 with self.assertRaises(Exception) as cm:
-                    device_history = method_under_test(app_info[test_set["by"]]["id"], toDate=invalidParameter)
-                self.assertIn("Invalid parameter:", cm.exception.message)
+                    device_history = method_under_test(app_info[test_set["by"]]["id"], to_date=invalidParameter)
+                self.assertIn("Invalid parameter:", cm.exception.message)  # type: ignore
 
     def test_device_model_get_device_history(self):
         self._test_device_history(self.balena.models.device.history)
-
-    def test_history_model_get_device_history(self):
-        self._test_device_history(self.balena.models.history.device_history)
 
 
 if __name__ == "__main__":

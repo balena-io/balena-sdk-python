@@ -1,12 +1,18 @@
-import json
+from typing import List, Optional, Union
 
 from .. import exceptions
-from ..auth import Auth
-from ..base_request import BaseRequest
+from ..balena_auth import request
+from ..dependent_resource import DependentResource
+from ..pine import PineClient
+from ..types import AnyObject, ResourceKey
+from ..types.models import (
+    OrganizationInviteType,
+    OrganizationMembershipTagType,
+    OrganizationMembershipType,
+    OrganizationType,
+)
+from ..utils import is_id, merge
 from ..settings import Settings
-from ..utils import is_id
-from .config import Config
-from .tag import BaseTag
 
 
 class Organization:
@@ -15,15 +21,12 @@ class Organization:
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
-        self.invite = OrganizationInvite()
-        self.membership = OrganizationMembership()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.invite = OrganizationInvite(pine, self, settings)
+        self.membership = OrganizationMembership(pine, self)
 
-    def create(self, name, handle=None):
+    def create(self, name: str, handle: Optional[str] = None) -> OrganizationType:
         """
         Creates a new organization.
 
@@ -36,66 +39,42 @@ class Organization:
 
         Examples:
             >>> balena.models.organization.create('My Org', 'test_org')
-            {
-                "id": 147950,
-                "created_at": "2020-06-23T09:33:25.187Z",
-                "name": "My Org",
-                "handle": "test_org",
-                "billing_account_code": None,
-                "__metadata": {"uri": "/resin/organization(@id)?@id=147950"},
-            }
         """
 
         data = {"name": name}
-
-        if handle:
+        if handle is not None:
             data["handle"] = handle
 
-        return json.loads(
-            self.base_request.request(
-                "organization",
-                "POST",
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            ).decode("utf-8")
-        )
+        return self.__pine.post({"resource": "organization", "body": data})
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[OrganizationType]:
         """
         Get all organizations.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains information of organizations.
+            List[OrganizationType]: list contains information of organizations.
 
         Examples:
             >>> balena.models.organization.get_all()
-            [
-                {
-                    "id": 26474,
-                    "created_at": "2018-08-14T00:24:33.144Z",
-                    "name": "test_account1",
-                    "handle": "test_account1",
-                    "billing_account_code": None,
-                    "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
-                }
-            ]
-
         """
 
-        return self.base_request.request(
-            "organization",
-            "GET",
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
+        return self.__pine.get(
+            {
+                "resource": "organization",
+                "options": merge({"$orderby": "name asc"}, options),
+            }
+        )
 
-    def get(self, org_id):
+    def get(self, handle_or_id: Union[str, int], options: AnyObject = {}) -> OrganizationType:
         """
-        Get a single organization by id.
+        Get a single organization.
 
         Args:
-            org_id (str): organization id.
+            handle_or_id (str): organization handle (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
             dict: organization info.
@@ -104,96 +83,38 @@ class Organization:
             OrganizationNotFound: if organization couldn't be found.
 
         Examples:
-            >>> balena.models.organization.get('26474')
+            >>> balena.models.organization.get(26474)
+            >>> balena.models.organization.get('myorg')
+        """
+
+        if handle_or_id is None:
+            raise exceptions.InvalidParameter("handle_or_id", handle_or_id)
+
+        org = self.__pine.get(
             {
-                "id": 26474,
-                "created_at": "2018-08-14T00:24:33.144Z",
-                "name": "test_account1",
-                "handle": "test_account1",
-                "billing_account_code": None,
-                "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
+                "resource": "organization",
+                "id": handle_or_id if is_id(handle_or_id) else {"handle": handle_or_id},
+                "options": options,
             }
+        )
 
-        """
+        if org is None:
+            raise exceptions.OrganizationNotFound(handle_or_id)
 
-        params = {"filter": "id", "eq": org_id}
+        return org
 
-        org = self.base_request.request(
-            "organization",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-        if not org:
-            raise exceptions.OrganizationNotFound(org_id)
-
-        return org[0]
-
-    def get_by_handle(self, handle):
-        """
-        Get a single organization by handle.
-
-        Args:
-            handle (str): organization handle.
-
-        Returns:
-            dict: organization info.
-
-        Raises:
-            OrganizationNotFound: if organization couldn't be found.
-
-        Examples:
-            >>> balena.models.organization.get_by_handle('test_account1')
-            {
-                "id": 26474,
-                "created_at": "2018-08-14T00:24:33.144Z",
-                "name": "test_account1",
-                "handle": "test_account1",
-                "billing_account_code": None,
-                "__metadata": {"uri": "/resin/organization(@id)?@id=26474"},
-            }
-
-        """
-
-        params = {"filter": "handle", "eq": handle}
-
-        org = self.base_request.request(
-            "organization",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-        if not org:
-            raise exceptions.OrganizationNotFound(handle)
-
-        return org[0]
-
-    def remove(self, org_id):
+    def remove(self, handle_or_id: Union[str, int]) -> None:
         """
         Remove an organization.
 
         Args:
-            org_id (str): organization id.
-
-        Returns:
-            dict: organization info.
+            handle_or_id (str): organization handle (string) or id (number).
 
         Examples:
-            >>> balena.models.organization.remove('148003')
-            'OK
-
+            >>> balena.models.organization.remove(148003)
         """
-
-        return self.base_request.request(
-            "organization({org_id})".format(org_id=org_id),
-            "DELETE",
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )
+        org_id = self.get(handle_or_id, {"$select": "id"})["id"]
+        self.__pine.delete({"resource": "organization", "id": org_id})
 
 
 class OrganizationInvite:
@@ -202,191 +123,108 @@ class OrganizationInvite:
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
+    def __init__(self, pine: PineClient, organization: Organization, settings: Settings):
+        self.__pine = pine
+        self.__organization = organization
+        self.__settings = settings
         self.RESOURCE = "invitee__is_invited_to__organization"
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[OrganizationInviteType]:
         """
         Get all invites.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: list contains info of invites.
+            List[OrganizationInviteType]: list contains info of invites.
 
         Examples:
             >>> balena.models.organization.invite.get_all()
-            [
-                {
-                    "id": 2862,
-                    "message": "Test invite",
-                    "invitee": {
-                        "__id": 2965,
-                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
-                    },
-                    "is_invited_to__organization": {
-                        "__id": 26474,
-                        "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
-                    },
-                    "is_created_by__user": {
-                        "__id": 5227,
-                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                    },
-                    "organization_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {
-                        "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
-                    },
-                }
-            ]
-
         """
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
-        return self.base_request.request(self.RESOURCE, "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def get_all_by_organization(self, org_id):
+    def get_all_by_organization(
+        self, handle_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[OrganizationInviteType]:
         """
         Get all invites by organization.
 
         Args:
-            org_id (str): organization id.
+            handle_or_id (Union[str, int]): organization handle (string), or id (number).
+            options (AnyObject): extra pine options to use.
 
         Returns:
-            list: list contains info of invites.
+            List[OrganizationInviteType]: list contains info of invites.
 
         Examples:
             >>> balena.models.organization.invite.get_all_by_organization(26474)
-            [
-                {
-                    "id": 2862,
-                    "message": "Test invite",
-                    "invitee": {
-                        "__id": 2965,
-                        "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"},
-                    },
-                    "is_invited_to__organization": {
-                        "__id": 26474,
-                        "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
-                    },
-                    "is_created_by__user": {
-                        "__id": 5227,
-                        "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                    },
-                    "organization_membership_role": {
-                        "__id": 2,
-                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
-                    },
-                    "__metadata": {
-                        "uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"
-                    },
-                }
-            ]
-
         """
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
+        return self.get_all(merge({"$filter": {"is_invited_to__organization": org_id}}, options))
 
-        params = {"filter": "is_invited_to__organization", "eq": org_id}
-
-        return self.base_request.request(
-            self.RESOURCE,
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-    def create(self, org_id, invitee, role_name=None, message=None):
+    def create(
+        self,
+        handle_or_id: Union[str, int],
+        invitee: str,
+        role_name: Optional[str] = None,
+        message: Optional[str] = None,
+    ) -> OrganizationInviteType:
         """
         Creates a new invite for an organization.
 
         Args:
-            org_id (str): organization id.
+            handle_or_id (Union[str, int]): organization handle (string), or id (number).
             invitee (str): the email/balena_username of the invitee.
             role_name (Optional[str]): the role name to be granted to the invitee.
             message (Optional[str]): the message to send along with the invite.
 
         Returns:
-            dict: organization invite.
+            OrganizationInviteType: organization invite.
 
         Examples:
             >>> balena.models.organization.invite.create(26474, 'invitee@example.org', 'member', 'Test invite')
-            {
-                "id": 2862,
-                "message": "Test invite",
-                "invitee": {"__id": 2965, "__deferred": {"uri": "/resin/invitee(@id)?@id=2965"}},
-                "is_invited_to__organization": {
-                    "__id": 26474,
-                    "__deferred": {"uri": "/resin/organization(@id)?@id=26474"},
-                },
-                "is_created_by__user": {
-                    "__id": 5227,
-                    "__deferred": {"uri": "/resin/user(@id)?@id=5227"},
-                },
-                "organization_membership_role": {
-                    "__id": 2,
-                    "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=2"},
-                },
-                "__metadata": {"uri": "/resin/invitee__is_invited_to__organization(@id)?@id=2862"},
-            }
-
         """
 
-        data = {
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
+        roles = None
+        if role_name is not None:
+            roles = self.__pine.get(
+                {
+                    "resource": "organization_membership_role",
+                    "options": {
+                        "$top": 1,
+                        "$select": ["id"],
+                        "$filter": {"name": role_name},
+                    },
+                }
+            )
+        body = {
             "invitee": invitee,
             "is_invited_to__organization": org_id,
             "message": message,
         }
+        if roles is not None:
+            if len(roles) == 0 and role_name is not None:
+                raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name)
+            body["organization_membership_role"] = roles[0].get("id")
 
-        if role_name:
-            params = {"filter": "name", "eq": role_name}
+        return self.__pine.post({"resource": self.RESOURCE, "body": body})
 
-            roles = self.base_request.request(
-                "organization_membership_role",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-
-            if not roles:
-                raise exceptions.BalenaOrganizationMembershipRoleNotFound(role_name=role_name)
-            else:
-                data["organization_membership_role "] = roles[0]["id"]
-
-        return json.loads(
-            self.base_request.request(
-                self.RESOURCE,
-                "POST",
-                data=data,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            ).decode("utf-8")
-        )
-
-    def revoke(self, invite_id):
+    def revoke(self, invite_id: int) -> None:
         """
         Revoke an invite.
 
         Args:
-            invite_id (str): organization invite id.
+            invite_id (int): organization invite id.
 
         Examples:
             >>> balena.models.organization.invite.revoke(2862)
-            'OK'
-
         """
 
-        params = {"filter": "id", "eq": invite_id}
+        self.__pine.delete({"resource": self.RESOURCE, "id": invite_id})
 
-        return self.base_request.request(
-            self.RESOURCE,
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def accept(self, invite_token):
+    def accept(self, invite_token: str) -> None:
         """
         Accepts an invite.
 
@@ -394,13 +232,7 @@ class OrganizationInvite:
             invite_token (str): invitation Token - invite token.
 
         """
-
-        return self.base_request.request(
-            "/org/v1/invitation/{0}".format(invite_token),
-            "POST",
-            endpoint=self.settings.get("api_endpoint"),
-            login=True,
-        )
+        request(method="POST", settings=self.__settings, path=f"/org/v1/invitation/{invite_token}")
 
 
 class OrganizationMembership:
@@ -409,277 +241,174 @@ class OrganizationMembership:
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.config = Config()
-        self.auth = Auth()
-        self.tag = OrganizationMembershipTag()
+    def __init__(self, pine: PineClient, organization: Organization):
+        self.__pine = pine
+        self.__organization = organization
+        self.tags = OrganizationMembershipTag(pine, organization)
+        self.RESOURCE = "organization_membership"
 
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[OrganizationMembershipType]:
         """
         Get all organization memberships.
 
+        Args:
+            options (AnyObject): extra pine options to use
+
         Returns:
-            list: organization memberships.
+            List[OrganizationMembershipType]: organization memberships.
 
         Examples:
-            >>> balena.models.organization.membership.get_all()
-            [
-                {
-                    "id": 17608,
-                    "created_at": "2017-08-03T11:16:03.022Z",
-                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
-                    "is_member_of__organization": {
-                        "__id": 3014,
-                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
-                    },
-                    "organization_membership_role": {
-                        "__id": 3,
-                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
-                    },
-                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                }
-            ]
-
+            >>> balena.models.organization.memberships.tags.get_all()
         """
 
-        return self.base_request.request(
-            "organization_membership",
-            "GET",
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
+        return self.__pine.get({"resource": self.RESOURCE, "options": options})
 
-    def get_all_by_organization(self, handle_or_id):
+    def get_all_by_organization(
+        self, handle_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[OrganizationMembershipType]:
         """
         Get all memberships by organization.
 
         Args:
-            handle_or_id (str): organization handle (string) or id (number).
+            handle_or_id (Union[str, int]): organization handle (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: organization memberships.
-
-        Raises:
-            OrganizationNotFound: if organization couldn't be found.
+            List[OrganizationMembershipType]: organization memberships.
 
         Examples:
-            >>> balena.models.organization.membership.get_all_by_organization(3014)
-            [
-                {
-                    "id": 17608,
-                    "created_at": "2017-08-03T11:16:03.022Z",
-                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
-                    "is_member_of__organization": {
-                        "__id": 3014,
-                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
-                    },
-                    "organization_membership_role": {
-                        "__id": 3,
-                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
-                    },
-                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                }
-            ]
-
+            >>> balena.models.organization.memberships.get_all_by_organization(3014)
         """
 
-        params = {"filter": "is_member_of__organization", "eq": handle_or_id}
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})
+        org_filter = {"$filter": {"is_member_of__organization": org_id}}
+        return self.get_all(merge(org_filter, options))
 
-        if not is_id(handle_or_id):
-            params1 = {"filter": "handle", "eq": handle_or_id}
-
-            org = self.base_request.request(
-                "organization",
-                "GET",
-                params=params1,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            )["d"]
-
-            if not org:
-                raise exceptions.OrganizationNotFound(handle_or_id)
-
-            params["eq"] = org["id"]
-
-        return self.base_request.request(
-            "organization_membership",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-    def get(self, membership_id):
+    def get(self, membership_id: ResourceKey, options: AnyObject = {}) -> OrganizationMembershipType:
         """
         Get a single organization membership.
 
         Args:
-            membership_id (str): membership id.
+            membership_id (ResourceKey): the id (int) or an object with the unique
+            `user` & `is_member_of__organization` numeric pair of the membership
+            options (AnyObject): extra pine options to use
 
         Returns:
             Organization membership.
 
-        Raises:
-            OrganizationNotFound: if organization couldn't be found.
-
         Examples:
-            >>> balena.models.organization.membership.get(17608)
-            [
-                {
-                    "id": 17608,
-                    "created_at": "2017-08-03T11:16:03.022Z",
-                    "user": {"__id": 22294, "__deferred": {"uri": "/resin/user(@id)?@id=22294"}},
-                    "is_member_of__organization": {
-                        "__id": 3014,
-                        "__deferred": {"uri": "/resin/organization(@id)?@id=3014"},
-                    },
-                    "organization_membership_role": {
-                        "__id": 3,
-                        "__deferred": {"uri": "/resin/organization_membership_role(@id)?@id=3"},
-                    },
-                    "__metadata": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                }
-            ]
-
+            >>> balena.models.organization.memberships.get(17608)
         """
+        result = self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "id": membership_id,  # type: ignore
+                "options": options,
+            }
+        )
 
-        params = {"filter": "id", "eq": membership_id}
-
-        org_membership = self.base_request.request(
-            "organization_membership",
-            "GET",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-            login=True,
-        )["d"]
-
-        if len(org_membership) > 0:
-            return org_membership[0]
-        else:
+        if result is None:
             raise exceptions.OrganizationMembershipNotFound(membership_id)
+        return result
 
 
-class OrganizationMembershipTag(BaseTag):
+class OrganizationMembershipTag(DependentResource[OrganizationMembershipTagType]):
     """
     This class implements organization membership tag model for balena python SDK.
 
     """
 
-    def __init__(self):
-        super(OrganizationMembershipTag, self).__init__("organization_membership")
+    def __init__(self, pine: PineClient, organization: Organization):
+        self.__organization = organization
+        super(OrganizationMembershipTag, self).__init__(
+            "organization_membership_tag",
+            "tag_key",
+            "organization_membership",
+            lambda id: self.__organization.get(id)["id"],
+            pine,
+        )
 
-    def get_all_by_organization(self, handle_or_id):
+    def get_all_by_organization(
+        self, handle_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[OrganizationMembershipTagType]:
         """
         Get all organization membership tags for an organization.
 
         Args:
-            handle_or_id (str): organization handle (string) or id (number).
+            handle_or_id (Union[str, int]): organization handle (string) or id (number).
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: organization membership tags.
-
-        Raises:
-            OrganizationNotFound: if organization couldn't be found.
+            List[OrganizationMembershipTagType]: organization membership tags.
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all_by_organization(3014)
-            [
+            >>> balena.models.organization.memberships.tags.get_all_by_organization(3014)
+        """
+        org_id = self.__organization.get(handle_or_id, {"$select": "id"})["id"]
+        return super(OrganizationMembershipTag, self)._get_all(
+            merge(
                 {
-                    "id": 991,
-                    "organization_membership": {
-                        "__id": 17608,
-                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                    },
-                    "tag_key": "mTag1",
-                    "value": "Python SDK 1",
-                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
-                }
-            ]
+                    "$filter": {
+                        "organization_membership": {
+                            "$any": {
+                                "$alias": "om",
+                                "$expr": {"om": {"is_member_of__organization": org_id}},
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
 
+    def get_all_by_organization_membership(
+        self, membership_id: int, options: AnyObject = {}
+    ) -> List[OrganizationMembershipTagType]:
         """
-
-        org_id = handle_or_id
-
-        if not is_id(handle_or_id):
-            params1 = {"filter": "handle", "eq": handle_or_id}
-
-            org = self.base_request.request(
-                "organization",
-                "GET",
-                params=params1,
-                endpoint=self.settings.get("pine_endpoint"),
-                login=True,
-            )["d"]
-
-            if not org:
-                raise exceptions.OrganizationNotFound(handle_or_id)
-
-            org_id = org["id"]
-
-        query = f"$filter=organization_membership/any(d:d/is_member_of__organization%20eq%20{org_id})"
-
-        return super(OrganizationMembershipTag, self).get_all(raw_query=query)
-
-    def get_all_by_organization_membership(self, membership_id):
-        """
-        Get all organization membership tags for all memberships of an organization.
+        Get all organization membership tags for a memberships of an organization.
 
         Args:
-            membership_id (str): organization membership id.
+            membership_id (int): organization membership id.
+            options (AnyObject): extra pine options to use
 
         Returns:
             list: organization membership tags.
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all_by_organization_membership(17608)
-            [
-                {
-                    "id": 991,
-                    "organization_membership": {
-                        "__id": 17608,
-                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                    },
-                    "tag_key": "mTag1",
-                    "value": "Python SDK 1",
-                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
-                }
-            ]
-
+            >>> balena.models.organization.memberships.tags.get_all_by_organization_membership(17608)
         """
 
-        params = {"filter": "organization_membership", "eq": membership_id}
+        return super(OrganizationMembershipTag, self)._get_all_by_parent(membership_id, options)
 
-        return super(OrganizationMembershipTag, self).get_all(params=params)
-
-    def get_all(self):
+    def get_all(self, options: AnyObject = {}) -> List[OrganizationMembershipTagType]:
         """
         Get all organization membership tags.
 
-        Returns:
-            list: organization membership tags.
+        Args:
+            options (AnyObject): extra pine options to use
+
 
         Examples:
-            >>> balena.models.organization.membership.tag.get_all()
-            [
-                {
-                    "id": 991,
-                    "organization_membership": {
-                        "__id": 17608,
-                        "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                    },
-                    "tag_key": "mTag1",
-                    "value": "Python SDK 1",
-                    "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
-                }
-            ]
-
+            >>> balena.models.organization.memberships.tags.get_all()
         """
 
-        return super(OrganizationMembershipTag, self).get_all()
+        return super(OrganizationMembershipTag, self)._get_all(options)
 
-    def set(self, membership_id, tag_key, value):
+    def get(self, membership_id: int, tag_key: str) -> Union[str, None]:
+        """
+        Get an organization membership tag.
+
+        Args:
+            membership_id: organization membership id.
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.organization.memberships.tags.get(17608, 'mTag1')
+        """
+
+        return super(OrganizationMembershipTag, self)._get(membership_id, tag_key)
+
+    def set(self, membership_id: int, tag_key: str, value: str) -> None:
         """
         Set an organization membership tag.
 
@@ -688,30 +417,13 @@ class OrganizationMembershipTag(BaseTag):
             tag_key (str): tag key.
             value (str): tag value.
 
-        Returns:
-            dict: dict contains organization membership tag info if tag doesn't exist.
-            OK: if tag exists.
-
         Examples:
-            >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK')
-            {
-                "id": 991,
-                "organization_membership": {
-                    "__id": 17608,
-                    "__deferred": {"uri": "/resin/organization_membership(@id)?@id=17608"},
-                },
-                "tag_key": "mTag1",
-                "value": "Python SDK",
-                "__metadata": {"uri": "/resin/organization_membership_tag(@id)?@id=991"},
-            }
-            >>> balena.models.organization.membership.tag.set(17608, 'mTag1', 'Python SDK 1')
-            'OK'
-
+            >>> balena.models.organization.memberships.tags.set(17608, 'mTag1', 'Python SDK')
         """
 
-        return super(OrganizationMembershipTag, self).set(membership_id, tag_key, value)
+        super(OrganizationMembershipTag, self)._set(membership_id, tag_key, value)
 
-    def remove(self, membership_id, tag_key):
+    def remove(self, membership_id: int, tag_key: str) -> None:
         """
         Remove an organization membership tag.
 
@@ -720,9 +432,7 @@ class OrganizationMembershipTag(BaseTag):
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.organization.membership.tag.remove(17608, 'mTag1')
-            'OK'
-
+            >>> balena.models.organization.memberships.tags.remove(17608, 'mTag1')
         """
 
-        return super(OrganizationMembershipTag, self).remove(membership_id, tag_key)
+        super(OrganizationMembershipTag, self)._remove(membership_id, tag_key)

@@ -1,9 +1,18 @@
+from typing import Any, List, Optional, TypedDict, Union
+
 from .. import exceptions
-from ..base_request import BaseRequest
+from ..builder import build_from_url
+from ..dependent_resource import DependentResource
+from ..pine import PineClient
+from ..types import AnyObject
+from ..types.models import BaseTagType, ReleaseType, ReleaseWithImageDetailsType
+from ..utils import is_id, merge
 from ..settings import Settings
-from ..utils import is_id
-from .image import Image
-from .service import Service
+
+
+class ReleaseRawVersionApplicationPair(TypedDict, total=True):
+    application: Union[str, int]
+    raw_version: str
 
 
 class Release:
@@ -12,177 +21,86 @@ class Release:
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self.image = Image()
-        self.service = Service()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__application = Application(pine, settings, False)
+        self.__settings = settings
+        self.tags = ReleaseTag(pine, self, settings)
 
-    def __get_by_option(self, **options):
-        """
-        Private function to get releases using any possible key.
+    def __set(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        body: AnyObject,
+    ) -> None:
+        release_id = self.get(commit_or_id_or_raw_version, {"$select": "id"})["id"]
+        self.__pine.patch({"resource": "release", "id": release_id, "body": body})
 
-        Args:
-            **options: options keyword arguments.
-
-        Returns:
-            list: release info.
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
-        """
-
-        params = {"filters": options}
-
-        release = self.base_request.request(
-            "release", "GET", params=params, endpoint=self.settings.get("pine_endpoint")
-        )
-
-        if release["d"]:
-            return release["d"]
-        else:
-            raise exceptions.ReleaseNotFound(options)
-
-    def __get_by_raw_query(self, raw_query):
-        """
-        Private function to get releases using raw query.
-
-        Args:
-            raw_query (str): query field.
-
-        Returns:
-            list: release info.
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
-        """
-
-        release = self.base_request.request(
-            "release",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-        if release["d"]:
-            return release["d"]
-        else:
-            raise exceptions.ReleaseNotFound(raw_query)
-
-    def get(self, commit_or_id):
+    def get(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        options: AnyObject = {},
+    ) -> ReleaseType:
         """
         Get a specific release.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
+            or id (number) or an object with the unique `application` (number or string) & `rawVersion` (string)
+            pair of the release options
+            options(AnyObject): extra pine options to use
 
         Returns:
-            dict: release info.
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
+            ReleaseType: release info.
         """
 
-        if is_id(commit_or_id):
-            return self.__get_by_option(id=commit_or_id)[0]
+        if commit_or_id_or_raw_version is None:
+            raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
+
+        if is_id(commit_or_id_or_raw_version):
+            release = self.__pine.get(
+                {"resource": "release", "id": commit_or_id_or_raw_version, "options": options}  # type: ignore
+            )
+
+            if release is None:
+                raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
+            return release
         else:
-            raw_query = "$filter=startswith(commit, '{}')".format(commit_or_id)
+            if isinstance(commit_or_id_or_raw_version, dict):
+                raw_version = commit_or_id_or_raw_version["raw_version"]
+                app = commit_or_id_or_raw_version["application"]
+                app_id = self.__application.get(app, {"$select": "id"})["id"]
+                dollar_filter = {
+                    "raw_version": raw_version,
+                    "belongs_to__application": app_id,
+                }
+            else:
+                dollar_filter = {"commit": {"$startswith": commit_or_id_or_raw_version}}
+            releases = self.__pine.get(
+                {
+                    "resource": "release",
+                    "options": merge({"$filter": dollar_filter}, options),
+                }
+            )
 
-            try:
-                rt = self.__get_by_raw_query(raw_query)
+            if len(releases) == 0:
+                raise exceptions.ReleaseNotFound(str(commit_or_id_or_raw_version))
+            if len(releases) > 1:
+                raise exceptions.AmbiguousRelease(str(commit_or_id_or_raw_version))
+            return releases[0]
 
-                if len(rt) > 1:
-                    raise exceptions.AmbiguousRelease(commit_or_id)
-
-                return rt[0]
-            except exceptions.ReleaseNotFound:
-                raise exceptions.ReleaseNotFound(commit_or_id)
-
-    def get_all_by_application(self, app_id):
-        """
-        Get all releases from an application.
-
-        Args:
-            app_id (str): applicaiton id.
-
-        Returns:
-            list: release info.
-
-        """
-
-        return self.__get_by_option(belongs_to__application=app_id)
-
-    def get_latest_by_application(self, app_id):
-        """
-        Get the latest successful release for an application.
-
-        Args:
-            app_id (str): applicaiton id.
-
-        Returns:
-            dict: release info.
-
-        """
-
-        # fmt: off
-        raw_query = (
-            "$top=1"
-            "&$filter="
-                f"belongs_to__application%20eq%20'{app_id}'%20and%20"
-                "status%20eq%20'success'"
-            "&$orderby=created_at%20desc"
-        )
-        # fmt: on
-
-        try:
-            return self.__get_by_raw_query(raw_query)[0]
-        except exceptions.ReleaseNotFound:
-            raise exceptions.ReleaseNotFound(app_id)
-
-    def remove(self, commit_or_id):
-        """
-        Remove a specific release. This function only works if you log in using credentials or Auth Token.
-
-        Args:
-            commit_or_id: release commit (str) or id (int).
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-            AmbiguousRelease: if release commit is ambiguous.
-
-        """
-
-        if is_id(commit_or_id):
-            params = {"filters": {"id": commit_or_id}}
-        else:
-            raw_query = "$filter=startswith(commit, '{}')".format(commit_or_id)
-
-            try:
-                rt = self.__get_by_raw_query(raw_query)
-
-                if len(rt) > 1:
-                    raise exceptions.AmbiguousRelease(commit_or_id)
-
-                params = {"filters": {"id": rt[0]["id"]}}
-            except exceptions.ReleaseNotFound:
-                raise exceptions.ReleaseNotFound(commit_or_id)
-
-        return self.base_request.request(
-            "release",
-            "DELETE",
-            params=params,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def get_with_image_details(self, commit_or_id):
+    def get_with_image_details(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        image_options: AnyObject = {},
+        release_options: AnyObject = {},
+    ) -> ReleaseWithImageDetailsType:
         """
         Get a specific release with the details of the images built.
 
         Args:
-            commit_or_id: release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
+            image_options (AnyObject): extra pine options to use on image expand
+            release_options (AnyObject): extra pine options to use on release expand
 
         Returns:
             dict: release info.
@@ -191,244 +109,322 @@ class Release:
             ReleaseNotFound: if release couldn't be found.
 
         """
+        base_image_options = {
+            "$select": "id",
+            "$expand": {"is_a_build_of__service": {"$select": "service_name"}},
+        }
 
-        id = self.get(commit_or_id)["id"]
+        base_release_options = {
+            "$expand": {
+                "release_image": {"$expand": {"image": merge(base_image_options, image_options)}},
+                "is_created_by__user": {"$select": ["id", "username"]},
+            }
+        }
 
-        # TODO: pine client for python
-        # fmt: off
-        raw_query = (
-            "$expand="
-                "release_image("
-                    "$select=id"
-                    "&$expand=image("
-                        "$select=id"
-                        "&$expand=is_a_build_of__service("
-                            "$select=service_name"
-                        ")"
-                    ")"
-                "),"
-                "is_created_by__user($select=id,username)"
-            )
-        # fmt: on
-        raw_release = self.base_request.request(
-            "release({id})".format(id=id),
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
+        release: Any = self.get(
+            commit_or_id_or_raw_version,
+            merge(base_release_options, release_options),
         )
 
-        if raw_release["d"]:
-            raw_release = raw_release["d"][0]
-            release = {
-                "user": raw_release["is_created_by__user"][0],
-                "images": [
+        images = [ri["image"][0] for ri in release["release_image"]]
+
+        del release["release_image"]
+        release["images"] = sorted(
+            [
+                {
+                    **image_data,
+                    "service_name": image_data["is_a_build_of__service"][0]["service_name"],
+                }
+                for image_data in images
+                if "is_a_build_of__service" in image_data
+            ],
+            key=lambda x: x["service_name"],
+        )
+        release["user"] = release["is_created_by__user"][0]
+
+        return release
+
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[ReleaseType]:
+        """
+        Get all releases from an application.
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[ReleaseType]: release info.
+        """
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+
+        return self.__pine.get(
+            {
+                "resource": "release",
+                "options": merge(
                     {
-                        "id": i["id"],
-                        "service_name": i["image"][0]["is_a_build_of__service"][0]["service_name"],
-                    }
-                    for i in raw_release["release_image"]
-                ],
+                        "$filter": {"belongs_to__application": app_id},
+                        "$orderby": "created_at desc",
+                    },
+                    options,
+                ),
             }
+        )
 
-            raw_release.pop("is_created_by__user", None)
-            raw_release.pop("release_image", None)
-            release.update(raw_release)
-            return release
-        else:
-            raise exceptions.ReleaseNotFound(commit_or_id)
+    def get_latest_by_application(
+        self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
+    ) -> Optional[ReleaseType]:
+        """
+        Get the latest successful release for an application.
 
-    def create_from_url(self, app_id, url, flatten_tarball=True):
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            Optional[ReleaseType]: release info.
+
+        """
+        releases = self.get_all_by_application(
+            slug_or_uuid_or_id,
+            merge({"$top": 1, "$filter": {"status": "success"}}, options),
+        )
+
+        if len(releases) == 0:
+            return None
+        return releases[0]
+
+    def create_from_url(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        url: str,
+        flatten_tarball: bool = True,
+    ) -> int:
         """
         Create a new release built from the source in the provided url.
 
         Args:
-            app_id (int): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
             url (str): a url with a tarball of the project to build.
-            flatten_tarball (Optional[bool]): Should be true when the tarball includes an extra root folder with all the content.
+            flatten_tarball (bool): Should be true when the tarball includes an extra root folder
+            with all the content.
 
         Returns:
             int: release Id.
+        """
 
-        Raises:
-            BuilderRequestError: if builder returns any errors.
-
-        """  # noqa: E501
-
-        raw_query = f"$filter=id%20eq%20'{app_id}'" "&$select=app_name" "&$expand=organization($select=handle)"
-
-        app = self.base_request.request(
-            "application",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-        if len(app) == 0:
-            raise exceptions.ApplicationNotFound(app_id)
-        if len(app) > 1:
-            raise exceptions.AmbiguousApplication(app_id)
-
-        data = {"url": url, "shouldFlatten": flatten_tarball}
-
-        response = self.base_request.request(
-            "/v3/buildFromUrl?headless=true&owner={owner}&app={app_name}".format(
-                app_name=app[0]["app_name"], owner=app[0]["organization"][0]["handle"]
-            ),
-            "POST",
-            data=data,
-            endpoint=self.settings.get("builder_url"),
+        app_options = {
+            "$select": "app_name",
+            "$expand": {"organization": {"$select": "handle"}},
+        }
+        app = self.__application.get(slug_or_uuid_or_id, app_options)
+        return build_from_url(
+            app["organization"][0]["handle"],
+            app["app_name"],
+            url,
+            flatten_tarball,
+            self.__settings,
         )
 
-        if response["started"]:
-            return response["releaseId"]
-
-        raise exceptions.BuilderRequestError(response["message"])
-
-    def finalize(self, commit_or_id):
+    def finalize(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+    ) -> None:
         """
         Finalizes a draft release.
 
         Args:
-            commit_or_id (str): release commit (str) or id (int).
-
-        Returns:
-            OK
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
         """
 
-        id = self.get(commit_or_id)["id"]
+        self.__set(commit_or_id_or_raw_version, {"is_final": True})
 
-        params = {"filter": "id", "eq": id}
-
-        data = {"is_final": True}
-
-        return self.base_request.request(
-            "release",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def set_is_invalidated(self, commit_or_id, is_invalidated):
+    def set_is_invalidated(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        is_invalidated: bool,
+    ) -> None:
         """
         Set the is_invalidated property of a release to True or False.
 
         Args:
-            commit_or_id (str): release commit (str) or id (int).
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
             is_invalidated (bool): True for invalidated, False for validated.
-
-        Returns:
-            OK
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
         """
+        self.__set(commit_or_id_or_raw_version, {"is_invalidated": is_invalidated})
 
-        id = self.get(commit_or_id)["id"]
-
-        params = {"filter": "id", "eq": id}
-
-        data = {"is_invalidated": is_invalidated}
-
-        return self.base_request.request(
-            "release",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def set_note(self, commit_or_id, note):
+    def set_note(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        note: Optional[str] = None,
+    ) -> None:
         """
         Set a note for a release.
 
         Args:
-            commit_or_id (str): release commit (str) or id (int).
-            note (str): the note.
-
-        Returns:
-            OK
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
+            note (Optional[str]): the note.
         """
+        self.__set(commit_or_id_or_raw_version, {"note": note})
 
-        id = self.get(commit_or_id)["id"]
-
-        params = {"filter": "id", "eq": id}
-
-        data = {"note": note}
-
-        return self.base_request.request(
-            "release",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
-        )
-
-    def set_known_issue_list(self, commit_or_id, known_issue_list):
+    def set_known_issue_list(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        known_issue_list: Optional[str],
+    ) -> None:
         """
         Set a known issue list for a release.
 
         Args:
-            commit_or_id (str): release commit (str) or id (int).
-            known_issue_list (str): the known issue list.
-
-        Returns:
-            OK
-
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string)
+            known_issue_list (Optional[str]): the known issue list.
         """
+        self.__set(commit_or_id_or_raw_version, {"known_issue_list": known_issue_list})
 
-        id = self.get(commit_or_id)["id"]
 
-        params = {"filter": "id", "eq": id}
+class ReleaseTag(DependentResource[BaseTagType]):
+    """
+    This class implements release tag model for balena python SDK.
 
-        data = {"known_issue_list": known_issue_list}
+    """
 
-        return self.base_request.request(
-            "release",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
+    def __init__(self, pine: PineClient, release: Release, settings: Settings):
+        self.__release = release
+        self.__application = Application(pine, settings, False)
+        super(ReleaseTag, self).__init__(
+            "release_tag", "tag_key", "release", lambda id: self.__release.get(id, {"$select": "id"})["id"], pine
         )
 
-    def set_release_version(self, commit_or_id, semver):
+    def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[BaseTagType]:
         """
-        Set a version for a release.
+        Get all device tags for an application.
 
         Args:
-            commit_or_id (str): release commit (str) or id (int).
-            semver (str): the release version, only supports semver compliant values.
+            slug_or_uuid_or_id (int): application slug (string), uuid (string) or id (number)
+            options (AnyObject): extra pine options to use
 
         Returns:
-            OK
+            List[BaseTagType]: tags list.
 
-        Raises:
-            ReleaseNotFound: if release couldn't be found.
-
+        Examples:
+            >>> balena.models.release.tag.get_all_by_application(1005160)
         """
 
-        id = self.get(commit_or_id)["id"]
-
-        params = {"filter": "id", "eq": id}
-
-        data = {"semver": semver}
-
-        return self.base_request.request(
-            "release",
-            "PATCH",
-            params=params,
-            data=data,
-            endpoint=self.settings.get("pine_endpoint"),
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        return super(ReleaseTag, self)._get_all(
+            merge(
+                {
+                    "$filter": {
+                        "release": {
+                            "$any": {
+                                "$alias": "r",
+                                "$expr": {"r": {"belongs_to__application": app_id}},
+                            }
+                        }
+                    }
+                },
+                options,
+            )
         )
+
+    def get_all_by_release(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        options: AnyObject = {},
+    ) -> List[BaseTagType]:
+        """
+        Get all release tags for a release.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.release.tags.get_all_by_release(135)
+        """
+
+        release_opts = {
+            "$select": "id",
+            "$expand": {"release_tag": merge({"$orderby": "tag_key asc"}, options)},
+        }
+        return self.__release.get(commit_or_id_or_raw_version, release_opts)["release_tag"]
+
+    def get_all(self, options: AnyObject = {}) -> List[BaseTagType]:
+        """
+        Get all release tags.
+
+        Args:
+            options (AnyObject): extra pine options to use
+
+        Returns:
+            List[BaseTagType]: tags list.
+
+        Examples:
+            >>> balena.models.release.tags.get_all()
+        """
+        return super(ReleaseTag, self)._get_all(options)
+
+    def set(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+        value: str,
+    ) -> None:
+        """
+        Set a release tag (update tag value if it exists).
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+            value (str): tag value.
+
+        Returns:
+            BaseTagType: dict contains release
+
+        Examples:
+            >>> balena.models.release.tags.set(465307, 'releaseTag1', 'Python SDK')
+        """
+        super(ReleaseTag, self)._set(commit_or_id_or_raw_version, tag_key, value)
+
+    def get(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+    ) -> Optional[str]:
+        """
+        Get a single release tag.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+
+        Returns:
+            BaseTagType: dict contains release
+
+        Examples:
+            >>> balena.models.release.tags.get(465307, 'releaseTag1')
+        """
+        return super(ReleaseTag, self)._get(commit_or_id_or_raw_version, tag_key)
+
+    def remove(
+        self,
+        commit_or_id_or_raw_version: Union[str, int, ReleaseRawVersionApplicationPair],
+        tag_key: str,
+    ) -> None:
+        """
+        Remove a release tag.
+
+        Args:
+            commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
+            tag_key (str): tag key.
+
+        Examples:
+            >>> balena.models.release.tags.remove(135, 'releaseTag1')
+        """
+
+        super(ReleaseTag, self)._remove(commit_or_id_or_raw_version, tag_key)
+
+
+from .application import Application  # noqa: E402

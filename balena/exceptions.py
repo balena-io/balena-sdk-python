@@ -34,6 +34,20 @@ class MissingOption(BalenaException):
         self.message = Message.MISSING_OPTION.format(option=option)
 
 
+class SupervisorLocked(BalenaException):
+    """
+    Exception type for supervisor locked.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(SupervisorLocked, self).__init__()
+        self.message = Message.SUPERVISOR_LOCKED
+
+
 class InvalidOption(BalenaException):
     """
     Exception type for invalid option in settings or auth token.
@@ -170,6 +184,7 @@ class RequestError(BalenaException):
         super(RequestError, self).__init__()
         self.message = Message.REQUEST_ERROR.format(body=body)
         self.status_code = status_code
+        # print(self.message, status_code)
 
 
 class NotLoggedIn(BalenaException):
@@ -583,3 +598,17 @@ class BalenaInvalidDeviceType(BalenaException):
     def __init__(self, device_type):
         super(BalenaInvalidDeviceType, self).__init__()
         self.message = Message.BALENA_INVALID_DEVICE_TYPE.format(device_type=device_type)
+
+
+class TooManyRequests(BalenaException):
+    """
+    Exception type for too many requests.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(TooManyRequests, self).__init__()
+        self.message = Message.TOO_MANY_REQUESTS

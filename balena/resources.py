@@ -10,6 +10,7 @@ class Message:
 
     # Exception Error Message
     NOT_LOGGED_IN = "You have to log in!"
+    TOO_MANY_REQUESTS = "Too Many Requests"
     UNAUTHORIZED = "You have to log in or BALENA_API_KEY environment variable must be set!"
     REQUEST_ERROR = "Request error: {body}"
     KEY_NOT_FOUND = "Key not found: {key}"
@@ -49,4 +50,5 @@ class Message:
     BALENA_ORG_MEMBERSHIP_ROLE_NOT_FOUND = "Organization membership role not found: {role_name}"
     BALENA_APP_MEMBERSHIP_ROLE_NOT_FOUND = "Application membership role not found: {role_name}"
     APPLICATION_MEMBERSHIP_NOT_FOUND = "Application membership not found: {membership}"
-    BALENA_INVALID_DEVICE_TYPE = "Invalid device type: ${device_type}"
+    BALENA_INVALID_DEVICE_TYPE = "Invalid device type: {device_type}"
+    SUPERVISOR_LOCKED = "Supervisor is locked"

@@ -1,8 +1,24 @@
 from . import exceptions
-from .base_request import BaseRequest
+from .balena_auth import request
 from .settings import Settings
+from typing import TypedDict, Optional, Literal, Union, cast
+from typing_extensions import Unpack
+from .pine import PineClient
+from .twofactor_auth import TwoFactorAuth
+
 
 TOKEN_KEY = "token"
+
+
+class CredentialsType(TypedDict):
+    username: str
+    password: str
+
+
+class WhoamiResult(TypedDict):
+    id: int
+    username: str
+    email: str
 
 
 class Auth:
@@ -11,127 +27,59 @@ class Auth:
 
     """
 
-    _user_detail_cache = {}
-    _user_actor_id_cache = None
+    _user_detail_cache: Optional[WhoamiResult] = None
+    _user_actor_id_cache: Optional[int] = None
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.two_factor = TwoFactorAuth(settings)
+        self.__pine = pine
+        self.__settings = settings
 
-    def __get_user_data(self):
+    def __get_user_details(self, no_cache: bool = False) -> Optional[WhoamiResult]:
         """
         Get user details from token.
 
         Returns:
-            dict: user details.
-
-        Raises:
-            NotLoggedIn: if there is no user logged in.
-
+            Optional[WhoamiResult]: user details.
         """
-
-        if not self._user_detail_cache:
-            self._user_detail_cache = self.base_request.request(
-                "user/v1/whoami", "get", endpoint=self.settings.get("api_endpoint")
-            )
+        if not self._user_detail_cache or no_cache:
+            whoami = request(method="GET", settings=self.__settings, path="/user/v1/whoami")
+            if isinstance(whoami, dict) and set(whoami.keys()) == set(["id", "username", "email"]):
+                self._user_detail_cache = cast(WhoamiResult, whoami)
+            else:
+                raise exceptions.NotLoggedIn()
 
         return self._user_detail_cache
 
-    def __get_property(self, element):
+    def __get_property(self, element: Literal["id", "username", "email"]) -> Union[str, int]:
         """
         Get a property from user details.
 
         Args:
-            element (str): property name.
+            element (Literal["id", "username", "email"]): property name.
 
         Returns:
-            str: property value.
-
-        Raises:
-            InvalidOption: If getting a non-existent property.
-            NotLoggedIn: if there is no user logged in.
-
+            Union[str, int]: property value.
         """
-
-        if element in self.__get_user_data():
-            return self._user_detail_cache[element]
+        details = self.__get_user_details()
+        if details:
+            return details[element]
         else:
             raise exceptions.InvalidOption(element)
 
-    def login(self, **credentials):
+    def whoami(self) -> str:
         """
-        This function is used for logging into balena using email and password.
-
-        Args:
-            **credentials: credentials keyword arguments.
-                username (str): Balena email.
-                password (str): Password.
-
-        Returns:
-            This functions saves Auth Token to Settings and returns nothing.
-
-        Raises:
-            LoginFailed: if the email or password is invalid.
-
-        Examples:
-            >>> from balena import Balena
-            >>> balena = Balena()
-            >>> credentials = {'username': '<your email>', 'password': '<your password>'}
-            >>> balena.auth.login(**credentials)
-            (Empty Return)
-
-        """
-
-        token = self.authenticate(**credentials).decode("utf-8")
-        self._user_detail_cache = {}
-        self._user_actor_id_cache = None
-        self.settings.set(TOKEN_KEY, token)
-
-    def login_with_token(self, token):
-        """
-        This function is used for logging into balena using Auth Token.
-        Auth Token can be found in Preferences section on balena Dashboard.
-
-        Args:
-            token (str): Auth Token.
-
-        Returns:
-            This functions saves Auth Token to Settings and returns nothing.
-
-        Raises:
-            MalformedToken: if token is invalid.
-
-        Examples:
-            >>> from balena import Balena
-            >>> balena = Balena()
-            >>> auth_token = <your token>
-            >>> balena.auth.login_with_token(auth_token)
-            (Empty Return)
-
-        """
-        self._user_detail_cache = {}
-        self._user_actor_id_cache = None
-        self.settings.set(TOKEN_KEY, token)
-
-    def who_am_i(self):
-        """
-        This function retrieves username of logged in user.
+        Return current logged in username.
 
         Returns:
             str: username.
 
-        Raises:
-            NotLoggedIn: if there is no user logged in.
-
         Examples:
-            >>> balena.auth.who_am_i()
-            u'g_trong_nghia_nguyen'
-
+            >>> balena.auth.whoami()
         """
+        return str(self.__get_property("username"))
 
-        return self.__get_property("username")
-
-    def authenticate(self, **credentials):
+    def authenticate(self, **credentials: Unpack[CredentialsType]) -> str:
         """
         This function authenticates provided credentials information.
         You should use Auth.login when possible, as it takes care of saving the Auth Token and username as well.
@@ -144,24 +92,66 @@ class Auth:
         Returns:
             str: Auth Token,
 
-        Raises:
-            LoginFailed: if the username or password is invalid.
-
         Examples:
             >>> balena.auth.authenticate(username='<your email>', password='<your password>')
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5NywidXNlcm5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImVtYWlsIjoicmVzaW5weXRob25zZGt0ZXN0QGdtYWlsLmNvbSIsInNvY2lhbF9zZXJ2aWNlX2FjY291bnQiOlt7ImNyZWF0ZWRfYXQiOiIyMDE1LTExLTIzVDAzOjMwOjE0LjU3MloiLCJpZCI6MTE2NiwidXNlciI6eyJfX2RlZmVycmVkIjp7InVyaSI6Ii9ld2EvdXNlcig1Mzk3KSJ9LCJfX2lkIjo1Mzk3fSwicHJvdmlkZXIiOiJnb29nbGUiLCJyZW1vdGVfaWQiOiIxMDE4OTMzNzc5ODQ3NDg1NDMwMDIiLCJkaXNwbGF5X25hbWUiOiJUcm9uZyBOZ2hpYSBOZ3V5ZW4iLCJfX21ldGFkYXRhIjp7InVyaSI6Ii9ld2Evc29jaWFsX3NlcnZpY2VfYWNjb3VudCgxMTY2KSIsInR5cGUiOiIifX1dLCJoYXNfZGlzYWJsZWRfbmV3c2xldHRlciI6ZmFsc2UsImp3dF9zZWNyZXQiOiI0UDVTQzZGV1pIVU5JR0NDT1dJQUtST0tST0RMUTRNVSIsImhhc1Bhc3N3b3JkU2V0Ijp0cnVlLCJuZWVkc1Bhc3N3b3JkUmVzZXQiOmZhbHNlLCJwdWJsaWNfa2V5Ijp0cnVlLCJmZWF0dXJlcyI6W10sImludGVyY29tVXNlck5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImludGVyY29tVXNlckhhc2giOiI5YTM0NmUwZTgzNjk0MzYxODU3MTdjNWRhZTZkZWZhZDdiYmM4YzZkOGNlMzgxYjhhYTY5YWRjMTRhYWZiNGU0IiwicGVybWlzc2lvbnMiOltdLCJpYXQiOjE0NDgyNTYzMDYsImV4cCI6MTQ0ODg2MTEwNn0.U9lfEpPHBRvGQSayASE-glI-lQtAjyIFYd00uXOUzLI'
-
         """
-
-        return self.base_request.request(
-            "login_",
-            "POST",
-            data=credentials,
-            endpoint=self.settings.get("api_endpoint"),
-            auth=False,
+        req = request(
+            method="POST", settings=self.__settings, path="login_", body=credentials, send_token=False, return_raw=True
         )
 
-    def is_logged_in(self):
+        if not req.ok:
+            if req.status_code == 401:
+                raise exceptions.LoginFailed()
+            elif req.status_code == 429:
+                raise exceptions.TooManyRequests()
+
+        return req.content.decode()
+
+    def login(self, **credentials: Unpack[CredentialsType]) -> None:
+        """
+        This function is used for logging into balena using email and password.
+
+        Args:
+            **credentials: credentials keyword arguments.
+                username (str): Balena email.
+                password (str): Password.
+
+        Examples:
+            >>> from balena import Balena
+            ... balena = Balena()
+            ... credentials = {'username': '<your email>', 'password': '<your password>'}
+            ... balena.auth.login(**credentials)
+            ... # or
+            ... balena.auth.login(username='<your email>', password='<your password>')
+        """
+        token = self.authenticate(**credentials)
+        self._user_detail_cache = None
+        self._user_actor_id_cache = None
+        self.__settings.set(TOKEN_KEY, token)
+
+    def login_with_token(self, token: str) -> None:
+        """
+        This function is used for logging into balena using Auth Token.
+        Auth Token can be found in Preferences section on balena Dashboard.
+
+        Args:
+            token (str): Auth Token.
+
+        Returns:
+            This functions saves Auth Token to Settings and returns nothing.
+
+        Examples:
+            >>> from balena import Balena
+            >>> balena = Balena()
+            >>> auth_token = <your token>
+            >>> balena.auth.login_with_token(auth_token)
+
+        """
+        self._user_detail_cache = None
+        self._user_actor_id_cache = None
+        self.__settings.set(TOKEN_KEY, token)
+
+    def is_logged_in(self) -> bool:
         """
         This function checks if you're logged in
 
@@ -174,36 +164,46 @@ class Auth:
             ...     print('You are logged in!')
             ... else:
             ...     print('You are not logged in!')
-
         """
-
         try:
-            self.__get_user_data()
+            self.__get_user_details(True)
             return True
-        except (exceptions.RequestError, exceptions.Unauthorized):
+        except (
+            exceptions.RequestError,
+            exceptions.Unauthorized,
+            exceptions.NotLoggedIn,
+        ):
             return False
 
-    def get_token(self):
+    def get_token(self) -> Optional[str]:
         """
         This function retrieves Auth Token.
 
         Returns:
             str: Auth Token.
 
-        Raises:
-            InvalidOption: if not logged in and there is no token in Settings.
+        Examples:
+            >>> balena.auth.get_token()
+        """
+        try:
+            return self.__settings.get(TOKEN_KEY)
+        except exceptions.InvalidOption:
+            return None
+
+    def get_user_id(self) -> int:
+        """
+        This function retrieves current logged in user's id.
+
+        Returns:
+            int: user id.
 
         Examples:
             # If you are logged in.
-            >>> balena.auth.get_token()
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5NywidXNlcm5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImVtYWlsIjoicmVzaW5weXRob25zZGt0ZXN0QGdtYWlsLmNvbSIsInNvY2lhbF9zZXJ2aWNlX2FjY291bnQiOlt7ImNyZWF0ZWRfYXQiOiIyMDE1LTExLTIzVDAzOjMwOjE0LjU3MloiLCJpZCI6MTE2NiwidXNlciI6eyJfX2RlZmVycmVkIjp7InVyaSI6Ii9ld2EvdXNlcig1Mzk3KSJ9LCJfX2lkIjo1Mzk3fSwicHJvdmlkZXIiOiJnb29nbGUiLCJyZW1vdGVfaWQiOiIxMDE4OTMzNzc5ODQ3NDg1NDMwMDIiLCJkaXNwbGF5X25hbWUiOiJUcm9uZyBOZ2hpYSBOZ3V5ZW4iLCJfX21ldGFkYXRhIjp7InVyaSI6Ii9ld2Evc29jaWFsX3NlcnZpY2VfYWNjb3VudCgxMTY2KSIsInR5cGUiOiIifX1dLCJoYXNfZGlzYWJsZWRfbmV3c2xldHRlciI6ZmFsc2UsImp3dF9zZWNyZXQiOiI0UDVTQzZGV1pIVU5JR0NDT1dJQUtST0tST0RMUTRNVSIsImhhc1Bhc3N3b3JkU2V0Ijp0cnVlLCJuZWVkc1Bhc3N3b3JkUmVzZXQiOmZhbHNlLCJwdWJsaWNfa2V5Ijp0cnVlLCJmZWF0dXJlcyI6W10sImludGVyY29tVXNlck5hbWUiOiJnX3Ryb25nX25naGlhX25ndXllbiIsImludGVyY29tVXNlckhhc2giOiI5YTM0NmUwZTgzNjk0MzYxODU3MTdjNWRhZTZkZWZhZDdiYmM4YzZkOGNlMzgxYjhhYTY5YWRjMTRhYWZiNGU0IiwicGVybWlzc2lvbnMiOltdLCJpYXQiOjE0NDgyNTY2ODMsImV4cCI6MTQ0ODg2MTQ4M30.oqq4DUI4cTbhzYznSwODZ_4zLOeGiJYuZRn82gTfQ6o'
-
-
+            >>> balena.auth.get_user_id()
         """
+        return int(self.__get_property("id"))
 
-        return self.settings.get(TOKEN_KEY)
-
-    def get_user_actor_id(self):
+    def get_user_actor_id(self) -> int:
         """
         Get current logged in user's actor id.
 
@@ -213,77 +213,41 @@ class Auth:
         Examples:
             # If you are logged in.
             >>> balena.auth.get_user_actor_id()
-            9761945
-
         """
+        return self.__pine.get(
+            {
+                "resource": "user",
+                "id": self.get_user_id(),
+                "options": {"$select": "actor"},
+            }
+        )["actor"]
 
-        if self._user_actor_id_cache is None:
-            self._user_actor_id_cache = self.base_request.request(
-                f"user({self.get_user_id()})",
-                "get",
-                raw_query="$select=actor",
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"][0]["actor"]
-
-        return self._user_actor_id_cache
-
-    def get_user_id(self):
-        """
-        This function retrieves current logged in user's id.
-
-        Returns:
-            str: user id.
-
-        Raises:
-            InvalidOption: if not logged in.
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_user_id()
-            5397
-
-        """
-
-        return self.__get_property("id")
-
-    def get_email(self):
+    def get_email(self) -> str:
         """
         This function retrieves current logged in user's get_email
 
         Returns:
             str: user email.
 
-        Raises:
-            InvalidOption: if not logged in.
-
         Examples:
             # If you are logged in.
             >>> balena.auth.get_email()
-            u'balenapythonsdktest@gmail.com'
-
         """
+        return str(self.__get_property("email"))
 
-        return self.__get_property("email")
-
-    def log_out(self):
+    def logout(self) -> None:
         """
         This function is used for logging out from balena.
 
-        Returns:
-            bool: True if successful, False otherwise.
-
         Examples:
             # If you are logged in.
-            >>> balena.auth.log_out()
-            True
-
+            >>> balena.auth.logout()
         """
-
-        self._user_detail_cache = {}
+        self._user_detail_cache = None
         self._user_actor_id_cache = None
-        return self.settings.remove(TOKEN_KEY)
+        self.__settings.remove(TOKEN_KEY)
 
-    def register(self, **credentials):
+    def register(self, **creentials: Unpack[CredentialsType]) -> str:
         """
         This function is used for registering to balena.
 
@@ -295,20 +259,14 @@ class Auth:
         Returns:
             str: Auth Token for new account.
 
-        Raises:
-            RequestError: if error occurs during registration.
-
         Examples:
             >>> credentials = {'email': '<your email>', 'password': '<your password>'}
             >>> balena.auth.register(**credentials)
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTM5OCwidXNlcm5hbWUiOiJ0ZXN0MjcxMCIsImVtYWlsIjoidGVzdDI3MTBAZ21haWwuY29tIiwic29jaWFsX3NlcnZpY2VfYWNjb3VudCI6bnVsbCwiaGFzX2Rpc2FibGVkX25ld3NsZXR0ZXIiOmZhbHNlLCJqd3Rfc2VjcmV0IjoiQlJXR0ZIVUgzNVBKT0VKTVRSSVo2MjdINjVKVkJKWDYiLCJoYXNQYXNzd29yZFNldCI6dHJ1ZSwibmVlZHNQYXNzd29yZFJlc2V0IjpmYWxzZSwicHVibGljX2tleSI6ZmFsc2UsImZlYXR1cmVzIjpbXSwiaW50ZXJjb21Vc2VyTmFtZSI6InRlc3QyNzEwIiwiaW50ZXJjb21Vc2VySGFzaCI6IjNiYTRhZDRkZjk4MDQ1OTc1YmU2ZGUwYWJmNjFiYjRmYWY4ZmEzYTljZWI0YzE4Y2QxOGU1NmViNmI1NzkxZDAiLCJwZXJtaXNzaW9ucyI6W10sImlhdCI6MTQ0ODI1NzgyOCwiZXhwIjoxNDQ4ODYyNjI4fQ.chhf6deZ9BNDMmPr1Hm-SlRoWkK7t_4cktAPo12aCoE'
-
         """
-
-        return self.base_request.request(
-            "user/register",
-            "POST",
-            data=credentials,
-            endpoint=self.settings.get("api_endpoint"),
-            auth=False,
+        return request(
+            method="POST",
+            settings=self.__settings,
+            path="/user/register",
+            body=creentials,
+            send_token=False,
         )

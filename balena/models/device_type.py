@@ -1,125 +1,168 @@
+from typing import List, Union
+
 from .. import exceptions
-from ..base_request import BaseRequest
+from ..pine import PineClient
 from ..settings import Settings
-from ..utils import is_id
+from ..types import AnyObject
+from ..types.models import DeviceTypeType
+from ..utils import merge
 
 
-class DeviceType(object):
+class DeviceType:
     """
     This class implements user API key model for balena python SDK.
 
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__settings = settings
 
-    def get_all(self):
-        """
-        Get all device types.
-
-        Returns:
-            list: list contains info of device types.
-
-        """
-
-        return self.base_request.request("device_type", "GET", endpoint=self.settings.get("pine_endpoint"))["d"]
-
-    def get_all_supported(self):
-        """
-        Get all supported device types.
-
-        Returns:
-            list: list contains info of all supported device types.
-
-        """
-
-        # fmt: off
-        raw_query = (
-            "$expand=is_of__cpu_architecture($select=slug,id)"
-            "&$filter="
-                "is_default_for__application/any(idfa:idfa/is_host%20eq%20true%20and%20is_archived%20eq%20false)"
-        )
-        # fmt: on
-
-        return self.base_request.request(
-            "device_type",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
-
-    def get(self, id_or_slug):
+    def get(self, id_or_slug: Union[str, int], options: AnyObject = {}) -> DeviceTypeType:
         """
         Get a single device type.
 
         Args:
-            id_or_slug (str): device type slug or alias (string) or id (number).
+            id_or_slug (Union[str, int]): device type slug or alias (string) or id (int).
+            options (AnyObject): extra pine options to use.
 
+        Returns:
+            DeviceTypeType: Returns the device type
         """
 
-        if not id_or_slug:
+        if id_or_slug is None:
             raise exceptions.InvalidDeviceType(id_or_slug)
 
-        if is_id(id_or_slug):
-            # ID
-            params = {"filter": "id", "eq": id_or_slug}
-
-            device_type = self.base_request.request(
-                "device_type",
-                "GET",
-                params=params,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
+        if isinstance(id_or_slug, str):
+            device_types = self.get_all(
+                merge(
+                    {
+                        "$top": 1,
+                        "$filter": {
+                            "device_type_alias": {
+                                "$any": {
+                                    "$alias": "dta",
+                                    "$expr": {
+                                        "dta": {
+                                            "is_referenced_by__alias": id_or_slug,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    options,
+                )
+            )
+            device_type = None
+            if len(device_types) > 0:
+                device_type = device_types[0]
         else:
-            # Slug or alias
-
-            raw_query = (
-                "$top=1"
-                "&$expand=is_of__cpu_architecture($select=slug,id)"
-                f"&$filter=device_type_alias/any(dta:dta/is_referenced_by__alias%20eq%20'{id_or_slug}')"
+            device_type = self.__pine.get(
+                {
+                    "resource": "device_type",
+                    "id": id_or_slug,
+                    "options": options,
+                }
             )
 
-            device_type = self.base_request.request(
-                "device_type",
-                "GET",
-                raw_query=raw_query,
-                endpoint=self.settings.get("pine_endpoint"),
-            )["d"]
-
-        if not device_type:
+        if device_type is None:
             raise exceptions.InvalidDeviceType(id_or_slug)
 
-        return device_type[0]
+        return device_type
 
-    def get_by_slug_or_name(self, slug_or_name):
+    def get_all(self, options: AnyObject = {}) -> List[DeviceTypeType]:
+        """
+        Get all device types.
+
+        Args:
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[DeviceTypeType]: list contains info of device types.
+        """
+        opts = merge({"$orderby": "name asc"}, options)
+        return self.__pine.get(
+            {
+                "resource": "device_type",
+                "options": opts,
+            }
+        )
+
+    def get_all_supported(self, options: AnyObject = {}):
+        """
+        Get all supported device types.
+
+        Args:
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[DeviceTypeType]: list contains info of all supported device types.
+        """
+
+        return self.get_all(
+            merge(
+                {
+                    "$filter": {
+                        "is_default_for__application": {
+                            "$any": {
+                                "$alias": "idfa",
+                                "$expr": {
+                                    "idfa": {
+                                        "is_host": True,
+                                        "is_archived": False,
+                                        "owns__release": {
+                                            "$any": {
+                                                "$alias": "r",
+                                                "$expr": {
+                                                    "r": {
+                                                        "status": "success",
+                                                        "is_final": True,
+                                                        "is_invalidated": False,
+                                                    }
+                                                },
+                                            }
+                                        },
+                                    }
+                                },
+                            }
+                        }
+                    }
+                },
+                options,
+            )
+        )
+
+    def get_by_slug_or_name(self, slug_or_name: str, options: AnyObject = {}) -> DeviceTypeType:
         """
         Get a single device type by slug or name.
 
         Args:
             slug_or_name (str): device type slug or name.
+            options (AnyObject): extra pine options to use.
 
+        Returns:
+            DeviceTypeType: Returns the device type
         """
 
-        raw_query = (
-            "$top=1"
-            "&$expand=is_of__cpu_architecture($select=slug,id)"
-            f"&$filter=name%20eq%20'{slug_or_name}'%20or%20slug%20eq%20'{slug_or_name}'"
+        device_types = self.get_all(
+            merge(
+                {
+                    "$top": 1,
+                    "$filter": {"$or": [{"name": slug_or_name}, {"slug": slug_or_name}]},
+                },
+                options,
+            )
         )
 
-        device_type = self.base_request.request(
-            "device_type",
-            "GET",
-            raw_query=raw_query,
-            endpoint=self.settings.get("pine_endpoint"),
-        )["d"]
+        device_type = device_types[0] if len(device_types) > 0 else None
 
-        if not device_type:
+        if device_type is None:
             raise exceptions.InvalidDeviceType(slug_or_name)
 
-        return device_type[0]
+        return device_type
 
-    def get_name(self, slug):
+    def get_name(self, slug: str) -> str:
         """
         Get display name for a device.
 
@@ -128,9 +171,9 @@ class DeviceType(object):
 
         """
 
-        return self.get_by_slug_or_name(slug)["name"]
+        return self.get_by_slug_or_name(slug, {"$select": "name"})["name"]
 
-    def get_slug_by_name(self, name):
+    def get_slug_by_name(self, name: str) -> str:
         """
         Get device slug.
 
@@ -139,4 +182,4 @@ class DeviceType(object):
 
         """
 
-        return self.get_by_slug_or_name(name)["slug"]
+        return self.get_by_slug_or_name(name, {"$select": "slug"})["slug"]

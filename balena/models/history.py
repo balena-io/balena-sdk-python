@@ -1,209 +1,135 @@
-from abc import ABC
 from datetime import datetime, timedelta
+from typing import List, Optional, Union
 
 from .. import exceptions
-from ..base_request import BaseRequest
+from ..pine import PineClient
+from ..types import AnyObject
+from ..types.models import DeviceHistoryType
+from ..utils import is_full_uuid, is_id, merge
 from ..settings import Settings
-from ..utils import is_full_uuid, is_id
+from .application import Application
 
 
-class History:
-    """
-    This class is a wrapper for history models.
+def history_timerange_filter_with_guard(from_date=None, to_date=None):
+    from_date_filter = {}
+    to_date_filter = {}
 
-    """
+    if from_date is not None:
+        if not isinstance(from_date, datetime):
+            raise exceptions.InvalidParameter("from_date", from_date)
+        else:
+            from_date_filter = {"$ge": from_date}
 
-    def __init__(self):
-        self.device_history = DeviceHistory()
+    if to_date is not None:
+        if not isinstance(to_date, datetime):
+            raise exceptions.InvalidParameter("to_date", to_date)
+        else:
+            to_date_filter = {"$le": to_date}
 
+    filter = {**from_date_filter, **to_date_filter}
 
-class HistoryBaseClass(ABC):
-    """
-    This class is a private abstract base class for history models.
+    if filter == {}:
+        return {}
 
-    """
-
-    def __init__(self):
-        self.settings = Settings()
-        self.base_request = BaseRequest()
-
-    def _history_timerange_filter_with_guard(self, fromDate=None, toDate=None):
-        rawTimeRangeFilters = []
-        if fromDate is not None:
-            if isinstance(fromDate, datetime):
-                rawTimeRangeFilters.append(f"(created_at ge datetime'{fromDate.isoformat()}')")
-            else:
-                raise exceptions.InvalidParameter("fromDate", fromDate)
-
-        if toDate is not None:
-            if isinstance(toDate, datetime):
-                rawTimeRangeFilters.append(f"(created_at le datetime'{toDate.isoformat()}')")
-            else:
-                raise exceptions.InvalidParameter("toDate", toDate)
-
-        return rawTimeRangeFilters
-
-    def _history_compile_raw_filter(self, **options):
-        rawOptionsFilter = []
-        for key in options:
-            rawOptionsFilter.append(f"{key}%20eq%20'{options[key]}'")
-        return rawOptionsFilter
-
-    def _get_history_by_resource_and_filter(self, resource_name, fromDate=None, toDate=None, **options):
-        rawTimeFilterArray = self._history_timerange_filter_with_guard(fromDate=fromDate, toDate=toDate)
-        rawOptionsFilter = self._history_compile_raw_filter(**options)
-
-        rawFilterString = "$filter=" + " and ".join(rawTimeFilterArray + rawOptionsFilter)
-
-        history_resource = resource_name + "_history"
-        return self.base_request.request(
-            history_resource,
-            "GET",
-            endpoint=self.settings.get("pine_endpoint"),
-            raw_query=rawFilterString,
-        )["d"]
+    return {"created_at": filter}
 
 
-class DeviceHistory(HistoryBaseClass):
+class DeviceHistory:
     """
     This class implements device history model for balena python SDK.
 
     """
 
-    def get_all_by_device(self, uuid_or_id, fromDate=datetime.utcnow() + timedelta(days=-7), toDate=None):
+    def __init__(self, pine: PineClient, settings: Settings):
+        self.__pine = pine
+        self.__application = Application(pine, settings)
+
+    def get_all_by_device(
+        self,
+        uuid_or_id: Union[str, int],
+        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        to_date: Optional[datetime] = None,
+        options: AnyObject = {},
+    ) -> List[DeviceHistoryType]:
         """
         Get all device history entries for a device.
 
         Args:
-            uuid_or_id (str): device uuid or id.
+            uuid_or_id (str): device uuid (32 / 62 digits string) or id (number) __note__: No short IDs supported
+            from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+            to_date (datetime): history entries younger or equal to this date.
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: device history entries.
+            List[DeviceHistoryType]: device history entries.
 
         Examples:
-            >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab')
-            >>> balena.models.history.device_history.get_all_by_device('6046335305c8142883a4466d30abe211')
-            >>> balena.models.history.device_history.get_all_by_device(11196426)
-            >>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-5))
-            >>> balena.models.history.device_history.get_all_by_device(11196426, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
-            [
-                {
-                    "id": 48262901,
-                    "tracks__device": {
-                        "__id": 11196426,
-                        "__deferred": {"uri": "/v6/device(@id)?@id=11196426"},
-                    },
-                    "tracks__actor": {
-                        "__id": 14923839,
-                        "__deferred": {"uri": "/v6/actor(@id)?@id=14923839"},
-                    },
-                    "uuid": "6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab",
-                    "is_active": False,
-                    "belongs_to__application": {
-                        "__id": 2036095,
-                        "__deferred": {"uri": "/v6/application(@id)?@id=2036095"},
-                    },
-                    "is_running__release": {
-                        "__id": 2534745,
-                        "__deferred": {"uri": "/v6/release(@id)?@id=2534745"},
-                    },
-                    "should_be_running__release": {
-                        "__id": 2534744,
-                        "__deferred": {"uri": "/v6/release(@id)?@id=2534744"},
-                    },
-                    "should_be_managed_by__release": None,
-                    "os_version": None,
-                    "os_variant": None,
-                    "supervisor_version": None,
-                    "is_of__device_type": {
-                        "__id": 57,
-                        "__deferred": {"uri": "/v6/device_type(@id)?@id=57"},
-                    },
-                    "end_timestamp": None,
-                    "created_at": "2023-03-28T20:28:22.773Z",
-                    "is_created_by__actor": {
-                        "__id": 14845379,
-                        "__deferred": {"uri": "/v6/actor(@id)?@id=14845379"},
-                    },
-                    "is_ended_by__actor": None,
-                    "__metadata": {"uri": "/v6/device_history(@id)?@id=48262901"},
-                }
-            ]
+            >>> balena.models.device.history.get_all_by_device('6046335305c8142883a4466d30abe211')
+            >>> balena.models.device.history.get_all_by_device(11196426)
+            >>> balena.models.device.history.get_all_by_device(
+            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ... )
+            >>> balena.models.device.history.get_all_by_device(
+            ...     11196426,
+            ...     from_date=datetime.utcnow() + timedelta(days=-10),
+            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ... )
 
-        """  # noqa: E501
-
+        """
+        dollar_filter = history_timerange_filter_with_guard(from_date, to_date)
         if is_id(uuid_or_id):
-            return self._get_history_by_resource_and_filter(
-                "device",
-                fromDate=fromDate,
-                toDate=toDate,
-                tracks__device=int(uuid_or_id),
-            )
+            dollar_filter = {**dollar_filter, "tracks__device": uuid_or_id}
         elif is_full_uuid(uuid_or_id):
-            return self._get_history_by_resource_and_filter("device", fromDate=fromDate, toDate=toDate, uuid=uuid_or_id)
+            dollar_filter = {**dollar_filter, "uuid": uuid_or_id}
         else:
             raise exceptions.InvalidParameter("uuid_or_id", uuid_or_id)
 
-    def get_all_by_application(self, app_id, fromDate=datetime.utcnow() + timedelta(days=-7), toDate=None):
+        return self.__pine.get({"resource": "device_history", "options": merge({"$filter": dollar_filter}, options)})
+
+    def get_all_by_application(
+        self,
+        slug_or_uuid_or_id: Union[str, int],
+        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        to_date: Optional[datetime] = None,
+        options: AnyObject = {},
+    ) -> List[DeviceHistoryType]:
         """
         Get all device history entries for an application.
 
         Args:
-            app_id (Union[str, int]): application id.
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            from_date (datetime): history entries newer than or equal to this timestamp. Defaults to 7 days ago
+            to_date (datetime): history entries younger or equal to this date.
+            options (AnyObject): extra pine options to use
 
         Returns:
-            list: device history entries.
+            List[DeviceHistoryType]: device history entries.
 
         Examples:
-            >>> balena.models.history.device.get_all_by_application(2036095)
-            >>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-5))
-            >>> balena.models.history.device.get_all_by_application(2036095, fromDate=datetime.utcnow() + timedelta(days=-10), toDate=fromDate = datetime.utcnow() + timedelta(days=-5)))
-            [
-                {
-                    "id": 48262901,
-                    "tracks__device": {
-                        "__id": 11196426,
-                        "__deferred": {"uri": "/v6/device(@id)?@id=11196426"},
-                    },
-                    "tracks__actor": {
-                        "__id": 14923839,
-                        "__deferred": {"uri": "/v6/actor(@id)?@id=14923839"},
-                    },
-                    "uuid": "6046335305c8142883a4466d30abe211c3a648251556c23520dcff503c9dab",
-                    "is_active": False,
-                    "belongs_to__application": {
-                        "__id": 2036095,
-                        "__deferred": {"uri": "/v6/application(@id)?@id=2036095"},
-                    },
-                    "is_running__release": {
-                        "__id": 2534745,
-                        "__deferred": {"uri": "/v6/release(@id)?@id=2534745"},
-                    },
-                    "should_be_running__release": {
-                        "__id": 2534744,
-                        "__deferred": {"uri": "/v6/release(@id)?@id=2534744"},
-                    },
-                    "should_be_managed_by__release": None,
-                    "os_version": None,
-                    "os_variant": None,
-                    "supervisor_version": None,
-                    "is_of__device_type": {
-                        "__id": 57,
-                        "__deferred": {"uri": "/v6/device_type(@id)?@id=57"},
-                    },
-                    "end_timestamp": None,
-                    "created_at": "2023-03-28T20:28:22.773Z",
-                    "is_created_by__actor": {
-                        "__id": 14845379,
-                        "__deferred": {"uri": "/v6/actor(@id)?@id=14845379"},
-                    },
-                    "is_ended_by__actor": None,
-                    "__metadata": {"uri": "/v6/device_history(@id)?@id=48262901"},
-                }
-            ]
+            >>> balena.models.device.history.get_all_by_application('myorg/myapp')
+            >>> balena.models.device.history.get_all_by_application(11196426)
+            >>> balena.models.device.history.get_all_by_application(
+            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ... )
+            >>> balena.models.device.history.get_all_by_application(
+            ...     11196426,
+            ...     from_date=datetime.utcnow() + timedelta(days=-10),
+            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ... )
+        """
+        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
-        """  # noqa: E501
-
-        return self._get_history_by_resource_and_filter(
-            "device", fromDate=fromDate, toDate=toDate, belongs_to__application=int(app_id)
+        return self.__pine.get(
+            {
+                "resource": "device_history",
+                "options": merge(
+                    {
+                        "$filter": {
+                            **history_timerange_filter_with_guard(from_date, to_date),
+                            "belongs_to__application": app_id,
+                        }
+                    },
+                    options,
+                ),
+            }
         )

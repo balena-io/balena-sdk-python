@@ -29,11 +29,12 @@ If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-python/issues), we'll be happy to help.
 """
 
+from typing import Optional
 from .auth import Auth
 from .logs import Logs
 from .models import Models
-from .settings import Settings
-from .twofactor_auth import TwoFactorAuth
+from .pine import PineClient
+from .settings import SettingsConfig, Settings
 
 __version__ = "12.7.0"
 
@@ -49,9 +50,9 @@ class Balena:
 
     """
 
-    def __init__(self):
-        self.settings = Settings()
-        self.logs = Logs()
-        self.auth = Auth()
-        self.models = Models()
-        self.twofactor_auth = TwoFactorAuth()
+    def __init__(self, settings: Optional[SettingsConfig] = None):
+        self.settings = Settings(settings)
+        self.pine = PineClient(self.settings, __version__)
+        self.logs = Logs(self.pine, self.settings)
+        self.auth = Auth(self.pine, self.settings)
+        self.models = Models(self.pine, self.settings)

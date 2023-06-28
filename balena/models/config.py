@@ -1,42 +1,48 @@
-from ..base_request import BaseRequest
+from typing import List, TypedDict, Optional
+
+from ..balena_auth import request
+from ..utils import normalize_device_os_version
 from ..settings import Settings
+
+
+class GaConfig(TypedDict):
+    site: str
+    id: str
+
+
+class ConfigType(TypedDict):
+    deployment: Optional[str]
+    deviceUrlsBase: str
+    adminUrl: str
+    gitServerUrl: str
+    ga: Optional[GaConfig]
+    mixpanelToken: Optional[str]
+    intercomAppId: Optional[str]
+    recurlyPublicKey: Optional[str]
+    DEVICE_ONLINE_ICON: str
+    DEVICE_OFFLINE_ICON: str
+    signupCodeRequired: bool
+    supportedSocialProviders: List[str]
 
 
 class Config:
     """
     This class implements configuration model for balena python SDK.
 
-    Attributes:
-        _config (dict): caching configuration.
-
     """
 
-    def __init__(self):
-        self.base_request = BaseRequest()
-        self.settings = Settings()
-        self._config = {}
-        self._device_types = None
+    def __init__(self, settings: Settings):
+        self.__settings = settings
 
-    def _get_config(self, key):
-        if self._config:
-            return self._config[key]
-        # Load all config again
-        self.get_all()
-        return self._config[key]
-
-    def get_all(self):
+    def get_all(self) -> ConfigType:
         """
         Get all configuration.
 
         Returns:
-            dict: configuration information.
+            ConfigType: configuration information.
 
         Examples:
             >>> balena.models.config.get_all()
-            { all configuration details }
-
         """
 
-        if not self._config:
-            self._config = self.base_request.request("config", "GET", endpoint=self.settings.get("api_endpoint"))
-        return self._config
+        return normalize_device_os_version(request(method="GET", path="/config", settings=self.__settings))

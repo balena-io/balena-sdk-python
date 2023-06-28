@@ -4,17 +4,14 @@ from tests.helper import TestHelper
 
 
 class TestDeviceType(unittest.TestCase):
-    helper = None
-    balena = None
-
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
 
-    def tearDown(self):
-        # Wipe all apps after every test case.
-        self.helper.wipe_application()
+    @classmethod
+    def tearDownClass(cls):
+        cls.helper.wipe_application()
 
     def test_get(self):
         # should get the device type for a known slug.
