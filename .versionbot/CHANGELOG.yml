@@ -1,4 +1,154 @@
 - commits:
+    - subject: Updates documentation and final type hints
+      hash: 2b7040019e94346a8102be05d2a27c6978bab775
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Send X-Balena-Client header for request tracing
+      hash: 1222f1af827069520b717354b008ce69b4298965
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Add scoped pinejs and sttings for each model
+      hash: 948c603e3dca2a6311b930397934876ae3b59e31
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Improve type hints with navigation resources
+      hash: 3278919d90a05e9afedde7036d4928e3bb1aa77a
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Add billing and credit bundle models
+      hash: afa9773e530a8c8fe52903d76741a9af95086321
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Fix api_key expiry_date model
+      hash: c7219ff6d261564591768ae5d18612dbecee8090
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Improve docs for release v13
+      hash: c0e5c1436a02bf1f5b4da54566d57f5f3ef49e5c
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+    - subject: Add 2fa tests and removes get_code function
+      hash: a019caf2eb8b38c1184b1dabe3ca90887098b02c
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Add logs tests and refactors inner working
+      hash: 0433bb4a758172c4e8326b51da47ce03e786de7d
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Refactor auth module and adds tests
+      hash: 6dd11eae184a69f926d1a7be4c0abb1b54c2042d
+      body: ""
+      footer:
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Change function scopes to match SDK scopes
+      hash: a488cef9152f48d337a742282919fb15a4d991a4
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Move key history and supervisor models to match current node-sdk
+      hash: 315aed17aa36f6f251c281879c3af339425e1a35
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Use pine-client on release image and service models
+      hash: 5a5a86a00c50720830880fedb7faf1cc701f2913
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Add device_os model
+      hash: 0983bc8bb2edac739827564a98cc1ff44b1ba037
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Use pine-client on environment variables models
+      hash: 73fc6e0c30412f541c02e75b304c9ae34c3329c8
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Add dependent_resource generic class over BaseTag
+      hash: f3746da13f04610647660293022883e85a1ab264
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Uses pine-client on device model
+      hash: cdc7321f090f9a0880adc49bb04f2c18b2459a2c
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Uses pine_client on device_type model
+      hash: 743a8c9b18e8e50efd51305bc901ecc2323c9cba
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Adds pine client to application model
+      hash: 02bafcc535e4726ad301e7c5a48f868b361cc336
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: Adds pine client python and refactors api_key model
+      hash: 34e5f209f1b02b83c2e367c448435e680f007fb4
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: SDK Version 13 with pine client and semver bump
+      hash: 1e0897bc69e8ff62f4013df9b0665a48c12189c7
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+  version: 13.0.0
+  title: ""
+  date: 2023-06-28T10:53:53.599Z
+- commits:
     - subject: Allow HUP between dev OS variants
       hash: e8d8581c487840441e4ba8438ad9a0215857b29a
       body: ""
