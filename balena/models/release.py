@@ -1,4 +1,5 @@
 from typing import Any, List, Optional, TypedDict, Union
+from semver.version import Version
 
 from .. import exceptions
 from ..builder import build_from_url
@@ -279,6 +280,22 @@ class Release:
             known_issue_list (Optional[str]): the known issue list.
         """
         self.__set(commit_or_id_or_raw_version, {"known_issue_list": known_issue_list})
+
+    def set_release_version(
+        self,
+        commit_or_id: Union[str, int],
+        semver: str,
+    ) -> None:
+        """
+        Set a direct semver for a given release.
+
+        Args:
+            commit_or_id(Union[str, int]): release commit (string) or id (int)
+            semver (str): the version to be released, must be a valid semver
+        """
+        if not Version.is_valid(semver):
+            raise exceptions.InvalidParameter("semver", semver)
+        self.__set(commit_or_id, {"semver": semver})
 
 
 class ReleaseTag(DependentResource[BaseTagType]):
