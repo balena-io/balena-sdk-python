@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add set_release_version for release model
+      hash: f7692a3bda94214a550430091fce451237ec0efe
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 13.0.1
+  title: ""
+  date: 2023-07-04T13:52:27.629Z
+- commits:
     - subject: Updates documentation and final type hints
       hash: 2b7040019e94346a8102be05d2a27c6978bab775
       body: ""
