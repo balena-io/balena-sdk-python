@@ -239,7 +239,18 @@ class TestRelease(unittest.TestCase):
             updated_release = self.balena.models.release.get(release["id"], {"$select": ["id", "known_issue_list"]})
             self.assertEqual(updated_release, {"id": release["id"], "known_issue_list": known_issue_list})
 
-    def test_11_get_latest_by_application(self):
+    def test_11_set_release_version(self):
+        for field in ["id", "commit"]:
+            release = self.mc_app["current_release"]
+            release_param = self.__get_param(field, release)
+            semver = "1.2.3"
+            self.balena.models.release.set_release_version(release_param, semver)  # type: ignore
+            with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+                self.balena.models.release.set_release_version(release_param, "inva.sem.ver")  # type: ignore
+            updated_release = self.balena.models.release.get(release["id"], {"$select": ["id", "semver"]})
+            self.assertEqual(updated_release, {"id": release["id"], "semver": semver})
+
+    def test_12_get_latest_by_application(self):
         app_id = self.mc_app["app"]["id"]
         user_id = self.balena.auth.get_user_id()
 
@@ -284,7 +295,7 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(release["commit"], "errored-then-fixed-release-commit")  # type: ignore
             self.assertEqual(release["belongs_to__application"]["__id"], app["id"])  # type: ignore
 
-    def test_12_releases_sharing_same_commit_root(self):
+    def test_13_releases_sharing_same_commit_root(self):
         user_id = self.balena.auth.get_user_id()
         app = self.mc_app["app"]
 
