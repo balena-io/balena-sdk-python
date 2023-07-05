@@ -37,6 +37,7 @@ balena = Balena({
     "token_refresh_interval": str(1 * 1000 * 60 * 60),    # 1 hour
     "timeout": str(30 * 1000),                            # request timeout, 30s
 })
+```
 
 Notice that if you want to change for the staging environment, you could simply do:
 balena = Balena({"balena_host": "balena-staging.com"})
