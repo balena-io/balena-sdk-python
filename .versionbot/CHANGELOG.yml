@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix docs for service variables
+      hash: d4ffdecf0bae143f72366ad866b3d3ec5318083d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 13.0.2
+  title: ""
+  date: 2023-07-05T13:24:58.394Z
+- commits:
     - subject: Add set_release_version for release model
       hash: f7692a3bda94214a550430091fce451237ec0efe
       body: ""
