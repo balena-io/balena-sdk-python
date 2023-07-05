@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix balena settings docs
+      hash: 611052eb3476305dcf6041e37fee83b47c5df0bb
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 13.0.3
+  title: ""
+  date: 2023-07-05T14:39:03.148Z
+- commits:
     - subject: Fix docs for service variables
       hash: d4ffdecf0bae143f72366ad866b3d3ec5318083d
       body: ""
