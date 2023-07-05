@@ -171,7 +171,7 @@ class TestDeviceServiceEnvironmentVariables(unittest.TestCase):
         self.assertIsNone(self.device_service_env_var.get(self.device["id"], self.service["id"], "DOES_NOT_EXIST"))
 
         with self.assertRaises(self.helper.balena_exceptions.ServiceNotFound):
-            self.device_service_env_var.set(self.device["id"], 123, "bla", "vai existir")
+            self.device_service_env_var.set(self.device["id"], 123, "bla", "will exist")
 
     def test_02_can_create_and_retrieve_device_service_env_var(self):
         for resource in self.__device_fetch_resources:
@@ -245,3 +245,86 @@ class TestDeviceServiceEnvironmentVariables(unittest.TestCase):
                     f"EDITOR_BY_{resource}",
                 ),
             )
+
+
+class TestServiceEnvironmentVariables(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.helper = TestHelper()
+        cls.balena = cls.helper.balena
+        # Wipe all apps before the tests run.
+        cls.helper.wipe_application()
+        mc_app = cls.helper.create_multicontainer_app()
+        cls.device = mc_app["device"]
+        cls.app = mc_app["app"]
+        cls.service = mc_app["web_service"]
+        cls.__app_fetch_resources = ["id", "slug", "uuid"]
+
+        cls.service_var = cls.balena.models.service.var
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.helper.wipe_organization()
+
+    def test_01_get_emtpy_service_var(self):
+        self.assertIsNone(self.service_var.get(self.service["id"], "DOES_NOT_EXIST"))
+
+        with self.assertRaises(self.helper.balena_exceptions.ServiceNotFound):
+            self.service_var.set(123, "bla", "will exist")
+
+    def test_02_can_create_and_retrieve_service_var(self):
+        self.service_var.set(
+            self.service["id"],
+            "EDITOR",
+            "VIM",
+        )
+        self.assertEqual(
+            self.service_var.get(
+                self.service["id"],
+                "EDITOR",
+            ),
+            "VIM",
+        )
+
+    def test_03_can_get_all_device_service_vars(self):
+        for resource in self.__app_fetch_resources:
+            device_vars = self.service_var.get_all_by_application(self.app[resource])
+            expected_vars = [{"name": "EDITOR", "value": "VIM"}]
+            device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
+
+            for var in expected_vars:
+                self.assertIn(var, device_vars_wo_id)
+
+    def test_04_can_get_all_device_vars_by_service(self):
+        device_vars = self.service_var.get_all_by_service(self.service["id"])
+        expected_vars = [{"name": "EDITOR", "value": "VIM"}]
+        device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
+
+        for var in expected_vars:
+            self.assertIn(var, device_vars_wo_id)
+
+    def test_05_can_update_device_service_vars(self):
+        self.service_var.set(
+            self.service["id"],
+            "EDITOR",
+            "VIM_edit",
+        )
+        self.assertEqual(
+            self.service_var.get(
+                self.service["id"],
+                "EDITOR",
+            ),
+            "VIM_edit",
+        )
+
+    def test_06_can_remove_service_vars(self):
+        self.service_var.remove(
+            self.service["id"],
+            "EDITOR",
+        )
+        self.assertIsNone(
+            self.service_var.get(
+                self.service["id"],
+                "EDITOR",
+            ),
+        )
