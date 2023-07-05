@@ -25,6 +25,34 @@ Getting started:
 ...
 ```
 
+The Balena object can be configured with a dict of type Settings
+
+```python
+balena = Balena({
+    "balena_host": "balena-cloud.com",
+    "api_version": "v6",
+    "device_actions_endpoint_version": "v1",
+    "data_directory": "/home/example/.balena",
+    "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7), # 1 week
+    "token_refresh_interval": str(1 * 1000 * 60 * 60),    # 1 hour
+    "timeout": str(30 * 1000),                            # request timeout, 30s
+})
+
+Notice that if you want to change for the staging environment, you could simply do:
+balena = Balena({"balena_host": "balena-staging.com"})
+
+However, this will overwrite your balena-cloud settings (stored api keys etc). So we recommend using
+a different data_directory for each balena-sdk instance, e.g:
+
+```python
+balena_prod = Balena()
+balena_staging = Balena({
+    "balena_host": "balena-staging.com",
+    "data_directory": "/home/balena-staging-sdk/.balena",
+})
+
+```
+
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-python/issues), we'll be happy to help.
 """

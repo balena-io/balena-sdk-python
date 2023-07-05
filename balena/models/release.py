@@ -397,9 +397,6 @@ class ReleaseTag(DependentResource[BaseTagType]):
             tag_key (str): tag key.
             value (str): tag value.
 
-        Returns:
-            BaseTagType: dict contains release
-
         Examples:
             >>> balena.models.release.tags.set(465307, 'releaseTag1', 'Python SDK')
         """
@@ -416,9 +413,6 @@ class ReleaseTag(DependentResource[BaseTagType]):
         Args:
             commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
             tag_key (str): tag key.
-
-        Returns:
-            BaseTagType: dict contains release
 
         Examples:
             >>> balena.models.release.tags.get(465307, 'releaseTag1')

@@ -75,7 +75,7 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: service environment variables.
 
         Examples:
-            >>> balena.models.service.env_var.get_all_by_service(1234)
+            >>> balena.models.service.var.get_all_by_service(1234)
         """
         return super(ServiceEnvVariable, self)._get_all_by_parent(id, options)
 
@@ -93,8 +93,8 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: application environment variables.
 
         Examples:
-            >>> balena.models.service.env_var.get_all_by_application(9020)
-            >>> balena.models.service.env_var.get_all_by_application("myorg/myslug")
+            >>> balena.models.service.var.get_all_by_application(9020)
+            >>> balena.models.service.var.get_all_by_application("myorg/myslug")
         """
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
@@ -124,7 +124,7 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             key (str): variable name
 
         Examples:
-            >>> balena.models.service.env_var.get(1234,'test_env4')
+            >>> balena.models.service.var.get(1234,'test_env4')
         """
         return super(ServiceEnvVariable, self)._get(id, key)
 
@@ -138,8 +138,9 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.service.env_var.set(1234,'test_env4', 'value')
+            >>> balena.models.service.var.set(1234,'test_env4', 'value')
         """
+        id = self.__service._get(id, {"$select": "id"})["id"]
         super(ServiceEnvVariable, self)._set(id, key, value)
 
     def remove(self, id: int, key: str) -> None:
@@ -151,6 +152,6 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             key (str): variable name
 
         Examples:
-            >>> balena.models.service.env_var.remove(1234,'test_env4')
+            >>> balena.models.service.var.remove(1234,'test_env4')
         """
         super(ServiceEnvVariable, self)._remove(id, key)
