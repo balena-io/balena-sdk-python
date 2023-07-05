@@ -73,9 +73,7 @@ def request(
     if token is None and send_token:
         raise exceptions.NotLoggedIn()
     try:
-        headers = {
-             "X-Balena-Client": f"balena-python-sdk/{balena.__version__}"
-        }
+        headers = {"X-Balena-Client": f"balena-python-sdk/{balena.__version__}"}
         if send_token:
             headers["Authorization"] = f"Bearer {token}"
 
