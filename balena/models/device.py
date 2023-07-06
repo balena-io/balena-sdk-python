@@ -719,8 +719,8 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (str) or id (int).
 
         Examples:
-            >>> balena.models.supervisor.ping('8f66ec7')
-            >>> balena.models.supervisor.ping(1234)
+            >>> balena.models.device.ping('8f66ec7')
+            >>> balena.models.device.ping(1234)
         """
         device_options = {
             "$select": "id",
@@ -819,7 +819,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.supervisor.reboot('8f66ec7')
+            >>> balena.models.device.reboot('8f66ec7')
         """
 
         def __reboot():
@@ -847,7 +847,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.supervisor.shutdown('8f66ec7')
+            >>> balena.models.device.shutdown('8f66ec7')
         """
 
         def __shutdown():
@@ -885,7 +885,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (str) or id (int).
 
         Examples:
-            >>> balena.models.supervisor.purge('8f66ec7')
+            >>> balena.models.device.purge('8f66ec7')
         """
 
         def __purge():
@@ -919,7 +919,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.supervisor.update('8f66ec7')
+            >>> balena.models.device.update('8f66ec7')
         """
 
         data = {}
@@ -982,7 +982,7 @@ class Device:
             image_id (int): id of the image to start
 
         Examples:
-            >>> balena.models.supervisor.start_service('f3887b1')
+            >>> balena.models.device.start_service('f3887b1')
         """
         device = self.get(
             uuid_or_id,
@@ -1013,7 +1013,7 @@ class Device:
             image_id (int): id of the image to stop
 
         Examples:
-            >>> balena.models.supervisor.stop_service('f3887b1', 392229)
+            >>> balena.models.device.stop_service('f3887b1', 392229)
         """
 
         def __stop_service():
@@ -1052,7 +1052,7 @@ class Device:
             image_id (int): id of the image to restart
 
         Examples:
-            >>> balena.models.supervisor.restart_service('f3887b', 392229)
+            >>> balena.models.device.restart_service('f3887b', 392229)
         """
 
         def __restart_service():
@@ -1681,7 +1681,7 @@ class Device:
             dict: dictionary contains application information.
 
         Examples:
-            >>> balena.models.supervisor.get_application_info('7f66ec')
+            >>> balena.models.device.get_application_info('7f66ec')
         """
 
         device = self.get(
@@ -1716,7 +1716,7 @@ class Device:
             dict: dictionary contains started application container id.
 
         Examples:
-            >>> balena.models.supervisor.start_application('8f66ec7')
+            >>> balena.models.device.start_application('8f66ec7')
         """
 
         device = self.get(
@@ -1755,7 +1755,7 @@ class Device:
             dict: dictionary contains stopped application container id.
 
         Examples:
-            >>> balena.models.supervisor.stop_application('8f66ec')
+            >>> balena.models.device.stop_application('8f66ec')
         """
 
         def __stop_aplication():
