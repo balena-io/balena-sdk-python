@@ -1,4 +1,28 @@
 - commits:
+    - subject: Update documentation
+      hash: b02f829a0695cf6865942e58a7c0a7407fc3b163
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Pranas Ziaukas <pranas@balena.io>
+        signed-off-by: Pranas Ziaukas <pranas@balena.io>
+      author: Pranas Ziaukas
+    - subject: Replace `balena.models.supervisor` examples with `device`
+      hash: 8a96353d8e39de741d3f984764623898404723ea
+      body: >
+        The supervisor model has been integrated into the device class, yet some
+        code examples were mistakenly pointing to the wrong model
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Pranas Ziaukas <pranas@balena.io>
+        signed-off-by: Pranas Ziaukas <pranas@balena.io>
+      author: Pranas Ziaukas
+  version: 13.0.4
+  title: ""
+  date: 2023-07-11T09:41:21.814Z
+- commits:
     - subject: Fix balena settings docs
       hash: 611052eb3476305dcf6041e37fee83b47c5df0bb
       body: ""
