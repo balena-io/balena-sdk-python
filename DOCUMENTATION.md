@@ -1397,7 +1397,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.get_application_info('7f66ec')
+>>> balena.models.device.get_application_info('7f66ec')
 ```
 
 <a name="device.get_application_name"></a>
@@ -1737,8 +1737,8 @@ This is useful to signal that the supervisor is alive and responding.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.ping('8f66ec7')
->>> balena.models.supervisor.ping(1234)
+>>> balena.models.device.ping('8f66ec7')
+>>> balena.models.device.ping(1234)
 ```
 
 <a name="device.purge"></a>
@@ -1752,7 +1752,7 @@ This function clears the user application's `/data` directory.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.purge('8f66ec7')
+>>> balena.models.device.purge('8f66ec7')
 ```
 
 <a name="device.reboot"></a>
@@ -1766,7 +1766,7 @@ Reboot the device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.reboot('8f66ec7')
+>>> balena.models.device.reboot('8f66ec7')
 ```
 
 <a name="device.register"></a>
@@ -1837,7 +1837,7 @@ Restart a service on device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.restart_service('f3887b', 392229)
+>>> balena.models.device.restart_service('f3887b', 392229)
 ```
 
 <a name="device.revoke_support_access"></a>
@@ -1906,7 +1906,7 @@ Shutdown the device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.shutdown('8f66ec7')
+>>> balena.models.device.shutdown('8f66ec7')
 ```
 
 <a name="device.start_application"></a>
@@ -1924,7 +1924,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.start_application('8f66ec7')
+>>> balena.models.device.start_application('8f66ec7')
 ```
 
 <a name="device.start_os_update"></a>
@@ -1959,7 +1959,7 @@ Start a service on device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.start_service('f3887b1')
+>>> balena.models.device.start_service('f3887b1')
 ```
 
 <a name="device.stop_application"></a>
@@ -1979,7 +1979,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.stop_application('8f66ec')
+>>> balena.models.device.stop_application('8f66ec')
 ```
 
 <a name="device.stop_service"></a>
@@ -1993,7 +1993,7 @@ Stop a service on device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.stop_service('f3887b1', 392229)
+>>> balena.models.device.stop_service('f3887b1', 392229)
 ```
 
 <a name="device.track_application_release"></a>
@@ -2028,7 +2028,7 @@ update the device.
 
 #### Examples:
 ```python
->>> balena.models.supervisor.update('8f66ec7')
+>>> balena.models.device.update('8f66ec7')
 ```
 ## DeviceTag
 
