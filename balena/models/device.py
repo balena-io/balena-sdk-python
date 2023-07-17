@@ -1811,7 +1811,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.devices.tag.get_all_by_application(1005160)
+            >>> balena.models.device.tag.get_all_by_application(1005160)
         """
 
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
@@ -1843,7 +1843,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.devices.tag.get_all_by_device('a03ab646c')
+            >>> balena.models.device.tag.get_all_by_device('a03ab646c')
         """
 
         id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
@@ -1860,7 +1860,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.devices.tag.get_all()
+            >>> balena.models.device.tag.get_all()
         """
 
         return super(DeviceTag, self)._get_all(options)
@@ -1880,8 +1880,8 @@ class DeviceTag(DependentResource[BaseTagType]):
             Optional[str]: tag value
 
         Examples:
-            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
-            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
         """
 
         # Trying to avoid an extra HTTP request
@@ -1903,8 +1903,8 @@ class DeviceTag(DependentResource[BaseTagType]):
             value (str): tag value.
 
         Examples:
-            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
-            >>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
+            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
         """
 
         # Trying to avoid an extra HTTP request
@@ -1923,7 +1923,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.devices.tag.remove('f5213eac0d63ac477', 'testtag')
+            >>> balena.models.device.tag.remove('f5213eac0d63ac477', 'testtag')
         """
 
         device_id = uuid_or_id if is_id(uuid_or_id) else self.__device.get(uuid_or_id, {"$select": "id"})["id"]
@@ -1955,7 +1955,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: device config variables.
 
         Examples:
-            >>> balena.models.devices.config_var.get_all_by_device('f5213ea')
+            >>> balena.models.device.config_var.get_all_by_device('f5213ea')
         """
         return super(DeviceConfigVariable, self)._get_all_by_parent(uuid_or_id, options)
 
@@ -1973,7 +1973,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: list of device environment variables.
 
         Examples:
-            >>> balena.models.devices.config_var.device.get_all_by_application(5780)
+            >>> balena.models.device.config_var.device.get_all_by_application(5780)
         """
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceConfigVariable, self)._get_all(
@@ -2006,7 +2006,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.devices.config_var.device.get('8deb12','test_env4')
+            >>> balena.models.device.config_var.device.get('8deb12','test_env4')
         """
         return super(DeviceConfigVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -2020,7 +2020,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.devices.config_var.device.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.device.config_var.device.set('8deb12','test_env4', 'testing1')
         """
         super(DeviceConfigVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -2032,7 +2032,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Examples:
-            >>> balena.models.devices.config_var.device.remove(2184)
+            >>> balena.models.device.config_var.device.remove(2184)
         """
         super(DeviceConfigVariable, self)._remove(uuid_or_id, key)
 
@@ -2066,7 +2066,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: device environment variables.
 
         Examples:
-            >>> balena.models.devices.env_var.get_all_by_device('8deb12a')
+            >>> balena.models.device.env_var.get_all_by_device('8deb12a')
         """
         return super(DeviceEnvVariable, self)._get_all_by_parent(uuid_or_id, options)
 
@@ -2084,7 +2084,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: list of device environment variables.
 
         Examples:
-            >>> balena.models.devices.env_var.get_all_by_application(5780)
+            >>> balena.models.device.env_var.get_all_by_application(5780)
         """
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
         return super(DeviceEnvVariable, self)._get_all(
@@ -2117,7 +2117,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.devices.env_var.get('8deb12','test_env4')
+            >>> balena.models.device.env_var.get('8deb12','test_env4')
         """
         return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -2131,7 +2131,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.devices.env_var.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.device.env_var.set('8deb12','test_env4', 'testing1')
         """
         super(DeviceEnvVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -2143,7 +2143,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Examples:
-            >>> balena.models.devices.env_var.remove(2184)
+            >>> balena.models.device.env_var.remove(2184)
         """
         super(DeviceEnvVariable, self)._remove(uuid_or_id, key)
 
@@ -2170,7 +2170,7 @@ class DeviceServiceEnvVariable:
             List[EnvironmentVariableBase]: device service environment variables.
 
         Examples:
-            >>> balena.models.devices.service_var.get_all_by_device(8deb12a)
+            >>> balena.models.device.service_var.get_all_by_device(8deb12a)
         """
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
         return self.__pine.get(
@@ -2206,7 +2206,7 @@ class DeviceServiceEnvVariable:
             List[EnvironmentVariableBase]: device service environment variables.
 
         Examples:
-            >>> balena.models.devices.service_var.get_all_by_application(1043050)
+            >>> balena.models.device.service_var.get_all_by_application(1043050)
         """
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
 
@@ -2239,22 +2239,30 @@ class DeviceServiceEnvVariable:
             }
         )
 
-    def get(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> Optional[str]:
+    def get(self, uuid_or_id: Union[str, int], service_name_or_id: Union[str, int], key: str) -> Optional[str]:
         """
         Get the overriden value of a service variable on a device
 
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-            service_id (int): service id
+            service_name_or_id (Union[str, int]): service name (string) or service id (number)
             key (str): variable name
 
         Returns:
            Optional[str]: device service environment variables.
 
         Examples:
-            >>> balena.models.devices.service_var.get('8deb12a', 1234', 'VAR')
+            >>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
+            >>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
         """
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
+
+        installs_service = (
+            service_name_or_id
+            if isinstance(service_name_or_id, int)
+            else {"$any": {"$alias": "is", "$expr": {"is": {"service_name": service_name_or_id}}}}
+        )
+
         variables = self.__pine.get(
             {
                 "resource": "device_service_environment_variable",
@@ -2264,12 +2272,7 @@ class DeviceServiceEnvVariable:
                         "service_install": {
                             "$any": {
                                 "$alias": "si",
-                                "$expr": {
-                                    "si": {
-                                        "device": device_id,
-                                        "installs__service": service_id,
-                                    }
-                                },
+                                "$expr": {"si": {"device": device_id, "installs__service": installs_service}},
                             }
                         },
                         "name": key,
@@ -2281,18 +2284,19 @@ class DeviceServiceEnvVariable:
         if isinstance(variables, list) and len(variables) == 1:
             return variables[0].get("value")
 
-    def set(self, uuid_or_id: Union[str, int], service_id: int, key: str, value: str) -> None:
+    def set(self, uuid_or_id: Union[str, int], service_name_or_id: Union[str, int], key: str, value: str) -> None:
         """
         Set the overriden value of a service variable on a device.
 
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-            service_id (int): service id
+            service_name_or_id (Union[str, int]): service name (string) or service id (number)
             key (str): variable name
             value (str): variable value
 
         Examples:
-            >>> balena.models.devices.service_var.set('7cf02a6', 123, 'VAR', 'override')
+            >>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR', 'override')
+            >>> balena.models.device.service_var.set('7cf02a6', 123, 'VAR', 'override')
         """
 
         if is_id(uuid_or_id):
@@ -2302,6 +2306,12 @@ class DeviceServiceEnvVariable:
         else:
             device_filter = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
 
+        installs_service = (
+            service_name_or_id
+            if isinstance(service_name_or_id, int)
+            else {"$any": {"$alias": "s", "$expr": {"s": {"service_name": service_name_or_id}}}}
+        )
+
         service_installs = self.__pine.get(
             {
                 "resource": "service_install",
@@ -2309,7 +2319,7 @@ class DeviceServiceEnvVariable:
                     "$select": "id",
                     "$filter": {
                         "device": device_filter,
-                        "installs__service": service_id,
+                        "installs__service": installs_service,
                     },
                 },
             }
@@ -2320,7 +2330,7 @@ class DeviceServiceEnvVariable:
             or (isinstance(service_installs, list) and len(service_installs) == 0)
             or service_installs[0] is None
         ):
-            raise exceptions.ServiceNotFound(service_id)
+            raise exceptions.ServiceNotFound(service_name_or_id)
 
         if len(service_installs) > 1:
             raise exceptions.AmbiguousDevice(uuid_or_id)
@@ -2336,20 +2346,27 @@ class DeviceServiceEnvVariable:
             }
         )
 
-    def remove(self, uuid_or_id: Union[str, int], service_id: int, key: str) -> None:
+    def remove(self, uuid_or_id: Union[str, int], service_name_or_id: Union[str, int], key: str) -> None:
         """
         Remove a device service environment variable.
 
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-            service_id (int): service id
+            service_name_or_id (Union[str, int]): service name (string) or service id (number)
             key (str): variable name
 
         Examples:
-            >>> balena.models.devices.service_var.remove(28970)
+            >>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR')
+            >>> balena.models.device.service_var.remove('7cf02a6', 28970, 'VAR')
         """
 
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
+        installs_service = (
+            service_name_or_id
+            if isinstance(service_name_or_id, int)
+            else {"$any": {"$alias": "is", "$expr": {"is": {"service_name": service_name_or_id}}}}
+        )
+
         self.__pine.delete(
             {
                 "resource": "device_service_environment_variable",
@@ -2361,7 +2378,7 @@ class DeviceServiceEnvVariable:
                                 "$expr": {
                                     "si": {
                                         "device": device_id,
-                                        "service": service_id,
+                                        "installs__service": installs_service,
                                     }
                                 },
                             }

@@ -161,6 +161,7 @@ class TestDeviceServiceEnvironmentVariables(unittest.TestCase):
         cls.app = mc_app["app"]
         cls.service = mc_app["web_service"]
         cls.__device_fetch_resources = ["id", "uuid"]
+        cls.__service_params = ["id", "service_name"]
         cls.device_service_env_var = cls.balena.models.device.service_var
 
     @classmethod
@@ -174,77 +175,85 @@ class TestDeviceServiceEnvironmentVariables(unittest.TestCase):
             self.device_service_env_var.set(self.device["id"], 123, "bla", "will exist")
 
     def test_02_can_create_and_retrieve_device_service_env_var(self):
-        for resource in self.__device_fetch_resources:
-            self.device_service_env_var.set(
-                self.device[resource],
-                self.service["id"],
-                f"EDITOR_BY_{resource}",
-                f"VIM{resource}",
-            )
-            self.assertEqual(
-                self.device_service_env_var.get(
-                    self.device[resource],
-                    self.service["id"],
-                    f"EDITOR_BY_{resource}",
-                ),
-                f"VIM{resource}",
-            )
+        for device_param in self.__device_fetch_resources:
+            for service_param in self.__service_params:
+                self.device_service_env_var.set(
+                    self.device[device_param],
+                    self.service[service_param],
+                    f"EDITOR_BY_{device_param}_{service_param}",
+                    f"VIM{device_param}_{service_param}",
+                )
+                self.assertEqual(
+                    self.device_service_env_var.get(
+                        self.device[device_param],
+                        self.service[service_param],
+                        f"EDITOR_BY_{device_param}_{service_param}",
+                    ),
+                    f"VIM{device_param}_{service_param}",
+                )
 
     def test_03_can_get_all_device_service_vars(self):
-        for resource in self.__device_fetch_resources:
-            device_vars = self.device_service_env_var.get_all_by_application(self.app[resource])
-            expected_vars = [
-                {"name": f"EDITOR_BY_{resource}", "value": f"VIM{resource}"}
-                for resource in self.__device_fetch_resources
-            ]
+        expected_vars = [
+            {"name": f"EDITOR_BY_{device_param}_{service_param}", "value": f"VIM{device_param}_{service_param}"}
+            for device_param in self.__device_fetch_resources
+            for service_param in self.__service_params
+        ]
+        for device_param in self.__device_fetch_resources:
+            device_vars = self.device_service_env_var.get_all_by_application(self.app[device_param])
+
             device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
 
             for var in expected_vars:
                 self.assertIn(var, device_vars_wo_id)
 
     def test_04_can_get_all_device_vars_by_device(self):
-        for resource in self.__device_fetch_resources:
-            device_vars = self.device_service_env_var.get_all_by_device(self.device[resource])
-            expected_vars = [
-                {"name": f"EDITOR_BY_{resource}", "value": f"VIM{resource}"}
-                for resource in self.__device_fetch_resources
-            ]
+        expected_vars = [
+            {"name": f"EDITOR_BY_{device_param}_{service_param}", "value": f"VIM{device_param}_{service_param}"}
+            for device_param in self.__device_fetch_resources
+            for service_param in self.__service_params
+        ]
+
+        for device_param in self.__device_fetch_resources:
+            device_vars = self.device_service_env_var.get_all_by_device(self.device[device_param])
+
             device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
 
             for var in expected_vars:
                 self.assertIn(var, device_vars_wo_id)
 
     def test_05_can_update_device_service_vars(self):
-        for resource in self.__device_fetch_resources:
-            self.device_service_env_var.set(
-                self.device[resource],
-                self.service["id"],
-                f"EDITOR_BY_{resource}",
-                f"VIM{resource}_edit",
-            )
-            self.assertEqual(
-                self.device_service_env_var.get(
-                    self.device[resource],
-                    self.service["id"],
-                    f"EDITOR_BY_{resource}",
-                ),
-                f"VIM{resource}_edit",
-            )
+        for device_param in self.__device_fetch_resources:
+            for service_param in self.__service_params:
+                self.device_service_env_var.set(
+                    self.device[device_param],
+                    self.service[service_param],
+                    f"EDITOR_BY_{device_param}_{service_param}",
+                    f"VIM{device_param}_{service_param}_edit",
+                )
+                self.assertEqual(
+                    self.device_service_env_var.get(
+                        self.device[device_param],
+                        self.service[service_param],
+                        f"EDITOR_BY_{device_param}_{service_param}",
+                    ),
+                    f"VIM{device_param}_{service_param}_edit",
+                )
 
     def test_06_can_remove_device_service_env_vars(self):
-        for resource in self.__device_fetch_resources:
-            self.device_service_env_var.remove(
-                self.device[resource],
-                self.service["id"],
-                f"EDITOR_BY_{resource}",
-            )
-            self.assertIsNone(
-                self.device_service_env_var.get(
-                    self.device[resource],
-                    self.service["id"],
-                    f"EDITOR_BY_{resource}",
-                ),
-            )
+        for device_param in self.__device_fetch_resources:
+            for service_param in self.__service_params:
+                self.device_service_env_var.remove(
+                    self.device[device_param],
+                    self.service[service_param],
+                    f"EDITOR_BY_{device_param}_{service_param}",
+                )
+                self.assertIsNone(
+                    self.device_service_env_var.get(
+                        self.device[device_param],
+                        self.service[service_param],
+                        f"EDITOR_BY_{device_param}_{service_param}",
+                    ),
+                )
 
 
 class TestServiceEnvironmentVariables(unittest.TestCase):
