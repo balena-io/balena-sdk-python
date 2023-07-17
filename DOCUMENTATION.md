@@ -285,11 +285,11 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
         - [.service](#service)
             - [get_all_by_application(slug_or_uuid_or_id, options)](#service.get_all_by_application) ⇒ [<code>List[ServiceType]</code>](#servicetype)
             - [.var](#serviceenvvariable)
-                - [get(id, key)](#serviceenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(service_id_or_natural_key, key)](#serviceenvvariable.get) ⇒ <code>Optional[str]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#serviceenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
-                - [get_all_by_service(id, options)](#serviceenvvariable.get_all_by_service) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
-                - [remove(id, key)](#serviceenvvariable.remove) ⇒ <code>None</code>
-                - [set(id, key, value)](#serviceenvvariable.set) ⇒ <code>None</code>
+                - [get_all_by_service(service_id_or_natural_key, options)](#serviceenvvariable.get_all_by_service) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
+                - [remove(service_id_or_natural_key, key)](#serviceenvvariable.remove) ⇒ <code>None</code>
+                - [set(service_id_or_natural_key, key, value)](#serviceenvvariable.set) ⇒ <code>None</code>
         - [.image](#image)
             - [get(id, options)](#image.get) ⇒ [<code>ImageType</code>](#imagetype)
             - [get_logs(id)](#image.get_logs) ⇒ <code>str</code>
@@ -3350,17 +3350,18 @@ Get all services from an application.
 This class implements Service environment variable model for balena python SDK.
 
 <a name="serviceenvvariable.get"></a>
-### Function: get(id, key) ⇒ <code>Optional[str]</code>
+### Function: get(service_id_or_natural_key, key) ⇒ <code>Optional[str]</code>
 
 Get the value of a specific service variable
 
 #### Args:
-    id (int): service id
+    service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
     key (str): variable name
 
 #### Examples:
 ```python
 >>> balena.models.service.var.get(1234,'test_env4')
+>>> balena.models.service.var.get({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR')
 ```
 
 <a name="serviceenvvariable.get_all_by_application"></a>
@@ -3382,12 +3383,12 @@ Get all service variables by application.
 ```
 
 <a name="serviceenvvariable.get_all_by_service"></a>
-### Function: get_all_by_service(id, options) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
+### Function: get_all_by_service(service_id_or_natural_key, options) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
 
 Get all variables for a service.
 
 #### Args:
-    id (int): service id
+    service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
     options (AnyObject): extra pine options to use
 
 #### Returns:
@@ -3396,34 +3397,37 @@ Get all variables for a service.
 #### Examples:
 ```python
 >>> balena.models.service.var.get_all_by_service(1234)
+>>> balena.models.service.var.get_all_by_service({'application': 'myorg/myapp', 'service_name': 'service'})
 ```
 
 <a name="serviceenvvariable.remove"></a>
-### Function: remove(id, key) ⇒ <code>None</code>
+### Function: remove(service_id_or_natural_key, key) ⇒ <code>None</code>
 
 Clear the value of a specific service variable
 
 #### Args:
-    id (int): service id
+    service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
     key (str): variable name
 
 #### Examples:
 ```python
+>>> balena.models.service.var.remove({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR')
 >>> balena.models.service.var.remove(1234,'test_env4')
 ```
 
 <a name="serviceenvvariable.set"></a>
-### Function: set(id, key, value) ⇒ <code>None</code>
+### Function: set(service_id_or_natural_key, key, value) ⇒ <code>None</code>
 
 Set the value of a specific application environment variable.
 
 #### Args:
-    id (int): service id
+    service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
     key (str): variable name
     value (str): environment variable value.
 
 #### Examples:
 ```python
+>>> balena.models.service.var.set({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR', 'value')
 >>> balena.models.service.var.set(1234,'test_env4', 'value')
 ```
 ## Image
