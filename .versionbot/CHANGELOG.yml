@@ -1,4 +1,15 @@
 - commits:
+    - subject: "service: Allow passing an application-service_name pair as a parameter"
+      hash: 5c0d94beba8a540c6a147adcfbf4c1a3454820a8
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+  version: 13.2.0
+  title: ""
+  date: 2023-07-17T16:19:00.598Z
+- commits:
     - subject: "device.service_var: Allow passing a service name as a parameter"
       hash: c296c1011fa056cd613f0344d61971c979937323
       body: ""
