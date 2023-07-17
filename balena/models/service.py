@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast, TypedDict
 
 from .. import exceptions
 from ..dependent_resource import DependentResource
@@ -8,6 +8,11 @@ from ..types.models import EnvironmentVariableBase, ServiceType
 from ..utils import merge
 from ..settings import Settings
 from .application import Application
+
+
+class ServiceNaturalKey(TypedDict):
+    application: Union[str, int]
+    service_name: str
 
 
 class Service:
@@ -41,9 +46,11 @@ class Service:
             List[ServiceType]: service info.
         """
 
-        app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
+        services = self.__application.get(slug_or_uuid_or_id, {"$select": "service", "$expand": {"service": options}})[
+            "service"
+        ]
 
-        return self.__pine.get({"resource": "service", "options": merge({"$filter": {"application": app_id}}, options)})
+        return cast(List[ServiceType], services)
 
 
 class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
@@ -59,16 +66,36 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             "service_environment_variable",
             "name",
             "service",
-            lambda id: self.__service._get(id, {"$select": "id"})["id"],
+            self.__get_resource_id,
             pine,
         )
 
-    def get_all_by_service(self, id: int, options: AnyObject = {}) -> List[EnvironmentVariableBase]:
+    def __get_resource_id(self, resource_id: Union[int, ServiceNaturalKey]):
+        if resource_id is not None and isinstance(resource_id, dict):
+            keys = resource_id.keys()
+            if len(keys) != 2 or "application" not in keys or "service_name" not in keys:
+                raise Exception(f"Unexpected type for id provided in service var model get resource id: {resource_id}")
+
+            service = self.__service.get_all_by_application(
+                resource_id["application"], {"$select": "id", "$filter": {"service_name": resource_id["service_name"]}}
+            )[0]
+
+            if service is None:
+                raise exceptions.ServiceNotFound(resource_id["service_name"])
+
+            return service["id"]
+        if not isinstance(resource_id, int):
+            raise Exception(f"Unexpected type for id provided in service varModel getResourceId: {resource_id}")
+        return self.__service._get(resource_id, {"$select": "id"})["id"]
+
+    def get_all_by_service(
+        self, service_id_or_natural_key: Union[int, ServiceNaturalKey], options: AnyObject = {}
+    ) -> List[EnvironmentVariableBase]:
         """
         Get all variables for a service.
 
         Args:
-            id (int): service id
+            service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
             options (AnyObject): extra pine options to use
 
         Returns:
@@ -76,8 +103,9 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
 
         Examples:
             >>> balena.models.service.var.get_all_by_service(1234)
+            >>> balena.models.service.var.get_all_by_service({'application': 'myorg/myapp', 'service_name': 'service'})
         """
-        return super(ServiceEnvVariable, self)._get_all_by_parent(id, options)
+        return super(ServiceEnvVariable, self)._get_all_by_parent(service_id_or_natural_key, options)
 
     def get_all_by_application(
         self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}
@@ -115,43 +143,45 @@ class ServiceEnvVariable(DependentResource[EnvironmentVariableBase]):
             )
         )
 
-    def get(self, id: int, key: str) -> Optional[str]:
+    def get(self, service_id_or_natural_key: Union[int, ServiceNaturalKey], key: str) -> Optional[str]:
         """
         Get the value of a specific service variable
 
         Args:
-            id (int): service id
+            service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
             key (str): variable name
 
         Examples:
             >>> balena.models.service.var.get(1234,'test_env4')
+            >>> balena.models.service.var.get({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR')
         """
-        return super(ServiceEnvVariable, self)._get(id, key)
+        return super(ServiceEnvVariable, self)._get(service_id_or_natural_key, key)
 
-    def set(self, id: int, key: str, value: str) -> None:
+    def set(self, service_id_or_natural_key: Union[int, ServiceNaturalKey], key: str, value: str) -> None:
         """
         Set the value of a specific application environment variable.
 
         Args:
-            id (int): service id
+            service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
             key (str): variable name
             value (str): environment variable value.
 
         Examples:
+            >>> balena.models.service.var.set({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR', 'value')
             >>> balena.models.service.var.set(1234,'test_env4', 'value')
         """
-        id = self.__service._get(id, {"$select": "id"})["id"]
-        super(ServiceEnvVariable, self)._set(id, key, value)
+        super(ServiceEnvVariable, self)._set(service_id_or_natural_key, key, value)
 
-    def remove(self, id: int, key: str) -> None:
+    def remove(self, service_id_or_natural_key: Union[int, ServiceNaturalKey], key: str) -> None:
         """
         Clear the value of a specific service variable
 
         Args:
-            id (int): service id
+            service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
             key (str): variable name
 
         Examples:
+            >>> balena.models.service.var.remove({'application': 'myorg/myapp', 'service_name': 'service'}, 'VAR')
             >>> balena.models.service.var.remove(1234,'test_env4')
         """
-        super(ServiceEnvVariable, self)._remove(id, key)
+        super(ServiceEnvVariable, self)._remove(service_id_or_natural_key, key)

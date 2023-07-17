@@ -1,6 +1,8 @@
 import unittest
 
 from tests.helper import TestHelper
+from typing import Union
+from balena.models.service import ServiceNaturalKey
 
 
 class TestAppVars(unittest.TestCase):
@@ -268,6 +270,7 @@ class TestServiceEnvironmentVariables(unittest.TestCase):
         cls.app = mc_app["app"]
         cls.service = mc_app["web_service"]
         cls.__app_fetch_resources = ["id", "slug", "uuid"]
+        cls.__service_fetch_resources = ["id", "service_name_application_id", "service_name_application_slug"]
 
         cls.service_var = cls.balena.models.service.var
 
@@ -275,30 +278,44 @@ class TestServiceEnvironmentVariables(unittest.TestCase):
     def tearDownClass(cls):
         cls.helper.wipe_organization()
 
-    def test_01_get_emtpy_service_var(self):
-        self.assertIsNone(self.service_var.get(self.service["id"], "DOES_NOT_EXIST"))
+    def __get_param(self, app, service, name) -> Union[ServiceNaturalKey, int]:
+        if name == "service_name_application_id":
+            return {"application": app["slug"], "service_name": service["service_name"]}
+        elif name == "service_name_application_slug":
+            return {
+                "application": app["slug"],
+                "service_name": service["service_name"],
+            }
+        return service[name]
 
-        with self.assertRaises(self.helper.balena_exceptions.ServiceNotFound):
-            self.service_var.set(123, "bla", "will exist")
+    def test_01_get_emtpy_service_var(self):
+        for fetch_resource in self.__service_fetch_resources:
+            param = self.__get_param(self.app, self.service, fetch_resource)
+            self.assertIsNone(self.service_var.get(param, "DOES_NOT_EXIST"))
 
     def test_02_can_create_and_retrieve_service_var(self):
-        self.service_var.set(
-            self.service["id"],
-            "EDITOR",
-            "VIM",
-        )
-        self.assertEqual(
-            self.service_var.get(
-                self.service["id"],
-                "EDITOR",
-            ),
-            "VIM",
-        )
+        for fetch_resource in self.__service_fetch_resources:
+            param = self.__get_param(self.app, self.service, fetch_resource)
+            self.service_var.set(
+                param,
+                f"EDITOR_{fetch_resource}",
+                f"VIM_{fetch_resource}",
+            )
+            self.assertEqual(
+                self.service_var.get(
+                    param,
+                    f"EDITOR_{fetch_resource}",
+                ),
+                f"VIM_{fetch_resource}",
+            )
 
     def test_03_can_get_all_device_service_vars(self):
+        expected_vars = []
+        for fetch_resource in self.__service_fetch_resources:
+            expected_vars.append({"name": f"EDITOR_{fetch_resource}", "value": f"VIM_{fetch_resource}"})
+
         for resource in self.__app_fetch_resources:
             device_vars = self.service_var.get_all_by_application(self.app[resource])
-            expected_vars = [{"name": "EDITOR", "value": "VIM"}]
             device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
 
             for var in expected_vars:
@@ -306,34 +323,41 @@ class TestServiceEnvironmentVariables(unittest.TestCase):
 
     def test_04_can_get_all_device_vars_by_service(self):
         device_vars = self.service_var.get_all_by_service(self.service["id"])
-        expected_vars = [{"name": "EDITOR", "value": "VIM"}]
+        expected_vars = []
+        for fetch_resource in self.__service_fetch_resources:
+            expected_vars.append({"name": f"EDITOR_{fetch_resource}", "value": f"VIM_{fetch_resource}"})
+
         device_vars_wo_id = [{"name": entry["name"], "value": entry["value"]} for entry in device_vars]
 
         for var in expected_vars:
             self.assertIn(var, device_vars_wo_id)
 
     def test_05_can_update_device_service_vars(self):
-        self.service_var.set(
-            self.service["id"],
-            "EDITOR",
-            "VIM_edit",
-        )
-        self.assertEqual(
-            self.service_var.get(
-                self.service["id"],
-                "EDITOR",
-            ),
-            "VIM_edit",
-        )
+        for fetch_resource in self.__service_fetch_resources:
+            param = self.__get_param(self.app, self.service, fetch_resource)
+            self.service_var.set(
+                param,
+                f"EDITOR_{fetch_resource}",
+                f"VIM_{fetch_resource}_edit",
+            )
+            self.assertEqual(
+                self.service_var.get(
+                    param,
+                    f"EDITOR_{fetch_resource}",
+                ),
+                f"VIM_{fetch_resource}_edit",
+            )
 
     def test_06_can_remove_service_vars(self):
-        self.service_var.remove(
-            self.service["id"],
-            "EDITOR",
-        )
-        self.assertIsNone(
-            self.service_var.get(
-                self.service["id"],
-                "EDITOR",
-            ),
-        )
+        for fetch_resource in self.__service_fetch_resources:
+            param = self.__get_param(self.app, self.service, fetch_resource)
+            self.service_var.remove(
+                param,
+                f"EDITOR_{fetch_resource}",
+            )
+            self.assertIsNone(
+                self.service_var.get(
+                    param,
+                    f"EDITOR_{fetch_resource}",
+                ),
+            )
