@@ -119,7 +119,7 @@ class TestAuth(unittest.TestCase):
 
         self.balena.logs.subscribe(self.uuid, cb)
 
-        time.sleep(1)
+        time.sleep(2)
         send_log_messages(
             self.uuid,
             self.device_api_key,
@@ -130,7 +130,7 @@ class TestAuth(unittest.TestCase):
             self.balena.settings,
         )
 
-        time.sleep(4)
+        time.sleep(10)
         self.assertEqual(results, ["First message", "Second message"])
 
         self.balena.logs.unsubscribe(self.uuid)

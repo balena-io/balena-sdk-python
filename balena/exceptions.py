@@ -183,6 +183,7 @@ class RequestError(BalenaException):
     def __init__(self, body, status_code=None):
         super(RequestError, self).__init__()
         self.message = Message.REQUEST_ERROR.format(body=body)
+        self.body = body
         self.status_code = status_code
         # print(self.message, status_code)
 

@@ -202,11 +202,11 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
                 - [remove(uuid_or_id, key)](#deviceenvvariable.remove) ⇒ <code>None</code>
                 - [set(uuid_or_id, env_var_name, value)](#deviceenvvariable.set) ⇒ <code>None</code>
             - [.service_var](#deviceserviceenvvariable)
-                - [get(uuid_or_id, service_id, key)](#deviceserviceenvvariable.get) ⇒ <code>Optional[str]</code>
+                - [get(uuid_or_id, service_name_or_id, key)](#deviceserviceenvvariable.get) ⇒ <code>Optional[str]</code>
                 - [get_all_by_application(slug_or_uuid_or_id, options)](#deviceserviceenvvariable.get_all_by_application) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
                 - [get_all_by_device(uuid_or_id, options)](#deviceserviceenvvariable.get_all_by_device) ⇒ [<code>List[EnvironmentVariableBase]</code>](#environmentvariablebase)
-                - [remove(uuid_or_id, service_id, key)](#deviceserviceenvvariable.remove) ⇒ <code>None</code>
-                - [set(uuid_or_id, service_id, key, value)](#deviceserviceenvvariable.set) ⇒ <code>None</code>
+                - [remove(uuid_or_id, service_name_or_id, key)](#deviceserviceenvvariable.remove) ⇒ <code>None</code>
+                - [set(uuid_or_id, service_name_or_id, key, value)](#deviceserviceenvvariable.set) ⇒ <code>None</code>
             - [.history](#devicehistory)
                 - [get_all_by_application(slug_or_uuid_or_id, from_date, to_date, options)](#devicehistory.get_all_by_application) ⇒ [<code>List[DeviceHistoryType]</code>](#devicehistorytype)
                 - [get_all_by_device(uuid_or_id, from_date, to_date, options)](#devicehistory.get_all_by_device) ⇒ [<code>List[DeviceHistoryType]</code>](#devicehistorytype)
@@ -2051,8 +2051,8 @@ it will avoid one extra API roundtrip.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
->>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+>>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
+>>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
 ```
 
 <a name="devicetag.get_all"></a>
@@ -2068,7 +2068,7 @@ Get all device tags.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.get_all()
+>>> balena.models.device.tag.get_all()
 ```
 
 <a name="devicetag.get_all_by_application"></a>
@@ -2085,7 +2085,7 @@ Get all device tags for an application.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.get_all_by_application(1005160)
+>>> balena.models.device.tag.get_all_by_application(1005160)
 ```
 
 <a name="devicetag.get_all_by_device"></a>
@@ -2102,7 +2102,7 @@ Get all device tags for a device.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.get_all_by_device('a03ab646c')
+>>> balena.models.device.tag.get_all_by_device('a03ab646c')
 ```
 
 <a name="devicetag.remove"></a>
@@ -2116,7 +2116,7 @@ Remove a device tag.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.remove('f5213eac0d63ac477', 'testtag')
+>>> balena.models.device.tag.remove('f5213eac0d63ac477', 'testtag')
 ```
 
 <a name="devicetag.set"></a>
@@ -2133,8 +2133,8 @@ it will avoid one extra API roundtrip.
 
 #### Examples:
 ```python
->>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test1')
->>> balena.models.devices.tag.set('f5213eac0d63ac4', 'testtag','test2')
+>>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
+>>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
 ```
 ## DeviceConfigVariable
 
@@ -2151,7 +2151,7 @@ Get a device config variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.config_var.device.get('8deb12','test_env4')
+>>> balena.models.device.config_var.device.get('8deb12','test_env4')
 ```
 
 <a name="deviceconfigvariable.get_all_by_application"></a>
@@ -2168,7 +2168,7 @@ Get all device config variables for an application.
 
 #### Examples:
 ```python
->>> balena.models.devices.config_var.device.get_all_by_application(5780)
+>>> balena.models.device.config_var.device.get_all_by_application(5780)
 ```
 
 <a name="deviceconfigvariable.get_all_by_device"></a>
@@ -2185,7 +2185,7 @@ Get all device config variables belong to a device.
 
 #### Examples:
 ```python
->>> balena.models.devices.config_var.get_all_by_device('f5213ea')
+>>> balena.models.device.config_var.get_all_by_device('f5213ea')
 ```
 
 <a name="deviceconfigvariable.remove"></a>
@@ -2198,7 +2198,7 @@ Remove a device environment variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.config_var.device.remove(2184)
+>>> balena.models.device.config_var.device.remove(2184)
 ```
 
 <a name="deviceconfigvariable.set"></a>
@@ -2213,7 +2213,7 @@ Set the value of a device config variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.config_var.device.set('8deb12','test_env4', 'testing1')
+>>> balena.models.device.config_var.device.set('8deb12','test_env4', 'testing1')
 ```
 ## DeviceEnvVariable
 
@@ -2230,7 +2230,7 @@ Get device environment variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.env_var.get('8deb12','test_env4')
+>>> balena.models.device.env_var.get('8deb12','test_env4')
 ```
 
 <a name="deviceenvvariable.get_all_by_application"></a>
@@ -2247,7 +2247,7 @@ Get all device environment variables for an application.
 
 #### Examples:
 ```python
->>> balena.models.devices.env_var.get_all_by_application(5780)
+>>> balena.models.device.env_var.get_all_by_application(5780)
 ```
 
 <a name="deviceenvvariable.get_all_by_device"></a>
@@ -2264,7 +2264,7 @@ Get all device environment variables.
 
 #### Examples:
 ```python
->>> balena.models.devices.env_var.get_all_by_device('8deb12a')
+>>> balena.models.device.env_var.get_all_by_device('8deb12a')
 ```
 
 <a name="deviceenvvariable.remove"></a>
@@ -2277,7 +2277,7 @@ Remove a device environment variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.env_var.remove(2184)
+>>> balena.models.device.env_var.remove(2184)
 ```
 
 <a name="deviceenvvariable.set"></a>
@@ -2292,20 +2292,20 @@ Set the value of a specific environment variable.
 
 #### Examples:
 ```python
->>> balena.models.devices.env_var.set('8deb12','test_env4', 'testing1')
+>>> balena.models.device.env_var.set('8deb12','test_env4', 'testing1')
 ```
 ## DeviceServiceEnvVariable
 
 This class implements device service variable model for balena python SDK.
 
 <a name="deviceserviceenvvariable.get"></a>
-### Function: get(uuid_or_id, service_id, key) ⇒ <code>Optional[str]</code>
+### Function: get(uuid_or_id, service_name_or_id, key) ⇒ <code>Optional[str]</code>
 
 Get the overriden value of a service variable on a device
 
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-    service_id (int): service id
+    service_name_or_id (Union[str, int]): service name (string) or service id (number)
     key (str): variable name
 
 #### Returns:
@@ -2313,7 +2313,8 @@ Get the overriden value of a service variable on a device
 
 #### Examples:
 ```python
->>> balena.models.devices.service_var.get('8deb12a', 1234', 'VAR')
+>>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
+>>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
 ```
 
 <a name="deviceserviceenvvariable.get_all_by_application"></a>
@@ -2330,7 +2331,7 @@ Get all device service environment variables belong to an application.
 
 #### Examples:
 ```python
->>> balena.models.devices.service_var.get_all_by_application(1043050)
+>>> balena.models.device.service_var.get_all_by_application(1043050)
 ```
 
 <a name="deviceserviceenvvariable.get_all_by_device"></a>
@@ -2347,38 +2348,40 @@ Get all device environment variables.
 
 #### Examples:
 ```python
->>> balena.models.devices.service_var.get_all_by_device(8deb12a)
+>>> balena.models.device.service_var.get_all_by_device(8deb12a)
 ```
 
 <a name="deviceserviceenvvariable.remove"></a>
-### Function: remove(uuid_or_id, service_id, key) ⇒ <code>None</code>
+### Function: remove(uuid_or_id, service_name_or_id, key) ⇒ <code>None</code>
 
 Remove a device service environment variable.
 
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-    service_id (int): service id
+    service_name_or_id (Union[str, int]): service name (string) or service id (number)
     key (str): variable name
 
 #### Examples:
 ```python
->>> balena.models.devices.service_var.remove(28970)
+>>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR')
+>>> balena.models.device.service_var.remove('7cf02a6', 28970, 'VAR')
 ```
 
 <a name="deviceserviceenvvariable.set"></a>
-### Function: set(uuid_or_id, service_id, key, value) ⇒ <code>None</code>
+### Function: set(uuid_or_id, service_name_or_id, key, value) ⇒ <code>None</code>
 
 Set the overriden value of a service variable on a device.
 
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
-    service_id (int): service id
+    service_name_or_id (Union[str, int]): service name (string) or service id (number)
     key (str): variable name
     value (str): variable value
 
 #### Examples:
 ```python
->>> balena.models.devices.service_var.set('7cf02a6', 123, 'VAR', 'override')
+>>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR', 'override')
+>>> balena.models.device.service_var.set('7cf02a6', 123, 'VAR', 'override')
 ```
 ## DeviceHistory
 
