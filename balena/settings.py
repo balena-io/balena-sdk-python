@@ -3,7 +3,9 @@ import os
 import os.path as Path
 import shutil
 import sys
-from typing import Dict, TypedDict, Optional
+from typing import Dict, TypedDict, Optional, Union, Literal
+from abc import ABC, abstractmethod
+from copy import deepcopy
 
 from . import exceptions
 from .resources import Message
@@ -13,13 +15,50 @@ class SettingsConfig(TypedDict, total=False):
     balena_host: str
     api_version: str
     device_actions_endpoint_version: str
-    data_directory: str
+    data_directory: Union[str, Literal[False]]
     image_cache_time: str
     token_refresh_interval: str
     timeout: str
 
 
-class Settings:
+class SettingsProviderInterface(ABC):
+
+    @abstractmethod
+    def has(self, key: str) -> bool:
+        pass
+
+    @abstractmethod
+    def get(self, key: str) -> str:
+        pass
+
+    @abstractmethod
+    def get_all(self) -> Dict[str, str]:
+        pass
+
+    @abstractmethod
+    def set(self, key: str, value: str) -> None:
+        pass
+
+    @abstractmethod
+    def remove(self, key: str) -> bool:
+        pass
+
+
+DEFAULT_SETTINGS = {
+    # These are default config values
+    "balena_host": "balena-cloud.com",
+    "api_version": "v6",
+    "device_actions_endpoint_version": "v1",
+    # cache time : 1 week in milliseconds
+    "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7),
+    # token refresh interval: 1 hour in milliseconds
+    "token_refresh_interval": str(1 * 1000 * 60 * 60),
+    # requests timeout: 30 seconds in milliseconds
+    "timeout": str(30 * 1000),
+}
+
+
+class FileStorageSettingsProvider(SettingsProviderInterface):
     """
     This class handles settings for balena python SDK.
 
@@ -50,20 +89,7 @@ class Settings:
     )
 
     def __init__(self, settings_config: Optional[SettingsConfig]):
-        _base_settings = {
-            # These are default config values to write default config file.
-            # All values here must be in string format otherwise there will be error when write config file.
-            "balena_host": "balena-cloud.com",
-            "api_version": "v6",
-            "device_actions_endpoint_version": "v1",
-            "data_directory": Path.join(Settings.HOME_DIRECTORY, ".balena"),
-            # cache time : 1 week in milliseconds
-            "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7),
-            # token refresh interval: 1 hour in milliseconds
-            "token_refresh_interval": str(1 * 1000 * 60 * 60),
-            # requests timeout: 30 seconds in milliseconds
-            "timeout": str(30 * 1000),
-        }
+        _base_settings = deepcopy(DEFAULT_SETTINGS)
 
         if settings_config is not None:
             _base_settings = {**_base_settings, **settings_config}
@@ -72,6 +98,10 @@ class Settings:
         _base_settings["builder_url"] = f"https://builder.{host}/"
         _base_settings["api_endpoint"] = f"https://api.{host}/"
         _base_settings["pine_endpoint"] = f"https://api.{host}/{_base_settings['api_version']}/"
+
+        data_directory = _base_settings.get("data_directory")
+        if data_directory is None or data_directory is True:
+            _base_settings["data_directory"] = Path.join(FileStorageSettingsProvider.HOME_DIRECTORY, ".balena")
 
         _base_settings["cache_directory"] = Path.join(_base_settings["data_directory"], "cache")
 
@@ -132,6 +162,86 @@ class Settings:
         self._setting = config_data
 
     def has(self, key: str) -> bool:
+        self.__read_settings()
+        if key in self._setting:
+            return True
+        return False
+
+    def get(self, key: str) -> str:
+        try:
+            self.__read_settings()
+            return self._setting[key]
+        except KeyError:
+            raise exceptions.InvalidOption(key)
+
+    def get_all(self) -> Dict[str, str]:
+        self.__read_settings()
+        return self._setting
+
+    def set(self, key: str, value: str) -> None:
+        self._setting[key] = str(value)
+        self.__write_settings()
+
+    def remove(self, key: str) -> bool:
+        # if key is not in settings, return False
+        result = self._setting.pop(key, False)
+        if result is not False:
+            self.__write_settings()
+            return True
+        return False
+
+
+class InMemorySettingsProvider(SettingsProviderInterface):
+    def __init__(self, settings_config: Optional[SettingsConfig]):
+        self._settings = deepcopy(DEFAULT_SETTINGS)
+
+        if settings_config is not None:
+            self._settings = {**DEFAULT_SETTINGS, **settings_config}
+
+        host = self._settings["balena_host"]
+        self._settings["builder_url"] = f"https://builder.{host}/"
+        self._settings["api_endpoint"] = f"https://api.{host}/"
+        self._settings["pine_endpoint"] = f"https://api.{host}/{self._settings['api_version']}/"
+
+    def has(self, key: str) -> bool:
+        if key in self._settings:
+            return True
+        return False
+
+    def get(self, key: str) -> str:
+        try:
+            return self._settings[key]
+        except KeyError:
+            raise exceptions.InvalidOption(key)
+
+    def get_all(self) -> Dict[str, str]:
+        return self._settings
+
+    def set(self, key: str, value: str) -> None:
+        self._settings[key] = str(value)
+
+    def remove(self, key: str) -> bool:
+        result = self._settings.pop(key, False)
+        if result:
+            return True
+        return False
+
+
+class Settings(SettingsProviderInterface):
+    """
+    This class handles settings for balena python SDK.
+
+    """
+
+    def __init__(self, settings_config: Optional[SettingsConfig]):
+        self.__settings_provider: SettingsProviderInterface
+
+        if settings_config and settings_config.get("data_directory") is False:
+            self.__settings_provider = InMemorySettingsProvider(settings_config)
+        else:
+            self.__settings_provider = FileStorageSettingsProvider(settings_config)
+
+    def has(self, key: str) -> bool:
         """
         Check if a setting exists.
 
@@ -144,11 +254,7 @@ class Settings:
         Examples:
             >>> balena.settings.has('api_endpoint')
         """
-
-        self.__read_settings()
-        if key in self._setting:
-            return True
-        return False
+        return self.__settings_provider.has(key)
 
     def get(self, key: str) -> str:
         """
@@ -166,12 +272,7 @@ class Settings:
         Examples:
             >>> balena.settings.get('api_endpoint')
         """
-
-        try:
-            self.__read_settings()
-            return self._setting[key]
-        except KeyError:
-            raise exceptions.InvalidOption(key)
+        return self.__settings_provider.get(key)
 
     def get_all(self) -> Dict[str, str]:
         """
@@ -183,9 +284,7 @@ class Settings:
         Examples:
             >>> balena.settings.get_all()
         """
-
-        self.__read_settings()
-        return self._setting
+        return self.__settings_provider.get_all()
 
     def set(self, key: str, value: str) -> None:
         """
@@ -198,9 +297,7 @@ class Settings:
         Examples:
             >>> balena.settings.set(key='tmp',value='123456')
         """
-
-        self._setting[key] = str(value)
-        self.__write_settings()
+        return self.__settings_provider.set(key, value)
 
     def remove(self, key: str) -> bool:
         """
@@ -218,10 +315,4 @@ class Settings:
             # Remove a non-existing key from settings
             >>> balena.settings.remove('tmp1')
         """
-
-        # if key is not in settings, return False
-        result = self._setting.pop(key, False)
-        if result is not False:
-            self.__write_settings()
-            return True
-        return False
+        return self.__settings_provider.remove(key)

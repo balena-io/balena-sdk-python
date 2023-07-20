@@ -51,8 +51,18 @@ balena_staging = Balena({
     "balena_host": "balena-staging.com",
     "data_directory": "/home/balena-staging-sdk/.balena",
 })
-
 ```
+
+In adition, you can also run balena-python-sdk completely in memory, without writing anything to the file system like:
+
+```python
+balena_prod = Balena({"data_directory": False})
+balena_staging = Balena({
+    "balena_host": "balena-staging.com",
+    "data_directory": False
+})
+```
+
 
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-python/issues), we'll be happy to help.
