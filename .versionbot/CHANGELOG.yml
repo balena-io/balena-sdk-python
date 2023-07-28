@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add in-memory settings config
+      hash: 57b45dc0782a76bf58a008b468a095672eec8f26
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+  version: 13.3.0
+  title: ""
+  date: 2023-07-28T15:56:16.952Z
+- commits:
     - subject: "service: Allow passing an application-service_name pair as a parameter"
       hash: 5c0d94beba8a540c6a147adcfbf4c1a3454820a8
       body: ""
