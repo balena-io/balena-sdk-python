@@ -22,7 +22,6 @@ class SettingsConfig(TypedDict, total=False):
 
 
 class SettingsProviderInterface(ABC):
-
     @abstractmethod
     def has(self, key: str) -> bool:
         pass

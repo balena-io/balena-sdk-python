@@ -247,7 +247,16 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.get_supervisor_target_state("9999999")
 
-    def test_28_remove(self):
+    def test_28_get_supervisor_target_state_for_app(self):
+        state = self.balena.models.device.get_supervisor_target_state_for_app(self.app["id"])
+
+        self.assertEqual(state[self.app["uuid"]]["name"], self.app["app_name"])
+
+        self.assertEqual(state[self.app["uuid"]]["config"]["RESIN_SUPERVISOR_NATIVE_LOGGER"], "true")
+
+        self.assertEqual(state[self.app["uuid"]]["config"]["RESIN_SUPERVISOR_POLL_INTERVAL"], "900000")
+
+    def test_29_remove(self):
         all_devices_len = len(self.balena.models.device.get_all())
         app_devices_len = len(self.balena.models.device.get_all_by_application(self.app["id"]))
         self.balena.models.device.remove(TestDevice.device["uuid"])
