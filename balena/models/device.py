@@ -1104,6 +1104,29 @@ class Device:
             path=f"/device/v2/{device_uuid}/state",
         )
 
+    def get_supervisor_target_state_for_app(
+        self, slug_or_uuid_or_id: Union[str, int], release: Optional[Union[str, int]] = None
+    ) -> Any:
+        """
+        Get the supervisor target state on a device
+
+        Args:
+            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+             release (Optional[Union[str, int]]): (optional) release uuid (default tracked)
+        Returns:
+            DeviceStateType: supervisor target state.
+
+        Examples:
+            >>> balena.models.device.get_supervisor_target_state_for_app('myorg/myapp')
+        """
+        uuid = self.__application.get(slug_or_uuid_or_id, {"$select": "uuid"})["uuid"]
+
+        path = f"/device/v3/fleet/{uuid}/state/?releaseUuid="
+        if release:
+            path += str(release)
+
+        return request(method="GET", settings=self.__settings, path=path)
+
     def generate_uuid(self) -> str:
         """
         Generate a random device UUID.

@@ -204,7 +204,7 @@ class Application:
         self,
         slug_or_uuid_or_id: Union[str, int],
         options: AnyObject = {},
-        context: Optional[str] = "directly_accessible",
+        context: Optional[str] = None,
     ) -> TypeApplication:
         """
         Get a single application.
