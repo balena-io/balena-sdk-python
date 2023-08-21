@@ -276,23 +276,6 @@ class Auth:
             }
         )["actor"]
 
-    def get_email(self) -> str:
-        """
-        This function retrieves current logged in user's get_email
-
-        Returns:
-            str: user email.
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_email()
-        """
-        actor = self.__get_actor_details()
-        if actor and actor.get("actorType") != "user":
-            raise Exception("The authentication credentials in use are not of a user")
-        actor = cast(UserKeyWhoAmIResponse, actor)
-        return cast(str, actor["email"])
-
     def logout(self) -> None:
         """
         This function is used for logging out from balena.

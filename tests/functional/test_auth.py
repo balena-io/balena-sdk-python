@@ -66,9 +66,6 @@ class TestAuth(unittest.TestCase):
             self.balena.auth.whoami()
 
         with self.assertRaises(NotLoggedIn):
-            self.balena.auth.get_email()
-
-        with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_id()
 
         with self.assertRaises(NotLoggedIn):
@@ -88,9 +85,6 @@ class TestAuth(unittest.TestCase):
     def test_11_getters_should_throw_with_malformed_token(self):
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.whoami()
-
-        with self.assertRaises(NotLoggedIn):
-            self.balena.auth.get_email()
 
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_id()
@@ -118,8 +112,6 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(whoami["id"], int)
         self.assertIsInstance(whoami["actorTypeId"], int)
 
-        self.assertEqual(self.balena.auth.get_email(), TestHelper.credentials["email"])
-
         user_id = self.balena.auth.get_user_id()
         self.assertIsInstance(user_id, int)
         self.assertGreater(user_id, 0)
@@ -141,7 +133,6 @@ class TestAuth(unittest.TestCase):
     def test_15_getters_should_return_info_when_logged_in_with_api_key(self):
         self.balena.auth.login_with_token(TestAuth.test_api_key)
         self.assertTrue(self.balena.auth.is_logged_in())
-        self.assertEqual(self.balena.auth.get_email(), TestHelper.credentials["email"])
 
         user_id = self.balena.auth.get_user_id()
         self.assertIsInstance(user_id, int)
@@ -180,9 +171,6 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(whoami["id"], self.app_info["device"]["actor"])
 
         errMsg = "The authentication credentials in use are not of a user"
-        with self.assertRaises(Exception) as cm:
-            self.balena.auth.get_email()
-        self.assertIn(errMsg, str(cm.exception))
 
         with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_id()
@@ -222,9 +210,6 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(whoami["slug"], self.app_info["app"]["slug"])
 
         errMsg = "The authentication credentials in use are not of a user"
-        with self.assertRaises(Exception) as cm:
-            self.balena.auth.get_email()
-        self.assertIn(errMsg, str(cm.exception))
 
         with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_id()

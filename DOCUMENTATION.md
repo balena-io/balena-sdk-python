@@ -306,7 +306,6 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_logs(id)](#image.get_logs) ⇒ <code>str</code>
     - [.auth](#auth)
         - [authenticate()](#auth.authenticate) ⇒ <code>str</code>
-        - [get_email()](#auth.get_email) ⇒ <code>str</code>
         - [get_token()](#auth.get_token) ⇒ <code>Union[str, None]</code>
         - [get_user_actor_id()](#auth.get_user_actor_id) ⇒ <code>int</code>
         - [get_user_id()](#auth.get_user_id) ⇒ <code>int</code>
@@ -3505,20 +3504,6 @@ You should use Auth.login when possible, as it takes care of saving the Auth Tok
 #### Examples:
 ```python
 >>> balena.auth.authenticate(username='<your email>', password='<your password>')
-```
-
-<a name="auth.get_email"></a>
-### Function: get_email() ⇒ <code>str</code>
-
-This function retrieves current logged in user's get_email
-
-#### Returns:
-    str: user email.
-
-#### Examples:
-```python
-# If you are logged in.
->>> balena.auth.get_email()
 ```
 
 <a name="auth.get_token"></a>
