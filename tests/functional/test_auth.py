@@ -74,6 +74,9 @@ class TestAuth(unittest.TestCase):
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_actor_id()
 
+        with self.assertRaises(NotLoggedIn):
+            self.balena.auth.get_user_info()
+
     def test_09_should_not_throw_login_with_malformed_token(self):
         token = self.balena.auth.authenticate(**TestAuth.creds)
         self.balena.auth.login_with_token(f"{token}malformingsuffix")
@@ -95,6 +98,9 @@ class TestAuth(unittest.TestCase):
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_actor_id()
 
+        with self.assertRaises(NotLoggedIn):
+            self.balena.auth.get_user_info()
+
     def test_12_should_get_logged_in_after_logged_in(self):
         TestAuth.creds = {
             "username": TestHelper.credentials["user_id"],
@@ -107,7 +113,7 @@ class TestAuth(unittest.TestCase):
         whoami = cast(UserKeyWhoAmIResponse, self.balena.auth.whoami())
 
         self.assertEqual(whoami["actorType"], "user")
-        self.assertEqual(whoami["username"], TestHelper.credentials["user_id"])
+        self.assertEqual(whoami["username"], TestAuth.creds["username"])
         self.assertEqual(whoami["email"], TestHelper.credentials["email"])
         self.assertIsInstance(whoami["id"], int)
         self.assertIsInstance(whoami["actorTypeId"], int)
@@ -121,6 +127,12 @@ class TestAuth(unittest.TestCase):
         user_actor_id = self.balena.auth.get_user_actor_id()
         self.assertIsInstance(user_actor_id, int)
         self.assertGreater(user_actor_id, 0)
+
+        user_info = self.balena.auth.get_user_info()
+        self.assertEqual(user_info["username"], TestAuth.creds["username"])
+        self.assertEqual(user_info["email"], TestHelper.credentials["email"])
+        self.assertEqual(user_info["actor"], user_actor_id)
+        self.assertIsInstance(user_info["id"], int)
 
     def test_14_should_not_return_logged_in_when_logged_out(self):
         self.balena.auth.logout()
@@ -180,6 +192,10 @@ class TestAuth(unittest.TestCase):
             self.balena.auth.get_user_actor_id()
         self.assertIn(errMsg, str(cm.exception))
 
+        with self.assertRaises(Exception) as cm:
+            self.balena.auth.get_user_info()
+        self.assertIn(errMsg, str(cm.exception))
+
         self.balena.auth.logout()
         self.assertFalse(self.balena.auth.is_logged_in())
 
@@ -216,6 +232,10 @@ class TestAuth(unittest.TestCase):
 
         with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_actor_id()
+        self.assertIn(errMsg, str(cm.exception))
+
+        with self.assertRaises(Exception) as cm:
+            self.balena.auth.get_user_info()
         self.assertIn(errMsg, str(cm.exception))
 
         self.balena.auth.logout()

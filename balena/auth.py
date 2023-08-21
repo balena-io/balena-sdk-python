@@ -40,6 +40,13 @@ class DeviceKeyWhoAmIResponse(TypedDict):
 WhoamiResult = Union[UserKeyWhoAmIResponse, ApplicationKeyWhoAmIResponse, DeviceKeyWhoAmIResponse]
 
 
+class UserInfo(TypedDict):
+    id: int
+    actor: int
+    username: str
+    email: Optional[str]
+
+
 class Auth:
     """
     This class implements all authentication functions for balena python SDK.
@@ -54,7 +61,7 @@ class Auth:
         self.__pine = pine
         self.__settings = settings
 
-    def __get_actor_details(self, no_cache: bool = False) -> Optional[WhoamiResult]:
+    def __get_actor_details(self, no_cache: bool = False) -> WhoamiResult:
         """
         Get user details from token.
 
@@ -209,6 +216,29 @@ class Auth:
         except exceptions.InvalidOption:
             return None
 
+    def get_user_info(self) -> UserInfo:
+        """
+        Get current logged in user's info
+
+        Returns:
+            UserInfo: iser info.
+
+        Examples:
+            # If you are logged in as a user.
+            >>> balena.auth.get_user_info()
+        """
+        actor = self.__get_actor_details()
+        if actor and actor["actorType"] != 'user':
+            raise Exception("The authentication credentials in use are not of a user")
+
+        actor = cast(UserKeyWhoAmIResponse, actor)
+        return {
+            "id": actor["actorTypeId"],
+            "actor": actor["id"],
+            "email": actor["email"],
+            "username": actor["username"],
+        }
+
     def get_user_id(self) -> int:
         """
         This function retrieves current logged in user's id.
@@ -222,9 +252,10 @@ class Auth:
         """
         actor = self.__get_actor_details()
 
-        if actor and actor.get("actorType") != "user":
+        if actor.get("actorType") != "user":
             raise Exception("The authentication credentials in use are not of a user")
-        return int(self.__get_property("actorTypeId"))
+
+        return int(actor["actorTypeId"])
 
     def get_user_actor_id(self) -> int:
         """
@@ -259,7 +290,8 @@ class Auth:
         actor = self.__get_actor_details()
         if actor and actor.get("actorType") != "user":
             raise Exception("The authentication credentials in use are not of a user")
-        return actor["email"]  # type: ignore
+        actor = cast(UserKeyWhoAmIResponse, actor)
+        return cast(str, actor["email"])
 
     def logout(self) -> None:
         """
