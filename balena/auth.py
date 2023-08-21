@@ -205,7 +205,7 @@ class Auth:
         Get current logged in user's info
 
         Returns:
-            UserInfo: iser info.
+            UserInfo: user info.
 
         Examples:
             # If you are logged in as a user.
@@ -235,25 +235,6 @@ class Auth:
             >>> balena.auth.get_actor_id()
         """
         return self.__get_actor_details()["id"]
-
-    def get_user_actor_id(self) -> int:
-        """
-        Get current logged in user's actor id.
-
-        Returns:
-            int: User actor id
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_user_actor_id()
-        """
-        return self.__pine.get(
-            {
-                "resource": "user",
-                "id": self.get_user_info()["id"],
-                "options": {"$select": "actor"},
-            }
-        )["actor"]
 
     def logout(self) -> None:
         """

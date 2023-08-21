@@ -168,7 +168,7 @@ class ApiKey:
             merge(
                 {
                     "$filter": {
-                        "is_of__actor": self.__auth.get_user_actor_id(),
+                        "is_of__actor": self.__auth.get_actor_id(),
                         "name": {"$ne": None},
                     }
                 },

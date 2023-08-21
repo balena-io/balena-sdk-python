@@ -66,9 +66,6 @@ class TestAuth(unittest.TestCase):
             self.balena.auth.whoami()
 
         with self.assertRaises(NotLoggedIn):
-            self.balena.auth.get_user_actor_id()
-
-        with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_actor_id()
 
         with self.assertRaises(NotLoggedIn):
@@ -85,9 +82,6 @@ class TestAuth(unittest.TestCase):
     def test_11_getters_should_throw_with_malformed_token(self):
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.whoami()
-
-        with self.assertRaises(NotLoggedIn):
-            self.balena.auth.get_user_actor_id()
 
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_actor_id()
@@ -112,14 +106,6 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(whoami["id"], int)
         self.assertIsInstance(whoami["actorTypeId"], int)
 
-        user_id = self.balena.auth.get_user_info()["id"]
-        self.assertIsInstance(user_id, int)
-        self.assertGreater(user_id, 0)
-
-        user_actor_id = self.balena.auth.get_user_actor_id()
-        self.assertIsInstance(user_actor_id, int)
-        self.assertGreater(user_actor_id, 0)
-
         actor_id = self.balena.auth.get_actor_id()
         self.assertIsInstance(actor_id, int)
         self.assertGreater(actor_id, 0)
@@ -127,8 +113,9 @@ class TestAuth(unittest.TestCase):
         user_info = self.balena.auth.get_user_info()
         self.assertEqual(user_info["username"], TestAuth.creds["username"])
         self.assertEqual(user_info["email"], TestHelper.credentials["email"])
-        self.assertEqual(user_info["actor"], user_actor_id)
+        self.assertEqual(user_info["actor"], actor_id)
         self.assertIsInstance(user_info["id"], int)
+        self.assertGreater(user_info["id"], 0)
 
     def test_14_should_not_return_logged_in_when_logged_out(self):
         self.balena.auth.logout()
@@ -142,9 +129,9 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(user_id, int)
         self.assertGreater(user_id, 0)
 
-        user_actor_id = self.balena.auth.get_user_actor_id()
-        self.assertIsInstance(user_actor_id, int)
-        self.assertGreater(user_actor_id, 0)
+        actor_id = self.balena.auth.get_actor_id()
+        self.assertIsInstance(actor_id, int)
+        self.assertGreater(actor_id, 0)
 
         self.balena.auth.logout()
         self.assertFalse(self.balena.auth.is_logged_in())
@@ -178,10 +165,6 @@ class TestAuth(unittest.TestCase):
 
         errMsg = "The authentication credentials in use are not of a user"
         with self.assertRaises(Exception) as cm:
-            self.balena.auth.get_user_actor_id()
-        self.assertIn(errMsg, str(cm.exception))
-
-        with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_info()
         self.assertIn(errMsg, str(cm.exception))
 
@@ -213,10 +196,6 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["app"]["actor"])
 
         errMsg = "The authentication credentials in use are not of a user"
-        with self.assertRaises(Exception) as cm:
-            self.balena.auth.get_user_actor_id()
-        self.assertIn(errMsg, str(cm.exception))
-
         with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_info()
         self.assertIn(errMsg, str(cm.exception))
