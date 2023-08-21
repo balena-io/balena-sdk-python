@@ -69,6 +69,9 @@ class TestAuth(unittest.TestCase):
             self.balena.auth.get_user_actor_id()
 
         with self.assertRaises(NotLoggedIn):
+            self.balena.auth.get_actor_id()
+
+        with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_info()
 
     def test_09_should_not_throw_login_with_malformed_token(self):
@@ -85,6 +88,9 @@ class TestAuth(unittest.TestCase):
 
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_actor_id()
+
+        with self.assertRaises(NotLoggedIn):
+            self.balena.auth.get_actor_id()
 
         with self.assertRaises(NotLoggedIn):
             self.balena.auth.get_user_info()
@@ -113,6 +119,10 @@ class TestAuth(unittest.TestCase):
         user_actor_id = self.balena.auth.get_user_actor_id()
         self.assertIsInstance(user_actor_id, int)
         self.assertGreater(user_actor_id, 0)
+
+        actor_id = self.balena.auth.get_actor_id()
+        self.assertIsInstance(actor_id, int)
+        self.assertGreater(actor_id, 0)
 
         user_info = self.balena.auth.get_user_info()
         self.assertEqual(user_info["username"], TestAuth.creds["username"])
@@ -164,6 +174,8 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(whoami["uuid"], device_uuid)
         self.assertEqual(whoami["id"], self.app_info["device"]["actor"])
 
+        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["device"]["actor"])
+
         errMsg = "The authentication credentials in use are not of a user"
         with self.assertRaises(Exception) as cm:
             self.balena.auth.get_user_actor_id()
@@ -197,6 +209,8 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(whoami["actorTypeId"], app_id)
         self.assertEqual(whoami["id"], self.app_info["app"]["actor"])
         self.assertEqual(whoami["slug"], self.app_info["app"]["slug"])
+
+        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["app"]["actor"])
 
         errMsg = "The authentication credentials in use are not of a user"
         with self.assertRaises(Exception) as cm:

@@ -77,22 +77,6 @@ class Auth:
 
         return self._actor_details_cache
 
-    def __get_property(self, element: str) -> Union[str, int]:
-        """
-        Get a property from user details.
-
-        Args:
-            element (str): property name.
-
-        Returns:
-            Union[str, int]: property value.
-        """
-        details = self.__get_actor_details()
-        if details:
-            return details[element]
-        else:
-            raise exceptions.InvalidOption(element)
-
     def whoami(self) -> Optional[WhoamiResult]:
         """
         Return current logged in username.
@@ -238,6 +222,19 @@ class Auth:
             "email": actor["email"],
             "username": actor["username"],
         }
+
+    def get_actor_id(self) -> int:
+        """
+        Get current logged in actor id.
+
+        Returns:
+            int: actor id
+
+        Examples:
+            # If you are logged in.
+            >>> balena.auth.get_actor_id()
+        """
+        return self.__get_actor_details()["id"]
 
     def get_user_actor_id(self) -> int:
         """
