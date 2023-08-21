@@ -1179,7 +1179,7 @@ class Device:
         }
 
         # TODO: paralelize this 4 requests
-        user_id = self.__auth.get_user_id()
+        user_id = self.__auth.get_user_info()["id"]
         api_key = self.__application.generate_provisioning_key(application_slug_or_uuid_or_id)
 
         app = self.__application.get(application_slug_or_uuid_or_id, application_options)

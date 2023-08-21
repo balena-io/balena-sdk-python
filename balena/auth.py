@@ -239,24 +239,6 @@ class Auth:
             "username": actor["username"],
         }
 
-    def get_user_id(self) -> int:
-        """
-        This function retrieves current logged in user's id.
-
-        Returns:
-            int: user id.
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_user_id()
-        """
-        actor = self.__get_actor_details()
-
-        if actor.get("actorType") != "user":
-            raise Exception("The authentication credentials in use are not of a user")
-
-        return int(actor["actorTypeId"])
-
     def get_user_actor_id(self) -> int:
         """
         Get current logged in user's actor id.
@@ -271,7 +253,7 @@ class Auth:
         return self.__pine.get(
             {
                 "resource": "user",
-                "id": self.get_user_id(),
+                "id": self.get_user_info()["id"],
                 "options": {"$select": "actor"},
             }
         )["actor"]

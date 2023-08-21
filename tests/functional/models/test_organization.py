@@ -115,7 +115,7 @@ class TestOrganization(unittest.TestCase):
         # shoud return only the user's own membership
         memberships = self.balena.models.organization.membership.get_all_by_organization(TestOrganization.org1["id"])
         self.assertEqual(1, len(memberships))
-        self.assertEqual(memberships[0]["user"]["__id"], self.balena.auth.get_user_id())
+        self.assertEqual(memberships[0]["user"]["__id"], self.balena.auth.get_user_info()["id"])
         self.assertEqual(memberships[0]["is_member_of__organization"]["__id"], TestOrganization.org1["id"])
         self.assertEqual(
             memberships[0]["organization_membership_role"]["__id"],

@@ -99,7 +99,7 @@ class TestRelease(unittest.TestCase):
 
     def test_04_finalize_releases(self):
         TestRelease.test_release_by_field = {}
-        user_id = self.balena.auth.get_user_id()
+        user_id = self.balena.auth.get_user_info()["id"]
         for i, field in enumerate(self.UNIQUE_PROPERTY_NAMES):
             TestRelease.test_release_by_field[field] = self.balena.pine.post(
                 {
@@ -252,7 +252,7 @@ class TestRelease(unittest.TestCase):
 
     def test_12_get_latest_by_application(self):
         app_id = self.mc_app["app"]["id"]
-        user_id = self.balena.auth.get_user_id()
+        user_id = self.balena.auth.get_user_info()["id"]
 
         releases = [
             {
@@ -296,7 +296,7 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(release["belongs_to__application"]["__id"], app["id"])  # type: ignore
 
     def test_13_releases_sharing_same_commit_root(self):
-        user_id = self.balena.auth.get_user_id()
+        user_id = self.balena.auth.get_user_info()["id"]
         app = self.mc_app["app"]
 
         self.balena.pine.post(

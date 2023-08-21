@@ -318,7 +318,7 @@ class TestHelper:
             device_type,
             self.default_organization["id"],
         )
-        user_id = self.balena.auth.get_user_id()
+        user_id = self.balena.auth.get_user_info()["id"]
 
         # Register an old & new release of this application
         old_release = self.balena.pine.post(

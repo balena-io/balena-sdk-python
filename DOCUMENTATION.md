@@ -308,7 +308,6 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
         - [authenticate()](#auth.authenticate) ⇒ <code>str</code>
         - [get_token()](#auth.get_token) ⇒ <code>Union[str, None]</code>
         - [get_user_actor_id()](#auth.get_user_actor_id) ⇒ <code>int</code>
-        - [get_user_id()](#auth.get_user_id) ⇒ <code>int</code>
         - [get_user_info()](#auth.get_user_info) ⇒ <code>UserInfo</code>
         - [is_logged_in()](#auth.is_logged_in) ⇒ <code>bool</code>
         - [login()](#auth.login) ⇒ <code>None</code>
@@ -3531,20 +3530,6 @@ Get current logged in user's actor id.
 ```python
 # If you are logged in.
 >>> balena.auth.get_user_actor_id()
-```
-
-<a name="auth.get_user_id"></a>
-### Function: get_user_id() ⇒ <code>int</code>
-
-This function retrieves current logged in user's id.
-
-#### Returns:
-    int: user id.
-
-#### Examples:
-```python
-# If you are logged in.
->>> balena.auth.get_user_id()
 ```
 
 <a name="auth.get_user_info"></a>

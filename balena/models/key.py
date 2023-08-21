@@ -72,7 +72,7 @@ class Key:
         # Avoid ugly whitespaces
         key = key.strip()
 
-        user_id = self.__auth.get_user_id()
+        user_id = self.__auth.get_user_info()["id"]
         return self.__pine.post(
             {"resource": "user__has__public_key", "body": {"title": title, "public_key": key, "user": user_id}}
         )
