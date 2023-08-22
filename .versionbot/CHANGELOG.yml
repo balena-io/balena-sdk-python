@@ -1,4 +1,58 @@
 - commits:
+    - subject: "**BREAKING**: Drop auth.get_user_actor_id in favor of auth.get_actor_id"
+      hash: 58e2759d9374841c5272eb089562c1532dd67a7e
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: "auth: Add get_actor_id"
+      hash: f972c499e9afcf3e259373d4ba5a5ab153a6bccc
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+    - subject: "**BREAKING**: Drop auth.get_user_id in favor of auth.get_user_info"
+      hash: 1d34e4d6f7917c8a3e64010436c66fd15d2a28cd
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: "**BREAKING**: Drop auth.get_email in favor of auth.get_user_info"
+      hash: 776f34e965b625e9a27d92c4dac9a46e64f2d047
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: "auth: Add get_user_info"
+      hash: 25a15a611c1eef9bc83618b8419d7cad096d1d4e
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+    - subject: "**BREAKING**: Drop pre-Resin OS v1 device os_version normalization"
+      hash: dbcbdda514ad1e46d8d54000d006db2452882b5c
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+    - subject: "**BREAKING**: Support non-user API keys in auth.is_logged_in() &
+        whoami()"
+      hash: 9be4e05f7593e10e107d8998cbc464f91769b0f3
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+  version: 14.0.0
+  title: ""
+  date: 2023-08-22T12:42:09.217Z
+- commits:
     - subject: Add devices.get_supervisor_target_state_for_app
       hash: 9eecf7beef4538167b55defbd12526d466605f14
       body: ""
