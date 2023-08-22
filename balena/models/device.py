@@ -26,7 +26,6 @@ from ..utils import (
     is_id,
     is_provisioned,
     merge,
-    normalize_device_os_version,
     with_supervisor_locked_error,
 )
 from .application import Application
@@ -286,7 +285,7 @@ class Device:
             }
         )
 
-        return list(map(normalize_device_os_version, devices))
+        return devices
 
     def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[TypeDevice]:
         """
@@ -394,7 +393,7 @@ class Device:
         if device is None:
             raise exceptions.DeviceNotFound(uuid_or_id)
 
-        return normalize_device_os_version(device)
+        return device
 
     def get_with_service_details(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> TypeDevice:
         """
@@ -1180,7 +1179,7 @@ class Device:
         }
 
         # TODO: paralelize this 4 requests
-        user_id = self.__auth.get_user_id()
+        user_id = self.__auth.get_user_info()["id"]
         api_key = self.__application.generate_provisioning_key(application_slug_or_uuid_or_id)
 
         app = self.__application.get(application_slug_or_uuid_or_id, application_options)

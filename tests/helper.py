@@ -37,7 +37,8 @@ class TestHelper:
                 "The test is run with an admin user account. Cancelled, please try" " again with a normal account!"
             )
 
-        self.default_organization = self.balena.models.organization.get(self.balena.auth.whoami())
+        whoami = self.balena.auth.whoami()
+        self.default_organization = self.balena.models.organization.get(whoami["username"])  # type: ignore
 
         self.application_retrieval_fields = ["id", "slug", "uuid"]
 
@@ -317,7 +318,7 @@ class TestHelper:
             device_type,
             self.default_organization["id"],
         )
-        user_id = self.balena.auth.get_user_id()
+        user_id = self.balena.auth.get_user_info()["id"]
 
         # Register an old & new release of this application
         old_release = self.balena.pine.post(

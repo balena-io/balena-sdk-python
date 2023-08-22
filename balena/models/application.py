@@ -21,7 +21,6 @@ from ..utils import (
     get_current_service_details_pine_expand,
     is_id,
     merge,
-    normalize_device_os_version,
     with_supervisor_locked_error,
 )
 from .device_type import DeviceType
@@ -98,12 +97,6 @@ class Application:
 
         return org["id"]
 
-    def __normalize_application(self, application: TypeApplication) -> TypeApplication:
-        owned_devices = application.get("owns__device")
-        if isinstance(owned_devices, list):
-            application["owns__device"] = list(map(normalize_device_os_version, owned_devices))
-        return application
-
     def get_id(self, slug_or_uuid_or_id: Union[str, int]) -> int:
         """
         Given an application slug or uuid or id, returns it numeric id.
@@ -166,7 +159,7 @@ class Application:
             >>> balena.models.application.get_all()
         """
 
-        apps = self.__pine.get(
+        return self.__pine.get(
             {
                 "resource": "application",
                 "options": merge(
@@ -178,8 +171,6 @@ class Application:
                 ),
             }
         )
-
-        return list(map(self.__normalize_application, apps))
 
     def get_all_directly_accessible(
         self,
@@ -274,7 +265,7 @@ class Application:
         if application is None:
             raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
 
-        return self.__normalize_application(application)
+        return application
 
     def get_directly_accessible(
         self,
@@ -372,7 +363,7 @@ class Application:
         if len(apps) > 1:
             raise exceptions.AmbiguousApplication(app_name)
 
-        return self.__normalize_application(apps[0])
+        return apps[0]
 
     def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> TypeApplication:
         """
@@ -402,7 +393,7 @@ class Application:
         if app is None:
             raise exceptions.ApplicationNotFound(slug)
 
-        return self.__normalize_application(app)
+        return app
 
     def has(self, slug_or_uuid_or_id: Union[str, int]) -> bool:
         """

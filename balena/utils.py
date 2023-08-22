@@ -223,13 +223,6 @@ def is_provisioned(device: Any) -> bool:
     )
 
 
-def normalize_device_os_version(device: Any) -> Any:
-    if device.get("os_version") is not None and len(device.get("os_version")) == 0 and is_provisioned(device):
-        device["os_version"] = "Resin OS 1.0.0-pre"
-
-    return device
-
-
 T = TypeVar("T")
 
 

@@ -1,7 +1,6 @@
 from typing import List, TypedDict, Optional
 
 from ..balena_auth import request
-from ..utils import normalize_device_os_version
 from ..settings import Settings
 
 
@@ -45,4 +44,4 @@ class Config:
             >>> balena.models.config.get_all()
         """
 
-        return normalize_device_os_version(request(method="GET", path="/config", settings=self.__settings))
+        return request(method="GET", path="/config", settings=self.__settings)

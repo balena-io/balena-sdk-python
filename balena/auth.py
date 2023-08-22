@@ -15,10 +15,36 @@ class CredentialsType(TypedDict):
     password: str
 
 
-class WhoamiResult(TypedDict):
+class UserKeyWhoAmIResponse(TypedDict):
     id: int
+    actorType: Literal["user"]
+    actorTypeId: int
     username: str
-    email: str
+    email: Optional[str]
+
+
+class ApplicationKeyWhoAmIResponse(TypedDict):
+    id: int
+    actorType: Literal["application"]
+    actorTypeId: int
+    slug: str
+
+
+class DeviceKeyWhoAmIResponse(TypedDict):
+    id: int
+    actorType: Literal["device"]
+    actorTypeId: int
+    uuid: str
+
+
+WhoamiResult = Union[UserKeyWhoAmIResponse, ApplicationKeyWhoAmIResponse, DeviceKeyWhoAmIResponse]
+
+
+class UserInfo(TypedDict):
+    id: int
+    actor: int
+    username: str
+    email: Optional[str]
 
 
 class Auth:
@@ -27,7 +53,7 @@ class Auth:
 
     """
 
-    _user_detail_cache: Optional[WhoamiResult] = None
+    _actor_details_cache: Optional[WhoamiResult] = None
     _user_actor_id_cache: Optional[int] = None
 
     def __init__(self, pine: PineClient, settings: Settings):
@@ -35,49 +61,33 @@ class Auth:
         self.__pine = pine
         self.__settings = settings
 
-    def __get_user_details(self, no_cache: bool = False) -> Optional[WhoamiResult]:
+    def __get_actor_details(self, no_cache: bool = False) -> WhoamiResult:
         """
         Get user details from token.
 
         Returns:
             Optional[WhoamiResult]: user details.
         """
-        if not self._user_detail_cache or no_cache:
-            whoami = request(method="GET", settings=self.__settings, path="/user/v1/whoami")
-            if isinstance(whoami, dict) and set(whoami.keys()) == set(["id", "username", "email"]):
-                self._user_detail_cache = cast(WhoamiResult, whoami)
+        if not self._actor_details_cache or no_cache:
+            whoami = request(method="GET", settings=self.__settings, path="/actor/v1/whoami")
+            if isinstance(whoami, dict) and set(["id", "actorType"]).issubset(set(whoami.keys())):
+                self._actor_details_cache = cast(WhoamiResult, whoami)
             else:
                 raise exceptions.NotLoggedIn()
 
-        return self._user_detail_cache
+        return self._actor_details_cache
 
-    def __get_property(self, element: Literal["id", "username", "email"]) -> Union[str, int]:
-        """
-        Get a property from user details.
-
-        Args:
-            element (Literal["id", "username", "email"]): property name.
-
-        Returns:
-            Union[str, int]: property value.
-        """
-        details = self.__get_user_details()
-        if details:
-            return details[element]
-        else:
-            raise exceptions.InvalidOption(element)
-
-    def whoami(self) -> str:
+    def whoami(self) -> Optional[WhoamiResult]:
         """
         Return current logged in username.
 
         Returns:
-            str: username.
+            Optional[WhoamiResult]: current logged in information
 
         Examples:
             >>> balena.auth.whoami()
         """
-        return str(self.__get_property("username"))
+        return self.__get_actor_details()
 
     def authenticate(self, **credentials: Unpack[CredentialsType]) -> str:
         """
@@ -125,7 +135,7 @@ class Auth:
             ... balena.auth.login(username='<your email>', password='<your password>')
         """
         token = self.authenticate(**credentials)
-        self._user_detail_cache = None
+        self._actor_details_cache = None
         self._user_actor_id_cache = None
         self.__settings.set(TOKEN_KEY, token)
 
@@ -147,7 +157,7 @@ class Auth:
             >>> balena.auth.login_with_token(auth_token)
 
         """
-        self._user_detail_cache = None
+        self._actor_details_cache = None
         self._user_actor_id_cache = None
         self.__settings.set(TOKEN_KEY, token)
 
@@ -166,7 +176,7 @@ class Auth:
             ...     print('You are not logged in!')
         """
         try:
-            self.__get_user_details(True)
+            self.__get_actor_details(True)
             return True
         except (
             exceptions.RequestError,
@@ -190,50 +200,41 @@ class Auth:
         except exceptions.InvalidOption:
             return None
 
-    def get_user_id(self) -> int:
+    def get_user_info(self) -> UserInfo:
         """
-        This function retrieves current logged in user's id.
+        Get current logged in user's info
 
         Returns:
-            int: user id.
+            UserInfo: user info.
+
+        Examples:
+            # If you are logged in as a user.
+            >>> balena.auth.get_user_info()
+        """
+        actor = self.__get_actor_details()
+        if actor and actor["actorType"] != 'user':
+            raise Exception("The authentication credentials in use are not of a user")
+
+        actor = cast(UserKeyWhoAmIResponse, actor)
+        return {
+            "id": actor["actorTypeId"],
+            "actor": actor["id"],
+            "email": actor["email"],
+            "username": actor["username"],
+        }
+
+    def get_actor_id(self) -> int:
+        """
+        Get current logged in actor id.
+
+        Returns:
+            int: actor id
 
         Examples:
             # If you are logged in.
-            >>> balena.auth.get_user_id()
+            >>> balena.auth.get_actor_id()
         """
-        return int(self.__get_property("id"))
-
-    def get_user_actor_id(self) -> int:
-        """
-        Get current logged in user's actor id.
-
-        Returns:
-            int: User actor id
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_user_actor_id()
-        """
-        return self.__pine.get(
-            {
-                "resource": "user",
-                "id": self.get_user_id(),
-                "options": {"$select": "actor"},
-            }
-        )["actor"]
-
-    def get_email(self) -> str:
-        """
-        This function retrieves current logged in user's get_email
-
-        Returns:
-            str: user email.
-
-        Examples:
-            # If you are logged in.
-            >>> balena.auth.get_email()
-        """
-        return str(self.__get_property("email"))
+        return self.__get_actor_details()["id"]
 
     def logout(self) -> None:
         """
@@ -243,7 +244,7 @@ class Auth:
             # If you are logged in.
             >>> balena.auth.logout()
         """
-        self._user_detail_cache = None
+        self._actor_details_cache = None
         self._user_actor_id_cache = None
         self.__settings.remove(TOKEN_KEY)
 
