@@ -212,7 +212,7 @@ class Auth:
             >>> balena.auth.get_user_info()
         """
         actor = self.__get_actor_details()
-        if actor and actor["actorType"] != 'user':
+        if actor and actor["actorType"] != "user":
             raise Exception("The authentication credentials in use are not of a user")
 
         actor = cast(UserKeyWhoAmIResponse, actor)

@@ -1561,7 +1561,7 @@ Get the status of a device.
 Get the supervisor state on a device
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
 #### Returns:
     dict: supervisor state.
@@ -1678,7 +1678,7 @@ Check if a device has the lock override enabled.
 Identify device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
 #### Examples:
 ```python
@@ -1759,7 +1759,7 @@ Ping a device.
 This is useful to signal that the supervisor is alive and responding.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
 #### Examples:
 ```python
@@ -1774,7 +1774,7 @@ Purge device.
 This function clears the user application's `/data` directory.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
 #### Examples:
 ```python
@@ -1787,7 +1787,7 @@ This function clears the user application's `/data` directory.
 Reboot the device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     force (Optional[bool]): If force is True, the update lock will be overridden.
 
 #### Examples:
@@ -1844,7 +1844,7 @@ the application on the device, but doesn't reboot
 the device itself.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
 #### Examples:
 ```python
@@ -1858,12 +1858,13 @@ the device itself.
 Restart a service on device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     image_id (int): id of the image to restart
 
 #### Examples:
 ```python
 >>> balena.models.device.restart_service('f3887b', 392229)
+>>> balena.models.device.restart_service(None, 392229)  # if running on the device
 ```
 
 <a name="device.revoke_support_access"></a>
@@ -1927,7 +1928,7 @@ Set a specific device to run a particular supervisor release.
 Shutdown the device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     force (Optional[bool]): If force is True, the update lock will be overridden.
 
 #### Examples:
@@ -1980,12 +1981,13 @@ Start an OS update on a device.
 Start a service on device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     image_id (int): id of the image to start
 
 #### Examples:
 ```python
->>> balena.models.device.start_service('f3887b1')
+>>> balena.models.device.start_service('f3887b1', 1234)
+>>> balena.models.device.start_service(None, 1234)  # if running on the device
 ```
 
 <a name="device.stop_application"></a>
@@ -2014,12 +2016,13 @@ This function requires supervisor v1.8 or higher.
 Stop a service on device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     image_id (int): id of the image to stop
 
 #### Examples:
 ```python
 >>> balena.models.device.stop_service('f3887b1', 392229)
+>>> balena.models.device.stop_service(None, 392229)  # if running on the device
 ```
 
 <a name="device.track_application_release"></a>
@@ -2049,7 +2052,7 @@ Clear the custom location of a device.
 update the device.
 
 #### Args:
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
     force (Optional[bool]): If force is True, the update lock will be overridden.
 
 #### Examples:

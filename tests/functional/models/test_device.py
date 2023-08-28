@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+from unittest.mock import patch, Mock
 
 from balena.models.device import LocationType
 from tests.helper import TestHelper
@@ -256,7 +257,109 @@ class TestDevice(unittest.TestCase):
 
         self.assertEqual(state[self.app["uuid"]]["config"]["RESIN_SUPERVISOR_POLL_INTERVAL"], "900000")
 
-    def test_29_remove(self):
+    def __reset_mock(self, mock_request):
+        mock_request.reset_mock()
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_request.return_value = mock_response
+        return mock_request
+
+    @patch.dict(
+        "os.environ",
+        {
+            "BALENA_SUPERVISOR_ADDRESS": "http://localhost:1337",
+            "BALENA_SUPERVISOR_API_KEY": "key",
+            "BALENA_APP_ID": "123",
+        },
+    )
+    def test_29_sdk_on_device(self):
+        other_helper = TestHelper()
+
+        with patch("requests.request") as mock_request:
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.ping()
+            mock_request.assert_called_once_with(
+                method="GET", url="http://localhost:1337/ping", json=None, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.identify()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/blink", json=None, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.restart_application()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/restart", json={"appId": "123"}, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.purge()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/purge", json={"appId": "123"}, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.reboot()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/reboot", json={}, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.shutdown()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/shutdown", json={}, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.update()
+            mock_request.assert_called_once_with(
+                method="POST", url="http://localhost:1337/v1/update", json={}, params={"apikey": "key"}
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.start_service(None, 444)
+            mock_request.assert_called_once_with(
+                method="POST",
+                url="http://localhost:1337/v2/applications/123/start-service",
+                json={"imageId": 444},
+                params={"apikey": "key"},
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.stop_service(None, 444)
+            mock_request.assert_called_once_with(
+                method="POST",
+                url="http://localhost:1337/v2/applications/123/stop-service",
+                json={"imageId": 444},
+                params={"apikey": "key"},
+            )
+
+            self.__reset_mock(mock_request)
+            other_helper.balena.models.device.restart_service(None, 444)
+            mock_request.assert_called_once_with(
+                method="POST",
+                url="http://localhost:1337/v2/applications/123/restart-service",
+                json={"imageId": 444},
+                params={"apikey": "key"},
+            )
+
+            mock_request.reset_mock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "api_port": "1337",
+            }
+            mock_request.return_value = mock_response
+            res = other_helper.balena.models.device.get_supervisor_state()
+            mock_request.assert_called_once_with(
+                method="GET", url="http://localhost:1337/v1/device", json=None, params={"apikey": "key"}
+            )
+            self.assertEqual(res["api_port"], "1337")
+
+    def test_30_remove(self):
         all_devices_len = len(self.balena.models.device.get_all())
         app_devices_len = len(self.balena.models.device.get_all_by_application(self.app["id"]))
         self.balena.models.device.remove(TestDevice.device["uuid"])
