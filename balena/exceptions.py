@@ -485,6 +485,20 @@ class LocalModeError(BalenaException):
         self.message = message
 
 
+class LocalSupervisorNotFound(BalenaException):
+    """
+    Generic Local Supervisor Not Found Exception.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self):
+        super(LocalSupervisorNotFound, self).__init__()
+        self.message = "You must either set a UUID/ID or be running inside a balena device with supervisor API enabled"
+
+
 class OrganizationNotFound(BalenaException):
     """
     Exception type for organization not found.

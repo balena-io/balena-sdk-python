@@ -5,7 +5,9 @@ from typing import Any, Callable, List, Optional, TypedDict, Union
 from urllib.parse import urljoin
 
 from deprecated import deprecated
+import requests
 from semver.version import Version
+from json.decoder import JSONDecodeError
 
 from .. import exceptions
 from ..auth import Auth
@@ -122,6 +124,13 @@ class Device:
         self.env_var = DeviceEnvVariable(pine, self, self.__application)
         self.service_var = DeviceServiceEnvVariable(pine, self, self.__application)
         self.history = DeviceHistory(pine, settings)
+
+        self.__supervisor_address = os.environ.get("BALENA_SUPERVISOR_ADDRESS")
+        self.__supervisor_api_key = os.environ.get("BALENA_SUPERVISOR_API_KEY")
+        self.__on_device_app_id = os.environ.get("BALENA_APP_ID")
+        self.__local_device_uuid = os.environ.get("BALENA_DEVICE_UUID")
+
+        self.__on_device = all([self.__supervisor_address, self.__supervisor_api_key, self.__on_device_app_id])
 
     def __get_applied_device_config_variable_value(self, uuid_or_id: Union[str, int], name: str):
         options = {
@@ -709,18 +718,46 @@ class Device:
 
         self.__set(uuid_or_id, {"belongs_to__application": app["id"]})
 
-    def ping(self, uuid_or_id: Union[str, int]):
+    def __supervisor_request(self, method: str, path: str, body: Optional[AnyObject] = None):
+        params = {"apikey": self.__supervisor_api_key}
+        req = with_supervisor_locked_error(
+            lambda: requests.request(
+                method=method, url=urljoin(self.__supervisor_address, path), json=body, params=params  # type: ignore
+            )
+        )
+
+        if req.ok:
+            try:
+                return req.json()
+            except JSONDecodeError:
+                return req.content.decode()
+        else:
+            raise exceptions.RequestError(body=req.content.decode(), status_code=req.status_code)
+
+    def __should_run_on_device(self, uuid_or_id: Optional[Union[str, int]]) -> bool:
+        return self.__on_device and (uuid_or_id is None or uuid_or_id == self.__local_device_uuid)
+
+    def ping(self, uuid_or_id: Optional[Union[str, int]] = None) -> None:
         """
         Ping a device.
         This is useful to signal that the supervisor is alive and responding.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
             >>> balena.models.device.ping('8f66ec7')
             >>> balena.models.device.ping(1234)
         """
+
+        path = "/ping"
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("GET", path)
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
         device_options = {
             "$select": "id",
             "$expand": {"belongs_to__application": {"$select": "id"}},
@@ -729,7 +766,7 @@ class Device:
         device = self.get(uuid_or_id, device_options)
         request(
             method="POST",
-            path="/supervisor/ping",
+            path=f"/supervisor/{path}",
             settings=self.__settings,
             body={
                 "method": "GET",
@@ -738,16 +775,24 @@ class Device:
             },
         )
 
-    def identify(self, uuid_or_id: Union[str, int]) -> None:
+    def identify(self, uuid_or_id: Optional[Union[str, int]] = None) -> None:
         """
         Identify device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
             >>> balena.models.device.identify('8deb12a5')
         """
+
+        path = "/v1/blink"
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path)
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
 
         device = self.get(uuid_or_id, {"$select": "uuid"})
         device_uuid = device["uuid"]
@@ -756,31 +801,38 @@ class Device:
             method="POST",
             settings=self.__settings,
             body={"uuid": device_uuid},
-            path="/supervisor/v1/blink",
+            path=f"/supervisor{path}",
         )
 
-    def restart_application(self, uuid_or_id: Union[str, int]) -> None:
+    def restart_application(self, uuid_or_id: Optional[Union[str, int]] = None) -> None:
         """
         This function restarts the Docker container running
         the application on the device, but doesn't reboot
         the device itself.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
             >>> balena.models.device.restart_application('8deb12a58')
             >>> balena.models.device.restart_application(1234)
         """
 
+        path = "/v1/restart"
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path, {"appId": self.__on_device_app_id})
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
+        restart_request = {
+            "$select": ["id", "supervisor_version"],
+            "$expand": {"belongs_to__application": {"$select": "id"}},
+        }
+
         def __restart_application():
-            device = self.get(
-                uuid_or_id,
-                {
-                    "$select": ["id", "supervisor_version"],
-                    "$expand": {"belongs_to__application": {"$select": "id"}},
-                },
-            )
+            device = self.get(uuid_or_id, restart_request)
             device_id = device["id"]
 
             if not Version.is_valid(device["supervisor_version"]) or (
@@ -796,7 +848,7 @@ class Device:
 
             return request(
                 method="POST",
-                path="/supervisor/v1/restart",
+                path=f"/supervisor{path}",
                 settings=self.__settings,
                 body={
                     "deviceId": device_id,
@@ -809,51 +861,73 @@ class Device:
 
         with_supervisor_locked_error(__restart_application)
 
-    def reboot(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+    def __should_force(self, force: bool):
+        if not isinstance(force, bool):
+            raise ValueError(f"The `force` flag must be of type bool, got {type(force)} instead.")
+
+        should_force = {}
+        if force:
+            should_force = {"force": force}
+
+        return should_force
+
+    def reboot(self, uuid_or_id: Optional[Union[str, int]] = None, force: bool = False) -> None:
         """
         Reboot the device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
             >>> balena.models.device.reboot('8f66ec7')
         """
 
-        def __reboot():
-            data = {}
-            if force:
-                data = {"force": bool(force)}
+        path = "/v1/reboot"
+        should_force = self.__should_force(force)
 
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path, should_force)
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
+        def __reboot():
             device_id = uuid_or_id if is_id(uuid_or_id) else self.get(uuid_or_id, {"$select": "id"})["id"]
 
             return request(
                 method="POST",
-                path="/supervisor/v1/reboot",
+                path=f"/supervisor{path}",
                 settings=self.__settings,
-                body={"deviceId": device_id, "data": data},
+                body={"deviceId": device_id, "data": should_force},
             )
 
         with_supervisor_locked_error(__reboot)
 
-    def shutdown(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+    def shutdown(self, uuid_or_id: Optional[Union[str, int]] = None, force: bool = False) -> None:
         """
         Shutdown the device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
             >>> balena.models.device.shutdown('8f66ec7')
         """
 
-        def __shutdown():
-            data = {}
-            if force:
-                data = {"force": bool(force)}
+        path = "/v1/shutdown"
+        should_force = self.__should_force(force)
 
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path, should_force)
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
+        def __shutdown():
             device = self.get(
                 uuid_or_id,
                 {
@@ -864,28 +938,36 @@ class Device:
 
             return request(
                 method="POST",
-                path="/supervisor/v1/shutdown",
+                path=f"/supervisor{path}",
                 settings=self.__settings,
                 body={
                     "deviceId": device["id"],
                     "appId": device["belongs_to__application"][0]["id"],
-                    "data": data,
+                    "data": should_force,
                 },
             )
 
         with_supervisor_locked_error(__shutdown)
 
-    def purge(self, uuid_or_id: Union[str, int]) -> None:
+    def purge(self, uuid_or_id: Optional[Union[str, int]] = None) -> None:
         """
         Purge device.
         This function clears the user application's `/data` directory.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
             >>> balena.models.device.purge('8f66ec7')
         """
+
+        path = "/v1/purge"
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path, {"appId": self.__on_device_app_id})
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
 
         def __purge():
             device = self.get(
@@ -896,34 +978,42 @@ class Device:
                 },
             )
 
+            app_id = device["belongs_to__application"][0]["id"]
+
             return request(
                 method="POST",
-                path="/supervisor/v1/purge",
+                path=f"/supervisor{path}",
                 settings=self.__settings,
                 body={
                     "deviceId": device["id"],
-                    "appId": device["belongs_to__application"][0]["id"],
-                    "data": {"appId": device["belongs_to__application"][0]["id"]},
+                    "appId": app_id,
+                    "data": {"appId": app_id},
                 },
             )
 
         with_supervisor_locked_error(__purge)
 
-    def update(self, uuid_or_id: Union[str, int], force: bool = False) -> None:
+    def update(self, uuid_or_id: Optional[Union[str, int]] = None, force: bool = False) -> None:
         """
         update the device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
             >>> balena.models.device.update('8f66ec7')
         """
 
-        data = {}
-        if force:
-            data = {"force": bool(force)}
+        path = "/v1/update"
+        should_force = self.__should_force(force)
+
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request("POST", path, should_force)
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
 
         device = self.get(
             uuid_or_id,
@@ -935,21 +1025,21 @@ class Device:
 
         return request(
             method="POST",
-            path="/supervisor/v1/update",
+            path=f"/supervisor{path}",
             settings=self.__settings,
             body={
                 "deviceId": device["id"],
                 "appId": device["belongs_to__application"][0]["id"],
-                "data": data,
+                "data": should_force,
             },
         )
 
-    def get_supervisor_state(self, uuid_or_id: Union[str, int]) -> SupervisorStateType:
+    def get_supervisor_state(self, uuid_or_id: Optional[Union[str, int]] = None) -> SupervisorStateType:
         """
         Get the supervisor state on a device
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Returns:
             dict: supervisor state.
@@ -958,11 +1048,18 @@ class Device:
             >>> balena.models.device.get_supervisor_state('b6070f4fea')
         """
 
+        path = "/v1/device"
+        if self.__should_run_on_device(uuid_or_id):
+            return self.__supervisor_request("GET", path)  # type: ignore
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
         uuid = self.get(uuid_or_id, {"$select": "uuid"})["uuid"]
 
         response = request(
             method="POST",
-            path="/supervisor/v1/device",
+            path=f"/supervisor{path}",
             settings=self.__settings,
             body={"uuid": uuid, "method": "GET"},
         )
@@ -972,17 +1069,28 @@ class Device:
 
         raise Exception(response)
 
-    def start_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+    def start_service(self, uuid_or_id: Optional[Union[str, int]], image_id: int) -> None:
         """
         Start a service on device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             image_id (int): id of the image to start
 
         Examples:
-            >>> balena.models.device.start_service('f3887b1')
+            >>> balena.models.device.start_service('f3887b1', 1234)
+            >>> balena.models.device.start_service(None, 1234)  # if running on the device
         """
+
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request(
+                "POST", f"/v2/applications/{self.__on_device_app_id}/start-service", {"imageId": image_id}
+            )
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
+
         device = self.get(
             uuid_or_id,
             {
@@ -1003,17 +1111,27 @@ class Device:
             },
         )
 
-    def stop_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+    def stop_service(self, uuid_or_id: Optional[Union[str, int]], image_id: int) -> None:
         """
         Stop a service on device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             image_id (int): id of the image to stop
 
         Examples:
             >>> balena.models.device.stop_service('f3887b1', 392229)
+            >>> balena.models.device.stop_service(None, 392229)  # if running on the device
         """
+
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request(
+                "POST", f"/v2/applications/{self.__on_device_app_id}/stop-service", {"imageId": image_id}
+            )
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
 
         def __stop_service():
             device = self.get(
@@ -1042,17 +1160,28 @@ class Device:
 
         with_supervisor_locked_error(__stop_service)
 
-    def restart_service(self, uuid_or_id: Union[str, int], image_id: int) -> None:
+    def restart_service(self, uuid_or_id: Optional[Union[str, int]], image_id: int) -> None:
         """
         Restart a service on device.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
             image_id (int): id of the image to restart
 
         Examples:
             >>> balena.models.device.restart_service('f3887b', 392229)
+            >>> balena.models.device.restart_service(None, 392229)  # if running on the device
+
         """
+
+        if self.__should_run_on_device(uuid_or_id):
+            self.__supervisor_request(
+                "POST", f"/v2/applications/{self.__on_device_app_id}/restart-service", {"imageId": image_id}
+            )
+            return
+
+        if uuid_or_id is None:
+            raise exceptions.LocalSupervisorNotFound()
 
         def __restart_service():
             device = self.get(

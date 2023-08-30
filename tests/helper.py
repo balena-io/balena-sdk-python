@@ -13,9 +13,8 @@ import time
 class TestHelper:
     credentials = {}
 
-    balena = Balena()
-
     def __init__(self):
+        self.balena = Balena()
         TestHelper.load_env()
         self.balena_exceptions = balena_exceptions
 
