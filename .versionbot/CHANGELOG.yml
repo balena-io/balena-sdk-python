@@ -1,4 +1,15 @@
 - commits:
+    - subject: Run supervisor actions directly on supervisor if sdk on device
+      hash: 1830b71f70730985d737e722c6991fbf9a2170c9
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+  version: 14.1.0
+  title: ""
+  date: 2023-08-30T22:36:29.618Z
+- commits:
     - subject: "**BREAKING**: Drop auth.get_user_actor_id in favor of auth.get_actor_id"
       hash: 58e2759d9374841c5272eb089562c1532dd67a7e
       body: ""
