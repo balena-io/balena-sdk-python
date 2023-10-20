@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime
-
+import os
 from tests.helper import TestHelper
 
 
@@ -34,10 +34,20 @@ class TestOrganization(unittest.TestCase):
         self.assertEqual(TestOrganization.org2["name"], self.test_org_name)
         self.assertEqual(TestOrganization.org2["handle"], self.test_org_custom_handle)
 
-        # should be able to create a new organization with the same name
-        TestOrganization.org3 = self.balena.models.organization.create(self.test_org_name)
+        # should be able to create a new organization with the same name & a file
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(current_directory, 'test-data', 'balena-python-sdk-test-logo.png')
+
+        with open(filename, 'rb') as f:
+            TestOrganization.org3 = self.balena.models.organization.create(self.test_org_name, None, f)
+
         self.assertEqual(TestOrganization.org3["name"], self.test_org_name)
         self.assertNotEqual(TestOrganization.org3["handle"], TestOrganization.org1["handle"])
+
+        org_with_logo = self.balena.models.organization.get(TestOrganization.org3["id"], {"$select": ["logo_image"]})
+        self.assertIsInstance(org_with_logo["logo_image"]["href"], str)
+        self.assertGreater(len(org_with_logo["logo_image"]["href"]), 0)
+        self.assertEqual(org_with_logo["logo_image"]["filename"], 'balena-python-sdk-test-logo.png')
 
     def test_get_all(self):
         # given three extra non-user organization, should retrieve all organizations.

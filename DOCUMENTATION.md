@@ -252,7 +252,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_all(options)](#key.get_all) ⇒ [<code>List[SSHKeyType]</code>](#sshkeytype)
             - [remove(id)](#key.remove) ⇒ <code>None</code>
         - [.organization](#organization)
-            - [create(name, handle)](#organization.create) ⇒ [<code>OrganizationType</code>](#organizationtype)
+            - [create(name, handle, logo_image)](#organization.create) ⇒ [<code>OrganizationType</code>](#organizationtype)
             - [get(handle_or_id, options)](#organization.get) ⇒ [<code>OrganizationType</code>](#organizationtype)
             - [get_all(options)](#organization.get_all) ⇒ [<code>List[OrganizationType]</code>](#organizationtype)
             - [remove(handle_or_id)](#organization.remove) ⇒ <code>None</code>
@@ -2705,13 +2705,14 @@ Remove a ssh key.
 This class implements organization model for balena python SDK.
 
 <a name="organization.create"></a>
-### Function: create(name, handle) ⇒ [<code>OrganizationType</code>](#organizationtype)
+### Function: create(name, handle, logo_image) ⇒ [<code>OrganizationType</code>](#organizationtype)
 
 Creates a new organization.
 
 #### Args:
     name (str): the name of the organization that will be created.
     handle (Optional[str]): The handle of the organization that will be created.
+    logo_image (Optional[io.BufferedReader]): The organization logo to be used.
 
 #### Returns:
     dict: organization info.
@@ -2719,6 +2720,8 @@ Creates a new organization.
 #### Examples:
 ```python
 >>> balena.models.organization.create('My Org', 'test_org')
+>>> with open('mypath/myfile.png', 'rb') as f:
+>>>     org = sdk.models.organization.create("my-name", None, f)
 ```
 
 <a name="organization.get"></a>
@@ -4246,6 +4249,7 @@ The name must be a string; the optional doc argument can have any type.
     "created_at": str,
     "name": str,
     "handle": str,
+    "logo_image": WebResource,
     "has_past_due_invoice_since__date": str,
     "application": Union[List[TypeApplication], None],
     "organization_membership": Union[List[OrganizationMembershipType], None],
@@ -4665,6 +4669,20 @@ The name must be a string; the optional doc argument can have any type.
     "user_application_membership": Union[List[ApplicationMembershipType], None],
     "team_membership": Union[List[TeamMembershipType], None],
     "has_direct_access_to__application": Union[List[TypeApplication], None]
+}
+```
+
+
+### WebResource
+
+
+```python
+{
+    "filename": str,
+    "href": str,
+    "content_type": str,
+    "content_disposition": str,
+    "size": int
 }
 ```
 
