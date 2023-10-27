@@ -19,6 +19,8 @@ class SettingsConfig(TypedDict, total=False):
     image_cache_time: str
     token_refresh_interval: str
     timeout: str
+    request_limit: str
+    request_limit_interval: str
 
 
 class SettingsProviderInterface(ABC):
@@ -54,6 +56,8 @@ DEFAULT_SETTINGS = {
     "token_refresh_interval": str(1 * 1000 * 60 * 60),
     # requests timeout: 30 seconds in milliseconds
     "timeout": str(30 * 1000),
+    # requests timeout: 60 seconds in seconds
+    "request_limit_interval": str(60),
 }
 
 

@@ -18,6 +18,7 @@ semver = "^3.0.0"
 pine-client= "*"
 typing_extensions = "*"
 deprecated = "^1.2.13"
+ratelimit = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 black = {version = "*", python = ">=3.8.1"}
