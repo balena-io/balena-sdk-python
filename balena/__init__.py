@@ -36,6 +36,8 @@ balena = Balena({
     "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7), # 1 week
     "token_refresh_interval": str(1 * 1000 * 60 * 60),    # 1 hour
     "timeout": str(30 * 1000),                            # request timeout, 30s
+    "request_limit": str(300), # the number of requests per request_limit_interval that the SDK should respect, defaults to unlimited.
+    "request_limit_interval": str(60), # the timespan that the request_limit should apply to in seconds, defaults to 60s (1 minute).
 })
 ```
 
@@ -66,7 +68,7 @@ balena_staging = Balena({
 
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-python/issues), we'll be happy to help.
-"""
+"""  # noqa: E501
 
 from typing import Optional
 from .auth import Auth
