@@ -38,6 +38,7 @@ balena = Balena({
     "timeout": str(30 * 1000),                            # request timeout, 30s
     "request_limit": str(300), # the number of requests per request_limit_interval that the SDK should respect, defaults to unlimited.
     "request_limit_interval": str(60), # the timespan that the request_limit should apply to in seconds, defaults to 60s (1 minute).
+    "retry_rate_limited_request": False, # awaits and retry once a request is rate limited (429)
 })
 ```
 
@@ -65,6 +66,13 @@ balena_staging = Balena({
 })
 ```
 
+By default the SDK will throw once a request is Rate limited by the API (with a 429 status code).
+A 429 request will contain a header called "retry-after" which informs how long the client should wait before trying a new request.
+If you would like the SDK to use this header and wait and automatically retry the request, just do:
+
+```python
+balena = Balena({"retry_rate_limited_request": True})
+```
 
 If you feel something is missing, not clear or could be improved, [please don't
 hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-python/issues), we'll be happy to help.

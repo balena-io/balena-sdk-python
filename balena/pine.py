@@ -1,7 +1,8 @@
 import json
-from typing import Any, Optional
+from typing import Any, Optional, cast
 from urllib.parse import urljoin
 from ratelimit import limits, sleep_and_retry
+from time import sleep
 
 import requests
 from pine_client import PinejsClientCore
@@ -20,8 +21,8 @@ class PineClient(PinejsClientCore):
         self.__settings = settings
         self.__sdk_version = sdk_version
 
-        api_url = settings.get("api_endpoint")
-        api_version = settings.get("api_version")
+        api_url = cast(str, settings.get("api_endpoint"))
+        api_version = cast(str, settings.get("api_version"))
 
         try:
             calls = int(self.__settings.get("request_limit"))
@@ -55,4 +56,14 @@ class PineClient(PinejsClientCore):
             except Exception:
                 return req.content.decode()
         else:
+            retry_after = req.headers.get("retry-after")
+            if (
+                self.__settings.get("retry_rate_limited_request") is True
+                and req.status_code == 429
+                and retry_after is not None
+                and retry_after.isdigit()
+            ):
+                sleep(int(retry_after))
+                return self.__base_request(method, url, body)
+
             raise RequestError(body=req.content.decode(), status_code=req.status_code)

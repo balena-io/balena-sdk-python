@@ -1,4 +1,5 @@
 from urllib.parse import parse_qs
+from typing import cast
 import jwt
 
 from . import exceptions
@@ -28,7 +29,7 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.is_enabled()
         """
         try:
-            token = self.__settings.get(TOKEN_KEY)
+            token = cast(str, self.__settings.get(TOKEN_KEY))
             token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             return "twoFactorRequired" in token_data
         except jwt.InvalidTokenError:
@@ -46,7 +47,7 @@ class TwoFactorAuth:
             >>> balena.twofactor_auth.is_passed()
         """
         try:
-            token = self.__settings.get(TOKEN_KEY)
+            token = cast(str, self.__settings.get(TOKEN_KEY))
             token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
             if "twoFactorRequired" in token_data:
                 return not token_data["twoFactorRequired"]

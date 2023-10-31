@@ -1,7 +1,7 @@
 import binascii
 import datetime
 import os
-from typing import Any, Callable, List, Optional, TypedDict, Union
+from typing import Any, Callable, List, Optional, TypedDict, Union, cast
 from urllib.parse import urljoin
 
 from deprecated import deprecated
@@ -266,7 +266,7 @@ class Device:
 
         if not isinstance(uuid, str) or len(uuid) == 0:
             raise ValueError("Device UUID must be a non empty string")
-        dashboard_url = self.__settings.get("api_endpoint").replace("api", "dashboard")
+        dashboard_url = cast(str, self.__settings.get("api_endpoint")).replace("api", "dashboard")
         return urljoin(dashboard_url, f"/devices/{uuid}/summary")
 
     def get_all(self, options: AnyObject = {}) -> List[TypeDevice]:
