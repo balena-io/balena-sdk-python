@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add throttling when API is rate limiting
+      hash: c2763e4ce378ec42fcbb76c8f0b57874c9c6da13
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+  version: 14.3.0
+  title: ""
+  date: 2023-11-06T13:22:39.833Z
+- commits:
     - subject: Add rate limiting to request config
       hash: c35338c595445ef7427a0a7c6562033760c8a65e
       body: ""
