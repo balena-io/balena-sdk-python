@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 from threading import Thread
 from urllib.parse import urljoin
-from typing import Union, Optional, Literal, Callable, TypedDict, Any, List
+from typing import Union, Optional, Literal, Callable, TypedDict, Any, List, cast
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol
@@ -89,7 +89,7 @@ class Subscription:
         if count:
             query = f"stream=1&count={count}"
 
-        url = urljoin(self.__settings.get("api_endpoint"), f"/device/v2/{uuid}/logs?{query}")
+        url = urljoin(cast(str, self.__settings.get("api_endpoint")), f"/device/v2/{uuid}/logs?{query}")
         headers = Headers({"Authorization": [f"Bearer {get_token(self.__settings)}"]})
 
         agent = Agent(reactor)

@@ -1,6 +1,6 @@
 from datetime import datetime
 from math import isinf
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional, Union, cast
 from urllib.parse import urljoin
 
 from .. import exceptions
@@ -136,7 +136,7 @@ class Application:
             raise exceptions.InvalidParameter("app_id", app_id)
 
         return urljoin(
-            self.__settings.get("api_endpoint").replace("api", "dashboard"),
+            cast(str, self.__settings.get("api_endpoint")).replace("api", "dashboard"),
             f"/apps/{app_id}",
         )
 

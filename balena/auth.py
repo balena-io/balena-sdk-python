@@ -196,7 +196,7 @@ class Auth:
             >>> balena.auth.get_token()
         """
         try:
-            return self.__settings.get(TOKEN_KEY)
+            return cast(str, self.__settings.get(TOKEN_KEY))
         except exceptions.InvalidOption:
             return None
 

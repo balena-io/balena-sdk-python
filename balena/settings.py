@@ -21,6 +21,7 @@ class SettingsConfig(TypedDict, total=False):
     timeout: str
     request_limit: str
     request_limit_interval: str
+    retry_rate_limited_request: bool
 
 
 class SettingsProviderInterface(ABC):
@@ -29,15 +30,15 @@ class SettingsProviderInterface(ABC):
         pass
 
     @abstractmethod
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Union[str, bool]:
         pass
 
     @abstractmethod
-    def get_all(self) -> Dict[str, str]:
+    def get_all(self) -> Dict[str, Union[str, bool]]:
         pass
 
     @abstractmethod
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: Union[str, bool]) -> None:
         pass
 
     @abstractmethod
@@ -58,6 +59,7 @@ DEFAULT_SETTINGS = {
     "timeout": str(30 * 1000),
     # requests timeout: 60 seconds in seconds
     "request_limit_interval": str(60),
+    "retry_rate_limited_request": False,
 }
 
 
@@ -88,6 +90,7 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
             "cache_directory",
             "timeout",
             "device_actions_endpoint_version",
+            "retry_rate_limited_request",
         ]
     )
 
@@ -146,7 +149,10 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
         config = configparser.ConfigParser()
         config.add_section(self.CONFIG_SECTION)
         for key in self._setting:
-            config.set(self.CONFIG_SECTION, key, self._setting[key])
+            value = self._setting[key]
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            config.set(self.CONFIG_SECTION, key, value)
         if not Path.isdir(self._setting["data_directory"]):
             os.makedirs(self._setting["data_directory"])
         with open(Path.join(self._setting["data_directory"], self.CONFIG_FILENAME), "w") as config_file:
@@ -160,6 +166,10 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
         for option in options:
             try:
                 config_data[option] = config_reader.get(self.CONFIG_SECTION, option)
+                if config_data[option] == "true":
+                    config_data[option] = True
+                if config_data[option] == "false":
+                    config_data[option] = False
             except Exception:
                 config_data[option] = None
         self._setting = config_data
@@ -170,18 +180,18 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
             return True
         return False
 
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Union[str, bool]:
         try:
             self.__read_settings()
             return self._setting[key]
         except KeyError:
             raise exceptions.InvalidOption(key)
 
-    def get_all(self) -> Dict[str, str]:
+    def get_all(self) -> Dict[str, Union[str, bool]]:
         self.__read_settings()
         return self._setting
 
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: Union[str, bool]) -> None:
         self._setting[key] = str(value)
         self.__write_settings()
 
@@ -211,16 +221,16 @@ class InMemorySettingsProvider(SettingsProviderInterface):
             return True
         return False
 
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Union[str, bool]:
         try:
             return self._settings[key]
         except KeyError:
             raise exceptions.InvalidOption(key)
 
-    def get_all(self) -> Dict[str, str]:
+    def get_all(self) -> Dict[str, Union[str, bool]]:
         return self._settings
 
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: Union[str, bool]) -> None:
         self._settings[key] = str(value)
 
     def remove(self, key: str) -> bool:
@@ -259,7 +269,7 @@ class Settings(SettingsProviderInterface):
         """
         return self.__settings_provider.has(key)
 
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Union[str, bool]:
         """
         Get a setting value.
 
@@ -277,7 +287,7 @@ class Settings(SettingsProviderInterface):
         """
         return self.__settings_provider.get(key)
 
-    def get_all(self) -> Dict[str, str]:
+    def get_all(self) -> Dict[str, Union[str, bool]]:
         """
         Get all settings.
 
@@ -289,7 +299,7 @@ class Settings(SettingsProviderInterface):
         """
         return self.__settings_provider.get_all()
 
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: Union[str, bool]) -> None:
         """
         Set value for a setting.
 
