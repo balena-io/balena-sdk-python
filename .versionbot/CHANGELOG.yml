@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add support to multipart/form-data requests
+      hash: 60bf40091bd1f85e7e8473f4d122c0cadb0148a5
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+  version: 14.4.0
+  title: ""
+  date: 2023-11-15T11:38:10.887Z
+- commits:
     - subject: Add throttling when API is rate limiting
       hash: c2763e4ce378ec42fcbb76c8f0b57874c9c6da13
       body: ""
