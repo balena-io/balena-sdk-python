@@ -1,10 +1,11 @@
-import json
 from typing import Any, Optional, cast
 from urllib.parse import urljoin
 from ratelimit import limits, sleep_and_retry
 from time import sleep
-
+import mimetypes
+import io
 import requests
+import os
 from pine_client import PinejsClientCore
 from pine_client.client import Params
 
@@ -40,15 +41,26 @@ class PineClient(PinejsClientCore):
     def __base_request(self, method: str, url: str, body: Optional[Any] = None) -> Any:
         token = get_token(self.__settings)
 
-        headers = {"Content-Type": "application/json", "X-Balena-Client": f"balena-python-sdk/{self.__sdk_version}"}
+        headers = {"X-Balena-Client": f"balena-python-sdk/{self.__sdk_version}"}
         if token is not None:
             headers["Authorization"] = f"Bearer {token}"
 
-        data = None
+        is_multipart_form_data = False
+        files = {}
+        values = {}
         if body is not None:
-            data = json.dumps(body)
+            for k, v in body.items():
+                if isinstance(v, io.BufferedReader):
+                    mimetype, _ = mimetypes.guess_type(v.name)
+                    files[k] = (os.path.basename(v.name), v, mimetype)
+                    is_multipart_form_data = True
+                else:
+                    values[k] = v
 
-        req = requests.request(method, url=url, data=data, headers=headers)
+        if is_multipart_form_data:
+            req = requests.request(method, url=url, files=files, data=values, headers=headers)
+        else:
+            req = requests.request(method, url=url, json=body, headers=headers)
 
         if req.ok:
             try:

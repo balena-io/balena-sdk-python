@@ -1,5 +1,5 @@
-from typing import List, Optional, Union
-
+from typing import List, Optional, Union, Dict
+import io
 from .. import exceptions
 from ..balena_auth import request
 from ..dependent_resource import DependentResource
@@ -26,24 +26,32 @@ class Organization:
         self.invite = OrganizationInvite(pine, self, settings)
         self.membership = OrganizationMembership(pine, self)
 
-    def create(self, name: str, handle: Optional[str] = None) -> OrganizationType:
+    def create(
+        self, name: str, handle: Optional[str] = None, logo_image: Optional[io.BufferedReader] = None
+    ) -> OrganizationType:
         """
         Creates a new organization.
 
         Args:
             name (str): the name of the organization that will be created.
             handle (Optional[str]): The handle of the organization that will be created.
+            logo_image (Optional[io.BufferedReader]): The organization logo to be used.
 
         Returns:
             dict: organization info.
 
         Examples:
             >>> balena.models.organization.create('My Org', 'test_org')
+            >>> with open('mypath/myfile.png', 'rb') as f:
+            >>>     org = sdk.models.organization.create("my-name", None, f)
         """
 
-        data = {"name": name}
+        data: Dict[str, Union[str, io.BufferedReader]] = {"name": name}
         if handle is not None:
             data["handle"] = handle
+
+        if logo_image is not None:
+            data["logo_image"] = logo_image
 
         return self.__pine.post({"resource": "organization", "body": data})
 

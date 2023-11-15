@@ -13,6 +13,14 @@ ConceptTypeNavigationResource = Union[List[__T], int]
 OptionalNavigationResource = Union[List[__T], PineDeferred, None]
 
 
+class WebResource(TypedDict):
+    filename: str
+    href: str
+    content_type: str
+    content_disposition: str
+    size: int
+
+
 class UserType(TypedDict):
     id: int
     actor: ConceptTypeNavigationResource["ActorType"]
@@ -354,6 +362,7 @@ class OrganizationType(TypedDict):
     created_at: str
     name: str
     handle: str
+    logo_image: WebResource
     has_past_due_invoice_since__date: str
     application: ReverseNavigationResource[TypeApplication]
     organization_membership: ReverseNavigationResource["OrganizationMembershipType"]
