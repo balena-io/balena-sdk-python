@@ -1,4 +1,4 @@
-from typing import Any, List, Literal, Optional, TypedDict, Union, TypeVar
+from typing import Any, List, Literal, Optional, TypedDict, Union, TypeVar, Dict
 
 __T = TypeVar("__T")
 
@@ -154,7 +154,7 @@ class TypeApplication(TypedDict):
     application_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     build_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     application_tag: ReverseNavigationResource["BaseTagType"]
-    owns__device: ReverseNavigationResource["DeviceTypeType"]
+    owns__device: ReverseNavigationResource["TypeDevice"]
     owns__public_device: ReverseNavigationResource[PublicDeviceType]
     owns__release: ReverseNavigationResource["ReleaseType"]
     service: ReverseNavigationResource["ServiceType"]
@@ -163,6 +163,10 @@ class TypeApplication(TypedDict):
     user_application_membership: ReverseNavigationResource["ApplicationMembershipType"]
     team_application_access: ReverseNavigationResource[TeamApplicationAccessType]
     can_use__application_as_host: ReverseNavigationResource[ApplicationHostedOnApplication]
+
+
+class TypeApplicationWithDeviceServiceDetails(TypeApplication):
+    owns__device: List["TypeDeviceWithServices"]  # type: ignore
 
 
 class APIKeyInfoType(TypedDict, total=False):
@@ -337,6 +341,19 @@ class TypeDevice(TypedDict):
     device_tag: ReverseNavigationResource["BaseTagType"]
     service_install: ReverseNavigationResource[ServiceInstanceType]
     image_install: ReverseNavigationResource[ImageInstallType]
+
+
+class TypeCurrentService(TypedDict):
+    id: int
+    image_id: int
+    service_id: int
+    download_progress: int
+    status: str
+    install_date: str
+
+
+class TypeDeviceWithServices(TypeDevice):
+    current_services: Dict[str, List[TypeCurrentService]]
 
 
 class DeviceMetricsType(TypedDict):
