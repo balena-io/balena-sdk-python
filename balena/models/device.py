@@ -18,7 +18,7 @@ from ..pine import PineClient
 from ..resources import Message
 from ..settings import Settings
 from ..types import AnyObject
-from ..types.models import BaseTagType, DeviceMetricsType, EnvironmentVariableBase, TypeDevice
+from ..types.models import BaseTagType, DeviceMetricsType, EnvironmentVariableBase, TypeDevice, TypeDeviceWithServices
 from ..utils import (
     ensure_version_compatibility,
     generate_current_service_details,
@@ -404,7 +404,7 @@ class Device:
 
         return device
 
-    def get_with_service_details(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> TypeDevice:
+    def get_with_service_details(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> TypeDeviceWithServices:
         """
         This method does not map exactly to the underlying model: it runs a
         larger prebuilt query, and reformats it into an easy to use and

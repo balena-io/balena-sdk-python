@@ -95,7 +95,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_directly_accessible(slug_or_uuid_or_id, options)](#application.get_directly_accessible) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_id(slug_or_uuid_or_id)](#application.get_id) ⇒ <code>int</code>
             - [get_target_release_hash(slug_or_uuid_or_id)](#application.get_target_release_hash) ⇒ <code>Union[str, None]</code>
-            - [get_with_device_service_details(slug_or_uuid_or_id, options)](#application.get_with_device_service_details) ⇒ [<code>TypeApplication</code>](#typeapplication)
+            - [get_with_device_service_details(slug_or_uuid_or_id, options)](#application.get_with_device_service_details) ⇒ [<code>TypeApplicationWithDeviceServiceDetails</code>](#typeapplicationwithdeviceservicedetails)
             - [grant_support_access(slug_or_uuid_or_id, expiry_timestamp)](#application.grant_support_access) ⇒ <code>None</code>
             - [has(slug_or_uuid_or_id)](#application.has) ⇒ <code>bool</code>
             - [has_any()](#application.has_any) ⇒ <code>bool</code>
@@ -171,7 +171,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_supervisor_state(uuid_or_id)](#device.get_supervisor_state) ⇒ <code>SupervisorStateType</code>
             - [get_supervisor_target_state(uuid_or_id)](#device.get_supervisor_target_state) ⇒ <code>Any</code>
             - [get_supervisor_target_state_for_app(slug_or_uuid_or_id, release)](#device.get_supervisor_target_state_for_app) ⇒ <code>Any</code>
-            - [get_with_service_details(uuid_or_id, options)](#device.get_with_service_details) ⇒ [<code>TypeDevice</code>](#typedevice)
+            - [get_with_service_details(uuid_or_id, options)](#device.get_with_service_details) ⇒ [<code>TypeDeviceWithServices</code>](#typedevicewithservices)
             - [grant_support_access(uuid_or_id_or_ids, expiry_timestamp)](#device.grant_support_access) ⇒ <code>None</code>
             - [has(uuid_or_id)](#device.has) ⇒ <code>bool</code>
             - [has_device_url(uuid_or_id)](#device.has_device_url) ⇒ <code>bool</code>
@@ -569,7 +569,7 @@ Get the hash of the current release for a specific application.
 ```
 
 <a name="application.get_with_device_service_details"></a>
-### Function: get_with_device_service_details(slug_or_uuid_or_id, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
+### Function: get_with_device_service_details(slug_or_uuid_or_id, options) ⇒ [<code>TypeApplicationWithDeviceServiceDetails</code>](#typeapplicationwithdeviceservicedetails)
 
 This method does not map exactly to the underlying model: it runs a
 larger prebuilt query, and reformats it into an easy to use and
@@ -1614,7 +1614,7 @@ Get the supervisor target state on a device
 ```
 
 <a name="device.get_with_service_details"></a>
-### Function: get_with_service_details(uuid_or_id, options) ⇒ [<code>TypeDevice</code>](#typedevice)
+### Function: get_with_service_details(uuid_or_id, options) ⇒ [<code>TypeDeviceWithServices</code>](#typedevicewithservices)
 
 This method does not map exactly to the underlying model: it runs a
 larger prebuilt query, and reformats it into an easy to use and
@@ -4544,7 +4544,7 @@ The name must be a string; the optional doc argument can have any type.
     "application_environment_variable": Union[List[EnvironmentVariableBase], None],
     "build_environment_variable": Union[List[EnvironmentVariableBase], None],
     "application_tag": Union[List[BaseTagType], None],
-    "owns__device": Union[List[DeviceTypeType], None],
+    "owns__device": Union[List[TypeDevice], None],
     "owns__public_device": Union[List[PublicDeviceType], None],
     "owns__release": Union[List[ReleaseType], None],
     "service": Union[List[ServiceType], None],
@@ -4553,6 +4553,63 @@ The name must be a string; the optional doc argument can have any type.
     "user_application_membership": Union[List[ApplicationMembershipType], None],
     "team_application_access": Union[List[TeamApplicationAccessType], None],
     "can_use__application_as_host": Union[List[ApplicationHostedOnApplication], None]
+}
+```
+
+
+### TypeApplicationWithDeviceServiceDetails
+
+
+```python
+{
+    "id": int,
+    "created_at": str,
+    "app_name": str,
+    "actor": Union[List[ActorType], int],
+    "slug": str,
+    "uuid": str,
+    "is_accessible_by_support_until__date": str,
+    "is_host": bool,
+    "should_track_latest_release": bool,
+    "is_public": bool,
+    "is_of__class": Literal["fleet", "block", "app"],
+    "is_archived": bool,
+    "is_discoverable": bool,
+    "is_stored_at__repository_url": str,
+    "public_organization": Union[List[PublicOrganizationType], PineDeferred, None],
+    "application_type": Union[List[ApplicationType], PineDeferred],
+    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred],
+    "depends_on__application": Union[List[ApplicationType], PineDeferred, None],
+    "organization": Union[List[OrganizationType], PineDeferred],
+    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "application_config_variable": Union[List[EnvironmentVariableBase], None],
+    "application_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "build_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "application_tag": Union[List[BaseTagType], None],
+    "owns__device": List[TypeDeviceWithServices],
+    "owns__public_device": Union[List[PublicDeviceType], None],
+    "owns__release": Union[List[ReleaseType], None],
+    "service": Union[List[ServiceType], None],
+    "is_depended_on_by__application": Union[List[ApplicationType], None],
+    "is_directly_accessible_by__user": Union[List[UserType], None],
+    "user_application_membership": Union[List[ApplicationMembershipType], None],
+    "team_application_access": Union[List[TeamApplicationAccessType], None],
+    "can_use__application_as_host": Union[List[ApplicationHostedOnApplication], None]
+}
+```
+
+
+### TypeCurrentService
+
+
+```python
+{
+    "id": int,
+    "image_id": int,
+    "service_id": int,
+    "download_progress": int,
+    "status": str,
+    "install_date": str
 }
 ```
 
@@ -4632,6 +4689,75 @@ The name must be a string; the optional doc argument can have any type.
 {
     "key": str,
     "name": str
+}
+```
+
+
+### TypeDeviceWithServices
+
+
+```python
+{
+    "id": int,
+    "actor": Union[List[ActorType], int],
+    "created_at": str,
+    "modified_at": str,
+    "custom_latitude": str,
+    "custom_longitude": str,
+    "device_name": str,
+    "download_progress": int,
+    "ip_address": str,
+    "public_address": str,
+    "mac_address": str,
+    "is_accessible_by_support_until__date": str,
+    "is_connected_to_vpn": bool,
+    "is_locked_until__date": str,
+    "is_web_accessible": bool,
+    "is_active": bool,
+    "is_frozen": bool,
+    "is_online": bool,
+    "last_connectivity_event": str,
+    "last_vpn_event": str,
+    "latitude": str,
+    "local_id": str,
+    "location": str,
+    "longitude": str,
+    "note": str,
+    "os_variant": str,
+    "os_version": str,
+    "provisioning_progress": int,
+    "provisioning_state": str,
+    "state": TypeDeviceState,
+    "status": str,
+    "status_sort_index": int,
+    "supervisor_version": str,
+    "uuid": str,
+    "vpn_address": str,
+    "api_heartbeat_state": Literal["online", "offline", "timeout", "unknown"],
+    "memory_usage": int,
+    "memory_total": int,
+    "storage_block_device": str,
+    "storage_usage": int,
+    "storage_total": int,
+    "cpu_usage": int,
+    "cpu_temp": int,
+    "cpu_id": str,
+    "is_undervolted": bool,
+    "overall_status": Any,
+    "overall_progress": int,
+    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
+    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "belongs_to__user": Union[List[UserType], PineDeferred, None],
+    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
+    "should_be_managed_by__supervisor_release": Union[List[SupervisorReleaseType], PineDeferred, None],
+    "device_config_variable": Union[List[EnvironmentVariableBase], None],
+    "device_environment_variable": Union[List[EnvironmentVariableBase], None],
+    "device_tag": Union[List[BaseTagType], None],
+    "service_install": Union[List[ServiceInstanceType], None],
+    "image_install": Union[List[ImageInstallType], None],
+    "current_services": Dict[str, List[TypeCurrentService]]
 }
 ```
 

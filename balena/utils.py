@@ -2,6 +2,7 @@ import numbers
 import re
 from collections import defaultdict
 from typing import Any, Callable, Dict, Literal, Optional, TypeVar
+from .types.models import TypeDevice, TypeDeviceWithServices
 
 from semver.version import Version
 
@@ -198,21 +199,21 @@ def get_single_install_summary(raw_data: Any) -> Any:
     return install
 
 
-def generate_current_service_details(raw_device: Any) -> Any:
+def generate_current_service_details(raw_device: TypeDevice) -> TypeDeviceWithServices:
     # TODO: Please compare me to node-sdk version
     grouped_services = defaultdict(list)
 
-    for obj in [get_single_install_summary(i) for i in raw_device.get("image_install", [])]:
+    for obj in [get_single_install_summary(i) for i in raw_device.get("image_install", [])]:  # type: ignore
         grouped_services[obj.pop("service_name", None)].append(obj)
 
-    raw_device["current_services"] = dict(grouped_services)
-    raw_device["current_gateway_downloads"] = [
+    raw_device["current_services"] = dict(grouped_services)  # type: ignore
+    raw_device["current_gateway_downloads"] = [  # type: ignore
         get_single_install_summary(i) for i in raw_device.get("gateway_download", [])
     ]
-    raw_device.pop("image_install", None)
-    raw_device.pop("gateway_download", None)
+    raw_device.pop("image_install", None)  # type: ignore
+    raw_device.pop("gateway_download", None)  # type: ignore
 
-    return raw_device
+    return raw_device  # type: ignore
 
 
 def is_provisioned(device: Any) -> bool:

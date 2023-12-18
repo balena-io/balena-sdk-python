@@ -15,6 +15,7 @@ from ..types.models import (
     TypeApplication,
     BaseTagType,
     EnvironmentVariableBase,
+    TypeApplicationWithDeviceServiceDetails,
 )
 from ..utils import (
     generate_current_service_details,
@@ -292,7 +293,7 @@ class Application:
         self,
         slug_or_uuid_or_id: Union[str, int],
         options: AnyObject = {},
-    ) -> TypeApplication:
+    ) -> TypeApplicationWithDeviceServiceDetails:
         """
         This method does not map exactly to the underlying model: it runs a
         larger prebuilt query, and reformats it into an easy to use and
