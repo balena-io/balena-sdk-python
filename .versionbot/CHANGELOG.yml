@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix get_with_service_details typings
+      hash: 9077f9d3bfcdc0066853d4808dbab2e5c336824a
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+  version: 14.4.1
+  title: ""
+  date: 2023-12-18T17:33:53.705Z
+- commits:
     - subject: Add support to multipart/form-data requests
       hash: 60bf40091bd1f85e7e8473f4d122c0cadb0148a5
       body: ""
