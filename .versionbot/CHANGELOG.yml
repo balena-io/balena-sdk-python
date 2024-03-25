@@ -1,4 +1,19 @@
 - commits:
+    - subject: "release.get_with_with_details: Set user None when without permissions"
+      hash: 5e7339c81a0428022282a53aece376b59890e389
+      body: >
+        This was a bug on balena python sdk which would not mimic the JS sdk
+        behaviour of
+
+        setting the user as undefined when without reading permissions for it
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 14.4.2
+  title: ""
+  date: 2024-03-25T13:40:15.707Z
+- commits:
     - subject: Fix get_with_service_details typings
       hash: 9077f9d3bfcdc0066853d4808dbab2e5c336824a
       body: ""
@@ -2312,7 +2327,9 @@
 
         from balena import Balena
 
-        to output all logging messages to stdout, which overrides all logging settings in the application and fills the logs with double printed messages.
+        to output all logging messages to stdout, which overrides all logging
+        settings in the application and fills the logs with double printed
+        messages.
 - commits:
     - hash: ac7bccdd234f6a7e14c6130b7433d9478fd45a4c
 - commits:
@@ -2521,7 +2538,8 @@
         - Implement get_all_with_device_service_details() and
         get_with_device_service_details() for Application.
 
-        - Update device.get_with_service_details() logic so the SDK can send lighter requests to the API.
+        - Update device.get_with_service_details() logic so the SDK can send
+        lighter requests to the API.
 - commits:
     - hash: 73e53e879f9d091fa8aebb1d343965b1d3b2288b
 - commits:
@@ -4056,7 +4074,8 @@
     - body: >-
         This PR contains some changes to make sure the right libraries and
 
-        dependencies are loaded for Python 3. There is no big change in the source code since most of the code is Python 3 compatible.
+        dependencies are loaded for Python 3. There is no big change in the
+        source code since most of the code is Python 3 compatible.
 
         Apart from that there are some improments and bug fixes included:
 
