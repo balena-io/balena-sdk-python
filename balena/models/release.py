@@ -141,7 +141,8 @@ class Release:
             ],
             key=lambda x: x["service_name"],
         )
-        release["user"] = release["is_created_by__user"][0]
+        created_by_user = release["is_created_by__user"]
+        release["user"] = created_by_user[0] if len(created_by_user) > 0 else None
 
         return release
 
