@@ -88,12 +88,15 @@ class DeviceStatus:
     Balena device statuses.
     """
 
-    IDLE = "Idle"
-    CONFIGURING = "Configuring"
-    UPDATING = "Updating"
-    OFFLINE = "Offline"
-    POST_PROVISIONING = "Post Provisioning"
-    INACTIVE = "Inactive"
+    IDLE = "idle"
+    CONFIGURING = "configuring"
+    UPDATING = "updating"
+    OFFLINE = "offline"
+    POST_PROVISIONING = "post-provisioning"
+    INACTIVE = "inactive"
+    OPERATIONAL = "operational",
+    DISCONNECTED = "disconnected",
+    REDUCED_FUNCTIONALITY = "reduced-functionality"
 
 
 class Device:
