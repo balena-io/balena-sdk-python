@@ -25,6 +25,9 @@ class TestHelper:
             }
         )
 
+        if "+testsdk" not in self.credentials["email"]:
+            raise Exception("Missing environment credentials, all emails must include `+testsdk` to avoid accidental deletion")  # noqa: E501
+
         # Stop the test if it's run by an admin user account.
         token_data = jwt.decode(
             self.balena.settings.get("token"),
