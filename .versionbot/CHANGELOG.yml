@@ -1,4 +1,29 @@
 - commits:
+    - subject: Force test email to contains "+testsdk"
+      hash: 2a3b5a32401a5cefcfce2d33d64be10268755724
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Fix unsubscribe for cases where logs come too early after unsubscribing
+      hash: 1eba56f11e0f5f1c22ea707ded06fddb390a3fd4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Fix verification of admin user without "permissions" on JWT
+      hash: c649deb76c29ccc4c68e3deb59429cc2baa33fa0
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 14.4.3
+  title: ""
+  date: 2024-05-24T14:54:56.819Z
+- commits:
     - subject: "release.get_with_with_details: Set user None when without permissions"
       hash: 5e7339c81a0428022282a53aece376b59890e389
       body: >
