@@ -1,4 +1,19 @@
 - commits:
+    - subject: Fix typo in /v2/applications/:appId/restart-service Supervisor API call
+      hash: 811403f98c555e8ec1dde65005194fae143d215d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Closes: "#354"
+        closes: "#354"
+        Signed-off-by: Christina Ying Wang <christina@balena.io>
+        signed-off-by: Christina Ying Wang <christina@balena.io>
+      author: Christina Ying Wang
+  version: 14.4.4
+  title: ""
+  date: 2024-05-24T19:55:13.993Z
+- commits:
     - subject: Force test email to contains "+testsdk"
       hash: 2a3b5a32401a5cefcfce2d33d64be10268755724
       body: ""
