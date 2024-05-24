@@ -33,6 +33,7 @@ class StreamingParser(Protocol):
         self.callback = callback
         self.error = error
         self.pending = b""
+        self.is_running = True
 
     def dataReceived(self, data):
         obj = {}
@@ -53,7 +54,8 @@ class StreamingParser(Protocol):
                     self.error(e)
                 break
 
-            self.callback(obj)
+            if self.is_running:
+                self.callback(obj)
 
     def connectionLost(self, reason):
         pass
@@ -66,6 +68,7 @@ def cbRequest(response, callback, error):
 
 
 def cbDrop(protocol):
+    protocol.is_running = False
     protocol.transport.stopProducing()
     protocol.transport.loseConnection()
 
