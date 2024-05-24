@@ -31,7 +31,7 @@ class TestHelper:
             algorithms=["HS256"],
             options={"verify_signature": False},
         )
-        if any("admin" in s for s in token_data["permissions"]):
+        if "permissions" in token_data.keys() and any("admin" in s for s in token_data["permissions"]):
             raise Exception(
                 "The test is run with an admin user account. Cancelled, please try" " again with a normal account!"
             )
