@@ -1199,7 +1199,7 @@ class Device:
             app_id = device["belongs_to__application"][0]["id"]
             request(
                 method="POST",
-                path=f"/supervisor/v2/applications/{app_id}/restart_service",
+                path=f"/supervisor/v2/applications/{app_id}/restart-service",
                 settings=self.__settings,
                 body={
                     "deviceId": device["id"],

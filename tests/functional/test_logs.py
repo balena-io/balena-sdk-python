@@ -135,7 +135,7 @@ class TestAuth(unittest.TestCase):
 
         self.balena.logs.unsubscribe(self.uuid)
 
-    def test_06_should_allow_to_unsubiscribe(self):
+    def test_06_should_allow_to_unsubscribe(self):
         results = []
 
         def cb(data):

@@ -26,7 +26,7 @@ class TestAppVars(unittest.TestCase):
     def tearDownClass(cls):
         cls.helper.wipe_organization()
 
-    def test_01_get_emtpy_application_vars(self):
+    def test_01_get_empty_application_vars(self):
         for app_var in self.app_vars:
             self.assertIsNone(app_var.get(self.app["id"], "DOES_NOT_EXIST"))
 
@@ -93,7 +93,7 @@ class TestDeviceEnvironmentVariables(unittest.TestCase):
     def tearDownClass(cls):
         cls.helper.wipe_organization()
 
-    def test_01_get_emtpy_device_env_var(self):
+    def test_01_get_empty_device_env_var(self):
         self.assertIsNone(self.device_env_var.get(self.device["id"], "DOES_NOT_EXIST"))
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
@@ -170,7 +170,7 @@ class TestDeviceServiceEnvironmentVariables(unittest.TestCase):
     def tearDownClass(cls):
         cls.helper.wipe_organization()
 
-    def test_01_get_emtpy_device_service_env_var(self):
+    def test_01_get_empty_device_service_env_var(self):
         self.assertIsNone(self.device_service_env_var.get(self.device["id"], self.service["id"], "DOES_NOT_EXIST"))
 
         with self.assertRaises(self.helper.balena_exceptions.ServiceNotFound):
@@ -288,7 +288,7 @@ class TestServiceEnvironmentVariables(unittest.TestCase):
             }
         return service[name]
 
-    def test_01_get_emtpy_service_var(self):
+    def test_01_get_empty_service_var(self):
         for fetch_resource in self.__service_fetch_resources:
             param = self.__get_param(self.app, self.service, fetch_resource)
             self.assertIsNone(self.service_var.get(param, "DOES_NOT_EXIST"))
