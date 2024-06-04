@@ -1038,9 +1038,10 @@ class ApplicationConfigVariable(DependentResource[EnvironmentVariableBase]):
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            key (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.config_var.remove(2184)
+            >>> balena.models.application.config_var.remove(2184, 'test_env')
         """
         super(ApplicationConfigVariable, self)._remove(slug_or_uuid_or_id, key)
 
@@ -1113,9 +1114,10 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            key (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.env_var.remove(2184)
+            >>> balena.models.application.env_var.remove(2184,'test_env4')
         """
         super(ApplicationEnvVariable, self)._remove(slug_or_uuid_or_id, key)
 
@@ -1188,9 +1190,10 @@ class BuildEnvVariable(DependentResource[EnvironmentVariableBase]):
 
         Args:
             slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
+            key (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.build_var.remove(2184)
+            >>> balena.models.application.build_var.remove(2184, 'test_env4')
         """
         super(BuildEnvVariable, self)._remove(slug_or_uuid_or_id, key)
 
