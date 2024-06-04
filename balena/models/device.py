@@ -2181,9 +2181,10 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
 
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            key (str): environment variable name.
 
         Examples:
-            >>> balena.models.device.config_var.device.remove(2184)
+            >>> balena.models.device.config_var.device.remove(2184, 'test_env4')
         """
         super(DeviceConfigVariable, self)._remove(uuid_or_id, key)
 
@@ -2268,7 +2269,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.device.env_var.get('8deb12','test_env4')
+            >>> balena.models.device.env_var.get('8deb12', 'test_env4')
         """
         return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -2282,7 +2283,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.device.env_var.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.device.env_var.set('8deb12', 'test_env4', 'testing1')
         """
         super(DeviceEnvVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -2292,9 +2293,10 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
 
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            key (str): environment variable name.
 
         Examples:
-            >>> balena.models.device.env_var.remove(2184)
+            >>> balena.models.device.env_var.remove(2184, 'test_env4')
         """
         super(DeviceEnvVariable, self)._remove(uuid_or_id, key)
 
