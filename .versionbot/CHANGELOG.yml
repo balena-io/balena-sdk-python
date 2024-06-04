@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix device.env_var docs with mandatory env var name key
+      hash: 3622aac06bde394912c5f7c981c5768975d4e39d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 14.4.5
+  title: ""
+  date: 2024-06-04T13:44:55.604Z
+- commits:
     - subject: Fix typo in /v2/applications/:appId/restart-service Supervisor API call
       hash: 811403f98c555e8ec1dde65005194fae143d215d
       body: ""
