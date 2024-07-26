@@ -2079,22 +2079,20 @@ This class implements device tag model for balena python SDK.
 <a name="devicetag.get"></a>
 ### Function: get(uuid_or_id, tag_key) ⇒ <code>Optional[str]</code>
 
-Set a device tag (update tag value if it exists).
+Get a device tag (update tag value if it exists).
 ___Note___: Notice that when using the device ID rather than UUID,
 it will avoid one extra API roundtrip.
 
 #### Args:
     uuid_or_id (Union[str, int]): device uuid or device id.
     tag_key (str): tag key.
-    value (str): tag value.
 
 #### Returns:
     Optional[str]: tag value
 
 #### Examples:
 ```python
->>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
->>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
+>>> balena.models.device.tags.get('f5213eac0d63ac4', 'testtag')
 ```
 
 <a name="devicetag.get_all"></a>
@@ -2110,7 +2108,7 @@ Get all device tags.
 
 #### Examples:
 ```python
->>> balena.models.device.tag.get_all()
+>>> balena.models.device.tags.get_all()
 ```
 
 <a name="devicetag.get_all_by_application"></a>
@@ -2127,7 +2125,7 @@ Get all device tags for an application.
 
 #### Examples:
 ```python
->>> balena.models.device.tag.get_all_by_application(1005160)
+>>> balena.models.device.tags.get_all_by_application(1005160)
 ```
 
 <a name="devicetag.get_all_by_device"></a>
@@ -2144,7 +2142,7 @@ Get all device tags for a device.
 
 #### Examples:
 ```python
->>> balena.models.device.tag.get_all_by_device('a03ab646c')
+>>> balena.models.device.tags.get_all_by_device('a03ab646c')
 ```
 
 <a name="devicetag.remove"></a>
@@ -2158,7 +2156,7 @@ Remove a device tag.
 
 #### Examples:
 ```python
->>> balena.models.device.tag.remove('f5213eac0d63ac477', 'testtag')
+>>> balena.models.device.tags.remove('f5213eac0d63ac477', 'testtag')
 ```
 
 <a name="devicetag.set"></a>
@@ -2175,8 +2173,8 @@ it will avoid one extra API roundtrip.
 
 #### Examples:
 ```python
->>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
->>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
+>>> balena.models.device.tags.set('f5213eac0d63ac4', 'testtag', 'test1')
+>>> balena.models.device.tags.set('f5213eac0d63ac4', 'testtag', 'test2')
 ```
 ## DeviceConfigVariable
 
@@ -3329,7 +3327,7 @@ Get all device tags for an application.
 
 #### Examples:
 ```python
->>> balena.models.release.tag.get_all_by_application(1005160)
+>>> balena.models.release.tags.get_all_by_application(1005160)
 ```
 
 <a name="releasetag.get_all_by_release"></a>

@@ -324,7 +324,7 @@ class ReleaseTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.release.tag.get_all_by_application(1005160)
+            >>> balena.models.release.tags.get_all_by_application(1005160)
         """
 
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
