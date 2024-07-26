@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix docs for using `tags` rather than `tag`
+      hash: ef06b212e4a5489fce3564ef29d9d45e6c127d01
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 14.4.6
+  title: ""
+  date: 2024-07-26T12:31:48.950Z
+- commits:
     - subject: Fix device.env_var docs with mandatory env var name key
       hash: 3622aac06bde394912c5f7c981c5768975d4e39d
       body: ""
