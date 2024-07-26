@@ -1962,7 +1962,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.device.tag.get_all_by_application(1005160)
+            >>> balena.models.device.tags.get_all_by_application(1005160)
         """
 
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]
@@ -1994,7 +1994,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.device.tag.get_all_by_device('a03ab646c')
+            >>> balena.models.device.tags.get_all_by_device('a03ab646c')
         """
 
         id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
@@ -2011,28 +2011,26 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.device.tag.get_all()
+            >>> balena.models.device.tags.get_all()
         """
 
         return super(DeviceTag, self)._get_all(options)
 
     def get(self, uuid_or_id: Union[str, int], tag_key: str) -> Optional[str]:
         """
-        Set a device tag (update tag value if it exists).
+        Get a device tag (update tag value if it exists).
         ___Note___: Notice that when using the device ID rather than UUID,
         it will avoid one extra API roundtrip.
 
         Args:
             uuid_or_id (Union[str, int]): device uuid or device id.
             tag_key (str): tag key.
-            value (str): tag value.
 
         Returns:
             Optional[str]: tag value
 
         Examples:
-            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
-            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
+            >>> balena.models.device.tags.get('f5213eac0d63ac4', 'testtag')
         """
 
         # Trying to avoid an extra HTTP request
@@ -2054,8 +2052,8 @@ class DeviceTag(DependentResource[BaseTagType]):
             value (str): tag value.
 
         Examples:
-            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test1')
-            >>> balena.models.device.tag.set('f5213eac0d63ac4', 'testtag','test2')
+            >>> balena.models.device.tags.set('f5213eac0d63ac4', 'testtag', 'test1')
+            >>> balena.models.device.tags.set('f5213eac0d63ac4', 'testtag', 'test2')
         """
 
         # Trying to avoid an extra HTTP request
@@ -2074,7 +2072,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             tag_key (str): tag key.
 
         Examples:
-            >>> balena.models.device.tag.remove('f5213eac0d63ac477', 'testtag')
+            >>> balena.models.device.tags.remove('f5213eac0d63ac477', 'testtag')
         """
 
         device_id = uuid_or_id if is_id(uuid_or_id) else self.__device.get(uuid_or_id, {"$select": "id"})["id"]
