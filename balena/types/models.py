@@ -306,7 +306,6 @@ class TypeDevice(TypedDict):
     status: str
     supervisor_version: str
     uuid: str
-    vpn_address: str
     api_heartbeat_state: Literal["online", "offline", "timeout", "unknown"]
     memory_usage: int
     memory_total: int
