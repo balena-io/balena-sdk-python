@@ -1740,7 +1740,7 @@ class Device:
             {
                 "resource": "device",
                 "id": device["id"],
-                "body": {"should_be_managed_by__supervisor_release": release["id"]},
+                "body": {"should_be_managed_by__release": release["id"]},
             }
         )
 

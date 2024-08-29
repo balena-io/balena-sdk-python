@@ -327,7 +327,7 @@ class TypeDevice(TypedDict):
     is_running__release: OptionalNavigationResource["ReleaseType"]
     should_be_running__release: OptionalNavigationResource["ReleaseType"]
     is_managed_by__service_instance: OptionalNavigationResource[ServiceInstanceType]
-    should_be_managed_by__supervisor_release: OptionalNavigationResource[SupervisorReleaseType]
+    should_be_managed_by__release: OptionalNavigationResource["ReleaseType"]
     device_config_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     device_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     device_tag: ReverseNavigationResource["BaseTagType"]
@@ -501,6 +501,7 @@ class ReleaseType(TypedDict):
     should_be_running_on__application: ReverseNavigationResource[TypeApplication]
     is_running_on__device: ReverseNavigationResource[TypeDevice]
     should_be_running_on__device: ReverseNavigationResource[TypeDevice]
+    should_manage__device: ReverseNavigationResource[TypeDevice]
     release_tag: ReverseNavigationResource[BaseTagType]
 
 
