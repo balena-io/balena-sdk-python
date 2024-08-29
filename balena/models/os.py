@@ -10,7 +10,8 @@ from ..balena_auth import request
 from ..hup import get_hup_action_type
 from ..pine import PineClient
 from ..types import AnyObject
-from ..utils import compare, merge, normalize_balena_semver
+from ..types.models import ReleaseType
+from ..utils import compare, merge, normalize_balena_semver, is_id
 from ..settings import Settings
 from .application import Application
 from .device_type import DeviceType
@@ -492,6 +493,89 @@ class DeviceOs:
             return False
 
         return True
+
+    def get_supervisor_releases_for_cpu_architecture(
+        self, cpu_architecture_slug_or_id: Union[str, int], options: AnyObject = {}
+    ) -> List[ReleaseType]:
+        """
+        Returns the Releases of the supervisor for the CPU Architecture
+
+        Args:
+            cpu_architecture_slug_or_id (Union[str, int]): The slug (string) or id (number) for the CPU Architecture.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            ReleaseType: release info.
+
+
+        Example:
+            results = balena.models.os.get_supervisor_releases_for_cpu_architecture('aarch64');
+            results = balena.models.os.get_supervisor_releases_for_cpu_architecture(
+                'aarch64',
+                { $filter: { raw_version: '12.11.0' } },
+            );
+        """
+        return self.__pine.get(
+            {
+                "resource": "release",
+                "options": merge(
+                    {
+                        "$select": ["id", "raw_version", "known_issue_list"],
+                        "$filter": {
+                            "status": "success",
+                            "is_final": True,
+                            "is_invalidated": False,
+                            "semver_major": {"$gt": 0},
+                            "belongs_to__application": {
+                                "$any": {
+                                    "$alias": "a",
+                                    "$expr": {
+                                        "$and": [
+                                            {"a": {"slug": {"$startswith": "balena_os/"}}},
+                                            {"a": {"slug": {"$endswith": "-supervisor"}}},
+                                        ],
+                                        "a": {
+                                            "is_public": True,
+                                            "is_host": False,
+                                            "is_for__device_type": {
+                                                "$any": {
+                                                    "$alias": "dt",
+                                                    "$expr": {
+                                                        "dt": {
+                                                            "is_of__cpu_architecture": (
+                                                                cpu_architecture_slug_or_id
+                                                                if is_id(cpu_architecture_slug_or_id)
+                                                                else {
+                                                                    "$any": {
+                                                                        "$alias": "c",
+                                                                        "$expr": {
+                                                                            "c": {
+                                                                                "slug": cpu_architecture_slug_or_id,
+                                                                            },
+                                                                        },
+                                                                    },
+                                                                }
+                                                            ),
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "$orderby": [
+                            {"semver_major": "desc"},
+                            {"semver_minor": "desc"},
+                            {"semver_patch": "desc"},
+                            {"revision": "desc"},
+                        ],
+                    },
+                    options,
+                ),
+            }
+        )
 
     def __tags_to_dict(self, tags: List[Any]) -> Dict[str, str]:
         tag_map = {}

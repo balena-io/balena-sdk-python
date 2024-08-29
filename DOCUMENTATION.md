@@ -281,6 +281,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_config(slug_or_uuid_or_id, options)](#deviceos.get_config) ⇒ <code>None</code>
             - [get_download_size(device_type, version)](#deviceos.get_download_size) ⇒ <code>float</code>
             - [get_max_satisfying_version(device_type, version_or_range, os_type)](#deviceos.get_max_satisfying_version) ⇒ <code>Optional[str]</code>
+            - [get_supervisor_releases_for_cpu_architecture(cpu_architecture_slug_or_id, options)](#deviceos.get_supervisor_releases_for_cpu_architecture) ⇒ [<code>List[ReleaseType]</code>](#releasetype)
             - [get_supported_os_update_versions(device_type, current_version)](#deviceos.get_supported_os_update_versions) ⇒ <code>None</code>
             - [is_architecture_compatible_with(os_architecture, application_architecture)](#deviceos.is_architecture_compatible_with) ⇒ <code>None</code>
             - [is_supported_os_update(device_type, current_version, target_version)](#deviceos.is_supported_os_update) ⇒ <code>bool</code>
@@ -1943,11 +1944,9 @@ Note a device.
 ### Function: set_supervisor_release(uuid_or_id, supervisor_version_or_id) ⇒ <code>None</code>
 
 Set a specific device to run a particular supervisor release.
-
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
     supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
-
 #### Examples:
 ```python
 >>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
@@ -3134,6 +3133,26 @@ Get OS download size estimate. Currently only the raw (uncompressed) size is rep
 
 #### Returns:
     float: OS image download size, in bytes.
+
+<a name="deviceos.get_supervisor_releases_for_cpu_architecture"></a>
+### Function: get_supervisor_releases_for_cpu_architecture(cpu_architecture_slug_or_id, options) ⇒ [<code>List[ReleaseType]</code>](#releasetype)
+
+Returns the Releases of the supervisor for the CPU Architecture
+
+#### Args:
+    cpu_architecture_slug_or_id (Union[str, int]): The slug (string) or id (number) for the CPU Architecture.
+    options (AnyObject): extra pine options to use.
+
+#### Returns:
+    ReleaseType: release info.
+
+
+Example:
+    results = balena.models.os.get_supervisor_releases_for_cpu_architecture('aarch64');
+    results = balena.models.os.get_supervisor_releases_for_cpu_architecture(
+        'aarch64',
+        { $filter: { raw_version: '12.11.0' } },
+    );
 
 <a name="deviceos.get_supported_os_update_versions"></a>
 ### Function: get_supported_os_update_versions(device_type, current_version) ⇒ <code>None</code>

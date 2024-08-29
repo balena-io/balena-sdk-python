@@ -1689,11 +1689,9 @@ class Device:
     ) -> None:
         """
         Set a specific device to run a particular supervisor release.
-
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
-
         Examples:
             >>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
         """
@@ -1735,7 +1733,6 @@ class Device:
 
         ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
         ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
-
         self.__pine.patch(
             {
                 "resource": "device",
