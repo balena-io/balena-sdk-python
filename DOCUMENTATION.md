@@ -444,7 +444,7 @@ Get all applications
     context (Optional[str]): extra access filters, None or 'directly_accessible'
 
 #### Returns:
-    List[APIKeyType]: user API key
+    List[TypeApplication]: application info.
 
 #### Examples:
 ```python

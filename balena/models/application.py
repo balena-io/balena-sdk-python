@@ -157,7 +157,7 @@ class Application:
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
-            List[APIKeyType]: user API key
+            List[TypeApplication]: application info.
 
         Examples:
             >>> balena.models.application.get_all()
