@@ -8,9 +8,9 @@ class TestApplication(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.helper = TestHelper()
-        cls.organization_name = cls.helper.default_organization["name"]
         cls.balena = cls.helper.balena
         cls.org_handle = cls.helper.default_organization["handle"]
+        cls.org_id = cls.helper.default_organization["id"]
         cls.app_slug = f"{cls.org_handle}/FooBar"
         cls.helper.wipe_application()
 
@@ -59,6 +59,18 @@ class TestApplication(unittest.TestCase):
             self.balena.models.application.get("AppNotExist")
 
         self.assertEqual(self.balena.models.application.get(self.app_slug)["app_name"], "FooBar")
+
+    def test_06_get_all_by_organization(self):
+        with self.assertRaises(self.helper.balena_exceptions.OrganizationNotFound):
+            self.balena.models.application.get_all_by_organization("OrgNotExist")
+
+        self.assertEqual(
+            self.balena.models.application.get_all_by_organization(self.org_handle)[0]["app_name"], "FooBar"
+        )
+
+        self.assertEqual(
+            self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar"
+        )
 
     def test_06_get_by_owner(self):
         with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):

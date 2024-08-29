@@ -25,6 +25,7 @@ from ..utils import (
     with_supervisor_locked_error,
 )
 from .device_type import DeviceType
+from .organization import Organization
 
 
 class Application:
@@ -39,6 +40,7 @@ class Application:
 
         self.__pine = pine
         self.__settings = settings
+        self.__organization = Organization(pine, settings)
         self.tags = ApplicationTag(pine, self)
         self.config_var = ApplicationConfigVariable(pine, self)
         self.env_var = ApplicationEnvVariable(pine, self)
@@ -365,6 +367,40 @@ class Application:
             raise exceptions.AmbiguousApplication(app_name)
 
         return apps[0]
+
+    def get_all_by_organization(
+        self,
+        org_handle_or_id: Union[str, int],
+        options: AnyObject = {},
+    ) -> List[TypeApplication]:
+        """
+        Get all applications of an organization.
+
+        Args:
+            org_handle_or_id (Union[str, int]): handle or id of the organization.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[TypeApplication]: application info.
+
+        Examples:
+            >>> balena.models.application.get_all_by_organization('myorg')
+        """
+        org = self.__organization.get(org_handle_or_id, {"$select": "id"})
+
+        return self.__pine.get(
+            {
+                "resource": "application",
+                "options": merge(
+                    {
+                        "$filter": {
+                            "organization": org["id"],
+                        },
+                    },
+                    options,
+                ),
+            }
+        )
 
     def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> TypeApplication:
         """
