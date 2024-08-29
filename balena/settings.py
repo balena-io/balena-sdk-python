@@ -49,7 +49,7 @@ class SettingsProviderInterface(ABC):
 DEFAULT_SETTINGS = {
     # These are default config values
     "balena_host": "balena-cloud.com",
-    "api_version": "v6",
+    "api_version": "v7",
     "device_actions_endpoint_version": "v1",
     # cache time : 1 week in milliseconds
     "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7),

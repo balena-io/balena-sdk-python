@@ -31,7 +31,7 @@ The Balena object can be configured with a dict of type Settings
 ```python
 balena = Balena({
     "balena_host": "balena-cloud.com",
-    "api_version": "v6",
+    "api_version": "v7",
     "device_actions_endpoint_version": "v1",
     "data_directory": "/home/example/.balena",
     "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7), # 1 week
