@@ -4669,9 +4669,7 @@ The name must be a string; the optional doc argument can have any type.
     "os_version": str,
     "provisioning_progress": int,
     "provisioning_state": str,
-    "state": TypeDeviceState,
     "status": str,
-    "status_sort_index": int,
     "supervisor_version": str,
     "uuid": str,
     "vpn_address": str,
@@ -4699,17 +4697,6 @@ The name must be a string; the optional doc argument can have any type.
     "device_tag": Optional[List[BaseTagType]],
     "service_install": Optional[List[ServiceInstanceType]],
     "image_install": Optional[List[ImageInstallType]]
-}
-```
-
-
-### TypeDeviceState
-
-
-```python
-{
-    "key": str,
-    "name": str
 }
 ```
 
@@ -4748,9 +4735,7 @@ The name must be a string; the optional doc argument can have any type.
     "os_version": str,
     "provisioning_progress": int,
     "provisioning_state": str,
-    "state": TypeDeviceState,
     "status": str,
-    "status_sort_index": int,
     "supervisor_version": str,
     "uuid": str,
     "vpn_address": str,

@@ -242,11 +242,6 @@ class DeviceTypeType(TypedDict):
     device_type_alias: ReverseNavigationResource["DeviceTypeAliasType"]
 
 
-class TypeDeviceState(TypedDict):
-    key: str
-    name: str
-
-
 class ServiceInstanceType(TypedDict):
     id: int
     created_at: str
@@ -308,9 +303,7 @@ class TypeDevice(TypedDict):
     os_version: str
     provisioning_progress: int
     provisioning_state: str
-    state: TypeDeviceState
     status: str
-    status_sort_index: int
     supervisor_version: str
     uuid: str
     vpn_address: str
