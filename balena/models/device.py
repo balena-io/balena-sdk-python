@@ -83,19 +83,6 @@ class SupervisorStateType(TypedDict):
     download_progress: str
 
 
-class DeviceStatus:
-    """
-    Balena device statuses.
-    """
-
-    IDLE = "Idle"
-    CONFIGURING = "Configuring"
-    UPDATING = "Updating"
-    OFFLINE = "Offline"
-    POST_PROVISIONING = "Post Provisioning"
-    INACTIVE = "Inactive"
-
-
 class Device:
     """
     This class implements device model for balena python SDK.

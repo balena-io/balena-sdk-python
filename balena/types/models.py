@@ -306,7 +306,16 @@ class TypeDevice(TypedDict):
     cpu_id: str
     is_undervolted: bool
     # This is a computed term
-    overall_status: Any
+    overall_status: Literal[
+        "configuring",
+        "inactive",
+        "post-provisioning",
+        "updating",
+        "operational",
+        "disconnected",
+        "reduced-functionality",
+    ]
+
     # This is a computed term
     overall_progress: int
 
