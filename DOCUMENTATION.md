@@ -4549,7 +4549,7 @@ The name must be a string; the optional doc argument can have any type.
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4591,7 +4591,7 @@ The name must be a string; the optional doc argument can have any type.
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4646,7 +4646,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4711,7 +4711,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4797,7 +4797,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "username": str,
     "organization_membership": Optional[List[OrganizationMembershipType]],

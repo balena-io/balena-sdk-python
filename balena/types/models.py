@@ -9,7 +9,7 @@ class PineDeferred(TypedDict):
 
 NavigationResource = Union[List[__T], PineDeferred]
 ReverseNavigationResource = Union[List[__T], None]
-ConceptTypeNavigationResource = Union[List[__T], int]
+ConceptTypeNavigationResource = NavigationResource[__T]
 OptionalNavigationResource = Union[List[__T], PineDeferred, None]
 
 
