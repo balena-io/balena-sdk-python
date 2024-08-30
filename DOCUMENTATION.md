@@ -4194,7 +4194,7 @@ The name must be a string; the optional doc argument can have any type.
     "start_timestamp": str,
     "end_timestamp": str,
     "push_timestamp": str,
-    "image_size": int,
+    "image_size": str,
     "dockerfile": str,
     "error_message": str,
     "is_a_build_of__service": Union[List[ServiceType], PineDeferred],

@@ -432,7 +432,7 @@ class ImageType(TypedDict):
     start_timestamp: str
     end_timestamp: str
     push_timestamp: str
-    image_size: int
+    image_size: str
     dockerfile: str
     error_message: str
     is_a_build_of__service: NavigationResource["ServiceType"]
