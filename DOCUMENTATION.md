@@ -91,7 +91,6 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_all_by_organization(org_handle_or_id, options)](#application.get_all_by_organization) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_all_directly_accessible(options)](#application.get_all_directly_accessible) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_by_name(app_name, options, context)](#application.get_by_name) ⇒ [<code>TypeApplication</code>](#typeapplication)
-            - [get_by_owner(app_name, owner, options)](#application.get_by_owner) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_dashboard_url(app_id)](#application.get_dashboard_url) ⇒ <code>str</code>
             - [get_directly_accessible(slug_or_uuid_or_id, options)](#application.get_directly_accessible) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_id(slug_or_uuid_or_id)](#application.get_id) ⇒ <code>int</code>
@@ -501,24 +500,6 @@ Get all applications directly accessible by the user
 #### Examples:
 ```python
 >>> balena.models.application.get("myapp")
-```
-
-<a name="application.get_by_owner"></a>
-### Function: get_by_owner(app_name, owner, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
-
-Get a single application using the appname and the handle of the owning organization.
-
-#### Args:
-    app_name (str): application name.
-    owner (str): The handle of the owning organization.
-    options (AnyObject): extra pine options to use.
-
-#### Returns:
-    TypeApplication: application info.
-
-#### Examples:
-```python
->>> balena.models.application.get_by_owner('foo', 'my_org')
 ```
 
 <a name="application.get_dashboard_url"></a>

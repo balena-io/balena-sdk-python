@@ -72,21 +72,6 @@ class TestApplication(unittest.TestCase):
             self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar"
         )
 
-    def test_06_get_by_owner(self):
-        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
-            self.balena.models.application.get_by_owner("AppNotExist", self.helper.credentials["user_id"])
-
-        self.assertEqual(
-            self.balena.models.application.get_by_owner("FooBar", self.helper.default_organization["handle"])[
-                "app_name"
-            ],
-            "FooBar",
-        )
-
-        with self.assertRaises(Exception) as cm:
-            self.balena.models.application.get_by_owner("FooBar", "random_username")
-        self.assertIn("Application not found: random_username/foobar", cm.exception.message)  # type: ignore
-
     def test_07_has(self):
         self.assertFalse(self.balena.models.application.has("AppNotExist"))
         self.assertTrue(self.balena.models.application.has(self.app_slug))
