@@ -88,6 +88,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [generate_provisioning_key(slug_or_uuid_or_id, key_name, description, expiry_date)](#application.generate_provisioning_key) ⇒ <code>str</code>
             - [get(slug_or_uuid_or_id, options, context)](#application.get) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_all(options, context)](#application.get_all) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
+            - [get_all_by_organization(org_handle_or_id, options)](#application.get_all_by_organization) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_all_directly_accessible(options)](#application.get_all_directly_accessible) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_by_name(app_name, options, context)](#application.get_by_name) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_by_owner(app_name, owner, options)](#application.get_by_owner) ⇒ [<code>TypeApplication</code>](#typeapplication)
@@ -443,11 +444,28 @@ Get all applications
     context (Optional[str]): extra access filters, None or 'directly_accessible'
 
 #### Returns:
-    List[APIKeyType]: user API key
+    List[TypeApplication]: application info.
 
 #### Examples:
 ```python
 >>> balena.models.application.get_all()
+```
+
+<a name="application.get_all_by_organization"></a>
+### Function: get_all_by_organization(org_handle_or_id, options) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
+
+Get all applications of an organization.
+
+#### Args:
+    org_handle_or_id (Union[str, int]): handle or id of the organization.
+    options (AnyObject): extra pine options to use.
+
+#### Returns:
+    List[TypeApplication]: application info.
+
+#### Examples:
+```python
+>>> balena.models.application.get_all_by_organization('myorg')
 ```
 
 <a name="application.get_all_directly_accessible"></a>

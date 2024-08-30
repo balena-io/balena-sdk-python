@@ -2,6 +2,7 @@ from datetime import datetime
 from math import isinf
 from typing import List, Literal, Optional, Union, cast
 from urllib.parse import urljoin
+from deprecated import deprecated
 
 from .. import exceptions
 from ..balena_auth import request
@@ -25,6 +26,7 @@ from ..utils import (
     with_supervisor_locked_error,
 )
 from .device_type import DeviceType
+from .organization import Organization
 
 
 class Application:
@@ -39,6 +41,7 @@ class Application:
 
         self.__pine = pine
         self.__settings = settings
+        self.__organization = Organization(pine, settings)
         self.tags = ApplicationTag(pine, self)
         self.config_var = ApplicationConfigVariable(pine, self)
         self.env_var = ApplicationEnvVariable(pine, self)
@@ -154,7 +157,7 @@ class Application:
             context (Optional[str]): extra access filters, None or 'directly_accessible'
 
         Returns:
-            List[APIKeyType]: user API key
+            List[TypeApplication]: application info.
 
         Examples:
             >>> balena.models.application.get_all()
@@ -366,6 +369,41 @@ class Application:
 
         return apps[0]
 
+    def get_all_by_organization(
+        self,
+        org_handle_or_id: Union[str, int],
+        options: AnyObject = {},
+    ) -> List[TypeApplication]:
+        """
+        Get all applications of an organization.
+
+        Args:
+            org_handle_or_id (Union[str, int]): handle or id of the organization.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[TypeApplication]: application info.
+
+        Examples:
+            >>> balena.models.application.get_all_by_organization('myorg')
+        """
+        org = self.__organization.get(org_handle_or_id, {"$select": "id"})
+
+        return self.__pine.get(
+            {
+                "resource": "application",
+                "options": merge(
+                    {
+                        "$filter": {
+                            "organization": org["id"],
+                        },
+                    },
+                    options,
+                ),
+            }
+        )
+
+    @deprecated("get_by_owner will be removed in a future release, use get_all_by_organization instead")
     def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> TypeApplication:
         """
         Get a single application using the appname and the handle of the owning organization.
