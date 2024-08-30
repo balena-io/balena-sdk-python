@@ -1,4 +1,29 @@
 - commits:
+    - subject: Fix application.get_all doc typo
+      hash: cb1220988ff362d6194fc6014f766a2d89153268
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Mark application.get_by_owner as deprecated
+      hash: 32c95ec1e30081c5ad77b6462f31afd1860c8236
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Add application.get_all_by_organization function
+      hash: 6e6eacc463be6782ea33237fee12afa02d1e168e
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otavio Jacobi
+  version: 14.5.0
+  title: ""
+  date: 2024-08-30T13:17:06.518Z
+- commits:
     - subject: Fix docs for using `tags` rather than `tag`
       hash: ef06b212e4a5489fce3564ef29d9d45e6c127d01
       body: ""
