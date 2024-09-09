@@ -1699,35 +1699,19 @@ class Device:
             uuid_or_id,
             {
                 "$select": ["id", "supervisor_version", "os_version"],
-                "$expand": {"is_of__device_type": {"$select": "slug"}},
+                "$expand": {"is_of__device_type": {"$select": "is_of__cpu_architecture"}},
             },
         )
-        device_type_slug = device["is_of__device_type"][0]["slug"]
+        cpu_arch_id = device["is_of__device_type"][0]["is_of__cpu_architecture"]["__id"]
 
         release_options = {
             "$top": 1,
             "$select": "id",
-            "$filter": {
-                "is_for__device_type": {
-                    "$any": {
-                        "$alias": "dt",
-                        "$expr": {
-                            "dt": {
-                                "slug": device_type_slug,
-                            },
-                        },
-                    },
-                },
-            },
+            "$filter": {"id" if is_id(supervisor_version_or_id) else "raw_version": supervisor_version_or_id},
         }
 
-        if is_id(supervisor_version_or_id):
-            release_options["$filter"]["id"] = supervisor_version_or_id
-        else:
-            release_options["$filter"]["supervisor_version"] = supervisor_version_or_id
-
         try:
-            release = self.__pine.get({"resource": "supervisor_release", "options": release_options})[0]
+            release = self.__device_os.get_supervisor_releases_for_cpu_architecture(cpu_arch_id, release_options)[0]
         except IndexError:
             raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
 

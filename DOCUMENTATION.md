@@ -4500,22 +4500,6 @@ The name must be a string; the optional doc argument can have any type.
 ```
 
 
-### SupervisorReleaseType
-
-
-```python
-{
-    "created_at": str,
-    "id": int,
-    "supervisor_version": str,
-    "image_name": str,
-    "is_public": bool,
-    "note": Optional[str],
-    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred]
-}
-```
-
-
 ### TeamApplicationAccessType
 
 

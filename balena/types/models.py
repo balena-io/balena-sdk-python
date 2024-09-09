@@ -250,17 +250,6 @@ class ServiceInstanceType(TypedDict):
     last_heartbeat: str
 
 
-class SupervisorReleaseType(TypedDict):
-    created_at: str
-    id: int
-    supervisor_version: str
-    image_name: str
-    is_public: bool
-    note: Optional[str]
-
-    is_for__device_type: NavigationResource[DeviceTypeType]
-
-
 class ImageInstallType(TypedDict):
     id: int
     download_progress: Optional[float]
