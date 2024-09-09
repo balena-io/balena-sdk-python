@@ -1620,7 +1620,7 @@ class Device:
             bool: is tracking the current application release.
         """
 
-        return not bool(self.get(uuid_or_id, {"$select": "should_be_running__release"})["should_be_running__release"])
+        return not bool(self.get(uuid_or_id, {"$select": "is_pinned_on__release"})["is_pinned_on__release"])
 
     # TODO: enable device batching
     def pin_to_release(
@@ -1667,7 +1667,7 @@ class Device:
             {
                 "resource": "device",
                 "id": device["id"],
-                "body": {"should_be_running__release": release["id"]},
+                "body": {"is_pinned_on__release": release["id"]},
             }
         )
 
@@ -1679,7 +1679,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int])
         """
 
-        self.__set(uuid_or_id_or_ids, {"should_be_running__release": None})
+        self.__set(uuid_or_id_or_ids, {"is_pinned_on__release": None})
 
     # TODO: enable device batching
     def set_supervisor_release(
