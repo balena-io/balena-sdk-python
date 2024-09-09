@@ -4368,6 +4368,7 @@ The name must be a string; the optional doc argument can have any type.
     "should_be_running_on__application": Optional[List[TypeApplication]],
     "is_running_on__device": Optional[List[TypeDevice]],
     "is_pinned_to__device": Optional[List[TypeDevice]],
+    "should_operate__device": Optional[List[TypeDevice]],
     "should_manage__device": Optional[List[TypeDevice]],
     "release_tag": Optional[List[BaseTagType]]
 }
@@ -4429,6 +4430,7 @@ The name must be a string; the optional doc argument can have any type.
     "should_be_running_on__application": Optional[List[TypeApplication]],
     "is_running_on__device": Optional[List[TypeDevice]],
     "is_pinned_to__device": Optional[List[TypeDevice]],
+    "should_operate__device": Optional[List[TypeDevice]],
     "should_manage__device": Optional[List[TypeDevice]],
     "release_tag": Optional[List[BaseTagType]],
     "images": List[ImageBasicInfoType],
@@ -4676,6 +4678,7 @@ The name must be a string; the optional doc argument can have any type.
     "is_running__release": Union[List[ReleaseType], PineDeferred, None],
     "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
     "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
+    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
     "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
     "device_config_variable": Optional[List[EnvironmentVariableBase]],
     "device_environment_variable": Optional[List[EnvironmentVariableBase]],
@@ -4741,6 +4744,7 @@ The name must be a string; the optional doc argument can have any type.
     "is_running__release": Union[List[ReleaseType], PineDeferred, None],
     "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
     "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
+    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
     "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
     "device_config_variable": Optional[List[EnvironmentVariableBase]],
     "device_environment_variable": Optional[List[EnvironmentVariableBase]],
