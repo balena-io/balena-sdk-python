@@ -1,4 +1,103 @@
 - commits:
+    - subject: "v7 model: Add the device.should_be_operated_by__release property"
+      hash: 1328499d9aa31fe2e0c456b7a1e35d951ccec5dd
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: Drop the application.get_app_by_owner method
+      hash: 45a652355ff3e4f2652de9ea282f391d40447eaa
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Change image.image_size to str"
+      hash: db06d84c70e36cd2b68743362f59991245abf3d7
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Replace device.overall_status offline & idle with
+        disconnected, reduced-functionality & operational"
+      hash: 5d6540de3842429cdcb3b66569ed1d4b9bd10f2b
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Change user, application & device actor, to return a
+        deferred property when selected"
+      hash: 3571c84131594d1360246f967bab67377d120bd0
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Replace should_be_running__release with is_pinned_on__release"
+      hash: eb9101be07c81bd273bb29ce3f35fe4001192c80
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Drop the supervisor_release resource"
+      hash: 1a978660a77ba581e3f8e706f6d2296e0577e1ae
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: Add the os.get_supervisor_releases_for_cpu_architecture() method
+      hash: 6aa19308550aefed0ccba65a963908c5cf1bf0f1
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otavio Jacobi
+    - subject: "v7 model: Replace should_be_managed_by__supervisor_release with
+        should_be_managed_by__release"
+      hash: b84ed6be0f7a62b94c3228e5c8ca4b5ecbc3d4b7
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Drop the device.vpn_address property"
+      hash: 276f16c5e357f1a9a5c3771108ea0887fafea378
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Drop the device state & status_sort_index sdk-only property
+        typings"
+      hash: d990aa628eb8ed22faad2f418a075b0377a8057a
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "v7 model: Drop the gateway_download resource"
+      hash: a72fbe23edcca249324b5aa7243d5ac5dc325f34
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: "[BREAKING]: Update all API queries to use the v7 model"
+      hash: 11e2c31d01d618323beb9abb28ea5ac569dc0255
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+  version: 15.0.0
+  title: ""
+  date: 2024-09-18T12:54:07.052Z
+- commits:
     - subject: Fix application.get_all doc typo
       hash: cb1220988ff362d6194fc6014f766a2d89153268
       body: ""
