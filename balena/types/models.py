@@ -9,7 +9,7 @@ class PineDeferred(TypedDict):
 
 NavigationResource = Union[List[__T], PineDeferred]
 ReverseNavigationResource = Union[List[__T], None]
-ConceptTypeNavigationResource = Union[List[__T], int]
+ConceptTypeNavigationResource = NavigationResource[__T]
 OptionalNavigationResource = Union[List[__T], PineDeferred, None]
 
 
@@ -242,28 +242,12 @@ class DeviceTypeType(TypedDict):
     device_type_alias: ReverseNavigationResource["DeviceTypeAliasType"]
 
 
-class TypeDeviceState(TypedDict):
-    key: str
-    name: str
-
-
 class ServiceInstanceType(TypedDict):
     id: int
     created_at: str
     service_type: str
     ip_address: str
     last_heartbeat: str
-
-
-class SupervisorReleaseType(TypedDict):
-    created_at: str
-    id: int
-    supervisor_version: str
-    image_name: str
-    is_public: bool
-    note: Optional[str]
-
-    is_for__device_type: NavigationResource[DeviceTypeType]
 
 
 class ImageInstallType(TypedDict):
@@ -308,12 +292,9 @@ class TypeDevice(TypedDict):
     os_version: str
     provisioning_progress: int
     provisioning_state: str
-    state: TypeDeviceState
     status: str
-    status_sort_index: int
     supervisor_version: str
     uuid: str
-    vpn_address: str
     api_heartbeat_state: Literal["online", "offline", "timeout", "unknown"]
     memory_usage: int
     memory_total: int
@@ -325,7 +306,16 @@ class TypeDevice(TypedDict):
     cpu_id: str
     is_undervolted: bool
     # This is a computed term
-    overall_status: Any
+    overall_status: Literal[
+        "configuring",
+        "inactive",
+        "post-provisioning",
+        "updating",
+        "operational",
+        "disconnected",
+        "reduced-functionality",
+    ]
+
     # This is a computed term
     overall_progress: int
 
@@ -333,9 +323,10 @@ class TypeDevice(TypedDict):
     belongs_to__application: NavigationResource[TypeApplication]
     belongs_to__user: OptionalNavigationResource[UserType]
     is_running__release: OptionalNavigationResource["ReleaseType"]
-    should_be_running__release: OptionalNavigationResource["ReleaseType"]
+    is_pinned_on__release: OptionalNavigationResource["ReleaseType"]
     is_managed_by__service_instance: OptionalNavigationResource[ServiceInstanceType]
-    should_be_managed_by__supervisor_release: OptionalNavigationResource[SupervisorReleaseType]
+    should_be_operated_by__release: OptionalNavigationResource["ReleaseType"]
+    should_be_managed_by__release: OptionalNavigationResource["ReleaseType"]
     device_config_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     device_environment_variable: ReverseNavigationResource["EnvironmentVariableBase"]
     device_tag: ReverseNavigationResource["BaseTagType"]
@@ -442,7 +433,7 @@ class ImageType(TypedDict):
     start_timestamp: str
     end_timestamp: str
     push_timestamp: str
-    image_size: int
+    image_size: str
     dockerfile: str
     error_message: str
     is_a_build_of__service: NavigationResource["ServiceType"]
@@ -508,7 +499,9 @@ class ReleaseType(TypedDict):
     release_image: ReverseNavigationResource[ReleaseImageType]
     should_be_running_on__application: ReverseNavigationResource[TypeApplication]
     is_running_on__device: ReverseNavigationResource[TypeDevice]
-    should_be_running_on__device: ReverseNavigationResource[TypeDevice]
+    is_pinned_to__device: ReverseNavigationResource[TypeDevice]
+    should_operate__device: ReverseNavigationResource[TypeDevice]
+    should_manage__device: ReverseNavigationResource[TypeDevice]
     release_tag: ReverseNavigationResource[BaseTagType]
 
 

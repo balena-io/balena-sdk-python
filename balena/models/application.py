@@ -2,7 +2,6 @@ from datetime import datetime
 from math import isinf
 from typing import List, Literal, Optional, Union, cast
 from urllib.parse import urljoin
-from deprecated import deprecated
 
 from .. import exceptions
 from ..balena_auth import request
@@ -402,37 +401,6 @@ class Application:
                 ),
             }
         )
-
-    @deprecated("get_by_owner will be removed in a future release, use get_all_by_organization instead")
-    def get_by_owner(self, app_name: str, owner: str, options: AnyObject = {}) -> TypeApplication:
-        """
-        Get a single application using the appname and the handle of the owning organization.
-
-        Args:
-            app_name (str): application name.
-            owner (str): The handle of the owning organization.
-            options (AnyObject): extra pine options to use.
-
-        Returns:
-            TypeApplication: application info.
-
-        Examples:
-            >>> balena.models.application.get_by_owner('foo', 'my_org')
-        """
-
-        slug = f"{owner.lower()}/{app_name.lower()}"
-        app = self.__pine.get(
-            {
-                "resource": "application",
-                "id": {"slug": slug},
-                "options": options,
-            }
-        )
-
-        if app is None:
-            raise exceptions.ApplicationNotFound(slug)
-
-        return app
 
     def has(self, slug_or_uuid_or_id: Union[str, int]) -> bool:
         """

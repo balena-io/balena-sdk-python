@@ -172,8 +172,7 @@ def get_current_service_details_pine_expand(
 def get_single_install_summary(raw_data: Any) -> Any:
     # TODO: Please compare me to node-sdk version
     """
-    Builds summary data for an image install or gateway download
-
+    Builds summary data for an image install
     """
 
     image = raw_data["image"][0]
@@ -207,11 +206,7 @@ def generate_current_service_details(raw_device: TypeDevice) -> TypeDeviceWithSe
         grouped_services[obj.pop("service_name", None)].append(obj)
 
     raw_device["current_services"] = dict(grouped_services)  # type: ignore
-    raw_device["current_gateway_downloads"] = [  # type: ignore
-        get_single_install_summary(i) for i in raw_device.get("gateway_download", [])
-    ]
     raw_device.pop("image_install", None)  # type: ignore
-    raw_device.pop("gateway_download", None)  # type: ignore
 
     return raw_device  # type: ignore
 

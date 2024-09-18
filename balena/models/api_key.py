@@ -134,8 +134,8 @@ class ApiKey:
             >>> balena.models.api_key.get_provisioning_api_keys_by_application("myorg/myapp")
         """
 
-        app = self.__application.get(slug_or_uuid_or_id, {"$select": "actor"})
-        return self.get_all(merge({"$filter": {"is_of__actor": app.get("actor")}}, options))
+        actor_id = self.__application.get(slug_or_uuid_or_id, {"$select": "actor"})["actor"]["__id"]
+        return self.get_all(merge({"$filter": {"is_of__actor": actor_id}}, options))
 
     def get_device_api_keys_by_device(self, uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[APIKeyType]:
         """
@@ -150,8 +150,8 @@ class ApiKey:
             >>> balena.models.api_key.get_device_api_keys_by_device(1111386)
         """
 
-        dev = self.__device.get(uuid_or_id, {"$select": "actor"})
-        return self.get_all(merge({"$filter": {"is_of__actor": dev["actor"]}}, options))
+        actor_id = self.__device.get(uuid_or_id, {"$select": "actor"})["actor"]["__id"]
+        return self.get_all(merge({"$filter": {"is_of__actor": actor_id}}, options))
 
     def get_all_named_user_api_keys(self, options: AnyObject = {}) -> List[APIKeyType]:
         """

@@ -38,6 +38,48 @@ class TestDevice(unittest.TestCase):
         for ver in testVersion:
             get_hup_action_type("", ver, ver)
 
+    def test_03_get_supervisor_releases_for_cpu_architecture(self):
+        # return an empty array if no image was found
+        svRelease = self.balena.models.os.get_supervisor_releases_for_cpu_architecture("notACpuArch")
+        self.assertEqual(svRelease, [])
+
+        # by default include the id, semver and known_issue_list
+        dt = self.balena.models.device_type.get(
+            "raspberrypi4-64", {"$select": "slug", "$expand": {"is_of__cpu_architecture": {"$select": "slug"}}}
+        )
+
+        svReleases = self.balena.models.os.get_supervisor_releases_for_cpu_architecture(
+            dt["is_of__cpu_architecture"][0]["slug"]
+        )
+
+        self.assertGreater(len(svReleases), 0)
+        svRelease = svReleases[0]
+        self.assertListEqual(sorted(svRelease.keys()), sorted(["id", "raw_version", "known_issue_list"]))
+
+        # return the right string when asking for raspberrypi4-64 and v12.11.0
+        dt = self.balena.models.device_type.get(
+            "raspberrypi4-64", {"$select": "slug", "$expand": {"is_of__cpu_architecture": {"$select": "slug"}}}
+        )
+        svReleases = self.balena.models.os.get_supervisor_releases_for_cpu_architecture(
+            dt["is_of__cpu_architecture"][0]["slug"],
+            {
+                "$select": "id",
+                "$expand": {
+                    "release_image": {
+                        "$select": "id",
+                        "$expand": {"image": {"$select": "is_stored_at__image_location"}},
+                    },
+                },
+                "$filter": {"raw_version": "12.11.0"},
+            },
+        )
+
+        self.assertEqual(len(svReleases), 1)
+        svRelease = svReleases[0]
+        imageLocation = svRelease["release_image"][0]["image"][0]["is_stored_at__image_location"]
+        self.assertRegex(imageLocation, r"registry2\.[a-z0-9_\-.]+\.[a-z]+\/v2\/[0-9a-f]+")
+        self.assertEqual(imageLocation, "registry2.balena-cloud.com/v2/4ca706e1c624daff7e519b3009746b2c")
+
 
 if __name__ == "__main__":
     unittest.main()

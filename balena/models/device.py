@@ -83,19 +83,6 @@ class SupervisorStateType(TypedDict):
     download_progress: str
 
 
-class DeviceStatus:
-    """
-    Balena device statuses.
-    """
-
-    IDLE = "Idle"
-    CONFIGURING = "Configuring"
-    UPDATING = "Updating"
-    OFFLINE = "Offline"
-    POST_PROVISIONING = "Post Provisioning"
-    INACTIVE = "Inactive"
-
-
 class Device:
     """
     This class implements device model for balena python SDK.
@@ -1620,7 +1607,7 @@ class Device:
             bool: is tracking the current application release.
         """
 
-        return not bool(self.get(uuid_or_id, {"$select": "should_be_running__release"})["should_be_running__release"])
+        return not bool(self.get(uuid_or_id, {"$select": "is_pinned_on__release"})["is_pinned_on__release"])
 
     # TODO: enable device batching
     def pin_to_release(
@@ -1667,7 +1654,7 @@ class Device:
             {
                 "resource": "device",
                 "id": device["id"],
-                "body": {"should_be_running__release": release["id"]},
+                "body": {"is_pinned_on__release": release["id"]},
             }
         )
 
@@ -1679,7 +1666,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int])
         """
 
-        self.__set(uuid_or_id_or_ids, {"should_be_running__release": None})
+        self.__set(uuid_or_id_or_ids, {"is_pinned_on__release": None})
 
     # TODO: enable device batching
     def set_supervisor_release(
@@ -1689,11 +1676,9 @@ class Device:
     ) -> None:
         """
         Set a specific device to run a particular supervisor release.
-
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
-
         Examples:
             >>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
         """
@@ -1701,46 +1686,29 @@ class Device:
             uuid_or_id,
             {
                 "$select": ["id", "supervisor_version", "os_version"],
-                "$expand": {"is_of__device_type": {"$select": "slug"}},
+                "$expand": {"is_of__device_type": {"$select": "is_of__cpu_architecture"}},
             },
         )
-        device_type_slug = device["is_of__device_type"][0]["slug"]
+        cpu_arch_id = device["is_of__device_type"][0]["is_of__cpu_architecture"]["__id"]
 
         release_options = {
             "$top": 1,
             "$select": "id",
-            "$filter": {
-                "is_for__device_type": {
-                    "$any": {
-                        "$alias": "dt",
-                        "$expr": {
-                            "dt": {
-                                "slug": device_type_slug,
-                            },
-                        },
-                    },
-                },
-            },
+            "$filter": {"id" if is_id(supervisor_version_or_id) else "raw_version": supervisor_version_or_id},
         }
 
-        if is_id(supervisor_version_or_id):
-            release_options["$filter"]["id"] = supervisor_version_or_id
-        else:
-            release_options["$filter"]["supervisor_version"] = supervisor_version_or_id
-
         try:
-            release = self.__pine.get({"resource": "supervisor_release", "options": release_options})[0]
+            release = self.__device_os.get_supervisor_releases_for_cpu_architecture(cpu_arch_id, release_options)[0]
         except IndexError:
             raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
 
         ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
         ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
-
         self.__pine.patch(
             {
                 "resource": "device",
                 "id": device["id"],
-                "body": {"should_be_managed_by__supervisor_release": release["id"]},
+                "body": {"should_be_managed_by__release": release["id"]},
             }
         )
 

@@ -31,7 +31,7 @@ The Balena object can be configured with a dict of type Settings
 ```python
 balena = Balena({
     "balena_host": "balena-cloud.com",
-    "api_version": "v6",
+    "api_version": "v7",
     "device_actions_endpoint_version": "v1",
     "data_directory": "/home/example/.balena",
     "image_cache_time": str(1 * 1000 * 60 * 60 * 24 * 7), # 1 week
@@ -91,7 +91,6 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_all_by_organization(org_handle_or_id, options)](#application.get_all_by_organization) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_all_directly_accessible(options)](#application.get_all_directly_accessible) ⇒ [<code>List[TypeApplication]</code>](#typeapplication)
             - [get_by_name(app_name, options, context)](#application.get_by_name) ⇒ [<code>TypeApplication</code>](#typeapplication)
-            - [get_by_owner(app_name, owner, options)](#application.get_by_owner) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_dashboard_url(app_id)](#application.get_dashboard_url) ⇒ <code>str</code>
             - [get_directly_accessible(slug_or_uuid_or_id, options)](#application.get_directly_accessible) ⇒ [<code>TypeApplication</code>](#typeapplication)
             - [get_id(slug_or_uuid_or_id)](#application.get_id) ⇒ <code>int</code>
@@ -281,6 +280,7 @@ hesitate to open an issue in GitHub](https://github.com/balena-io/balena-sdk-pyt
             - [get_config(slug_or_uuid_or_id, options)](#deviceos.get_config) ⇒ <code>None</code>
             - [get_download_size(device_type, version)](#deviceos.get_download_size) ⇒ <code>float</code>
             - [get_max_satisfying_version(device_type, version_or_range, os_type)](#deviceos.get_max_satisfying_version) ⇒ <code>Optional[str]</code>
+            - [get_supervisor_releases_for_cpu_architecture(cpu_architecture_slug_or_id, options)](#deviceos.get_supervisor_releases_for_cpu_architecture) ⇒ [<code>List[ReleaseType]</code>](#releasetype)
             - [get_supported_os_update_versions(device_type, current_version)](#deviceos.get_supported_os_update_versions) ⇒ <code>None</code>
             - [is_architecture_compatible_with(os_architecture, application_architecture)](#deviceos.is_architecture_compatible_with) ⇒ <code>None</code>
             - [is_supported_os_update(device_type, current_version, target_version)](#deviceos.is_supported_os_update) ⇒ <code>bool</code>
@@ -500,24 +500,6 @@ Get all applications directly accessible by the user
 #### Examples:
 ```python
 >>> balena.models.application.get("myapp")
-```
-
-<a name="application.get_by_owner"></a>
-### Function: get_by_owner(app_name, owner, options) ⇒ [<code>TypeApplication</code>](#typeapplication)
-
-Get a single application using the appname and the handle of the owning organization.
-
-#### Args:
-    app_name (str): application name.
-    owner (str): The handle of the owning organization.
-    options (AnyObject): extra pine options to use.
-
-#### Returns:
-    TypeApplication: application info.
-
-#### Examples:
-```python
->>> balena.models.application.get_by_owner('foo', 'my_org')
 ```
 
 <a name="application.get_dashboard_url"></a>
@@ -1943,11 +1925,9 @@ Note a device.
 ### Function: set_supervisor_release(uuid_or_id, supervisor_version_or_id) ⇒ <code>None</code>
 
 Set a specific device to run a particular supervisor release.
-
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
     supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
-
 #### Examples:
 ```python
 >>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
@@ -3135,6 +3115,26 @@ Get OS download size estimate. Currently only the raw (uncompressed) size is rep
 #### Returns:
     float: OS image download size, in bytes.
 
+<a name="deviceos.get_supervisor_releases_for_cpu_architecture"></a>
+### Function: get_supervisor_releases_for_cpu_architecture(cpu_architecture_slug_or_id, options) ⇒ [<code>List[ReleaseType]</code>](#releasetype)
+
+Returns the Releases of the supervisor for the CPU Architecture
+
+#### Args:
+    cpu_architecture_slug_or_id (Union[str, int]): The slug (string) or id (number) for the CPU Architecture.
+    options (AnyObject): extra pine options to use.
+
+#### Returns:
+    ReleaseType: release info.
+
+
+Example:
+    results = balena.models.os.get_supervisor_releases_for_cpu_architecture('aarch64');
+    results = balena.models.os.get_supervisor_releases_for_cpu_architecture(
+        'aarch64',
+        { $filter: { raw_version: '12.11.0' } },
+    );
+
 <a name="deviceos.get_supported_os_update_versions"></a>
 ### Function: get_supported_os_update_versions(device_type, current_version) ⇒ <code>None</code>
 
@@ -4175,7 +4175,7 @@ The name must be a string; the optional doc argument can have any type.
     "start_timestamp": str,
     "end_timestamp": str,
     "push_timestamp": str,
-    "image_size": int,
+    "image_size": str,
     "dockerfile": str,
     "error_message": str,
     "is_a_build_of__service": Union[List[ServiceType], PineDeferred],
@@ -4367,7 +4367,9 @@ The name must be a string; the optional doc argument can have any type.
     "release_image": Optional[List[ReleaseImageType]],
     "should_be_running_on__application": Optional[List[TypeApplication]],
     "is_running_on__device": Optional[List[TypeDevice]],
-    "should_be_running_on__device": Optional[List[TypeDevice]],
+    "is_pinned_to__device": Optional[List[TypeDevice]],
+    "should_operate__device": Optional[List[TypeDevice]],
+    "should_manage__device": Optional[List[TypeDevice]],
     "release_tag": Optional[List[BaseTagType]]
 }
 ```
@@ -4427,7 +4429,9 @@ The name must be a string; the optional doc argument can have any type.
     "release_image": Optional[List[ReleaseImageType]],
     "should_be_running_on__application": Optional[List[TypeApplication]],
     "is_running_on__device": Optional[List[TypeDevice]],
-    "should_be_running_on__device": Optional[List[TypeDevice]],
+    "is_pinned_to__device": Optional[List[TypeDevice]],
+    "should_operate__device": Optional[List[TypeDevice]],
+    "should_manage__device": Optional[List[TypeDevice]],
     "release_tag": Optional[List[BaseTagType]],
     "images": List[ImageBasicInfoType],
     "user": BasicUserInfoType
@@ -4475,22 +4479,6 @@ The name must be a string; the optional doc argument can have any type.
     "is_built_by__image": Optional[List[ImageType]],
     "service_environment_variable": Optional[List[EnvironmentVariableBase]],
     "device_service_environment_variable": Optional[List[EnvironmentVariableBase]]
-}
-```
-
-
-### SupervisorReleaseType
-
-
-```python
-{
-    "created_at": str,
-    "id": int,
-    "supervisor_version": str,
-    "image_name": str,
-    "is_public": bool,
-    "note": Optional[str],
-    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred]
 }
 ```
 
@@ -4544,7 +4532,7 @@ The name must be a string; the optional doc argument can have any type.
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4586,7 +4574,7 @@ The name must be a string; the optional doc argument can have any type.
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4641,7 +4629,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4669,12 +4657,9 @@ The name must be a string; the optional doc argument can have any type.
     "os_version": str,
     "provisioning_progress": int,
     "provisioning_state": str,
-    "state": TypeDeviceState,
     "status": str,
-    "status_sort_index": int,
     "supervisor_version": str,
     "uuid": str,
-    "vpn_address": str,
     "api_heartbeat_state": Literal["online", "offline", "timeout", "unknown"],
     "memory_usage": int,
     "memory_total": int,
@@ -4685,31 +4670,21 @@ The name must be a string; the optional doc argument can have any type.
     "cpu_temp": int,
     "cpu_id": str,
     "is_undervolted": bool,
-    "overall_status": Any,
+    "overall_status": Literal["configuring", "inactive", "post-provisioning", "updating", "operational", "disconnected", "reduced-functionality"],
     "overall_progress": int,
     "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
     "belongs_to__application": Union[List[TypeApplication], PineDeferred],
     "belongs_to__user": Union[List[UserType], PineDeferred, None],
     "is_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
     "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
-    "should_be_managed_by__supervisor_release": Union[List[SupervisorReleaseType], PineDeferred, None],
+    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
+    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
     "device_config_variable": Optional[List[EnvironmentVariableBase]],
     "device_environment_variable": Optional[List[EnvironmentVariableBase]],
     "device_tag": Optional[List[BaseTagType]],
     "service_install": Optional[List[ServiceInstanceType]],
     "image_install": Optional[List[ImageInstallType]]
-}
-```
-
-
-### TypeDeviceState
-
-
-```python
-{
-    "key": str,
-    "name": str
 }
 ```
 
@@ -4720,7 +4695,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4748,12 +4723,9 @@ The name must be a string; the optional doc argument can have any type.
     "os_version": str,
     "provisioning_progress": int,
     "provisioning_state": str,
-    "state": TypeDeviceState,
     "status": str,
-    "status_sort_index": int,
     "supervisor_version": str,
     "uuid": str,
-    "vpn_address": str,
     "api_heartbeat_state": Literal["online", "offline", "timeout", "unknown"],
     "memory_usage": int,
     "memory_total": int,
@@ -4764,15 +4736,16 @@ The name must be a string; the optional doc argument can have any type.
     "cpu_temp": int,
     "cpu_id": str,
     "is_undervolted": bool,
-    "overall_status": Any,
+    "overall_status": Literal["configuring", "inactive", "post-provisioning", "updating", "operational", "disconnected", "reduced-functionality"],
     "overall_progress": int,
     "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
     "belongs_to__application": Union[List[TypeApplication], PineDeferred],
     "belongs_to__user": Union[List[UserType], PineDeferred, None],
     "is_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
+    "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
     "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
-    "should_be_managed_by__supervisor_release": Union[List[SupervisorReleaseType], PineDeferred, None],
+    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
+    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
     "device_config_variable": Optional[List[EnvironmentVariableBase]],
     "device_environment_variable": Optional[List[EnvironmentVariableBase]],
     "device_tag": Optional[List[BaseTagType]],
@@ -4809,7 +4782,7 @@ The name must be a string; the optional doc argument can have any type.
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], int],
+    "actor": Union[List[ActorType], PineDeferred],
     "created_at": str,
     "username": str,
     "organization_membership": Optional[List[OrganizationMembershipType]],

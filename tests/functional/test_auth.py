@@ -159,9 +159,9 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(whoami["actorType"], "device")
         self.assertEqual(whoami["actorTypeId"], self.app_info["device"]["id"])
         self.assertEqual(whoami["uuid"], device_uuid)
-        self.assertEqual(whoami["id"], self.app_info["device"]["actor"])
+        self.assertEqual(whoami["id"], self.app_info["device"]["actor"]["__id"])
 
-        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["device"]["actor"])
+        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["device"]["actor"]["__id"])
 
         errMsg = "The authentication credentials in use are not of a user"
         with self.assertRaises(Exception) as cm:
@@ -190,10 +190,10 @@ class TestAuth(unittest.TestCase):
 
         self.assertEqual(whoami["actorType"], "application")
         self.assertEqual(whoami["actorTypeId"], app_id)
-        self.assertEqual(whoami["id"], self.app_info["app"]["actor"])
+        self.assertEqual(whoami["id"], self.app_info["app"]["actor"]["__id"])
         self.assertEqual(whoami["slug"], self.app_info["app"]["slug"])
 
-        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["app"]["actor"])
+        self.assertEqual(self.balena.auth.get_actor_id(), self.app_info["app"]["actor"]["__id"])
 
         errMsg = "The authentication credentials in use are not of a user"
         with self.assertRaises(Exception) as cm:
