@@ -57,6 +57,9 @@ class Release:
         if commit_or_id_or_raw_version is None:
             raise exceptions.ReleaseNotFound(commit_or_id_or_raw_version)
 
+        if commit_or_id_or_raw_version == '':
+            raise exceptions.InvalidParameter("commit_or_id_or_raw_version", None)
+
         if is_id(commit_or_id_or_raw_version):
             release = self.__pine.get(
                 {"resource": "release", "id": commit_or_id_or_raw_version, "options": options}  # type: ignore
