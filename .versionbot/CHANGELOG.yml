@@ -1,4 +1,23 @@
 - commits:
+    - subject: "release: throw in case of trying to get a release with an empty string
+        uuid"
+      hash: 6d5d043bba744025650eb73afa51927887acafc6
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: "device: do not operate on empty or ambiguous device UUIDs"
+      hash: 473425882b89a02ee3227e51fab613c77e8f66e9
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.0.1
+  title: ""
+  date: 2024-10-15T17:17:20.121Z
+- commits:
     - subject: "v7 model: Add the device.should_be_operated_by__release property"
       hash: 1328499d9aa31fe2e0c456b7a1e35d951ccec5dd
       body: ""
