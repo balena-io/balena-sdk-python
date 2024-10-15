@@ -173,6 +173,9 @@ class TestRelease(unittest.TestCase):
         )  # type: ignore
         self.__expect_release_to_match_on_get(release, match)
 
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.release.get("")
+
     def test_07_get_all_by_application(self):
         app_id = self.mc_app["app"]["id"]
         releases = self.balena.models.release.get_all_by_application(app_id)

@@ -94,6 +94,9 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.get("999999999999")
 
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.get("")
+
     def test_08_rename(self):
         self.balena.models.device.rename(TestDevice.device["uuid"], "test-device")
         self.assertEqual(self.balena.models.device.get_name(TestDevice.device["uuid"]), "test-device")
@@ -369,8 +372,38 @@ class TestDevice(unittest.TestCase):
             app_devices_len - 1,
         )
 
+        uuid = self.balena.models.device.generate_uuid()
+        self.balena.models.device.register(self.app["id"], uuid)
+        uuid2 = uuid[:-2] + uuid[-1] + uuid[-2]
+
+        self.balena.models.device.register(self.app["id"], uuid2)
+
+        device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]
+        self.assertIn(uuid, device_uuids)
+        self.assertIn(uuid2, device_uuids)
+
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.get(TestDevice.device["uuid"])
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.remove("")
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.remove("abc")
+
+        with self.assertRaises(self.helper.balena_exceptions.AmbiguousDevice):
+            self.balena.models.device.remove(uuid[0:10])
+
+        device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]
+        self.assertIn(uuid, device_uuids)
+        self.assertIn(uuid2, device_uuids)
+
+        self.balena.models.device.remove(uuid)
+        self.balena.models.device.remove(uuid2)
+
+        device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]
+        self.assertNotIn(uuid, device_uuids)
+        self.assertNotIn(uuid2, device_uuids)
 
 
 if __name__ == "__main__":
