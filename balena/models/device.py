@@ -2145,14 +2145,14 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
     def set(self, uuid_or_id: Union[str, int], env_var_name: str, value: str) -> None:
         """
         Set the value of a device config variable.
-
+        Note that config variables must start with BALENA_ and RESIN_ prefixes.
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             env_var_name (str): environment variable name.
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.device.config_var.device.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.device.config_var.set('8deb12','BALENA_test_env4', 'testing1')
         """
         super(DeviceConfigVariable, self)._set(uuid_or_id, env_var_name, value)
 

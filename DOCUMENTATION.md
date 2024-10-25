@@ -2244,7 +2244,7 @@ Remove a device environment variable.
 ### Function: set(uuid_or_id, env_var_name, value) ⇒ <code>None</code>
 
 Set the value of a device config variable.
-
+Note that config variables must start with BALENA_ and RESIN_ prefixes.
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
     env_var_name (str): environment variable name.
@@ -2252,7 +2252,7 @@ Set the value of a device config variable.
 
 #### Examples:
 ```python
->>> balena.models.device.config_var.device.set('8deb12','test_env4', 'testing1')
+>>> balena.models.device.config_var.set('8deb12','BALENA_test_env4', 'testing1')
 ```
 ## DeviceEnvVariable
 
