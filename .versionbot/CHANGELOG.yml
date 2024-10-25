@@ -1,4 +1,22 @@
 - commits:
+    - subject: Fix docs for `device.config_var.set`
+      hash: 4c42649e4f9145ded61330c3fbe83dbaadc811ce
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Properly surface RequestErrors from balena-api
+      hash: 26400c206cd43038baf4e7a03d7c8bd0c85341a7
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.0.2
+  title: ""
+  date: 2024-10-25T14:07:49.431Z
+- commits:
     - subject: "release: throw in case of trying to get a release with an empty string
         uuid"
       hash: 6d5d043bba744025650eb73afa51927887acafc6
