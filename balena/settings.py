@@ -164,6 +164,11 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
         config_data = {}
         options = config_reader.options(self.CONFIG_SECTION)
         for option in options:
+            # Always use the default supported SDK version and pine endpoint
+            # Unless it was explicetely defined differently (in short, do not cache this    )
+            if option == "api_version":
+                config_data[option] = self.__base_settings[option]
+                continue
             try:
                 config_data[option] = config_reader.get(self.CONFIG_SECTION, option)
                 if config_data[option] == "true":
@@ -172,6 +177,8 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
                     config_data[option] = False
             except Exception:
                 config_data[option] = None
+        # Ensure pine endpoint matches the final decided api_version
+        config_data["pine_endpoint"] = f"https://api.{config_data['balena_host']}/{config_data['api_version']}/"
         self._setting = config_data
 
     def has(self, key: str) -> bool:
