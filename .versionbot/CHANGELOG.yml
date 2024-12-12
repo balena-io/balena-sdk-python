@@ -1,4 +1,15 @@
 - commits:
+    - subject: Stop caching api_version and pine_endpoint on balena.cfg
+      hash: 38d63c6a4a7f045fad8d880455216c5a852e2478
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.0.3
+  title: ""
+  date: 2024-12-12T11:42:25.893Z
+- commits:
     - subject: Fix docs for `device.config_var.set`
       hash: 4c42649e4f9145ded61330c3fbe83dbaadc811ce
       body: ""
