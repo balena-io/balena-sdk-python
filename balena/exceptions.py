@@ -185,7 +185,8 @@ class RequestError(BalenaException):
         self.message = Message.REQUEST_ERROR.format(body=body)
         self.body = body
         self.status_code = status_code
-        print(self.message, status_code)
+        if status_code >= 500:
+            print(self.message, status_code)
 
 
 class NotLoggedIn(BalenaException):
