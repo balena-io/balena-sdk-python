@@ -1,4 +1,15 @@
 - commits:
+    - subject: Avoid displaying 4xx errors that might be handled internally
+      hash: 3bf42720736d8c3035416fb089c9cb3a02b08a4c
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.0.4
+  title: ""
+  date: 2024-12-12T23:09:28.032Z
+- commits:
     - subject: Stop caching api_version and pine_endpoint on balena.cfg
       hash: 38d63c6a4a7f045fad8d880455216c5a852e2478
       body: ""
