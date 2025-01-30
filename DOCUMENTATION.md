@@ -1976,6 +1976,9 @@ Start an OS update on a device.
         Unsupported (unpublished) version will result in rejection.
         The version **must** be the exact version number, a "prod" variant
         and greater than the one running on the device.
+    run_detached (Optional[bool]): run the update in detached mode.
+        Default behaviour is run_detached=False but is DEPRECATED and will be
+        removed in a future release. Use run_detached=True for more reliable updates.
 
 #### Returns:
     HUPStatusResponse: action response.
@@ -1984,6 +1987,7 @@ Start an OS update on a device.
 ```python
 >>> balena.models.device.start_os_update('b6070f4', '2.29.2+rev1.prod')
 >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1')
+>>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1', run_detached=True)
 ```
 
 <a name="device.start_service"></a>

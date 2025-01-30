@@ -1727,7 +1727,13 @@ class Device:
             }
         )
 
-    def start_os_update(self, uuid_or_id: Union[str, int], target_os_version: str) -> HUPStatusResponse:
+    def start_os_update(
+        self,
+        uuid_or_id: Union[str, int],
+        target_os_version: str,
+        *,  # Force keyword arguments after this point
+        run_detached: Optional[bool] = False
+    ) -> HUPStatusResponse:
         """
         Start an OS update on a device.
 
@@ -1737,6 +1743,9 @@ class Device:
                 Unsupported (unpublished) version will result in rejection.
                 The version **must** be the exact version number, a "prod" variant
                 and greater than the one running on the device.
+            run_detached (Optional[bool]): run the update in detached mode.
+                Default behaviour is run_detached=False but is DEPRECATED and will be
+                removed in a future release. Use run_detached=True for more reliable updates.
 
         Returns:
             HUPStatusResponse: action response.
@@ -1744,6 +1753,7 @@ class Device:
         Examples:
             >>> balena.models.device.start_os_update('b6070f4', '2.29.2+rev1.prod')
             >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1')
+            >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1', run_detached=True)
         """
 
         if target_os_version is None or uuid_or_id is None:
@@ -1766,7 +1776,9 @@ class Device:
         data = {"parameters": {"target_version": target_os_version}}
 
         url_base = self.__config.get_all()["deviceUrlsBase"]
-        action_api_version = self.__settings.get("device_actions_endpoint_version")
+        if not isinstance(run_detached, bool):
+            raise ValueError(f"run_detached must be True or False, got {type(run_detached)}: {run_detached}")
+        action_api_version = "v2" if run_detached is True else self.__settings.get("device_actions_endpoint_version")
 
         return request(
             method="POST",
@@ -1776,6 +1788,12 @@ class Device:
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
         )
 
+    @deprecated(
+        """
+        This will be removed in a future major release. This will no longer return a
+        useful status for runDetached=true updates.
+        """
+    )
     def get_os_update_status(self, uuid_or_id: Union[str, int]) -> HUPStatusResponse:
         """
         Get the OS update status of a device.
