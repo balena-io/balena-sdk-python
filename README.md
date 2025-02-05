@@ -97,7 +97,7 @@ To verify linting you can run `poetry run flake8 --max-line-length=120`
 Tests
 -----
 
-To run the tests, first create a `.env` file with your test user configuration, e.g.:
+To run the tests, first create a `.env` file with your test user configuration, like below. **Do not** use credentials for a user with active fleets, as the tests may be destructive.
 
 ```
 [Credentials]
@@ -108,7 +108,7 @@ password=123456my_password
 
 You can optionally change the target API endpoint too, e.g. `api_endpoint=https://api.balena-cloud.com`.
 
-Then run `python -m unittest discover tests -v`.
+Then run `poetry run python -m unittest discover tests -v`. Use of poetry to run tests ensures use of its virtual environment.
 
 Support
 -------
