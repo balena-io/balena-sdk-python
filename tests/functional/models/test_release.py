@@ -16,7 +16,7 @@ class TestRelease(unittest.TestCase):
             "ServiceTestApp", "raspberry-pi2", cls.helper.default_organization["id"]
         )
         cls.mc_app = cls.helper.create_multicontainer_app()
-        cls.TEST_SOURCE_URL = "https://codeload.github.com/balena-io-examples/balena-nodejs-hello-world/tar.gz/refs/tags/v1.0.0"
+        cls.TEST_SOURCE_URL = "https://codeload.github.com/balena-io-examples/balena-nodejs-hello-world/tar.gz/refs/tags/v1.0.0"  # noqa: E501
         cls.TEST_SOURCE_CONTAINER_COUNT = 1
 
         # releases can be queried by id, commit or a dict containing application and raw_version
