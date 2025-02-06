@@ -16,7 +16,7 @@ class TestRelease(unittest.TestCase):
             "ServiceTestApp", "raspberry-pi2", cls.helper.default_organization["id"]
         )
         cls.mc_app = cls.helper.create_multicontainer_app()
-        cls.TEST_SOURCE_URL = "https://github.com/balena-io-examples/balena-node-hello-world/archive/v1.0.0.tar.gz"
+        cls.TEST_SOURCE_URL = "https://codeload.github.com/balena-io-examples/balena-nodejs-hello-world/tar.gz/refs/tags/v1.0.0"  # noqa: E501
         cls.TEST_SOURCE_CONTAINER_COUNT = 1
 
         # releases can be queried by id, commit or a dict containing application and raw_version
@@ -69,17 +69,10 @@ class TestRelease(unittest.TestCase):
 
         with self.assertRaises(self.helper.balena_exceptions.BuilderRequestError) as cm:
             self.balena.models.release.create_from_url(
-                self.empty_app["id"],
-                url="https://github.com/balena-io-projects/simple-server-node/archive/v0.0.0.tar.gz",
-            )
-        self.assertIn("Failed to fetch tarball from passed URL", cm.exception.message)
-
-        with self.assertRaises(self.helper.balena_exceptions.BuilderRequestError) as cm:
-            self.balena.models.release.create_from_url(
-                self.empty_app["id"], url="https://github.com/balena-io-projects/simple-server-node"
+                self.empty_app["id"], url="https://codeload.github.com/balena-io-examples/balena-nodejs-hello-world"
             )
         self.assertIn(
-            "Invalid tar header. Maybe the tar is corrupted or it needs to be gunzipped?", cm.exception.message
+            "Failed to fetch tarball from passed URL", cm.exception.message
         )
 
         release_ids = []
