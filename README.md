@@ -97,6 +97,8 @@ To verify linting you can run `poetry run flake8 --max-line-length=120`
 Tests
 -----
 
+**WARNING: This will delete all devices and orgs of the test users.**
+
 To run the tests, first create a `.env` file with your test user configuration, e.g.:
 
 ```
