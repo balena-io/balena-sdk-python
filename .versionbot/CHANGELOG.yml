@@ -1,4 +1,22 @@
 - commits:
+    - subject: Increase logs tests reliability
+      hash: b2b5bd55add603b55b7858fe7360b690ad6bf9bb
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Fix broken tar tests URLs to match same from the Node SDK
+      hash: 51918ffb9cf201e15f45c91cd387e116176022f5
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.0.5
+  title: ""
+  date: 2025-02-06T13:45:36.508Z
+- commits:
     - subject: Avoid displaying 4xx errors that might be handled internally
       hash: 3bf42720736d8c3035416fb089c9cb3a02b08a4c
       body: ""
