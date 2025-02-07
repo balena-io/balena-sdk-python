@@ -1,4 +1,17 @@
 - commits:
+    - subject: Clarify/Warn how to setup and run tests
+      hash: 1e8dbd3a89e8d71517b10520f02b964a605c7394
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 15.0.6
+  title: ""
+  date: 2025-02-07T13:19:55.977Z
+- commits:
     - subject: Increase logs tests reliability
       hash: b2b5bd55add603b55b7858fe7360b690ad6bf9bb
       body: ""
