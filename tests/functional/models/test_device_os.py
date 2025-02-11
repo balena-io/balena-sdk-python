@@ -9,6 +9,8 @@ class TestDevice(unittest.TestCase):
     def setUpClass(cls):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
+        cls.helper.wipe_application()
+        cls.app = cls.balena.models.application.create("FooBar", "raspberry-pi2", cls.helper.default_organization["id"])
 
     @classmethod
     def tearDownClass(cls):
@@ -79,6 +81,24 @@ class TestDevice(unittest.TestCase):
         imageLocation = svRelease["release_image"][0]["image"][0]["is_stored_at__image_location"]
         self.assertRegex(imageLocation, r"registry2\.[a-z0-9_\-.]+\.[a-z]+\/v2\/[0-9a-f]+")
         self.assertEqual(imageLocation, "registry2.balena-cloud.com/v2/4ca706e1c624daff7e519b3009746b2c")
+
+    def test_04_start_os_update(self):
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(self.app["id"], uuid)
+        # sanity check
+        self.assertEqual(device["uuid"], uuid)
+        device["is_online"] = False
+        self.assertEqual(device["is_online"], False)
+
+        # Perform sanity checks on input
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.start_os_update('999999999999', '6.0.10')
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.start_os_update(uuid, None)
+        # device is offline
+        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
+            self.balena.models.device.start_os_update(uuid, '99.99.0')
 
 
 if __name__ == "__main__":
