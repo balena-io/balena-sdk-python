@@ -1,4 +1,21 @@
 - commits:
+    - subject: Add option for detached HUP on start_os_update
+      hash: 7ab93c0513fad1d2ce9033933435577a0c18f028
+      body: |
+        This will call the v2 actions endpoint for resinhup
+        which runs a detached version of HUP that increases
+        HUP reliability on slow networks but will offer
+        no status updates such as in_progress.
+
+        Add tests for start_os_update as well.
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: jaomaloy
+  version: 15.1.0
+  title: ""
+  date: 2025-02-11T17:46:30.161Z
+- commits:
     - subject: Clarify/Warn how to setup and run tests
       hash: 1e8dbd3a89e8d71517b10520f02b964a605c7394
       body: ""
