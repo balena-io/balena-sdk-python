@@ -1539,6 +1539,7 @@ Get device name by device uuid.
 <a name="device.get_os_update_status"></a>
 ### Function: get_os_update_status(uuid_or_id) ⇒ <code>HUPStatusResponse</code>
 
+***Deprecated***
 Get the OS update status of a device.
 
 #### Args:
@@ -1969,6 +1970,9 @@ This function requires supervisor v1.8 or higher.
 ### Function: start_os_update(uuid_or_id, target_os_version) ⇒ <code>HUPStatusResponse</code>
 
 Start an OS update on a device.
+
+If using run_detached option, monitor progress with device.get() --
+status, provisioning_state and provisioning_progress entries.
 
 #### Args:
     uuid_or_id (Union[str, int]): device uuid (string) or id (int).
