@@ -25,6 +25,7 @@ black = {version = "*", python = ">=3.9.0"}
 pydocstyle = "*"
 flake8 = "*"
 pytest= "*"
+coverage = "^7.6.12"
 
 [tool.pytest.ini_options]
 # Tests are run via the custom action in .github/actions/test/action.yml
