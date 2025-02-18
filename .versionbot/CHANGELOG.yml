@@ -1,4 +1,15 @@
 - commits:
+    - subject: "tests: Increase logs timeouts"
+      hash: 01684967e1ea070342edeb52d0e2c874de2e1ec9
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.1.1
+  title: ""
+  date: 2025-02-18T14:47:58.674Z
+- commits:
     - subject: Add option for detached HUP on start_os_update
       hash: 7ab93c0513fad1d2ce9033933435577a0c18f028
       body: |
