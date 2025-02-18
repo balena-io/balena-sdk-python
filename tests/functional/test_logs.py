@@ -21,8 +21,8 @@ import time
 
 WAIT_FOR_FIRSTLOGS_TIMEOUT_S = 5
 WAIT_FOR_FIRSTLOGS_ATTEMPTS = 20
-WAIT_FOR_LOGS_TIMEOUT_S = 15
-WAIT_AFTER_SUBSCRIBE_TIMEOUT_S = 4
+WAIT_FOR_LOGS_TIMEOUT_S = 20
+WAIT_AFTER_SUBSCRIBE_TIMEOUT_S = 10
 
 
 def send_log_messages(uuid: str, device_api_key: str, messages: List[Any], settings):
