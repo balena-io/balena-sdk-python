@@ -1,4 +1,17 @@
 - commits:
+    - subject: Enhance documentation for detached_mode OS update
+      hash: e4fa488e77ca1333be59243221d056ffebd29a84
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 15.1.2
+  title: ""
+  date: 2025-02-19T15:36:24.906Z
+- commits:
     - subject: "tests: Increase logs timeouts"
       hash: 01684967e1ea070342edeb52d0e2c874de2e1ec9
       body: ""
