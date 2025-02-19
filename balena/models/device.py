@@ -1737,6 +1737,9 @@ class Device:
         """
         Start an OS update on a device.
 
+        If using run_detached option, monitor progress with device.get() --
+        status, provisioning_state and provisioning_progress entries.
+
         Args:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int).
             target_os_version (str): semver-compatible version for the target device.
@@ -1796,6 +1799,7 @@ class Device:
     )
     def get_os_update_status(self, uuid_or_id: Union[str, int]) -> HUPStatusResponse:
         """
+        ***Deprecated***
         Get the OS update status of a device.
 
         Args:
