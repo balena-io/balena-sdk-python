@@ -241,7 +241,7 @@ class TestHelper:
                     "is_provided_by__release": old_release["id"],
                     "device": dev["id"],
                     "download_progress": 100,
-                    "status": "running",
+                    "status": "Running",
                     "install_date": "2017-10-01",
                 },
             }
@@ -255,7 +255,7 @@ class TestHelper:
                     "is_provided_by__release": new_release["id"],
                     "device": dev["id"],
                     "download_progress": 50,
-                    "status": "downloading",
+                    "status": "Downloading",
                     "install_date": "2017-10-30",
                 },
             }
@@ -283,7 +283,7 @@ class TestHelper:
                     "is_provided_by__release": new_release["id"],
                     "device": dev["id"],
                     "download_progress": 100,
-                    "status": "running",
+                    "status": "Running",
                     "install_date": "2017-10-30",
                 },
             }
