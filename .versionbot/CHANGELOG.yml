@@ -1,4 +1,17 @@
 - commits:
+    - subject: "tests: Use more realistic statuses for image installs"
+      hash: 53d9d798fb3ae134d95261cf9dc0cfce1d9dee2b
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        See: https://balena.fibery.io/Work/Project/API-Limit-size-of-large-fields-975
+        see: https://balena.fibery.io/Work/Project/API-Limit-size-of-large-fields-975
+      author: Thodoris Greasidis
+  version: 15.1.3
+  title: ""
+  date: 2025-05-22T00:00:20.508Z
+- commits:
     - subject: Enhance documentation for detached_mode OS update
       hash: e4fa488e77ca1333be59243221d056ffebd29a84
       body: ""
