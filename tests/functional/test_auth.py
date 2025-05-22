@@ -2,9 +2,12 @@ import unittest
 
 from balena import Balena
 from balena.exceptions import NotLoggedIn, LoginFailed
+from balena.balena_auth import get_token
 from tests.helper import TestHelper
 from typing import cast
+from datetime import datetime, timedelta
 from balena.auth import ApplicationKeyWhoAmIResponse, UserKeyWhoAmIResponse, DeviceKeyWhoAmIResponse
+import jwt
 
 
 class TestAuth(unittest.TestCase):
@@ -204,3 +207,23 @@ class TestAuth(unittest.TestCase):
         self.assertFalse(self.balena.auth.is_logged_in())
 
         self.assertIsNone(self.balena.auth.get_token())
+
+    def test_19_should_continue_using_current_token_if_refresh_fails(self):
+        TestAuth.creds = {
+            "username": TestHelper.credentials["user_id"],
+            "password": TestHelper.credentials["password"],
+        }
+        self.balena.auth.login(**TestAuth.creds)
+        self.assertTrue(self.balena.auth.is_logged_in())
+
+        token = self.balena.auth.get_token()
+        self.assertIsNotNone(token)
+
+        self.balena.auth.logout()
+
+        # force token refresh with an invalid old token should not throw
+        year_ago = int((datetime.utcnow() - timedelta(days=1 * 365)).timestamp())
+        new_token = jwt.encode({"iat": year_ago}, "dummy_secret", algorithm="HS256")
+        self.balena.auth.login_with_token(new_token)
+        token = get_token(self.balena.auth._Auth__settings)
+        self.assertEqual(self.balena.auth.get_token(), new_token)

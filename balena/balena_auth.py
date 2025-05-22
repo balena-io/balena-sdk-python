@@ -17,7 +17,10 @@ def __request_new_token(settings: Settings) -> str:
     response = requests.get(url, headers=headers)
 
     if not response.ok:
-        raise exceptions.RequestError(response.content.decode(), response.status_code)
+        # If it fails to get a new token on the default expiry time
+        # let it continue trying with the current token
+        # as not all roles have the refresh_token permission
+        return None
 
     return response.content.decode()
 
@@ -41,7 +44,9 @@ def get_token(settings: Settings) -> Optional[str]:
         token = settings.get("token")
         interval = settings.get("token_refresh_interval")
         if __should_update_token(token, interval):
-            settings.set("token", __request_new_token(settings))
+            new_token = __request_new_token(settings)
+            if new_token is not None:
+                settings.set("token", new_token)
         api_key = settings.get("token")
 
     else:
