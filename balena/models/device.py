@@ -2409,7 +2409,7 @@ class DeviceServiceEnvVariable:
 
         Examples:
             >>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
-            >>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
+            >>> balena.models.device.service_var.get('8deb12a', 1234, 'VAR')
         """
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
 

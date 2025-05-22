@@ -2362,7 +2362,7 @@ Get the overriden value of a service variable on a device
 #### Examples:
 ```python
 >>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
->>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
+>>> balena.models.device.service_var.get('8deb12a', 1234, 'VAR')
 ```
 
 <a name="deviceserviceenvvariable.get_all_by_application"></a>
