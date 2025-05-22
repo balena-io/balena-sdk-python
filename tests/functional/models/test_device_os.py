@@ -27,18 +27,21 @@ class TestDevice(unittest.TestCase):
         self.assertGreater(len(supported_device_os_versions["versions"]), 2)
 
     def test_02_get_hup_action_type(self):
+        # Ensure version advances
         testVersion = [
-            "2.108.1+rev2",
-            "2.106.7",
-            "2.98.11+rev4",
-            "2.98.11+rev3",
-            "2.98.11+rev2",
-            "2.98.11",
-            "2.91.5",
             "2.85.2+rev4.prod",
+            "2.91.5",
+            "2.98.11",
+            "2.98.11+rev2",
+            "2.98.11+rev3",
+            "2.98.11+rev4",
+            "2.106.7",
+            "2.108.1+rev2"
         ]
-        for ver in testVersion:
-            get_hup_action_type("", ver, ver)
+        last_ver = testVersion[0]
+        for ver in testVersion[1:]:
+            get_hup_action_type("", last_ver, ver)
+            last_ver = ver
 
     def test_03_get_supervisor_releases_for_cpu_architecture(self):
         # return an empty array if no image was found
