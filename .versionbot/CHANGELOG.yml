@@ -1,4 +1,15 @@
 - commits:
+    - subject: Do not throw in case of failure to refresh token
+      hash: fb91e7bb49879083e74642c6b22cccff83bff26b
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.1.4
+  title: ""
+  date: 2025-05-22T14:26:18.301Z
+- commits:
     - subject: "tests: Use more realistic statuses for image installs"
       hash: 53d9d798fb3ae134d95261cf9dc0cfce1d9dee2b
       body: ""
