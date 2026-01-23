@@ -855,7 +855,7 @@ Get application config variable.
 
 #### Examples:
 ```python
->>> balena.models.application.config_var.get('8deb12','test_env4')
+>>> balena.models.application.config_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
 ```
 
 <a name="applicationconfigvariable.get_all_by_application"></a>
@@ -901,7 +901,7 @@ Set the value of a specific application config variable.
 
 #### Examples:
 ```python
->>> balena.models.application.config_var.set('8deb12','test_env', 'testing1')
+>>> balena.models.application.config_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env', 'testing1')
 ```
 ## ApplicationEnvVariable
 
@@ -918,7 +918,7 @@ Get application environment variable.
 
 #### Examples:
 ```python
->>> balena.models.application.env_var.get('8deb12','test_env4')
+>>> balena.models.application.env_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
 ```
 
 <a name="applicationenvvariable.get_all_by_application"></a>
@@ -965,7 +965,7 @@ Set the value of a specific application environment variable.
 
 #### Examples:
 ```python
->>> balena.models.application.env_var.set('8deb12','test_env4', 'testing1')
+>>> balena.models.application.env_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4', 'testing1')
 ```
 ## BuildEnvVariable
 
@@ -982,7 +982,7 @@ Get build environment variable.
 
 #### Examples:
 ```python
->>> balena.models.application.build_var.get('8deb12','test_env4')
+>>> balena.models.application.build_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
 ```
 
 <a name="buildenvvariable.get_all_by_application"></a>
@@ -1029,7 +1029,7 @@ Set the value of a specific build environment variable.
 
 #### Examples:
 ```python
->>> balena.models.application.build_var.set('8deb12','test_env4', 'testing1')
+>>> balena.models.application.build_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4', 'testing1')
 ```
 ## ApplicationMembership
 
@@ -1238,7 +1238,7 @@ Disable device url for a device.
 
 #### Examples:
 ```python
->>> balena.models.device.disable_device_url('8deb12a58')
+>>> balena.models.device.disable_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
 >>> balena.models.device.disable_device_url([123, 345])
 ```
 
@@ -1255,7 +1255,7 @@ Disable local mode.
 
 #### Examples:
 ```python
->>> balena.models.device.disable_local_mode('b6070f4f')
+>>> balena.models.device.disable_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.disable_lock_override"></a>
@@ -1276,7 +1276,7 @@ Enable device url for a device.
 
 #### Examples:
 ```python
->>> balena.models.device.enable_device_url('8deb12a58')
+>>> balena.models.device.enable_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
 >>> balena.models.device.enable_device_url([123, 345])
 ```
 
@@ -1290,7 +1290,7 @@ Enable local mode.
 
 #### Examples:
 ```python
->>> balena.models.device.enable_local_mode('b6070f4f')
+>>> balena.models.device.enable_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.enable_lock_override"></a>
@@ -1314,7 +1314,7 @@ Generate a device key.
 
 #### Examples:
 ```python
->>> balena.models.device.generate_device_key('df0926')
+>>> balena.models.device.generate_device_key('df0926d8a5cf4293a1b3742c98a500a1')
 ```
 
 <a name="device.generate_uuid"></a>
@@ -1345,7 +1345,7 @@ This method returns a single device by id or uuid.
 #### Examples:
 ```python
 >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
->>> balena.models.device.get('8deb12')
+>>> balena.models.device.get('8deb12a7d7592c2b7f9e44735c2b0a41')
 >>> balena.models.device.get(12345)
 ```
 
@@ -1420,7 +1420,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.device.get_application_info('7f66ec')
+>>> balena.models.device.get_application_info('7f66ec3c5da146c3b6a84aaed1c07581')
 ```
 
 <a name="device.get_application_name"></a>
@@ -1473,7 +1473,7 @@ Get a device url for a device.
 
 #### Examples:
 ```python
->>> balena.models.device.get_device_url('8deb12a')
+>>> balena.models.device.get_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
 ```
 
 <a name="device.get_local_ip_address"></a>
@@ -1500,7 +1500,7 @@ Returns whether local mode is supported and a message describing the reason why 
 
 #### Examples:
 ```python
->>> balena.models.device.get_local_mode_support('b6070f4')
+>>> balena.models.device.get_local_mode_support('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.get_mac_address"></a>
@@ -1550,7 +1550,7 @@ Get the OS update status of a device.
 
 #### Examples:
 ```python
->>> balena.models.device.get_os_update_status('b6070f4f')
+>>> balena.models.device.get_os_update_status('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.get_status"></a>
@@ -1566,7 +1566,7 @@ Get the status of a device.
 
 #### Examples:
 ```python
->>> balena.models.device.get_status('8deb12')
+>>> balena.models.device.get_status('8deb12a7d7592c2b7f9e44735c2b0a41')
 ```
 
 <a name="device.get_supervisor_state"></a>
@@ -1582,7 +1582,7 @@ Get the supervisor state on a device
 
 #### Examples:
 ```python
->>> balena.models.device.get_supervisor_state('b6070f4fea')
+>>> balena.models.device.get_supervisor_state('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.get_supervisor_target_state"></a>
@@ -1648,7 +1648,7 @@ Grant support access to a device until a specified time.
 
 #### Examples:
 ```python
->>> balena.models.device.grant_support_access('49b2a7', 1511974999000)
+>>> balena.models.device.grant_support_access('49b2a76e8a8d4a2b918c08a23b423580', 1511974999000)
 ```
 
 <a name="device.has"></a>
@@ -1672,7 +1672,7 @@ Check if a device is web accessible with device urls
 
 #### Examples:
 ```python
->>> balena.models.device.has_device_url('8deb12a')
+>>> balena.models.device.has_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
 ```
 
 <a name="device.has_lock_override"></a>
@@ -1696,7 +1696,7 @@ Identify device.
 
 #### Examples:
 ```python
->>> balena.models.device.identify('8deb12a5')
+>>> balena.models.device.identify('8deb12a7d7592c2b7f9e44735c2b0a41')
 ```
 
 <a name="device.is_in_local_mode"></a>
@@ -1712,7 +1712,7 @@ Check if local mode is enabled on the device.
 
 #### Examples:
 ```python
->>> balena.models.device.is_in_local_mode('b6070f4f')
+>>> balena.models.device.is_in_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="device.is_online"></a>
@@ -1777,7 +1777,7 @@ This is useful to signal that the supervisor is alive and responding.
 
 #### Examples:
 ```python
->>> balena.models.device.ping('8f66ec7')
+>>> balena.models.device.ping('8f66ec7335dd4a97b7661faa131b1502')
 >>> balena.models.device.ping(1234)
 ```
 
@@ -1792,7 +1792,7 @@ This function clears the user application's `/data` directory.
 
 #### Examples:
 ```python
->>> balena.models.device.purge('8f66ec7')
+>>> balena.models.device.purge('8f66ec7335dd4a97b7661faa131b1502')
 ```
 
 <a name="device.reboot"></a>
@@ -1806,7 +1806,7 @@ Reboot the device.
 
 #### Examples:
 ```python
->>> balena.models.device.reboot('8f66ec7')
+>>> balena.models.device.reboot('8f66ec7335dd4a97b7661faa131b1502')
 ```
 
 <a name="device.register"></a>
@@ -1862,7 +1862,7 @@ the device itself.
 
 #### Examples:
 ```python
->>> balena.models.device.restart_application('8deb12a58')
+>>> balena.models.device.restart_application('8deb12a7d7592c2b7f9e44735c2b0a41')
 >>> balena.models.device.restart_application(1234)
 ```
 
@@ -1877,7 +1877,7 @@ Restart a service on device.
 
 #### Examples:
 ```python
->>> balena.models.device.restart_service('f3887b', 392229)
+>>> balena.models.device.restart_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 392229)
 >>> balena.models.device.restart_service(None, 392229)  # if running on the device
 ```
 
@@ -1891,7 +1891,7 @@ Revoke support access to a device.
 
 #### Examples:
 ```python
->>> balena.models.device.revoke_support_access('49b2a7')
+>>> balena.models.device.revoke_support_access('49b2a76e8a8d4a2b918c08a23b423580')
 ```
 
 <a name="device.set_custom_location"></a>
@@ -1931,7 +1931,7 @@ Set a specific device to run a particular supervisor release.
     supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
 #### Examples:
 ```python
->>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
+>>> balena.models.device.set_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
 ```
 
 <a name="device.shutdown"></a>
@@ -1945,7 +1945,7 @@ Shutdown the device.
 
 #### Examples:
 ```python
->>> balena.models.device.shutdown('8f66ec7')
+>>> balena.models.device.shutdown('8f66ec7335dd4a97b7661faa131b1502')
 ```
 
 <a name="device.start_application"></a>
@@ -1963,7 +1963,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.device.start_application('8f66ec7')
+>>> balena.models.device.start_application('8f66ec7335dd4a97b7661faa131b1502')
 ```
 
 <a name="device.start_os_update"></a>
@@ -1989,9 +1989,9 @@ status, provisioning_state and provisioning_progress entries.
 
 #### Examples:
 ```python
->>> balena.models.device.start_os_update('b6070f4', '2.29.2+rev1.prod')
->>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1')
->>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1', run_detached=True)
+>>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
+>>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
+>>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1', run_detached=True)
 ```
 
 <a name="device.start_service"></a>
@@ -2005,7 +2005,7 @@ Start a service on device.
 
 #### Examples:
 ```python
->>> balena.models.device.start_service('f3887b1', 1234)
+>>> balena.models.device.start_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 1234)
 >>> balena.models.device.start_service(None, 1234)  # if running on the device
 ```
 
@@ -2026,7 +2026,7 @@ This function requires supervisor v1.8 or higher.
 
 #### Examples:
 ```python
->>> balena.models.device.stop_application('8f66ec')
+>>> balena.models.device.stop_application('8f66ec7335dd4a97b7661faa131b1502')
 ```
 
 <a name="device.stop_service"></a>
@@ -2040,7 +2040,7 @@ Stop a service on device.
 
 #### Examples:
 ```python
->>> balena.models.device.stop_service('f3887b1', 392229)
+>>> balena.models.device.stop_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 392229)
 >>> balena.models.device.stop_service(None, 392229)  # if running on the device
 ```
 
@@ -2076,7 +2076,7 @@ update the device.
 
 #### Examples:
 ```python
->>> balena.models.device.update('8f66ec7')
+>>> balena.models.device.update('8f66ec7335dd4a97b7661faa131b1502')
 ```
 ## DeviceTag
 
@@ -2148,7 +2148,7 @@ Get all device tags for a device.
 
 #### Examples:
 ```python
->>> balena.models.device.tags.get_all_by_device('a03ab646c')
+>>> balena.models.device.tags.get_all_by_device('a03ab646ca5a4f11b4d05c1f1c3b4e72')
 ```
 
 <a name="devicetag.remove"></a>
@@ -2197,7 +2197,7 @@ Get a device config variable.
 
 #### Examples:
 ```python
->>> balena.models.device.config_var.device.get('8deb12','test_env4')
+>>> balena.models.device.config_var.device.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
 ```
 
 <a name="deviceconfigvariable.get_all_by_application"></a>
@@ -2231,7 +2231,7 @@ Get all device config variables belong to a device.
 
 #### Examples:
 ```python
->>> balena.models.device.config_var.get_all_by_device('f5213ea')
+>>> balena.models.device.config_var.get_all_by_device('f5213eac574a4fba8b9e32ab3a9cba12')
 ```
 
 <a name="deviceconfigvariable.remove"></a>
@@ -2260,7 +2260,7 @@ Note that config variables must start with BALENA_ and RESIN_ prefixes.
 
 #### Examples:
 ```python
->>> balena.models.device.config_var.set('8deb12','BALENA_test_env4', 'testing1')
+>>> balena.models.device.config_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','BALENA_test_env4', 'testing1')
 ```
 ## DeviceEnvVariable
 
@@ -2277,7 +2277,7 @@ Get device environment variable.
 
 #### Examples:
 ```python
->>> balena.models.device.env_var.get('8deb12', 'test_env4')
+>>> balena.models.device.env_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 'test_env4')
 ```
 
 <a name="deviceenvvariable.get_all_by_application"></a>
@@ -2311,7 +2311,7 @@ Get all device environment variables.
 
 #### Examples:
 ```python
->>> balena.models.device.env_var.get_all_by_device('8deb12a')
+>>> balena.models.device.env_var.get_all_by_device('8deb12a7d7592c2b7f9e44735c2b0a41')
 ```
 
 <a name="deviceenvvariable.remove"></a>
@@ -2340,7 +2340,7 @@ Set the value of a specific environment variable.
 
 #### Examples:
 ```python
->>> balena.models.device.env_var.set('8deb12', 'test_env4', 'testing1')
+>>> balena.models.device.env_var.set('8deb12a7d7592c2b7f9e44735c2b0a41', 'test_env4', 'testing1')
 ```
 ## DeviceServiceEnvVariable
 
@@ -2361,8 +2361,8 @@ Get the overriden value of a service variable on a device
 
 #### Examples:
 ```python
->>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
->>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
+>>> balena.models.device.service_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 'myservice', 'VAR')
+>>> balena.models.device.service_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 1234', 'VAR')
 ```
 
 <a name="deviceserviceenvvariable.get_all_by_application"></a>
@@ -2411,8 +2411,8 @@ Remove a device service environment variable.
 
 #### Examples:
 ```python
->>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR')
->>> balena.models.device.service_var.remove('7cf02a6', 28970, 'VAR')
+>>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 'myservice', 'VAR')
+>>> balena.models.device.service_var.remove('7cf02a6a016a4b3c9e3b7a8d5f46e127', 28970, 'VAR')
 ```
 
 <a name="deviceserviceenvvariable.set"></a>
@@ -2428,8 +2428,8 @@ Set the overriden value of a service variable on a device.
 
 #### Examples:
 ```python
->>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR', 'override')
->>> balena.models.device.service_var.set('7cf02a6', 123, 'VAR', 'override')
+>>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 'myservice', 'VAR', 'override')
+>>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 123, 'VAR', 'override')
 ```
 ## DeviceHistory
 

@@ -164,40 +164,20 @@ class Device:
             fn = self.__pine.patch
 
         if isinstance(uuid_or_id_or_ids, (int, str)):
-            is_potentially_full_uuid = is_full_uuid(uuid_or_id_or_ids)
-            if is_potentially_full_uuid or is_id(uuid_or_id_or_ids):
-                fn(
-                    {
-                        "resource": "device",
-                        "id": uuid_or_id_or_ids if is_id(uuid_or_id_or_ids) else {"uuid": uuid_or_id_or_ids},
-                        "body": body,
-                    }
-                )
+            if is_id(uuid_or_id_or_ids):
+                resource_id = uuid_or_id_or_ids
+            elif is_full_uuid(uuid_or_id_or_ids):
+                resource_id = {"uuid": uuid_or_id_or_ids}
             else:
-                if len(uuid_or_id_or_ids) < 6:
-                    raise exceptions.InvalidParameter("UUID must have at least 6 characeters", None)
+                raise exceptions.InvalidParameter("uuid_or_id_or_ids", uuid_or_id_or_ids)
 
-                affected = self.__pine.get(
-                    {
-                        "resource": "device",
-                        "options": {
-                            "$top": 2,
-                            "$select": "id",
-                            "$filter": {"uuid": {"$startswith": uuid_or_id_or_ids}},
-                        },
-                    }
-                )
-                if len(affected) > 1:
-                    raise exceptions.AmbiguousDevice(uuid_or_id_or_ids)
-
-                fn(
-                    {
-                        "resource": "device",
-                        "options": {"$filter": {"uuid": {"$startswith": uuid_or_id_or_ids}}},
-                        "body": body,
-                    }
-                )
-
+            fn(
+                {
+                    "resource": "device",
+                    "id": resource_id,
+                    "body": body,
+                }
+            )
         else:
             chunk_size = 200
             chunked_devices = [
@@ -368,7 +348,7 @@ class Device:
 
         Examples:
             >>> balena.models.device.get('8deb12a58e3b6d3920db1c2b6303d1ff32f23d5ab99781ce1dde6876e8d143')
-            >>> balena.models.device.get('8deb12')
+            >>> balena.models.device.get('8deb12a7d7592c2b7f9e44735c2b0a41')
             >>> balena.models.device.get(12345)
         """
 
@@ -378,32 +358,20 @@ class Device:
         if uuid_or_id == "":
             raise exceptions.InvalidParameter("UUID can not be empty", None)
 
-        is_potentially_full_uuid = is_full_uuid(uuid_or_id)
-        if is_potentially_full_uuid or is_id(uuid_or_id):
-            device = self.__pine.get(
-                {
-                    "resource": "device",
-                    "id": {"uuid": uuid_or_id} if is_potentially_full_uuid else uuid_or_id,
-                    "options": options,
-                }
-            )
+        if is_id(uuid_or_id):
+            resource_id = uuid_or_id
+        elif is_full_uuid(uuid_or_id):
+            resource_id = {"uuid": uuid_or_id}
         else:
-            devices = self.__pine.get(
-                {
-                    "resource": "device",
-                    "options": merge(
-                        {"$filter": {"uuid": {"$startswith": uuid_or_id}}},
-                        options,
-                    ),
-                }
-            )
+            raise exceptions.InvalidParameter("uuid_or_id", uuid_or_id)
 
-            if len(devices) > 1:
-                raise exceptions.AmbiguousDevice(uuid_or_id)
-            try:
-                device = devices[0]
-            except IndexError:
-                raise exceptions.DeviceNotFound(uuid_or_id)
+        device = self.__pine.get(
+            {
+                "resource": "device",
+                "id": resource_id,
+                "options": options,
+            }
+        )
 
         if device is None:
             raise exceptions.DeviceNotFound(uuid_or_id)
@@ -751,7 +719,7 @@ class Device:
             uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
-            >>> balena.models.device.ping('8f66ec7')
+            >>> balena.models.device.ping('8f66ec7335dd4a97b7661faa131b1502')
             >>> balena.models.device.ping(1234)
         """
 
@@ -788,7 +756,7 @@ class Device:
             uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
-            >>> balena.models.device.identify('8deb12a5')
+            >>> balena.models.device.identify('8deb12a7d7592c2b7f9e44735c2b0a41')
         """
 
         path = "/v1/blink"
@@ -819,7 +787,7 @@ class Device:
             uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
-            >>> balena.models.device.restart_application('8deb12a58')
+            >>> balena.models.device.restart_application('8deb12a7d7592c2b7f9e44735c2b0a41')
             >>> balena.models.device.restart_application(1234)
         """
 
@@ -885,7 +853,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.device.reboot('8f66ec7')
+            >>> balena.models.device.reboot('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         path = "/v1/reboot"
@@ -919,7 +887,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.device.shutdown('8f66ec7')
+            >>> balena.models.device.shutdown('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         path = "/v1/shutdown"
@@ -963,7 +931,7 @@ class Device:
             uuid_or_id (Optional[Union[str, int]]): device uuid (str) or id (int) or None for SDK running on device.
 
         Examples:
-            >>> balena.models.device.purge('8f66ec7')
+            >>> balena.models.device.purge('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         path = "/v1/purge"
@@ -1007,7 +975,7 @@ class Device:
             force (Optional[bool]): If force is True, the update lock will be overridden.
 
         Examples:
-            >>> balena.models.device.update('8f66ec7')
+            >>> balena.models.device.update('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         path = "/v1/update"
@@ -1050,7 +1018,7 @@ class Device:
             dict: supervisor state.
 
         Examples:
-            >>> balena.models.device.get_supervisor_state('b6070f4fea')
+            >>> balena.models.device.get_supervisor_state('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
 
         path = "/v1/device"
@@ -1083,7 +1051,7 @@ class Device:
             image_id (int): id of the image to start
 
         Examples:
-            >>> balena.models.device.start_service('f3887b1', 1234)
+            >>> balena.models.device.start_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 1234)
             >>> balena.models.device.start_service(None, 1234)  # if running on the device
         """
 
@@ -1125,7 +1093,7 @@ class Device:
             image_id (int): id of the image to stop
 
         Examples:
-            >>> balena.models.device.stop_service('f3887b1', 392229)
+            >>> balena.models.device.stop_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 392229)
             >>> balena.models.device.stop_service(None, 392229)  # if running on the device
         """
 
@@ -1174,7 +1142,7 @@ class Device:
             image_id (int): id of the image to restart
 
         Examples:
-            >>> balena.models.device.restart_service('f3887b', 392229)
+            >>> balena.models.device.restart_service('f3887b1de5b54c6a9e6e5e3a2e57b642', 392229)
             >>> balena.models.device.restart_service(None, 392229)  # if running on the device
 
         """
@@ -1375,7 +1343,7 @@ class Device:
             expiry_date (Optional[str]): expiry date for device key, for example: `2030-01-01T00:00:00Z`.
 
         Examples:
-            >>> balena.models.device.generate_device_key('df0926')
+            >>> balena.models.device.generate_device_key('df0926d8a5cf4293a1b3742c98a500a1')
         """
 
         if is_id(uuid_or_id):
@@ -1402,7 +1370,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Examples:
-            >>> balena.models.device.has_device_url('8deb12a')
+            >>> balena.models.device.has_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
         """
 
         return self.get(uuid_or_id, {"$select": "is_web_accessible"})["is_web_accessible"]
@@ -1415,7 +1383,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Examples:
-            >>> balena.models.device.get_device_url('8deb12a')
+            >>> balena.models.device.get_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
         """
         device = self.get(uuid_or_id, {"$select": ["uuid", "is_web_accessible"]})
         if not device["is_web_accessible"]:
@@ -1433,7 +1401,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int]).
 
         Examples:
-            >>> balena.models.device.enable_device_url('8deb12a58')
+            >>> balena.models.device.enable_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
             >>> balena.models.device.enable_device_url([123, 345])
         """
         self.__set(uuid_or_id_or_ids, {"is_web_accessible": True})
@@ -1446,7 +1414,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int]).
 
         Examples:
-            >>> balena.models.device.disable_device_url('8deb12a58')
+            >>> balena.models.device.disable_device_url('8deb12a7d7592c2b7f9e44735c2b0a41')
             >>> balena.models.device.disable_device_url([123, 345])
         """
         self.__set(uuid_or_id_or_ids, {"is_web_accessible": False})
@@ -1459,7 +1427,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
 
         Examples:
-            >>> balena.models.device.enable_local_mode('b6070f4f')
+            >>> balena.models.device.enable_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
 
         device = self.get(uuid_or_id, {"$select": self.__LOCAL_MODE_SELECT})
@@ -1477,7 +1445,7 @@ class Device:
             None.
 
         Examples:
-            >>> balena.models.device.disable_local_mode('b6070f4f')
+            >>> balena.models.device.disable_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
         self.config_var.set(uuid_or_id, LOCAL_MODE_ENV_VAR, "0")
 
@@ -1492,7 +1460,7 @@ class Device:
             bool: True if local mode enabled, otherwise False.
 
         Examples:
-            >>> balena.models.device.is_in_local_mode('b6070f4f')
+            >>> balena.models.device.is_in_local_mode('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
 
         device = self.get(uuid_or_id, {"$select": "id"})
@@ -1516,7 +1484,7 @@ class Device:
             dict: local mode support information ({'supported': True/False, 'message': '...'}).
 
         Examples:
-            >>> balena.models.device.get_local_mode_support('b6070f4')
+            >>> balena.models.device.get_local_mode_support('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
 
         device = self.get(uuid_or_id, {"$select": self.__LOCAL_MODE_SELECT})
@@ -1568,7 +1536,7 @@ class Device:
             str: status of a device.
 
         Examples:
-            >>> balena.models.device.get_status('8deb12')
+            >>> balena.models.device.get_status('8deb12a7d7592c2b7f9e44735c2b0a41')
         """
 
         return self.get(uuid_or_id, {"$select": "overall_status"})["overall_status"]
@@ -1586,7 +1554,7 @@ class Device:
             expiry_timestamp (int): a timestamp in ms for when the support access will expire.
 
         Examples:
-            >>> balena.models.device.grant_support_access('49b2a7', 1511974999000)
+            >>> balena.models.device.grant_support_access('49b2a76e8a8d4a2b918c08a23b423580', 1511974999000)
         """
 
         if expiry_timestamp is None or expiry_timestamp <= int(
@@ -1607,7 +1575,7 @@ class Device:
             uuid_or_id_or_ids (Union[str, int, List[int]]): device uuid (str) or id (int) or ids (List[int])
 
         Examples:
-            >>> balena.models.device.revoke_support_access('49b2a7')
+            >>> balena.models.device.revoke_support_access('49b2a76e8a8d4a2b918c08a23b423580')
         """
         self.__set(
             uuid_or_id_or_ids,
@@ -1698,7 +1666,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
         Examples:
-            >>> balena.models.device.set_supervisor_release('f55dcdd9ad', 'v13.0.0')
+            >>> balena.models.device.set_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
         """
         device = self.get(
             uuid_or_id,
@@ -1757,10 +1725,10 @@ class Device:
             HUPStatusResponse: action response.
 
         Examples:
-            >>> balena.models.device.start_os_update('b6070f4', '2.29.2+rev1.prod')
-            >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1')
-            >>> balena.models.device.start_os_update('b6070f4', '2.89.0+rev1', run_detached=True)
-        """
+            >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
+            >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
+            >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1', run_detached=True)
+        """  # noqa: E501
 
         if target_os_version is None or uuid_or_id is None:
             raise exceptions.InvalidParameter("target_os_version or UUID", None)
@@ -1812,7 +1780,7 @@ class Device:
             HUPStatusResponse: action response.
 
         Examples:
-            >>> balena.models.device.get_os_update_status('b6070f4f')
+            >>> balena.models.device.get_os_update_status('b6070f4fea5a4f11b4d05c1f1c3b4e72')
         """
 
         device = self.get(uuid_or_id, {"$select": "uuid"})
@@ -1840,7 +1808,7 @@ class Device:
             dict: dictionary contains application information.
 
         Examples:
-            >>> balena.models.device.get_application_info('7f66ec')
+            >>> balena.models.device.get_application_info('7f66ec3c5da146c3b6a84aaed1c07581')
         """
 
         device = self.get(
@@ -1875,7 +1843,7 @@ class Device:
             dict: dictionary contains started application container id.
 
         Examples:
-            >>> balena.models.device.start_application('8f66ec7')
+            >>> balena.models.device.start_application('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         device = self.get(
@@ -1914,7 +1882,7 @@ class Device:
             dict: dictionary contains stopped application container id.
 
         Examples:
-            >>> balena.models.device.stop_application('8f66ec')
+            >>> balena.models.device.stop_application('8f66ec7335dd4a97b7661faa131b1502')
         """
 
         def __stop_aplication():
@@ -2112,7 +2080,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: device config variables.
 
         Examples:
-            >>> balena.models.device.config_var.get_all_by_device('f5213ea')
+            >>> balena.models.device.config_var.get_all_by_device('f5213eac574a4fba8b9e32ab3a9cba12')
         """
         return super(DeviceConfigVariable, self)._get_all_by_parent(uuid_or_id, options)
 
@@ -2163,7 +2131,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.device.config_var.device.get('8deb12','test_env4')
+            >>> balena.models.device.config_var.device.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
         """
         return super(DeviceConfigVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -2177,7 +2145,7 @@ class DeviceConfigVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.device.config_var.set('8deb12','BALENA_test_env4', 'testing1')
+            >>> balena.models.device.config_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','BALENA_test_env4', 'testing1')
         """
         super(DeviceConfigVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -2224,7 +2192,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             List[EnvironmentVariableBase]: device environment variables.
 
         Examples:
-            >>> balena.models.device.env_var.get_all_by_device('8deb12a')
+            >>> balena.models.device.env_var.get_all_by_device('8deb12a7d7592c2b7f9e44735c2b0a41')
         """
         return super(DeviceEnvVariable, self)._get_all_by_parent(uuid_or_id, options)
 
@@ -2275,7 +2243,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.device.env_var.get('8deb12', 'test_env4')
+            >>> balena.models.device.env_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 'test_env4')
         """
         return super(DeviceEnvVariable, self)._get(uuid_or_id, env_var_name)
 
@@ -2289,7 +2257,7 @@ class DeviceEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.device.env_var.set('8deb12', 'test_env4', 'testing1')
+            >>> balena.models.device.env_var.set('8deb12a7d7592c2b7f9e44735c2b0a41', 'test_env4', 'testing1')
         """
         super(DeviceEnvVariable, self)._set(uuid_or_id, env_var_name, value)
 
@@ -2411,8 +2379,8 @@ class DeviceServiceEnvVariable:
            Optional[str]: device service environment variables.
 
         Examples:
-            >>> balena.models.device.service_var.get('8deb12a', 'myservice', 'VAR')
-            >>> balena.models.device.service_var.get('8deb12a', 1234', 'VAR')
+            >>> balena.models.device.service_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 'myservice', 'VAR')
+            >>> balena.models.device.service_var.get('8deb12a7d7592c2b7f9e44735c2b0a41', 1234', 'VAR')
         """
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
 
@@ -2454,8 +2422,8 @@ class DeviceServiceEnvVariable:
             value (str): variable value
 
         Examples:
-            >>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR', 'override')
-            >>> balena.models.device.service_var.set('7cf02a6', 123, 'VAR', 'override')
+            >>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 'myservice', 'VAR', 'override')
+            >>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 123, 'VAR', 'override')
         """
 
         if is_id(uuid_or_id):
@@ -2515,8 +2483,8 @@ class DeviceServiceEnvVariable:
             key (str): variable name
 
         Examples:
-            >>> balena.models.device.service_var.set('7cf02a6', 'myservice', 'VAR')
-            >>> balena.models.device.service_var.remove('7cf02a6', 28970, 'VAR')
+            >>> balena.models.device.service_var.set('7cf02a6a016a4b3c9e3b7a8d5f46e127', 'myservice', 'VAR')
+            >>> balena.models.device.service_var.remove('7cf02a6a016a4b3c9e3b7a8d5f46e127', 28970, 'VAR')
         """
 
         device_id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]

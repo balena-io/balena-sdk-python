@@ -1020,7 +1020,7 @@ class ApplicationConfigVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.config_var.get('8deb12','test_env4')
+            >>> balena.models.application.config_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
         """
         return super(ApplicationConfigVariable, self)._get(slug_or_uuid_or_id, env_var_name)
 
@@ -1034,7 +1034,7 @@ class ApplicationConfigVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.application.config_var.set('8deb12','test_env', 'testing1')
+            >>> balena.models.application.config_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env', 'testing1')
         """
         super(ApplicationConfigVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
 
@@ -1096,7 +1096,7 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.env_var.get('8deb12','test_env4')
+            >>> balena.models.application.env_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
         """
         return super(ApplicationEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
 
@@ -1110,7 +1110,7 @@ class ApplicationEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.application.env_var.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.application.env_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4', 'testing1')
         """
         super(ApplicationEnvVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
 
@@ -1172,7 +1172,7 @@ class BuildEnvVariable(DependentResource[EnvironmentVariableBase]):
             env_var_name (str): environment variable name.
 
         Examples:
-            >>> balena.models.application.build_var.get('8deb12','test_env4')
+            >>> balena.models.application.build_var.get('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4')
         """
         return super(BuildEnvVariable, self)._get(slug_or_uuid_or_id, env_var_name)
 
@@ -1186,7 +1186,7 @@ class BuildEnvVariable(DependentResource[EnvironmentVariableBase]):
             value (str): environment variable value.
 
         Examples:
-            >>> balena.models.application.build_var.set('8deb12','test_env4', 'testing1')
+            >>> balena.models.application.build_var.set('8deb12a7d7592c2b7f9e44735c2b0a41','test_env4', 'testing1')
         """
         super(BuildEnvVariable, self)._set(slug_or_uuid_or_id, env_var_name, value)
 

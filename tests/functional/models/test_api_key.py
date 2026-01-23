@@ -86,7 +86,7 @@ class TestApiKey(unittest.TestCase):
         self.assertIn("provisionTestKey", provisioning_keys_names)
 
     def test_07_get_device_api_keys_by_device_for_non_existing(self):
-        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.api_key.get_device_api_keys_by_device("nonexistentuuid")
 
     def test_08_get_device_api_keys_by_device_for_non_existing(self):
