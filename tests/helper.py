@@ -86,10 +86,11 @@ class TestHelper:
 
     def wipe_organization(self):
         """
-        Wipe all user's orgs
+        Wipe all user's orgs except the personal org
         """
         for org in self.balena.models.organization.get_all():
-            self.balena.models.organization.remove(org["id"])
+            if org["handle"] != self.credentials["user_id"]:
+                self.balena.models.organization.remove(org["id"])
 
     def reset_user(self):
         """
