@@ -68,9 +68,7 @@ class TestApplication(unittest.TestCase):
             self.balena.models.application.get_all_by_organization(self.org_handle)[0]["app_name"], "FooBar"
         )
 
-        self.assertEqual(
-            self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar"
-        )
+        self.assertEqual(self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar")
 
     def test_07_has(self):
         self.assertFalse(self.balena.models.application.has("AppNotExist"))

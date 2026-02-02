@@ -177,13 +177,16 @@ class Device:
                 if len(uuid_or_id_or_ids) < 6:
                     raise exceptions.InvalidParameter("UUID must have at least 6 characeters", None)
 
-                affected = self.__pine.get({
-                    "resource": "device",
-                    "options": {
-                        "$top": 2,
-                        "$select": "id",
-                        "$filter": {"uuid": {"$startswith": uuid_or_id_or_ids}}}
-                    })
+                affected = self.__pine.get(
+                    {
+                        "resource": "device",
+                        "options": {
+                            "$top": 2,
+                            "$select": "id",
+                            "$filter": {"uuid": {"$startswith": uuid_or_id_or_ids}},
+                        },
+                    }
+                )
                 if len(affected) > 1:
                     raise exceptions.AmbiguousDevice(uuid_or_id_or_ids)
 
@@ -372,7 +375,7 @@ class Device:
         if uuid_or_id is None:
             raise exceptions.DeviceNotFound(uuid_or_id)
 
-        if uuid_or_id == '':
+        if uuid_or_id == "":
             raise exceptions.InvalidParameter("UUID can not be empty", None)
 
         is_potentially_full_uuid = is_full_uuid(uuid_or_id)
@@ -1732,7 +1735,7 @@ class Device:
         uuid_or_id: Union[str, int],
         target_os_version: str,
         *,  # Force keyword arguments after this point
-        run_detached: Optional[bool] = False
+        run_detached: Optional[bool] = False,
     ) -> HUPStatusResponse:
         """
         Start an OS update on a device.

@@ -120,7 +120,7 @@ class TestAuth(unittest.TestCase):
         )
 
         log_messages = [log["message"] for log in self.__collect_logs(count="all")]
-        print('log messages are', log_messages)
+        print("log messages are", log_messages)
         self.assertTrue(all(msg in log_messages for msg in ["1 message", "2 message", "3 message", "4 message"]))
 
     def test_04_subscribe_should_limit_historical_data_if_requested(self):
