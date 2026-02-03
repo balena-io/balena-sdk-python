@@ -236,7 +236,8 @@ class TestApplication(unittest.TestCase):
 
     def test_31_membership_create(self):
         app = TestApplication.app
-        membership = self.balena.models.application.membership.create(app["id"], "device_tester1")
+        member_username = self.helper.member_credentials["member_username"]
+        membership = self.balena.models.application.membership.create(app["id"], member_username)
         TestApplication.membership = membership
         self.assertEqual(membership["is_member_of__application"]["__id"], app["id"])
 

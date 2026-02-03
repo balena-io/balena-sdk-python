@@ -97,14 +97,21 @@ To verify linting you can run `poetry run flake8 --max-line-length=120`
 Tests
 -----
 
-To run the tests, first create a `.env` file with your test user configuration, like below. **Do not** use credentials for a user with active fleets, as the tests may be destructive.
+To run the tests, first create a `.env` file with your test user configuration, like below. **Do not** use credentials for users with active fleets, as the tests may be destructive.
 
 ```
 [Credentials]
-email=my_test_user@balena.io
+email=my_test_user+test_sdk@balena.io
 user_id=my_test_user
 password=123456my_password
+
+[Member]
+member_email=my_member_user+testsdk@balena.io
+member_username=my_member_user
+member_password=123456my_member_password
 ```
+
+The `[Member]` section is required for membership tests. This should be a second test user that will be added to applications. The member must be manually added to the main test user's organization before running the tests. All emails must include `+testsdk` to avoid accidental deletion.
 
 You can optionally change the target API endpoint too, e.g. `api_endpoint=https://api.balena-cloud.com`.
 

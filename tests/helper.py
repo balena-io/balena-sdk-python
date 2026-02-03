@@ -12,6 +12,7 @@ import time
 
 class TestHelper:
     credentials = {}
+    member_credentials = {}
 
     def __init__(self):
         self.balena = Balena()
@@ -42,7 +43,7 @@ class TestHelper:
             )
 
         whoami = self.balena.auth.whoami()
-        self.default_organization = self.balena.models.organization.get(whoami["username"])  # type: ignore
+        self.default_organization = self.balena.models.organization.get(self.credentials["user_id"])  # type: ignore
 
         self.application_retrieval_fields = ["id", "slug", "uuid"]
 
@@ -50,7 +51,9 @@ class TestHelper:
     def load_env(cls):
         env_file_name = ".env"
         required_env_keys = set(["email", "user_id", "password"])
+        required_member_keys = set(["member_email", "member_username", "member_password"])
         cls.credentials = {}
+        cls.member_credentials = {}
 
         if Path.isfile(env_file_name):
             # If .env file exists
@@ -66,6 +69,18 @@ class TestHelper:
             if not required_env_keys.issubset(set(config_data)):
                 raise Exception("Mandatory env keys missing!")
             cls.credentials = config_data
+
+            if not config_reader.has_section("Member"):
+                raise Exception("Member credentials missing! Please add [Member] section to .env file.")
+            member_data = {}
+            for option in config_reader.options("Member"):
+                try:
+                    member_data[option] = config_reader.get("Member", option)
+                except Exception:
+                    member_data[option] = None
+            if not required_member_keys.issubset(set(member_data)):
+                raise Exception("Mandatory member env keys missing!")
+            cls.member_credentials = member_data
         else:
             # If .env file not exists, read credentials from environment vars.
             try:
@@ -75,8 +90,14 @@ class TestHelper:
 
                 # Optional endpoint override:
                 cls.credentials["api_endpoint"] = os.environ.get("TEST_API_ENDPOINT")
-            except Exception:
-                raise Exception("Mandatory env keys missing!")
+
+                cls.member_credentials = {
+                    "member_email": os.environ["TEST_MEMBER_EMAIL"],
+                    "member_username": os.environ["TEST_MEMBER_USER_ID"],
+                    "member_password": os.environ["TEST_MEMBER_PASSWORD"],
+                }
+            except KeyError as e:
+                raise Exception(f"Mandatory env key missing: {e}")
 
     def wipe_application(self):
         """
