@@ -42,7 +42,7 @@ class TestHelper:
                 "The test is run with an admin user account. Cancelled, please try" " again with a normal account!"
             )
 
-        whoami = self.balena.auth.whoami()
+        self.balena.auth.whoami()
         self.default_organization = self.balena.models.organization.get(self.credentials["user_id"])  # type: ignore
 
         self.application_retrieval_fields = ["id", "slug", "uuid"]

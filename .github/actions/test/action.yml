@@ -34,5 +34,8 @@ runs:
         export TEST_ENV_EMAIL=${{ fromJSON(inputs.secrets).TEST_ENV_EMAIL }}
         export TEST_ENV_USER_ID=${{ fromJSON(inputs.secrets).TEST_ENV_USER_ID }}
         export TEST_ENV_PASSWORD=${{ fromJSON(inputs.secrets).TEST_ENV_PASSWORD }}
+        export TEST_MEMBER_EMAIL=${{ fromJSON(inputs.secrets).TEST_MEMBER_EMAIL }}
+        export TEST_MEMBER_USER_ID=${{ fromJSON(inputs.secrets).TEST_MEMBER_USER_ID }}
+        export TEST_MEMBER_PASSWORD=${{ fromJSON(inputs.secrets).TEST_MEMBER_PASSWORD }}
 
         poetry run python -m unittest discover tests -v
