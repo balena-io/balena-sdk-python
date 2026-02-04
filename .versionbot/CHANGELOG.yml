@@ -1,4 +1,36 @@
 - commits:
+    - subject: "tests: Make constraint assert raises more flexible"
+      hash: 5112ffb89b54967aeebfe179ff9ff50b9819e4b3
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: "tests: Allow configuring TEST_MEMBER_ env vars"
+      hash: 23a6f943499a541e10bd1c6c44b62c089718903c
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: "tests: Avoid wiping personal organization on organization wipes"
+      hash: d3d8a80be98c16437727c3ac2a7ffeeae309d90d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Fix linter
+      hash: 07679ff33ae0166028315201da18e566e0b045b0
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 15.1.5
+  title: ""
+  date: 2026-02-04T19:24:20.002Z
+- commits:
     - subject: Do not throw in case of failure to refresh token
       hash: fb91e7bb49879083e74642c6b22cccff83bff26b
       body: ""
