@@ -12,6 +12,7 @@ import time
 
 class TestHelper:
     credentials = {}
+    member_credentials = {}
 
     def __init__(self):
         self.balena = Balena()
@@ -26,7 +27,9 @@ class TestHelper:
         )
 
         if "+testsdk" not in self.credentials["email"]:
-            raise Exception("Missing environment credentials, all emails must include `+testsdk` to avoid accidental deletion")  # noqa: E501
+            raise Exception(
+                "Missing environment credentials, all emails must include `+testsdk` to avoid accidental deletion"
+            )  # noqa: E501
 
         # Stop the test if it's run by an admin user account.
         token_data = jwt.decode(
@@ -39,8 +42,8 @@ class TestHelper:
                 "The test is run with an admin user account. Cancelled, please try" " again with a normal account!"
             )
 
-        whoami = self.balena.auth.whoami()
-        self.default_organization = self.balena.models.organization.get(whoami["username"])  # type: ignore
+        self.balena.auth.whoami()
+        self.default_organization = self.balena.models.organization.get(self.credentials["user_id"])  # type: ignore
 
         self.application_retrieval_fields = ["id", "slug", "uuid"]
 
@@ -48,7 +51,9 @@ class TestHelper:
     def load_env(cls):
         env_file_name = ".env"
         required_env_keys = set(["email", "user_id", "password"])
+        required_member_keys = set(["member_email", "member_username", "member_password"])
         cls.credentials = {}
+        cls.member_credentials = {}
 
         if Path.isfile(env_file_name):
             # If .env file exists
@@ -64,6 +69,18 @@ class TestHelper:
             if not required_env_keys.issubset(set(config_data)):
                 raise Exception("Mandatory env keys missing!")
             cls.credentials = config_data
+
+            if not config_reader.has_section("Member"):
+                raise Exception("Member credentials missing! Please add [Member] section to .env file.")
+            member_data = {}
+            for option in config_reader.options("Member"):
+                try:
+                    member_data[option] = config_reader.get("Member", option)
+                except Exception:
+                    member_data[option] = None
+            if not required_member_keys.issubset(set(member_data)):
+                raise Exception("Mandatory member env keys missing!")
+            cls.member_credentials = member_data
         else:
             # If .env file not exists, read credentials from environment vars.
             try:
@@ -73,8 +90,14 @@ class TestHelper:
 
                 # Optional endpoint override:
                 cls.credentials["api_endpoint"] = os.environ.get("TEST_API_ENDPOINT")
-            except Exception:
-                raise Exception("Mandatory env keys missing!")
+
+                cls.member_credentials = {
+                    "member_email": os.environ["TEST_MEMBER_EMAIL"],
+                    "member_username": os.environ["TEST_MEMBER_USER_ID"],
+                    "member_password": os.environ["TEST_MEMBER_PASSWORD"],
+                }
+            except KeyError as e:
+                raise Exception(f"Mandatory env key missing: {e}")
 
     def wipe_application(self):
         """
@@ -84,10 +107,11 @@ class TestHelper:
 
     def wipe_organization(self):
         """
-        Wipe all user's orgs
+        Wipe all user's orgs except the personal org
         """
         for org in self.balena.models.organization.get_all():
-            self.balena.models.organization.remove(org["id"])
+            if org["handle"] != self.credentials["user_id"]:
+                self.balena.models.organization.remove(org["id"])
 
     def reset_user(self):
         """

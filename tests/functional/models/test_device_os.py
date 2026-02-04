@@ -92,13 +92,13 @@ class TestDevice(unittest.TestCase):
 
         # Perform sanity checks on input
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.start_os_update('999999999999', '6.0.10')
+            self.balena.models.device.start_os_update("999999999999", "6.0.10")
 
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.start_os_update(uuid, None)
         # device is offline
         with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
-            self.balena.models.device.start_os_update(uuid, '99.99.0')
+            self.balena.models.device.start_os_update(uuid, "99.99.0")
 
 
 if __name__ == "__main__":

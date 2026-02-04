@@ -98,7 +98,7 @@ class BaseTagTest:
         test_runner.assertIn(
             (
                 f"It is necessary that each {self.associated_resource_name} tag has a "
-                "tag key that has a Length (Type) that is greater than 0."
+                "tag key that has a Length (Type) that is greater than 0"
             ),
             cm.exception.message,
         )

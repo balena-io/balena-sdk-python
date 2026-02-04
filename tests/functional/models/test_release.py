@@ -71,9 +71,7 @@ class TestRelease(unittest.TestCase):
             self.balena.models.release.create_from_url(
                 self.empty_app["id"], url="https://codeload.github.com/balena-io-examples/balena-nodejs-hello-world"
             )
-        self.assertIn(
-            "Failed to fetch tarball from passed URL", cm.exception.message
-        )
+        self.assertIn("Failed to fetch tarball from passed URL", cm.exception.message)
 
         release_ids = []
         for prop in self.helper.application_retrieval_fields:

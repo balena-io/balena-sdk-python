@@ -68,9 +68,7 @@ class TestApplication(unittest.TestCase):
             self.balena.models.application.get_all_by_organization(self.org_handle)[0]["app_name"], "FooBar"
         )
 
-        self.assertEqual(
-            self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar"
-        )
+        self.assertEqual(self.balena.models.application.get_all_by_organization(self.org_id)[0]["app_name"], "FooBar")
 
     def test_07_has(self):
         self.assertFalse(self.balena.models.application.has("AppNotExist"))
@@ -238,7 +236,8 @@ class TestApplication(unittest.TestCase):
 
     def test_31_membership_create(self):
         app = TestApplication.app
-        membership = self.balena.models.application.membership.create(app["id"], "device_tester1")
+        member_username = self.helper.member_credentials["member_username"]
+        membership = self.balena.models.application.membership.create(app["id"], member_username)
         TestApplication.membership = membership
         self.assertEqual(membership["is_member_of__application"]["__id"], app["id"])
 
