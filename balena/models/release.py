@@ -78,7 +78,7 @@ class Release:
                     "belongs_to__application": app_id,
                 }
             else:
-                dollar_filter = {"commit": {"$startswith": commit_or_id_or_raw_version}}
+                dollar_filter = {"commit": commit_or_id_or_raw_version}
             releases = self.__pine.get(
                 {
                     "resource": "release",
