@@ -92,7 +92,14 @@ class TestDevice(unittest.TestCase):
         )
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.get("999999999999")
+            self.balena.models.device.get(99999999)
+
+        non_registered_uuid = self.balena.models.device.generate_uuid()
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.get(non_registered_uuid)
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.get(non_registered_uuid[0:10])
 
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.get("")
@@ -111,7 +118,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.balena.models.device.get_name(TestDevice.device["uuid"]), "test-device")
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.get_name("9999999999999999")
+            self.balena.models.device.get_name(99999999)
 
     def test_11_get_status(self):
         self.assertEqual(self.balena.models.device.get_status(TestDevice.device["uuid"]), "inactive")
@@ -123,19 +130,18 @@ class TestDevice(unittest.TestCase):
         )
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.get_application_name("9999999999999999")
+            self.balena.models.device.get_application_name(99999999)
 
     def test_13_has(self):
         self.assertTrue(self.balena.models.device.has(TestDevice.device["uuid"]))
-        self.assertTrue(self.balena.models.device.has(TestDevice.device["uuid"][0:10]))
 
-        self.assertFalse(self.balena.models.device.has("999999999"))
+        self.assertFalse(self.balena.models.device.has(999999999))
 
     def test_14_is_online(self):
         self.assertFalse(self.balena.models.device.is_online(TestDevice.device["uuid"]))
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.is_online("9999999999999999")
+            self.balena.models.device.is_online(99999999)
 
     def test_15_note(self):
         self.balena.models.device.set_note(TestDevice.device["uuid"], "Python SDK Test")
@@ -231,7 +237,7 @@ class TestDevice(unittest.TestCase):
 
     def test_26_get_supervisor_state(self):
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.get_supervisor_state("9999999")
+            self.balena.models.device.get_supervisor_state(9999999)
 
         with self.assertRaises(Exception) as cm:
             self.balena.models.device.get_supervisor_state(TestDevice.device["uuid"])
@@ -249,7 +255,7 @@ class TestDevice(unittest.TestCase):
         )
 
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
-            self.balena.models.device.get_supervisor_target_state("9999999")
+            self.balena.models.device.get_supervisor_target_state(9999999)
 
     def test_28_get_supervisor_target_state_for_app(self):
         state = self.balena.models.device.get_supervisor_target_state_for_app(self.app["id"])
@@ -391,7 +397,7 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.remove("abc")
 
-        with self.assertRaises(self.helper.balena_exceptions.AmbiguousDevice):
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.remove(uuid[0:10])
 
         device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]

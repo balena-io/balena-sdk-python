@@ -153,8 +153,8 @@ class TestRelease(unittest.TestCase):
         release = self.balena.models.release.get(self.mc_app["current_release"]["commit"])
         self.__expect_release_to_match_on_get(release, match)
 
-        release = self.balena.models.release.get(self.mc_app["current_release"]["commit"][0:7])
-        self.__expect_release_to_match_on_get(release, match)
+        with self.assertRaises(self.helper.balena_exceptions.ReleaseNotFound):
+            self.balena.models.release.get(self.mc_app["current_release"]["commit"][0:7])
 
         release = self.balena.models.release.get(
             {
@@ -196,11 +196,8 @@ class TestRelease(unittest.TestCase):
         release = self.balena.models.release.get_with_image_details(self.mc_app["current_release"]["commit"])
         self.__expect_release_to_match_on_get_with_image_details(release)
 
-        release = self.balena.models.release.get_with_image_details(self.mc_app["current_release"]["commit"][0:7])
-        self.__expect_release_to_match_on_get_with_image_details(release)
-
-        release = self.balena.models.release.get_with_image_details(self.mc_app["current_release"]["commit"][0:7])
-        self.__expect_release_to_match_on_get_with_image_details(release)
+        with self.assertRaises(self.helper.balena_exceptions.ReleaseNotFound):
+            self.balena.models.release.get_with_image_details(self.mc_app["current_release"]["commit"][0:7])
 
         release = self.balena.models.release.get_with_image_details(
             {
@@ -289,58 +286,36 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(release["commit"], "errored-then-fixed-release-commit")  # type: ignore
             self.assertEqual(release["belongs_to__application"]["__id"], app["id"])  # type: ignore
 
-    def test_13_releases_sharing_same_commit_root(self):
+    def test_13_should_throw_ambiguous_release_for_duplicate_commits(self):
+        with self.assertRaises(self.helper.balena_exceptions.AmbiguousRelease):
+            self.balena.models.release.get("errored-then-fixed-release-commit")
+
+        with self.assertRaises(self.helper.balena_exceptions.AmbiguousRelease):
+            self.balena.models.release.get_with_image_details("errored-then-fixed-release-commit")
+
         user_id = self.balena.auth.get_user_info()["id"]
-        app = self.mc_app["app"]
-
-        self.balena.pine.post(
-            {
-                "resource": "release",
-                "body": {
-                    "belongs_to__application": app["id"],
-                    "is_created_by__user": user_id,
-                    "commit": "feb2361230dc40dba6dca9a18f2c19dc8f2c19dc",
-                    "status": "success",
-                    "source": "cloud",
-                    "composition": {},
-                    "start_timestamp": 64321,
-                },
-            }
-        )
-        self.balena.pine.post(
-            {
-                "resource": "release",
-                "body": {
-                    "belongs_to__application": app["id"],
-                    "is_created_by__user": user_id,
-                    "commit": "feb236123bf740d48900c19027d4a02127d4a021",
-                    "status": "success",
-                    "source": "cloud",
-                    "composition": {},
-                    "start_timestamp": 74321,
-                },
-            }
-        )
+        shared_commit = "cross-app-ambiguous-commit"
+        for app_id in [self.mc_app["app"]["id"], self.empty_app["id"]]:
+            self.balena.pine.post(
+                {
+                    "resource": "release",
+                    "body": {
+                        "belongs_to__application": app_id,
+                        "is_created_by__user": user_id,
+                        "commit": shared_commit,
+                        "status": "success",
+                        "source": "cloud",
+                        "composition": {},
+                        "start_timestamp": 94321,
+                    },
+                }
+            )
 
         with self.assertRaises(self.helper.balena_exceptions.AmbiguousRelease):
-            self.balena.models.release.get("feb23612")
-
-        release = self.balena.models.release.get("feb2361230dc40dba6dca9a18f2c19dc8f2c19dc")
-
-        self.assertEqual(release["commit"], "feb2361230dc40dba6dca9a18f2c19dc8f2c19dc")
-        self.assertEqual(release["status"], "success")
-        self.assertEqual(release["source"], "cloud")
+            self.balena.models.release.get(shared_commit)
 
         with self.assertRaises(self.helper.balena_exceptions.AmbiguousRelease):
-            self.balena.models.release.get_with_image_details("feb23612")
-
-        release_with_details = self.balena.models.release.get_with_image_details(
-            "feb2361230dc40dba6dca9a18f2c19dc8f2c19dc"
-        )
-
-        self.assertEqual(release_with_details["commit"], "feb2361230dc40dba6dca9a18f2c19dc8f2c19dc")
-        self.assertEqual(release_with_details["status"], "success")
-        self.assertEqual(release_with_details["source"], "cloud")
+            self.balena.models.release.get_with_image_details(shared_commit)
 
     def __expect_release_to_match_on_get(self, release, match):
         self.assertEqual(release["status"], "success")

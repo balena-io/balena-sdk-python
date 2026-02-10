@@ -7,3 +7,4 @@ build/*
 dist/
 poetry.lock
 .coverage
+.python-version
