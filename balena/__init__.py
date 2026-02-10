@@ -85,7 +85,7 @@ from .models import Models
 from .pine import PineClient
 from .settings import SettingsConfig, Settings
 
-__version__ = "15.1.5"
+__version__ = "16.0.0"
 
 
 class Balena:

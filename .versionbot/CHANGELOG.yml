@@ -1,4 +1,22 @@
 - commits:
+    - subject: Drop support for using short release commits as parameters
+      hash: dcda6fb81ec0c53e2cdb61d6e8c3340573d47bc8
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+    - subject: No longer support using device short uuid
+      hash: fbd9f0b22972bdde5c6e21f28db5bd29b35d3c63
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otavio Jacobi
+  version: 16.0.0
+  title: ""
+  date: 2026-02-10T13:55:44.841Z
+- commits:
     - subject: "tests: Make constraint assert raises more flexible"
       hash: 5112ffb89b54967aeebfe179ff9ff50b9819e4b3
       body: ""
