@@ -45,6 +45,9 @@ def get_hup_action_type(device_type: str, current_version: Optional[str], target
     if Version.parse(target_version).compare(current_version) < 0:
         raise exceptions.OsUpdateError("OS downgrades are not allowed")
 
+    if Version.compare(parsed_current_ver, parsed_target_ver) == 0:
+        raise exceptions.OsUpdateError("Current OS version matches Target OS version")
+
     # For 1.x -> 2.x or 2.x to 2.x only
     if parsed_target_ver.major > 1 and Version.parse(target_version).compare(MIN_TARGET_VERSION) < 0:
         raise exceptions.OsUpdateError("Target balenaOS version must be greater than {0}".format(MIN_TARGET_VERSION))
