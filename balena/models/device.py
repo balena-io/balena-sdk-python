@@ -1703,7 +1703,7 @@ class Device:
         uuid_or_id: Union[str, int],
         target_os_version: str,
         *,  # Force keyword arguments after this point
-        run_detached: Optional[bool] = False,
+        run_detached: Optional[bool] = True,
     ) -> HUPStatusResponse:
         """
         Start an OS update on a device.
@@ -1718,8 +1718,7 @@ class Device:
                 The version **must** be the exact version number, a "prod" variant
                 and greater than the one running on the device.
             run_detached (Optional[bool]): run the update in detached mode.
-                Default behaviour is run_detached=False but is DEPRECATED and will be
-                removed in a future release. Use run_detached=True for more reliable updates.
+                Default behaviour is run_detached=True for more reliable updates.
 
         Returns:
             HUPStatusResponse: action response.
@@ -1727,7 +1726,6 @@ class Device:
         Examples:
             >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
             >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
-            >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1', run_detached=True)
         """  # noqa: E501
 
         if target_os_version is None or uuid_or_id is None:
