@@ -1,4 +1,45 @@
 - commits:
+    - subject: Generate docs for doc comment updates
+      hash: 70333751d532dbb538be7488eb72b34f762181c5
+      body: |
+        * Includes a couple of doc comment fixes found during review
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+    - subject: Rename device.set_supervisor_release to device.pin_to_supervisor_release
+      hash: e8300ab16f6a1cb95fb54e1ed09f6c0efe271c2e
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+    - subject: Run OS update in detached mode by default
+      hash: a377bda88b3fd69cd2751180ae41748abaa59725
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+    - subject: Block OS upgrades from current OS < 2.14.0 and target OS < 2.16.0
+      hash: 0c0609c65f14137fe82b1ae294bbe9529ad65e5b
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 17.0.0
+  title: ""
+  date: 2026-02-17T14:48:36.164Z
+- commits:
     - subject: Drop support for using short release commits as parameters
       hash: dcda6fb81ec0c53e2cdb61d6e8c3340573d47bc8
       body: ""

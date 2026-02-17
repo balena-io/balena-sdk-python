@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "balena-sdk"
-version = "16.0.0"
+version = "17.0.0"
 description = ""
 authors = ["Balena <info@balena.io>"]
 license = "Apache License 2.0"
