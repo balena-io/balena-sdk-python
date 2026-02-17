@@ -19,9 +19,9 @@ class TestDevice(unittest.TestCase):
     def test_01_get_supported_os_versions_by_device_type_slug(self):
         # should become the manifest if the slug is valid.
         supported_device_os_versions = self.balena.models.os.get_supported_os_update_versions(
-            "raspberrypi3", "2.9.6+rev1.prod"
+            "raspberrypi3", "2.15.1+rev2.prod"
         )
-        self.assertEqual(supported_device_os_versions["current"], "2.9.6+rev1.prod")
+        self.assertEqual(supported_device_os_versions["current"], "2.15.1+rev2.prod")
         self.assertIsInstance(supported_device_os_versions["recommended"], str)
         self.assertIsInstance(supported_device_os_versions["versions"], list)
         self.assertGreater(len(supported_device_os_versions["versions"]), 2)
@@ -99,6 +99,19 @@ class TestDevice(unittest.TestCase):
         # device is offline
         with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
             self.balena.models.device.start_os_update(uuid, "99.99.0")
+
+    def test_05_is_supported_os_update(self):
+        # valid
+        self.assertTrue(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev2.prod", "6.0.10"))
+        self.assertTrue(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev2.prod", "2025.7.0"))
+        # target < v2.16
+        self.assertFalse(
+            self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev1.prod", "2.15.1+rev2")
+        )
+        # source < v2.14
+        self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.7.8+rev2.prod", "6.0.10"))
+        # downgrade
+        self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "6.0.10", "2.15.1+rev2.prod"))
 
 
 if __name__ == "__main__":

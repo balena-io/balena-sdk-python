@@ -1610,7 +1610,7 @@ class Device:
             full_release_hash_or_id (Union[str, int]) : the hash of a successful release (string) or id (number)
 
         Examples:
-            >>> balena.models.device.set_to_release('49b2a', '45c90004de73557ded7274d4896a6db90ea61e36')
+            >>> balena.models.device.pin_to_release('49b2a', '45c90004de73557ded7274d4896a6db90ea61e36')
         """
 
         device = self.get(
@@ -1655,7 +1655,7 @@ class Device:
         self.__set(uuid_or_id_or_ids, {"is_pinned_on__release": None})
 
     # TODO: enable device batching
-    def set_supervisor_release(
+    def pin_to_supervisor_release(
         self,
         uuid_or_id: Union[str, int],
         supervisor_version_or_id: Union[str, int],
@@ -1666,7 +1666,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
         Examples:
-            >>> balena.models.device.set_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
+            >>> balena.models.device.pin_to_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
         """
         device = self.get(
             uuid_or_id,
@@ -1703,7 +1703,7 @@ class Device:
         uuid_or_id: Union[str, int],
         target_os_version: str,
         *,  # Force keyword arguments after this point
-        run_detached: Optional[bool] = False,
+        run_detached: Optional[bool] = True,
     ) -> HUPStatusResponse:
         """
         Start an OS update on a device.
@@ -1718,8 +1718,7 @@ class Device:
                 The version **must** be the exact version number, a "prod" variant
                 and greater than the one running on the device.
             run_detached (Optional[bool]): run the update in detached mode.
-                Default behaviour is run_detached=False but is DEPRECATED and will be
-                removed in a future release. Use run_detached=True for more reliable updates.
+                Default behaviour is run_detached=True for more reliable updates.
 
         Returns:
             HUPStatusResponse: action response.
@@ -1727,7 +1726,6 @@ class Device:
         Examples:
             >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
             >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
-            >>> balena.models.device.start_os_update('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1', run_detached=True)
         """  # noqa: E501
 
         if target_os_version is None or uuid_or_id is None:
@@ -1970,7 +1968,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.device.tags.get_all_by_device('a03ab646c')
+            >>> balena.models.device.tags.get_all_by_device('a03ab646ca5a4f11b4d05c1f1c3b4e72')
         """
 
         id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]

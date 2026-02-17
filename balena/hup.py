@@ -4,7 +4,10 @@ from semver.version import Version
 
 from . import exceptions
 
-MIN_TARGET_VERSION = "2.2.0+rev1"
+# The HUP process itself as well as policies set minimum bounds on current/target
+# versions that it can update. These variables allow enforcement of these minimums.
+MIN_CURRENT_VERSION = "2.14.0+rev1"
+MIN_TARGET_VERSION = "2.16.0+rev1"
 
 
 def __get_variant(ver: Version) -> Optional[Literal["dev", "prod"]]:
@@ -45,8 +48,10 @@ def get_hup_action_type(device_type: str, current_version: Optional[str], target
     if Version.parse(target_version).compare(current_version) < 0:
         raise exceptions.OsUpdateError("OS downgrades are not allowed")
 
-    # For 1.x -> 2.x or 2.x to 2.x only
-    if parsed_target_ver.major > 1 and Version.parse(target_version).compare(MIN_TARGET_VERSION) < 0:
-        raise exceptions.OsUpdateError("Target balenaOS version must be greater than {0}".format(MIN_TARGET_VERSION))
+    if Version.parse(current_version).compare(MIN_CURRENT_VERSION) < 0:
+        raise exceptions.OsUpdateError("Current balenaOS version must be at least {0}".format(MIN_CURRENT_VERSION))
+
+    if Version.parse(target_version).compare(MIN_TARGET_VERSION) < 0:
+        raise exceptions.OsUpdateError("Target balenaOS version must be at least {0}".format(MIN_TARGET_VERSION))
 
     return "resinhup{from_v}{to_v}".format(from_v=parsed_current_ver.major, to_v=parsed_target_ver.major)
