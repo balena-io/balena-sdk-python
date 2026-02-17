@@ -1610,7 +1610,7 @@ class Device:
             full_release_hash_or_id (Union[str, int]) : the hash of a successful release (string) or id (number)
 
         Examples:
-            >>> balena.models.device.set_to_release('49b2a', '45c90004de73557ded7274d4896a6db90ea61e36')
+            >>> balena.models.device.pin_to_release('49b2a', '45c90004de73557ded7274d4896a6db90ea61e36')
         """
 
         device = self.get(
@@ -1968,7 +1968,7 @@ class DeviceTag(DependentResource[BaseTagType]):
             List[BaseTagType]: tags list.
 
         Examples:
-            >>> balena.models.device.tags.get_all_by_device('a03ab646c')
+            >>> balena.models.device.tags.get_all_by_device('a03ab646ca5a4f11b4d05c1f1c3b4e72')
         """
 
         id = self.__device.get(uuid_or_id, {"$select": "id"})["id"]
