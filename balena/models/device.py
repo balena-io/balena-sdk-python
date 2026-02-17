@@ -1655,7 +1655,7 @@ class Device:
         self.__set(uuid_or_id_or_ids, {"is_pinned_on__release": None})
 
     # TODO: enable device batching
-    def set_supervisor_release(
+    def pin_to_supervisor_release(
         self,
         uuid_or_id: Union[str, int],
         supervisor_version_or_id: Union[str, int],
@@ -1666,7 +1666,7 @@ class Device:
             uuid_or_id (Union[str, int]): device uuid (string) or id (int)
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
         Examples:
-            >>> balena.models.device.set_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
+            >>> balena.models.device.pin_to_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
         """
         device = self.get(
             uuid_or_id,
