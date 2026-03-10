@@ -216,9 +216,6 @@ class Device:
             raise exceptions.OsUpdateError("The uuid of the device is not available")
 
         uuid = device_info["uuid"]
-        if "is_online" not in device_info or not device_info["is_online"]:
-            raise exceptions.OsUpdateError(f"The device is offline: {uuid}")
-
         if "os_version" not in device_info or not device_info["os_version"]:
             raise exceptions.OsUpdateError(f"The current os version of the device is not available: {uuid}")
 
@@ -1739,6 +1736,8 @@ class Device:
             },
         )
 
+        if not device["is_online"]:
+            raise exceptions.OsUpdateError(f"The device is offline: {uuid_or_id}")
         self.__check_os_update_target(device, target_os_version)
 
         all_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
@@ -1758,6 +1757,58 @@ class Device:
             path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             body=data,
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
+        )
+
+    def pin_to_os_release(
+        self,
+        uuid_or_id: Union[str, int],
+        target_os_version: str,
+    ) -> None:
+        """
+        Mark a specific device to be updated to a particular OS release
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
+            target_os_version (str): semver-compatible version for the target device.
+                Unsupported (unpublished) version will result in rejection.
+                The version **must** be the exact version number, a "prod" variant
+                and greater or equal to the one running on the device.
+
+        Examples:
+            >>> balena.models.device.pin_to_os_release('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
+            >>> balena.models.device.pin_to_os_release('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
+        """
+
+        if target_os_version is None or uuid_or_id is None:
+            raise exceptions.InvalidParameter("target_os_version or UUID", None)
+
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": ["id", "uuid", "is_online", "os_version", "os_variant"],
+                "$expand": {"is_of__device_type": {"$select": "slug"}},
+            },
+        )
+
+        # 2026-02-23 Presently rejects if offline. Remove from this function
+        # and add to start_os_update() and any other callers.
+        self.__check_os_update_target(device, target_os_version)
+
+        # Include draft version, like node SDK?
+        all_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
+        if not [v for v in all_versions if target_os_version == v["raw_version"]]:
+            raise exceptions.InvalidParameter("target_os_version", target_os_version)
+
+        data = {"parameters": {"target_version": target_os_version}}
+
+        url_base = self.__config.get_all()["deviceUrlsBase"]
+
+        self.__pine.patch(
+            {
+                "resource": "device",
+                "id": device["id"],
+                "body": {"should_be_operated_by__release": release["id"]},
+            }
         )
 
     @deprecated(

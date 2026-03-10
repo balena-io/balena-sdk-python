@@ -88,7 +88,6 @@ class TestDevice(unittest.TestCase):
         # sanity check
         self.assertEqual(device["uuid"], uuid)
         device["is_online"] = False
-        self.assertEqual(device["is_online"], False)
 
         # Perform sanity checks on input
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
@@ -96,9 +95,11 @@ class TestDevice(unittest.TestCase):
 
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.start_os_update(uuid, None)
-        # device is offline
-        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
+
+        # Expect the offline check precedes the target version check.
+        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError) as context:
             self.balena.models.device.start_os_update(uuid, "99.99.0")
+        self.assertTrue("device is offline" in str(context.exception))
 
     def test_05_is_supported_os_update(self):
         # valid
@@ -112,6 +113,26 @@ class TestDevice(unittest.TestCase):
         self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.7.8+rev2.prod", "6.0.10"))
         # downgrade
         self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "6.0.10", "2.15.1+rev2.prod"))
+
+    def test_06_pin_to_os_release(self):
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(self.app["id"], uuid)
+        # sanity check
+        self.assertEqual(device["uuid"], uuid)
+        device["is_online"] = False
+        device["os_version"] = "5.3.21"
+
+        # Perform sanity checks on input
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.pin_to_os_release(99999999, "6.0.10")
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.pin_to_os_release(uuid, None)
+
+        # Also indirectly verifies does not encounter a check for online status.
+        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError) as context:
+            self.balena.models.device.pin_to_os_release(uuid, "99.99.0")
+        self.assertTrue("current os version of the device is not available" in str(context.exception))
 
 
 if __name__ == "__main__":
