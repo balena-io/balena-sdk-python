@@ -10,7 +10,7 @@ class TestDevice(unittest.TestCase):
         cls.helper = TestHelper()
         cls.balena = cls.helper.balena
         cls.helper.wipe_application()
-        cls.app = cls.balena.models.application.create("FooBar", "raspberry-pi2", cls.helper.default_organization["id"])
+        cls.app = cls.balena.models.application.create("FooBar", "raspberrypi3", cls.helper.default_organization["id"])
 
     @classmethod
     def tearDownClass(cls):
@@ -88,7 +88,6 @@ class TestDevice(unittest.TestCase):
         # sanity check
         self.assertEqual(device["uuid"], uuid)
         device["is_online"] = False
-        self.assertEqual(device["is_online"], False)
 
         # Perform sanity checks on input
         with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
@@ -96,9 +95,11 @@ class TestDevice(unittest.TestCase):
 
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.start_os_update(uuid, None)
-        # device is offline
-        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
+
+        # Expect the offline check precedes the target version check.
+        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError) as context:
             self.balena.models.device.start_os_update(uuid, "99.99.0")
+        self.assertTrue("device is offline" in str(context.exception))
 
     def test_05_is_supported_os_update(self):
         # valid
@@ -114,6 +115,54 @@ class TestDevice(unittest.TestCase):
         self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.7.8+rev2.prod", "6.0.10"))
         # downgrade
         self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "6.0.10", "2.15.1+rev2.prod"))
+
+    def test_06_pin_to_os_release(self):
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(self.app["id"], uuid)
+        # sanity check
+        self.assertEqual(device["uuid"], uuid)
+        # Device setup: Ensure not online and is on a valid OS version.
+        self.balena.pine.patch(
+            {"resource": "device", "id": device["id"], "body": {"is_online": False, "os_version": "balenaOS 5.3.21"}}
+        )
+
+        # Perform sanity checks on input
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.pin_to_os_release(99999999, "6.0.10")
+
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+            self.balena.models.device.pin_to_os_release(uuid, None)
+
+        # Also indirectly verifies does not encounter a check for online status
+        # since target version check occurs later.
+        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter) as context:
+            self.balena.models.device.pin_to_os_release(uuid, "99.99.0")
+        self.assertTrue("target_os_version" in str(context.exception))
+
+        # Allow pinning to same version
+        self.balena.models.device.pin_to_os_release(uuid, "5.3.21")
+
+    def test_07_pin_to_os_release_with_prod(self):
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(self.app["id"], uuid)
+        # sanity check
+        self.assertEqual(device["uuid"], uuid)
+        # Device setup: Ensure not online and is on a valid OS version.
+        self.balena.pine.patch(
+            {
+                "resource": "device",
+                "id": device["id"],
+                "body": {"is_online": False, "os_version": "balenaOS 2.83.21+rev1", "os_variant": "prod"},
+            }
+        )
+
+        # Allow pinning to same version, but validate variants
+        with self.assertRaises(self.helper.balena_exceptions.OsUpdateError):
+            self.balena.models.device.pin_to_os_release(uuid, "2.83.21+rev1.dev")
+
+        self.balena.models.device.pin_to_os_release(uuid, "2.83.21+rev1.prod")
+
+        self.balena.models.device.pin_to_os_release(uuid, "6.0.10")
 
 
 if __name__ == "__main__":
