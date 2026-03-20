@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from threading import Thread
+from threading import Thread, Event, Lock
 from urllib.parse import urljoin
 from typing import Union, Optional, Literal, Callable, TypedDict, Any, List, cast
 
@@ -80,6 +80,7 @@ class Subscription:
 
     def __init__(self, settings: Settings):
         self.__settings = settings
+        self.__reactor_lock = Lock()
 
     def add(
         self,
@@ -95,16 +96,26 @@ class Subscription:
         url = urljoin(cast(str, self.__settings.get("api_endpoint")), f"/device/v2/{uuid}/logs?{query}")
         headers = Headers({"Authorization": [f"Bearer {get_token(self.__settings)}"]})
 
-        agent = Agent(reactor)
-        req = agent.request(b"GET", url.encode(), headers, None)
-        req.addCallback(cbRequest, callback, error)
         self.run()
 
-        return req
+        result = [None]
+        done = Event()
+
+        def create_request():
+            agent = Agent(reactor)
+            req = agent.request(b"GET", url.encode(), headers, None)
+            req.addCallback(cbRequest, callback, error)
+            result[0] = req
+            done.set()
+
+        reactor.callFromThread(create_request)  # type: ignore
+        done.wait()
+        return result[0]
 
     def run(self):
-        if not reactor.running:  # type: ignore
-            Thread(target=reactor.run, args=(False,)).start()  # type: ignore
+        with self.__reactor_lock:
+            if not reactor.running:  # type: ignore
+                Thread(target=reactor.run, args=(False,)).start()  # type: ignore
 
     def stop(self, d):
         reactor.callFromThread(d.addCallback, cbDrop)  # type: ignore
