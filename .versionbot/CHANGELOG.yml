@@ -1,4 +1,18 @@
 - commits:
+    - subject: Disable log tests
+      hash: e35e2a299bdd7039f5185cc8d8dc800cebd60c10
+      body: |
+        They run inconsistently; cause under investigation.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 17.0.1
+  title: ""
+  date: 2026-04-08T15:07:21.260Z
+- commits:
     - subject: Generate docs for doc comment updates
       hash: 70333751d532dbb538be7488eb72b34f762181c5
       body: |
