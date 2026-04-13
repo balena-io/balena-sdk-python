@@ -38,7 +38,7 @@ class TestDevice(unittest.TestCase):
             "2.85.2+rev4.prod",
         ]
         for ver in testVersion:
-            get_hup_action_type("", ver, ver)
+            get_hup_action_type("", "2.15.1+rev2.prod", ver)
 
     def test_03_get_supervisor_releases_for_cpu_architecture(self):
         # return an empty array if no image was found
@@ -104,6 +104,8 @@ class TestDevice(unittest.TestCase):
         # valid
         self.assertTrue(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev2.prod", "6.0.10"))
         self.assertTrue(self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev2.prod", "2025.7.0"))
+        # same version
+        self.assertFalse(self.balena.models.os.is_supported_os_update("raspberrypi3", "6.0.10", "6.0.10"))
         # target < v2.16
         self.assertFalse(
             self.balena.models.os.is_supported_os_update("raspberrypi3", "2.15.1+rev1.prod", "2.15.1+rev2")
