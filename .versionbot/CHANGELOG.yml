@@ -1,4 +1,17 @@
 - commits:
+    - subject: Prohibit OS update to same version via start_os_update()
+      hash: 349e5c68fd1a66e441aa05b47d8720a89d1ed37d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 17.0.2
+  title: ""
+  date: 2026-04-13T14:35:06.200Z
+- commits:
     - subject: Disable log tests
       hash: e35e2a299bdd7039f5185cc8d8dc800cebd60c10
       body: |
