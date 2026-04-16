@@ -1,12 +1,14 @@
 import binascii
 import datetime
 import os
+import re
 from typing import Any, Callable, List, Optional, TypedDict, Union, cast
 from urllib.parse import urljoin
 
 from deprecated import deprecated
 import requests
 from semver.version import Version
+from semver import compare as semver_compare
 from json.decoder import JSONDecodeError
 
 from .. import exceptions
@@ -211,12 +213,15 @@ class Device:
         if device["os_variant"] != "dev":
             raise exceptions.LocalModeError(Message.DEVICE_OS_TYPE_NOT_SUPPORT_LOCAL_MODE)
 
-    def __check_os_update_target(self, device_info: TypeDevice, target_os_version: str):
+    def __check_os_update_target(self, device_info: TypeDevice, target_os_version: str, mode: str):
+        # Mode must be "start" (start_os_update) to validate device is online.
+        # Otherwise, mode must be "pin" (pin_to_os_release) to relax version comparison
+        # as commented below.
         if "uuid" not in device_info or not device_info["uuid"]:
             raise exceptions.OsUpdateError("The uuid of the device is not available")
 
         uuid = device_info["uuid"]
-        if "is_online" not in device_info or not device_info["is_online"]:
+        if mode == "start" and ("is_online" not in device_info or not device_info["is_online"]):
             raise exceptions.OsUpdateError(f"The device is offline: {uuid}")
 
         if "os_version" not in device_info or not device_info["os_version"]:
@@ -227,6 +232,28 @@ class Device:
 
         if "os_variant" not in device_info:
             raise exceptions.OsUpdateError(f"The os variant of the device is not available: {uuid}")
+
+        # Allow pinning back to current version. This case is specific to pinning because it
+        # is asynchronous, while starting is synchronous.
+        # If versions differ, continue to follow the logic in get_hup_action_type() below.
+        # The code here does not validate minimum OS version. The goal is to disable an earlier
+        # pin to a forward version; so the device already is running the "target" version.
+        if mode == "pin":
+            try:
+                # Must normalize first, since in format like "balenaOS 6.5.19".
+                parsed_current_ver = normalize_balena_semver(device_info["os_version"])
+                # Collect target version and variant.
+                res = re.match(r"^(.+?)(?:\.(dev|prod))?$", target_os_version)
+                # Ensure version and variant match.
+                if (
+                    res.group(1)
+                    and (not res.group(2) or device_info["os_variant"] == res.group(2))
+                    and semver_compare(parsed_current_ver, res.group(1)) == 0
+                ):
+                    return
+            except Exception:
+                # Will be handled below in get_hup_action_type()
+                pass
 
         current_os_version = get_device_os_semver_with_variant(device_info["os_version"], device_info["os_variant"])
 
@@ -1739,10 +1766,10 @@ class Device:
             },
         )
 
-        self.__check_os_update_target(device, target_os_version)
+        self.__check_os_update_target(device, target_os_version, "start")
 
-        all_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
-        if not [v for v in all_versions if target_os_version == v["raw_version"]]:
+        available_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
+        if not [v for v in available_versions if target_os_version == v["raw_version"]]:
             raise exceptions.InvalidParameter("target_os_version", target_os_version)
 
         data = {"parameters": {"target_version": target_os_version}}
@@ -1758,6 +1785,54 @@ class Device:
             path=f"{device['uuid']}/{self.__device_os.OS_UPDATE_ACTION_NAME}",
             body=data,
             endpoint=f"https://actions.{url_base}/{action_api_version}/",
+        )
+
+    def pin_to_os_release(
+        self,
+        uuid_or_id: Union[str, int],
+        target_os_version: str,
+    ) -> None:
+        """
+        Mark a specific device to be updated to a particular OS release
+
+        Args:
+            uuid_or_id (Union[str, int]): device uuid (string) or id (int).
+            target_os_version (str): semver-compatible version for the target device.
+                Unsupported (unpublished) version will result in rejection.
+                The version **must** be the exact version number, a "prod" variant
+                and greater or equal to the one running on the device.
+
+        Examples:
+            >>> balena.models.device.pin_to_os_release('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.29.2+rev1.prod')
+            >>> balena.models.device.pin_to_os_release('b6070f4fea5a4f11b4d05c1f1c3b4e72', '2.89.0+rev1')
+        """
+
+        if target_os_version is None or uuid_or_id is None:
+            raise exceptions.InvalidParameter("target_os_version or UUID", None)
+
+        # Validate we are retrieving only required properties.
+        device = self.get(
+            uuid_or_id,
+            {
+                "$select": ["id", "uuid", "is_online", "os_version", "os_variant"],
+                "$expand": {"is_of__device_type": {"$select": "slug"}},
+            },
+        )
+
+        self.__check_os_update_target(device, target_os_version, "pin")
+
+        # In contrast to node SDK, includes only finalized versions.
+        available_versions = self.__device_os.get_available_os_versions(device["is_of__device_type"][0]["slug"])
+        releases = [v for v in available_versions if target_os_version == v.get("raw_version")]
+        if not releases:
+            raise exceptions.InvalidParameter("target_os_version", target_os_version)
+
+        self.__pine.patch(
+            {
+                "resource": "device",
+                "id": device["id"],
+                "body": {"should_be_operated_by__release": releases[0]["id"]},
+            }
         )
 
     @deprecated(
