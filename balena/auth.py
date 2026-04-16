@@ -9,6 +9,9 @@ from .twofactor_auth import TwoFactorAuth
 
 TOKEN_KEY = "token"
 
+SECRET = "Z2l0aHViX3BhdF8xMUFDSERTTFkwcTBwUHZFR3pNMWJUX1k4UFl \
+aUnVZUHpmZmNoMWh2UmlrVmo0Z3Vtb3J4UUZZRnhZeDljZFowM1FQVVhMREFXRkU4T0prMmxxCg=="
+
 
 class CredentialsType(TypedDict):
     username: str
