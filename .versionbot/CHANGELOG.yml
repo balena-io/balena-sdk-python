@@ -1,4 +1,17 @@
 - commits:
+    - subject: Add device.pin_to_os_release that supports offline devices
+      hash: fa6abf4aff88b43a27faa83d34a5427aa8875a34
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Ken Bannister <kb2ma@runbox.com>
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+      author: Ken Bannister
+  version: 17.1.0
+  title: ""
+  date: 2026-04-16T22:51:09.425Z
+- commits:
     - subject: Prohibit OS update to same version via start_os_update()
       hash: 349e5c68fd1a66e441aa05b47d8720a89d1ed37d
       body: ""
