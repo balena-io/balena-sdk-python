@@ -276,6 +276,8 @@ class TypeDevice(TypedDict):
     is_accessible_by_support_until__date: str
     is_connected_to_vpn: bool
     is_locked_until__date: str
+    update_status: Literal[ "rejected", "downloading", "downloaded", "applying changes", "aborted", "done"]
+    last_update_status_event: str
     is_web_accessible: bool
     is_active: bool
     # This is a computed term
