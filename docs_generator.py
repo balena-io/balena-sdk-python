@@ -11,43 +11,6 @@ TOC_L2 = 2
 TOC_L3 = 3
 TOC_L4 = 4
 
-Table_Of_Content = [
-    ("balena", TOC_ROOT, None),
-    (".models", TOC_L1, "Models"),
-    (".application", TOC_L2, balena.models.Application),
-    (".tags", TOC_L3, balena.models.application.ApplicationTag),
-    (".config_var", TOC_L3, balena.models.application.ApplicationConfigVariable),
-    (".env_var", TOC_L3, balena.models.application.ApplicationEnvVariable),
-    (".build_var", TOC_L3, balena.models.application.BuildEnvVariable),
-    (".membership", TOC_L3, balena.models.application.ApplicationMembership),
-    (".invite", TOC_L3, balena.models.application.ApplicationInvite),
-    (".device", TOC_L2, balena.models.Device),
-    (".tags", TOC_L3, balena.models.device.DeviceTag),
-    (".config_var", TOC_L3, balena.models.device.DeviceConfigVariable),
-    (".env_var", TOC_L3, balena.models.device.DeviceEnvVariable),
-    (".service_var", TOC_L3, balena.models.device.DeviceServiceEnvVariable),
-    (".history", TOC_L3, balena.models.device.DeviceHistory),
-    (".device_type", TOC_L2, balena.models.DeviceType),
-    (".api_key", TOC_L2, balena.models.ApiKey),
-    (".key", TOC_L2, balena.models.Key),
-    (".organization", TOC_L2, balena.models.Organization),
-    (".membership", TOC_L3, balena.models.organization.OrganizationMembership),
-    (".tags", TOC_L4, balena.models.organization.OrganizationMembershipTag),
-    (".invite", TOC_L3, balena.models.organization.OrganizationInvite),
-    (".os", TOC_L2, balena.models.DeviceOs),
-    (".config", TOC_L2, balena.models.Config),
-    (".release", TOC_L2, balena.models.Release),
-    (".tags", TOC_L3, balena.models.release.ReleaseTag),
-    (".service", TOC_L2, balena.models.Service),
-    (".var", TOC_L3, balena.models.service.ServiceEnvVariable),
-    (".image", TOC_L2, balena.models.Image),
-    (".auth", TOC_L1, balena.auth.Auth),
-    (".two_factor", TOC_L2, balena.twofactor_auth.TwoFactorAuth),
-    (".logs", TOC_L1, balena.logs.Logs),
-    (".settings", TOC_L1, type(balena.settings)),
-    (".types", TOC_L1, balena.types),
-]
-
 FUNCTION_NAME_TEMPLATE = "{f_name}({f_args})"
 
 
@@ -63,9 +26,8 @@ def print_functions(baseclass, model_hints):
     for func_name, blah in inspect.getmembers(baseclass, predicate=inspect.isfunction):
         if func_name != "__init__" and not func_name.startswith("_"):
             func = getattr(baseclass, func_name)
-            print(f'\n<a name="{baseclass.__name__.lower()}.{func_name}"></a>')
 
-            print_name, func_output_hint = doc2md.make_function_name(func, func_name)
+            clean_name, f_args, func_output_hint = doc2md.make_function_name(func, func_name)
 
             hint_ref = None
             for model_hint in model_hints:
@@ -74,12 +36,19 @@ def print_functions(baseclass, model_hints):
                 if model_hint in func_output_hint:
                     hint_ref = model_hint.lower()
 
-            if hint_ref:
-                print_name = f"{print_name} ⇒ [<code>{func_output_hint}</code>](#{hint_ref})"
-            else:
-                print_name = f"{print_name} ⇒ <code>{func_output_hint}</code>"
+            module_path = baseclass.__module__
+            full_function_call = f"{module_path}.{clean_name}{f_args}"
 
-            print(doc2md.doc2md(func.__doc__, print_name, type=1))
+            if hint_ref:
+                signature_line = (
+                    f"**Signature:** `{full_function_call}` ⇒ [<code>{func_output_hint}</code>](#{hint_ref})"
+                )
+            else:
+                signature_line = f"**Signature:** `{full_function_call}` ⇒ <code>{func_output_hint}</code>"
+
+            heading_markdown = doc2md.doc2md(func.__doc__, clean_name, type=1, signature=signature_line)
+            print(heading_markdown)
+            print_newline()
 
 
 def main():
@@ -90,9 +59,6 @@ def main():
             hints.append(type_tuple[0])
 
     print(doc2md.doc2md(balena.__doc__, "Balena Python SDK", type=0))
-    print_newline()
-    print("## Table of Contents")
-    print(doc2md.make_toc(Table_Of_Content, hints))
     print_newline()
     print(doc2md.doc2md(balena.models.__doc__, "Models", type=0))
     print(doc2md.doc2md(balena.models.application.Application.__doc__, "Application", type=0))
