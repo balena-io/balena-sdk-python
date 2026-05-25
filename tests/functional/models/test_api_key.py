@@ -42,7 +42,7 @@ class TestApiKey(unittest.TestCase):
         self.assertIsInstance(key, str)
 
     def test_03_should_be_able_to_create_key_with_expiry_date(self):
-        tomorrow = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).isoformat()
+        tomorrow = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).isoformat()
         key = self.balena.models.api_key.create(
             "apiKeyWithExpiry",
             "apiKeyDescription",

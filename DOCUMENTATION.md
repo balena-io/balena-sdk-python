@@ -2471,12 +2471,12 @@ Get all device history entries for an application.
 >>> balena.models.device.history.get_all_by_application('myorg/myapp')
 >>> balena.models.device.history.get_all_by_application(11196426)
 >>> balena.models.device.history.get_all_by_application(
-...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+...     11196426, from_date=datetime.now(timezone.utc) + timedelta(days=-5)
 ... )
 >>> balena.models.device.history.get_all_by_application(
 ...     11196426,
-...     from_date=datetime.utcnow() + timedelta(days=-10),
-...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+...     from_date=datetime.now(timezone.utc) + timedelta(days=-10),
+...     to_date=from_date = datetime.now(timezone.utc) + timedelta(days=-5))
 ... )
 ```
 
@@ -2499,12 +2499,12 @@ Get all device history entries for a device.
 >>> balena.models.device.history.get_all_by_device('6046335305c8142883a4466d30abe211')
 >>> balena.models.device.history.get_all_by_device(11196426)
 >>> balena.models.device.history.get_all_by_device(
-...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+...     11196426, from_date=datetime.now(timezone.utc) + timedelta(days=-5)
 ... )
 >>> balena.models.device.history.get_all_by_device(
 ...     11196426,
-...     from_date=datetime.utcnow() + timedelta(days=-10),
-...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+...     from_date=datetime.now(timezone.utc) + timedelta(days=-10),
+...     to_date=from_date = datetime.now(timezone.utc) + timedelta(days=-5))
 ... )
 ```
 ## DeviceType
@@ -2593,7 +2593,7 @@ This method registers a new api key for the current user with the name given.
 ```python
 >>> balena.models.api_key.create_api_key("myApiKey")
 >>> balena.models.api_key.create_api_key("myApiKey", "my api key description")
->>> balena.models.api_key.create_api_key("myApiKey", "my descr", datetime.datetime.utcnow().isoformat())
+>>> balena.models.api_key.create_api_key("myApiKey", "my descr", datetime.datetime.now(datetime.timezone.utc).isoformat())
 ```
 
 <a name="apikey.get_all"></a>
