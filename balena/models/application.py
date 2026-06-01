@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from math import isinf
 from typing import List, Literal, Optional, Union, cast
 from urllib.parse import urljoin
@@ -870,7 +870,7 @@ class Application:
         """
 
         if expiry_timestamp is None or expiry_timestamp <= int(
-            (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000
+            datetime.now(timezone.utc).timestamp() * 1000
         ):
             raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
 

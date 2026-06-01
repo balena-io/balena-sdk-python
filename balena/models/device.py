@@ -1585,7 +1585,7 @@ class Device:
         """
 
         if expiry_timestamp is None or expiry_timestamp <= int(
-            (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000
+            datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000
         ):
             raise exceptions.InvalidParameter("expiry_timestamp", expiry_timestamp)
 
