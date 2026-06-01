@@ -1,4 +1,15 @@
 - commits:
+    - subject: Clean up documentation for use in docs site
+      hash: 4e17e785765727233aa3ad38e8e8dd2e995916cd
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Matthew Yarmolinsky
+  version: 17.1.2
+  title: ""
+  date: 2026-06-01T15:43:18.274Z
+- commits:
     - subject: Rebuild documentation to include pin_to_os_release()
       hash: 61be12f97796ecc97c1d82e3ae56a337eeb1d8c1
       body: ""
