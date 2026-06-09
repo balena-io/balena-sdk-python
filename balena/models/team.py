@@ -5,9 +5,169 @@ from ..exceptions import InvalidParameter
 from ..pine import PineClient
 from ..settings import Settings
 from ..types import AnyObject
-from ..types.models import TeamType
+from ..types.models import ApplicationMembershipRoles, TeamApplicationAccessType, TeamType
 from ..utils import is_id, merge
 from .organization import Organization
+
+
+class TeamApplicationAccess:
+    """
+    This class implements team application access model for balena python SDK.
+
+    """
+
+    def __init__(self, pine: PineClient, team: "Team", settings: Settings):
+        self.__pine = pine
+        self.__team = team
+        self.__settings = settings
+        self.RESOURCE = "team_application_access"
+
+    def __get_role_id(self, role_name: str) -> int:
+        role = self.__pine.get(
+            {
+                "resource": "application_membership_role",
+                "id": {"name": role_name},
+                "options": {"$select": "id"},
+            }
+        )
+        if role is None:
+            raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
+        return role["id"]
+
+    def get_all_by_team(self, team_id: int, options: AnyObject = {}) -> List[TeamApplicationAccessType]:
+        """
+        Get all team applications access.
+
+        Args:
+            team_id (int): team id.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[TeamApplicationAccessType]: team application access.
+
+        Examples:
+            >>> balena.models.team.application_access.get_all_by_team(1239948)
+        """
+
+        team = self.__team.get(team_id, {"$select": "id"})
+
+        return self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "options": merge(
+                    {"$filter": {"team": team["id"]}},
+                    options,
+                ),
+            }
+        )
+
+    def get(self, team_application_access_id: int, options: AnyObject = {}) -> TeamApplicationAccessType:
+        """
+        Get team applications access.
+
+        Args:
+            team_application_access_id (int): team application access id.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            TeamApplicationAccessType: team application access.
+
+        Raises:
+            TeamApplicationAccessNotFound: if team application access couldn't be found.
+
+        Examples:
+            >>> balena.models.team.application_access.get(1239948)
+        """
+
+        result = self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "id": team_application_access_id,
+                "options": options,
+            }
+        )
+        if result is None:
+            raise exceptions.TeamApplicationAccessNotFound(team_application_access_id)
+        return result
+
+    def add(
+        self,
+        team_id: int,
+        application_id_or_slug: Union[int, str],
+        role_name: ApplicationMembershipRoles,
+    ) -> TeamApplicationAccessType:
+        """
+        Add applications access to team.
+
+        Args:
+            team_id (int): team id the application access will be granted for.
+            application_id_or_slug (Union[int, str]): application id or slug.
+            role_name (ApplicationMembershipRoles): application membership role name.
+
+        Returns:
+            TeamApplicationAccessType: team application access.
+
+        Examples:
+            >>> balena.models.team.application_access.add(1239948, 'MyAppSlug', 'developer')
+            >>> balena.models.team.application_access.add(1239948, 456789, 'observer')
+        """
+
+        from .application import Application
+
+        app_id = Application(self.__pine, self.__settings).get(application_id_or_slug, {"$select": "id"})["id"]
+
+        role_id = self.__get_role_id(role_name)
+
+        return self.__pine.post(
+            {
+                "resource": self.RESOURCE,
+                "body": {
+                    "team": team_id,
+                    "grants_access_to__application": app_id,
+                    "application_membership_role": role_id,
+                },
+            }
+        )
+
+    def update(self, team_application_access_id: int, role_name: ApplicationMembershipRoles) -> None:
+        """
+        Update team application access.
+
+        Args:
+            team_application_access_id (int): team application access id.
+            role_name (ApplicationMembershipRoles): the new role to assign.
+
+        Examples:
+            >>> balena.models.team.application_access.update(123, 'developer')
+        """
+
+        role_id = self.__get_role_id(role_name)
+
+        self.__pine.patch(
+            {
+                "resource": self.RESOURCE,
+                "id": team_application_access_id,
+                "body": {"application_membership_role": role_id},
+            }
+        )
+
+    def remove(self, team_application_access_id: int) -> None:
+        """
+        Remove team application access.
+
+        Args:
+            team_application_access_id (int): team application access id.
+
+        Examples:
+            >>> balena.models.team.application_access.remove(123)
+        """
+
+        self.__pine.delete(
+            {
+                "resource": self.RESOURCE,
+                "id": team_application_access_id,
+            }
+        )
 
 
 class Team:
@@ -20,6 +180,7 @@ class Team:
         self.__pine = pine
         self.__settings = settings
         self.__organization = Organization(pine, settings)
+        self.application_access = TeamApplicationAccess(pine, self, settings)
 
     def create(self, organization_slug_or_id: Union[str, int], name: str) -> TeamType:
         """

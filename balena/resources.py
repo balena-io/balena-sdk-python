@@ -53,3 +53,4 @@ class Message:
     BALENA_INVALID_DEVICE_TYPE = "Invalid device type: {device_type}"
     SUPERVISOR_LOCKED = "Supervisor is locked"
     TEAM_NOT_FOUND = "Team not found: {team_id}"
+    TEAM_APPLICATION_ACCESS_NOT_FOUND = "Team application access not found: {team_application_access_id}"

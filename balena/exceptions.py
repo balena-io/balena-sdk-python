@@ -645,3 +645,22 @@ class TeamNotFound(BalenaException):
     def __init__(self, team_id):
         super(TeamNotFound, self).__init__()
         self.message = Message.TEAM_NOT_FOUND.format(team_id=team_id)
+
+
+class TeamApplicationAccessNotFound(BalenaException):
+    """
+    Exception type for team application access not found.
+
+    Args:
+        team_application_access_id (int): team application access id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, team_application_access_id):
+        super(TeamApplicationAccessNotFound, self).__init__()
+        self.message = Message.TEAM_APPLICATION_ACCESS_NOT_FOUND.format(
+            team_application_access_id=team_application_access_id
+        )
