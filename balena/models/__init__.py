@@ -17,6 +17,7 @@ from .organization import Organization
 from .os import DeviceOs
 from .release import Release
 from .service import Service
+from .team import Team
 from ..settings import Settings
 
 
@@ -35,3 +36,4 @@ class Models:
         self.release = Release(pine, settings)
         self.service = Service(pine, settings)
         self.image = Image(pine, settings)
+        self.team = Team(pine, settings)

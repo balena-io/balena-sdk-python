@@ -52,3 +52,4 @@ class Message:
     APPLICATION_MEMBERSHIP_NOT_FOUND = "Application membership not found: {membership}"
     BALENA_INVALID_DEVICE_TYPE = "Invalid device type: {device_type}"
     SUPERVISOR_LOCKED = "Supervisor is locked"
+    TEAM_NOT_FOUND = "Team not found: {team_id}"
