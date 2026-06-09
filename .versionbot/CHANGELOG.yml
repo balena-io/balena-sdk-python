@@ -1,4 +1,15 @@
 - commits:
+    - subject: Alphabetize documentation
+      hash: aebf69b47e0d7bcf798817f88d4fee971266d0f3
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Matthew Yarmolinsky
+  version: 17.1.3
+  title: ""
+  date: 2026-06-09T13:42:25.718Z
+- commits:
     - subject: Clean up documentation for use in docs site
       hash: 4e17e785765727233aa3ad38e8e8dd2e995916cd
       body: ""
