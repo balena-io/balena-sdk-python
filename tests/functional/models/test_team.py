@@ -179,6 +179,81 @@ class TestTeam(unittest.TestCase):
         self.assertEqual(accesses, [])
         self.balena.models.team.remove(TestTeam.access_team["id"])
 
+    # --- TeamMembership ---
+
+    def test_26_membership_get_all_by_team_empty(self):
+        TestTeam.membership_team = self.balena.models.team.create(self.org_id, self.test_team_name + "_membership")
+        memberships = self.balena.models.team.membership.get_all_by_team(TestTeam.membership_team["id"])
+        self.assertEqual(memberships, [])
+
+    def test_27_membership_create(self):
+        TestTeam.membership1 = self.balena.models.team.membership.create(
+            TestTeam.membership_team["id"], self.member_username
+        )
+        self.assertIn("id", TestTeam.membership1)
+        self.assertEqual(
+            TestTeam.membership1["is_member_of__team"]["__id"],
+            TestTeam.membership_team["id"],
+        )
+
+    def test_28_membership_get(self):
+        membership = self.balena.models.team.membership.get(
+            TestTeam.membership1["id"],
+            {"$select": ["id", "user", "is_member_of__team"]},
+        )
+        self.assertEqual(membership["id"], TestTeam.membership1["id"])
+        self.assertEqual(membership["is_member_of__team"]["__id"], TestTeam.membership_team["id"])
+
+    def test_29_membership_get_not_found(self):
+        with self.assertRaises(self.helper.balena_exceptions.TeamMembershipNotFound) as cm:
+            self.balena.models.team.membership.get(999999)
+        self.assertIn("Team Membership not found: 999999", cm.exception.message)
+
+    def test_30_membership_get_all_by_team(self):
+        memberships = self.balena.models.team.membership.get_all_by_team(
+            TestTeam.membership_team["id"], {"$select": ["id", "user"]}
+        )
+        self.assertEqual(len(memberships), 1)
+        self.assertEqual(memberships[0]["id"], TestTeam.membership1["id"])
+
+    def test_31_membership_get_all_by_team_with_options(self):
+        memberships = self.balena.models.team.membership.get_all_by_team(
+            TestTeam.membership_team["id"],
+            {"$select": "id", "$expand": {"user": {"$select": "username"}}},
+        )
+        self.assertEqual(len(memberships), 1)
+        self.assertEqual(memberships[0]["user"][0]["username"], self.member_username)
+
+    def test_32_membership_get_all_by_user_by_username(self):
+        memberships = self.balena.models.team.membership.get_all_by_user(
+            self.member_username, {"$select": ["user", "is_member_of__team"]}
+        )
+        team_ids = [m["is_member_of__team"]["__id"] for m in memberships]
+        self.assertIn(TestTeam.membership_team["id"], team_ids)
+
+    def test_33_membership_get_all_by_user_not_a_member(self):
+        memberships = self.balena.models.team.membership.get_all_by_user("nonexistent_user_xyz")
+        self.assertEqual(memberships, [])
+
+    def test_34_membership_remove_single(self):
+        self.balena.models.team.membership.remove(TestTeam.membership1["id"])
+        with self.assertRaises(self.helper.balena_exceptions.TeamMembershipNotFound):
+            self.balena.models.team.membership.get(TestTeam.membership1["id"])
+        memberships = self.balena.models.team.membership.get_all_by_team(TestTeam.membership_team["id"])
+        self.assertEqual(memberships, [])
+
+    def test_35_membership_remove_multiple(self):
+        team2 = self.balena.models.team.create(self.org_id, self.test_team_name + "_membership_2")
+        membership1 = self.balena.models.team.membership.create(TestTeam.membership_team["id"], self.member_username)
+        membership2 = self.balena.models.team.membership.create(team2["id"], self.member_username)
+        self.balena.models.team.membership.remove([membership1["id"], membership2["id"]])
+        with self.assertRaises(self.helper.balena_exceptions.TeamMembershipNotFound):
+            self.balena.models.team.membership.get(membership1["id"])
+        with self.assertRaises(self.helper.balena_exceptions.TeamMembershipNotFound):
+            self.balena.models.team.membership.get(membership2["id"])
+        self.balena.models.team.remove(team2["id"])
+        self.balena.models.team.remove(TestTeam.membership_team["id"])
+
 
 if __name__ == "__main__":
     unittest.main()

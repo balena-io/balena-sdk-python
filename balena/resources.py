@@ -54,3 +54,4 @@ class Message:
     SUPERVISOR_LOCKED = "Supervisor is locked"
     TEAM_NOT_FOUND = "Team not found: {team_id}"
     TEAM_APPLICATION_ACCESS_NOT_FOUND = "Team application access not found: {team_application_access_id}"
+    TEAM_MEMBERSHIP_NOT_FOUND = "Team Membership not found: {membership_id}"

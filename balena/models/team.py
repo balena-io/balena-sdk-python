@@ -5,7 +5,7 @@ from ..exceptions import InvalidParameter
 from ..pine import PineClient
 from ..settings import Settings
 from ..types import AnyObject
-from ..types.models import ApplicationMembershipRoles, TeamApplicationAccessType, TeamType
+from ..types.models import ApplicationMembershipRoles, TeamApplicationAccessType, TeamMembershipType, TeamType
 from ..utils import is_id, merge
 from .organization import Organization
 
@@ -170,6 +170,163 @@ class TeamApplicationAccess:
         )
 
 
+class TeamMembership:
+    """
+    This class implements team membership model for balena python SDK.
+
+    """
+
+    def __init__(self, pine: PineClient, team: "Team"):
+        self.__pine = pine
+        self.__team = team
+        self.RESOURCE = "team_membership"
+
+    def get(self, membership_id: int, options: AnyObject = {}) -> TeamMembershipType:
+        """
+        Get a single team membership.
+
+        Args:
+            membership_id (int): team membership id.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            TeamMembershipType: team membership.
+
+        Raises:
+            TeamMembershipNotFound: if team membership couldn't be found.
+
+        Examples:
+            >>> balena.models.team.membership.get(5)
+        """
+
+        if not isinstance(membership_id, int):
+            raise InvalidParameter("membership_id", membership_id)
+
+        result = self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "id": membership_id,
+                "options": options,
+            }
+        )
+        if result is None:
+            raise exceptions.TeamMembershipNotFound(membership_id)
+
+        return result
+
+    def get_all_by_team(self, team_id: int, options: AnyObject = {}) -> List[TeamMembershipType]:
+        """
+        Get all memberships by team.
+
+        Args:
+            team_id (int): team id.
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[TeamMembershipType]: team memberships.
+
+        Examples:
+            >>> balena.models.team.membership.get_all_by_team(123)
+        """
+
+        return self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "options": merge(
+                    {"$filter": {"is_member_of__team": team_id}},
+                    options,
+                ),
+            }
+        )
+
+    def get_all_by_user(self, username_or_id: Union[str, int], options: AnyObject = {}) -> List[TeamMembershipType]:
+        """
+        Get all memberships by user.
+
+        Args:
+            username_or_id (Union[str, int]): the user's username (string) or id (number).
+            options (AnyObject): extra pine options to use.
+
+        Returns:
+            List[TeamMembershipType]: team memberships.
+
+        Examples:
+            >>> balena.models.team.membership.get_all_by_user('balena_os')
+            >>> balena.models.team.membership.get_all_by_user(123)
+        """
+
+        if not isinstance(username_or_id, (int, str)):
+            raise InvalidParameter("username_or_id", username_or_id)
+
+        return self.__pine.get(
+            {
+                "resource": self.RESOURCE,
+                "options": merge(
+                    {
+                        "$filter": {
+                            "user": (
+                                username_or_id
+                                if isinstance(username_or_id, int)
+                                else {
+                                    "$any": {
+                                        "$alias": "u",
+                                        "$expr": {"u": {"username": username_or_id}},
+                                    }
+                                }
+                            ),
+                        },
+                    },
+                    options,
+                ),
+            }
+        )
+
+    def create(self, team: int, username: str) -> TeamMembershipType:
+        """
+        Creates a new membership for a team.
+
+        Args:
+            team (int): team id.
+            username (str): the username of the balena user that will become a member.
+
+        Returns:
+            TeamMembershipType: team membership.
+
+        Examples:
+            >>> balena.models.team.membership.create(team=123, username="user123")
+        """
+
+        return self.__pine.post(
+            {
+                "resource": self.RESOURCE,
+                "body": {
+                    "username": username,
+                    "is_member_of__team": team,
+                },
+            }
+        )
+
+    def remove(self, id_or_ids: Union[int, List[int]]) -> None:
+        """
+        Remove a team membership.
+
+        Args:
+            id_or_ids (Union[int, List[int]]): team membership id or array of team membership ids.
+
+        Examples:
+            >>> balena.models.team.membership.remove(123)
+            >>> balena.models.team.membership.remove([123, 456])
+        """
+
+        ids = id_or_ids if isinstance(id_or_ids, list) else [id_or_ids]
+        self.__pine.delete(
+            {
+                "resource": self.RESOURCE,
+                "options": {"$filter": {"id": {"$in": ids}}},
+            }
+        )
+
+
 class Team:
     """
     This class implements team model for balena python SDK.
@@ -181,6 +338,7 @@ class Team:
         self.__settings = settings
         self.__organization = Organization(pine, settings)
         self.application_access = TeamApplicationAccess(pine, self, settings)
+        self.membership = TeamMembership(pine, self)
 
     def create(self, organization_slug_or_id: Union[str, int], name: str) -> TeamType:
         """
