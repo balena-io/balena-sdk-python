@@ -1,7 +1,6 @@
 import importlib
 import inspect
 
-
 balena = importlib.import_module("balena", ".")
 doc2md = importlib.import_module("docs.doc2md", ".")
 
@@ -14,16 +13,13 @@ TOC_L4 = 4
 FUNCTION_NAME_TEMPLATE = "{f_name}({f_args})"
 
 
-def print_newline():
+def get_function_docs(baseclass, model_hints):
     """
-    Add new line
-
+    Generates and collects documentation for all functions within a class.
+    Returns a list of tuples: (function_name, markdown_string)
     """
-    print("")
-
-
-def print_functions(baseclass, model_hints):
-    for func_name, blah in inspect.getmembers(baseclass, predicate=inspect.isfunction):
+    func_docs = []
+    for (func_name, _) in inspect.getmembers(baseclass, predicate=inspect.isfunction):
         if func_name != "__init__" and not func_name.startswith("_"):
             func = getattr(baseclass, func_name)
 
@@ -47,8 +43,10 @@ def print_functions(baseclass, model_hints):
                 signature_line = f"**Signature:** `{full_function_call}` ⇒ <code>{func_output_hint}</code>"
 
             heading_markdown = doc2md.doc2md(func.__doc__, clean_name, type=1, signature=signature_line)
-            print(heading_markdown)
-            print_newline()
+
+            func_docs.append((clean_name, heading_markdown + "\n"))
+
+    return func_docs
 
 
 def main():
@@ -59,183 +57,65 @@ def main():
             hints.append(type_tuple[0])
 
     print(doc2md.doc2md(balena.__doc__, "Balena Python SDK", type=0))
-    print_newline()
+    print("")
     print(doc2md.doc2md(balena.models.__doc__, "Models", type=0))
-    print(doc2md.doc2md(balena.models.application.Application.__doc__, "Application", type=0))
-    print_functions(balena.models.application.Application, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.ApplicationTag.__doc__,
-            "ApplicationTag",
-            type=0,
-        ),
-    )
-    print_functions(balena.models.application.ApplicationTag, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.ApplicationConfigVariable.__doc__,
-            "ApplicationConfigVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.application.ApplicationConfigVariable, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.ApplicationEnvVariable.__doc__,
-            "ApplicationEnvVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.application.ApplicationEnvVariable, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.BuildEnvVariable.__doc__,
-            "BuildEnvVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.application.BuildEnvVariable, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.ApplicationMembership.__doc__,
-            "ApplicationMembership",
-            type=0,
-        )
-    )
-    print_functions(balena.models.application.ApplicationMembership, hints)
-    print(
-        doc2md.doc2md(
-            balena.models.application.ApplicationInvite.__doc__,
-            "ApplicationInvite",
-            type=0,
-        )
-    )
-    print_functions(balena.models.application.ApplicationInvite, hints)
-    print(doc2md.doc2md(balena.models.device.Device.__doc__, "Device", type=0))
-    print_functions(balena.models.device.Device, hints)
+    print("")
 
-    print(
-        doc2md.doc2md(
-            balena.models.device.DeviceTag.__doc__,
-            "DeviceTag",
-            type=0,
-        )
-    )
-    print_functions(balena.models.device.DeviceTag, hints)
+    # A list of tuples: (name, markdown_content)
+    documentation_pool = []
 
-    print(
-        doc2md.doc2md(
-            balena.models.device.DeviceConfigVariable.__doc__,
-            "DeviceConfigVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.device.DeviceConfigVariable, hints)
+    # Target classes
+    targets = [
+        (balena.models.application.Application, "Application"),
+        (balena.models.application.ApplicationTag, "ApplicationTag"),
+        (balena.models.application.ApplicationConfigVariable, "ApplicationConfigVariable"),
+        (balena.models.application.ApplicationEnvVariable, "ApplicationEnvVariable"),
+        (balena.models.application.BuildEnvVariable, "BuildEnvVariable"),
+        (balena.models.application.ApplicationMembership, "ApplicationMembership"),
+        (balena.models.application.ApplicationInvite, "ApplicationInvite"),
+        (balena.models.device.Device, "Device"),
+        (balena.models.device.DeviceTag, "DeviceTag"),
+        (balena.models.device.DeviceConfigVariable, "DeviceConfigVariable"),
+        (balena.models.device.DeviceEnvVariable, "DeviceEnvVariable"),
+        (balena.models.device.DeviceServiceEnvVariable, "DeviceServiceEnvVariable"),
+        (balena.models.device.DeviceHistory, "DeviceHistory"),
+        (balena.models.device_type.DeviceType, "DeviceType"),
+        (balena.models.api_key.ApiKey, "ApiKey"),
+        (balena.models.key.Key, "Key"),
+        (balena.models.organization.Organization, "Organization"),
+        (balena.models.organization.OrganizationMembership, "OrganizationMembership"),
+        (balena.models.organization.OrganizationMembershipTag, "OrganizationMembershipTag"),
+        (balena.models.organization.OrganizationInvite, "OrganizationInvite"),
+        (balena.models.os.DeviceOs, "DeviceOs"),
+        (balena.models.config.Config, "Config"),
+        (balena.models.release.Release, "Release"),
+        (balena.models.release.ReleaseTag, "ReleaseTag"),
+        (balena.models.Service, "Service"),
+        (balena.models.service.ServiceEnvVariable, "ServiceEnvVariable"),
+        (balena.models.Image, "Image"),
+        (balena.auth.Auth, "Auth"),
+        (balena.twofactor_auth.TwoFactorAuth, "TwoFactorAuth"),
+        (balena.logs.Logs, "Logs"),
+        (type(balena.settings), "Settings")
+    ]
 
-    print(
-        doc2md.doc2md(
-            balena.models.device.DeviceEnvVariable.__doc__,
-            "DeviceEnvVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.device.DeviceEnvVariable, hints)
+    for (element_cls, title) in targets:
+        # Generate the main Markdown body for the class itself
+        class_md = doc2md.doc2md(element_cls.__doc__, title, type=0)
+        documentation_pool.append((title, class_md))
 
-    print(
-        doc2md.doc2md(
-            balena.models.device.DeviceServiceEnvVariable.__doc__,
-            "DeviceServiceEnvVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.device.DeviceServiceEnvVariable, hints)
+        method_docs = get_function_docs(element_cls, hints)
+        method_docs.sort(key=lambda method: method[0].lower())
+        for _, m_md in method_docs:
+            # Anchor these methods to their parent class using a "Class Z_method" key.
+            # This suffix ensures a global sort keeps the methods grouped directly underneath
+            # their parent class header, instead of scattering them across the document.
+            documentation_pool.append((title + " Z_method", m_md))
 
-    print(
-        doc2md.doc2md(
-            balena.models.device.DeviceHistory.__doc__,
-            "DeviceHistory",
-        )
-    )
+    documentation_pool.sort(key=lambda name: name[0].lower())
 
-    print_functions(balena.models.device.DeviceHistory, hints)
-
-    print(doc2md.doc2md(balena.models.device_type.DeviceType.__doc__, "DeviceType", type=0))
-    print_functions(balena.models.device_type.DeviceType, hints)
-
-    print(doc2md.doc2md(balena.models.api_key.ApiKey.__doc__, "ApiKey", type=0))
-    print_functions(balena.models.api_key.ApiKey, hints)
-
-    print(doc2md.doc2md(balena.models.key.Key.__doc__, "Key", type=0))
-    print_functions(balena.models.key.Key, hints)
-
-    print(doc2md.doc2md(balena.models.organization.Organization.__doc__, "Organization", type=0))
-    print_functions(balena.models.organization.Organization, hints)
-
-    print(
-        doc2md.doc2md(
-            balena.models.organization.OrganizationMembership.__doc__,
-            "OrganizationMembership",
-            type=0,
-        )
-    )
-    print_functions(balena.models.organization.OrganizationMembership, hints)
-
-    print(
-        doc2md.doc2md(
-            balena.models.organization.OrganizationMembershipTag.__doc__,
-            "OrganizationMembershipTag",
-            type=0,
-        )
-    )
-    print_functions(balena.models.organization.OrganizationMembershipTag, hints)
-
-    print(
-        doc2md.doc2md(
-            balena.models.organization.OrganizationInvite.__doc__,
-            "OrganizationInvite",
-            type=0,
-        )
-    )
-    print_functions(balena.models.organization.OrganizationInvite, hints)
-
-    print(doc2md.doc2md(balena.models.os.DeviceOs.__doc__, "DeviceOs", type=0))
-    print_functions(balena.models.os.DeviceOs, hints)
-
-    print(doc2md.doc2md(balena.models.config.Config.__doc__, "Config", type=0))
-    print_functions(balena.models.config.Config, hints)
-
-    print(doc2md.doc2md(balena.models.release.Release.__doc__, "Release", type=0))
-    print_functions(balena.models.release.Release, hints)
-
-    print(doc2md.doc2md(balena.models.release.ReleaseTag.__doc__, "ReleaseTag", type=0))
-    print_functions(balena.models.release.ReleaseTag, hints)
-
-    print(doc2md.doc2md(balena.models.Service.__doc__, "Service", type=0))
-    print_functions(balena.models.Service, hints)
-
-    print(
-        doc2md.doc2md(
-            balena.models.service.ServiceEnvVariable.__doc__,
-            "ServiceEnvVariable",
-            type=0,
-        )
-    )
-    print_functions(balena.models.service.ServiceEnvVariable, hints)
-
-    print(doc2md.doc2md(balena.models.Image.__doc__, "Image", type=0))
-    print_functions(balena.models.Image, hints)
-
-    print(doc2md.doc2md(balena.auth.Auth.__doc__, "Auth", type=0))
-    print_functions(balena.auth.Auth, hints)
-
-    print(doc2md.doc2md(balena.twofactor_auth.TwoFactorAuth.__doc__, "TwoFactorAuth", type=0))
-    print_functions(balena.twofactor_auth.TwoFactorAuth, hints)
-
-    print(doc2md.doc2md(balena.logs.Logs.__doc__, "Logs", type=0))
-    print_functions(balena.logs.Logs, hints)
-
-    print(doc2md.doc2md(type(balena.settings).__doc__, "Settings", type=0))
-    print_functions(type(balena.settings), hints)
+    for (_, markdown_content) in documentation_pool:
+        print(markdown_content)
 
     doc2md.print_types(balena.types.models)
 
