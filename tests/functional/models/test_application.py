@@ -260,6 +260,32 @@ class TestApplication(unittest.TestCase):
         membership_list = self.balena.models.application.membership.get_all()
         self.assertEqual(0, len(membership_list))
 
+    def test_35_remove_not_found(self):
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound) as cm:
+            self.balena.models.application.remove(999999)
+        self.assertIn("Application not found: 999999", cm.exception.message)
+
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.remove(f"{self.org_handle}/nonexistentapp")
+
+    def test_36_remove_batch(self):
+        app1 = self.balena.models.application.create("BatchApp1", "raspberry-pi2", self.org_id)
+        app2 = self.balena.models.application.create("BatchApp2", "raspberry-pi2", self.org_id)
+
+        self.balena.models.application.remove([app1["id"], app2["id"]])
+
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.get(app1["id"])
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.get(app2["id"])
+
+        app3 = self.balena.models.application.create("BatchApp3", "raspberry-pi2", self.org_id)
+        with self.assertRaises(self.helper.balena_exceptions.ApplicationNotFound):
+            self.balena.models.application.remove([app3["id"], 999999])
+
+        self.assertIsNotNone(self.balena.models.application.get(app3["id"]))
+        self.balena.models.application.remove(app3["id"])
+
 
 if __name__ == "__main__":
     unittest.main()

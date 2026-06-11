@@ -24,6 +24,7 @@ from ..utils import (
     merge,
     with_supervisor_locked_error,
 )
+from ..request_batching import batch_resource_operation_factory
 from .device_type import DeviceType
 from .organization import Organization
 
@@ -47,6 +48,12 @@ class Application:
         self.build_var = BuildEnvVariable(pine, self)
         self.membership = ApplicationMembership(pine, self)
         self.invite = ApplicationInvite(pine, self, settings)
+
+        self.__batch_application_operation = batch_resource_operation_factory(
+            get_all=self.get_all,
+            not_found_error=exceptions.ApplicationNotFound,
+            ambiguous_error=exceptions.AmbiguousApplication,
+        )
 
     def __get_access_filter(self):
         return {
@@ -481,13 +488,13 @@ class Application:
 
         return self.__pine.post({"resource": "application", "body": body})
 
-    # TODO: enable batch operations
-    def remove(self, slug_or_uuid_or_id: Union[str, int]) -> None:
+    def remove(self, slug_or_uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
         """
         Remove application.
 
         Args:
-            slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+            slug_or_uuid_or_id_or_ids (Union[str, int, List[int]]): application slug (string), uuid (string),
+                id (number) or ids (List[int]).
 
         Examples:
             >>> balena.models.application.remove('my_org/my_app')
@@ -495,13 +502,29 @@ class Application:
             >>> balena.models.application.remove(123)
         """
 
+        if isinstance(slug_or_uuid_or_id_or_ids, list):
+            self.__batch_application_operation(
+                slug_or_uuid_or_id_or_ids,
+                parameter_name="slug_or_uuid_or_id_or_ids",
+                fn=lambda applications: self.__pine.delete(
+                    {
+                        "resource": "application",
+                        "options": {"$filter": {"id": {"$in": [a["id"] for a in applications]}}},
+                    }
+                ),
+            )
+            return
+
+        if isinstance(slug_or_uuid_or_id_or_ids, str):
+            application_id = self.get_id(slug_or_uuid_or_id_or_ids)
+        else:
+            application_id = slug_or_uuid_or_id_or_ids
         try:
-            application_id = self.get_id(slug_or_uuid_or_id)
             self.__pine.delete({"resource": "application", "id": application_id})
         except exceptions.RequestError as e:
             if e.status_code == 404:
-                raise exceptions.ApplicationNotFound(slug_or_uuid_or_id)
-            raise e
+                raise exceptions.ApplicationNotFound(str(slug_or_uuid_or_id_or_ids))
+            raise
 
     def rename(self, slug_or_uuid_or_id: Union[str, int], new_name: str) -> None:
         """
