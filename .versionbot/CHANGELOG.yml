@@ -1,4 +1,29 @@
 - commits:
+    - subject: Add team-membership model
+      hash: 65744d6040b5ab36a0acdeaf1bb919247f06d4f2
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+    - subject: Add team-application-access model
+      hash: 96939c10de9efa34c8023143f252617ed856447f
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+    - subject: Add team model
+      hash: 5412533d8aeafbc5d1de5e55630a3762a83ee3bd
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+  version: 17.2.0
+  title: ""
+  date: 2026-06-22T10:17:53.290Z
+- commits:
     - subject: Alphabetize documentation
       hash: aebf69b47e0d7bcf798817f88d4fee971266d0f3
       body: ""
