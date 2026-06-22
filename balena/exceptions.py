@@ -628,3 +628,56 @@ class TooManyRequests(BalenaException):
     def __init__(self):
         super(TooManyRequests, self).__init__()
         self.message = Message.TOO_MANY_REQUESTS
+
+
+class TeamNotFound(BalenaException):
+    """
+    Exception type for team not found.
+
+    Args:
+        team_id (int): team id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, team_id):
+        super(TeamNotFound, self).__init__()
+        self.message = Message.TEAM_NOT_FOUND.format(team_id=team_id)
+
+
+class TeamApplicationAccessNotFound(BalenaException):
+    """
+    Exception type for team application access not found.
+
+    Args:
+        team_application_access_id (int): team application access id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, team_application_access_id):
+        super(TeamApplicationAccessNotFound, self).__init__()
+        self.message = Message.TEAM_APPLICATION_ACCESS_NOT_FOUND.format(
+            team_application_access_id=team_application_access_id
+        )
+
+
+class TeamMembershipNotFound(BalenaException):
+    """
+    Exception type for team membership not found.
+
+    Args:
+        membership_id (int): team membership id.
+
+    Attributes:
+        message (str): error message.
+
+    """
+
+    def __init__(self, membership_id):
+        super(TeamMembershipNotFound, self).__init__()
+        self.message = Message.TEAM_MEMBERSHIP_NOT_FOUND.format(membership_id=membership_id)
