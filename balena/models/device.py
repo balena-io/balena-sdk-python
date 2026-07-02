@@ -32,6 +32,7 @@ from ..utils import (
     merge,
     with_supervisor_locked_error,
 )
+from ..request_batching import batch_resource_operation_factory
 from .application import Application
 from .config import Config
 from .device_type import DeviceType
@@ -114,6 +115,12 @@ class Device:
         self.service_var = DeviceServiceEnvVariable(pine, self, self.__application)
         self.history = DeviceHistory(pine, settings)
 
+        self.__batch_device_operation = batch_resource_operation_factory(
+            get_all=self.get_all,
+            not_found_error=exceptions.DeviceNotFound,
+            ambiguous_error=exceptions.AmbiguousDevice,
+        )
+
         self.__supervisor_address = os.environ.get("BALENA_SUPERVISOR_ADDRESS")
         self.__supervisor_api_key = os.environ.get("BALENA_SUPERVISOR_API_KEY")
         self.__on_device_app_id = os.environ.get("BALENA_APP_ID")
@@ -162,38 +169,33 @@ class Device:
         body: Any,
         fn: Optional[Callable] = None,
     ) -> None:
-        if fn is None:
-            fn = self.__pine.patch
+        actual_fn = self.__pine.patch if fn is None else fn
 
-        if isinstance(uuid_or_id_or_ids, (int, str)):
-            if is_id(uuid_or_id_or_ids):
-                resource_id = uuid_or_id_or_ids
-            elif is_full_uuid(uuid_or_id_or_ids):
-                resource_id = {"uuid": uuid_or_id_or_ids}
-            else:
-                raise exceptions.InvalidParameter("uuid_or_id_or_ids", uuid_or_id_or_ids)
-
-            fn(
-                {
-                    "resource": "device",
-                    "id": resource_id,
-                    "body": body,
-                }
-            )
-        else:
-            chunk_size = 200
-            chunked_devices = [
-                uuid_or_id_or_ids[i : i + chunk_size]  # noqa: E203 type: ignore
-                for i in range(0, len(uuid_or_id_or_ids), chunk_size)
-            ]
-            for chunk in chunked_devices:
-                fn(
-                    {
-                        "resource": "device",
-                        "options": {"$filter": {"id": {"$in": chunk}}},
-                        "body": body,
-                    }
+        if isinstance(uuid_or_id_or_ids, list):
+            def _operation(devices: list) -> None:
+                device_filter = (
+                    {"id": devices[0]["id"]} if len(devices) == 1
+                    else {"id": {"$in": [d["id"] for d in devices]}}
                 )
+                query: Any = {"resource": "device", "options": {"$filter": device_filter}}
+                if body is not None:
+                    query["body"] = body
+                actual_fn(query)
+            self.__batch_device_operation(uuid_or_id_or_ids, _operation)
+            return
+
+        if uuid_or_id_or_ids == "":
+            raise exceptions.InvalidParameter("uuid_or_id_or_ids", uuid_or_id_or_ids)
+        resource_filter = (
+            {"id": uuid_or_id_or_ids} if is_id(uuid_or_id_or_ids) else {"uuid": uuid_or_id_or_ids}
+        )
+        devices = self.get_all({"$select": "id", "$filter": resource_filter})
+        if not devices:
+            raise exceptions.DeviceNotFound(str(uuid_or_id_or_ids))
+        query: Any = {"resource": "device", "id": devices[0]["id"]}
+        if body is not None:
+            query["body"] = body
+        actual_fn(query)
 
     def __check_local_mode_supported(self, device: TypeDevice):
         if not is_provisioned(device):
@@ -667,56 +669,66 @@ class Device:
 
         self.set_custom_location(uuid_or_id_or_ids, {"latitude": "", "longitude": ""})
 
-    # TODO: enable device batching
     def move(
         self,
-        uuid_or_id: Union[str, int],
+        uuid_or_id_or_ids: Union[str, int, List[int], List[str]],
         app_slug_or_uuid_or_id: Union[str, int],
     ):
         """
         Move a device to another application.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+            uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (str) or id (int)
+                or array of uuids or ids.
             app_slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
 
         Examples:
             >>> balena.models.device.move(123, 'RPI1Test')
         """
-        application_options = {
-            "$select": "id",
-            "$expand": {
-                "is_for__device_type": {
-                    "$select": "is_of__cpu_architecture",
-                    "$expand": {"is_of__cpu_architecture": {"$select": "slug"}},
-                }
+        app = self.__application.get(
+            app_slug_or_uuid_or_id,
+            {
+                "$select": "id",
+                "$expand": {
+                    "is_for__device_type": {
+                        "$select": "is_of__cpu_architecture",
+                        "$expand": {"is_of__cpu_architecture": {"$select": "slug"}},
+                    }
+                },
             },
-        }
-
-        app = self.__application.get(app_slug_or_uuid_or_id, application_options)
+        )
         app_cpu_arch_slug = app["is_for__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
 
-        device_options = {
-            "$select": "is_of__device_type",
-            "$expand": {
-                "is_of__device_type": {
-                    "$select": "is_of__cpu_architecture",
-                    "$expand": {
-                        "is_of__cpu_architecture": {
-                            "$select": "slug",
-                        }
-                    },
+        def _operation(devices: list, _owner_id: int) -> None:
+            for device in devices:
+                device_cpu_arch_slug = device["is_of__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
+                if not self.__device_os.is_architecture_compatible_with(app_cpu_arch_slug, device_cpu_arch_slug):
+                    raise exceptions.IncompatibleApplication(app_slug_or_uuid_or_id)
+            device_filter = (
+                {"id": devices[0]["id"]} if len(devices) == 1 else {"id": {"$in": [d["id"] for d in devices]}}
+            )
+            self.__pine.patch(
+                {
+                    "resource": "device",
+                    "options": {"$filter": device_filter},
+                    "body": {"belongs_to__application": app["id"]},
                 }
+            )
+
+        self.__batch_device_operation(
+            uuid_or_id_or_ids,
+            _operation,
+            options={
+                "$select": "is_of__device_type",
+                "$expand": {
+                    "is_of__device_type": {
+                        "$select": "is_of__cpu_architecture",
+                        "$expand": {"is_of__cpu_architecture": {"$select": "slug"}},
+                    }
+                },
             },
-        }
-
-        device = self.get(uuid_or_id, device_options)
-        device_cpu_arch_slug = device["is_of__device_type"][0]["is_of__cpu_architecture"][0]["slug"]
-
-        if not self.__device_os.is_architecture_compatible_with(app_cpu_arch_slug, device_cpu_arch_slug):
-            raise exceptions.IncompatibleApplication(app_slug_or_uuid_or_id)
-
-        self.__set(uuid_or_id, {"belongs_to__application": app["id"]})
+            group_by_navigation_property="belongs_to__application",
+        )
 
     def __supervisor_request(self, method: str, path: str, body: Optional[AnyObject] = None):
         params = {"apikey": self.__supervisor_api_key}
@@ -1622,10 +1634,9 @@ class Device:
 
         return not bool(self.get(uuid_or_id, {"$select": "is_pinned_on__release"})["is_pinned_on__release"])
 
-    # TODO: enable device batching
     def pin_to_release(
         self,
-        uuid_or_id: Union[str, int],
+        uuid_or_id_or_ids: Union[str, int, List[int], List[str]],
         full_release_hash_or_id: Union[str, int],
     ) -> None:
         """
@@ -1633,42 +1644,50 @@ class Device:
         and not get updated when the current application release changes.
 
         Args:
-            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (string) or id (int)
+                or array of uuids or ids
             full_release_hash_or_id (Union[str, int]) : the hash of a successful release (string) or id (number)
 
         Examples:
             >>> balena.models.device.pin_to_release('49b2a', '45c90004de73557ded7274d4896a6db90ea61e36')
         """
+        release_filter_prop = "id" if is_id(full_release_hash_or_id) else "commit"
+        release_cache = {}
 
-        device = self.get(
-            uuid_or_id,
-            {
-                "$select": "id",
-                "$expand": {"belongs_to__application": {"$select": "id"}},
-            },
-        )
-        app_id = device["belongs_to__application"][0]["id"]
-        release_options = {
-            "$top": 1,
-            "$select": "id",
-            "$filter": {
-                "status": "success",
-                "belongs_to__application": app_id,
-            },
-            "$orderby": "created_at desc",
-        }
-        if is_id(full_release_hash_or_id):
-            release_options["$filter"]["id"] = full_release_hash_or_id
-        else:
-            release_options["$filter"]["commit"] = full_release_hash_or_id
+        def _get_release(app_id: int):
+            if app_id not in release_cache:
+                release_cache[app_id] = self.__release.get(
+                    full_release_hash_or_id,
+                    {
+                        "$top": 1,
+                        "$select": "id",
+                        "$filter": {
+                            release_filter_prop: full_release_hash_or_id,
+                            "status": "success",
+                            "belongs_to__application": app_id,
+                        },
+                        "$orderby": "created_at desc",
+                    },
+                )
+            return release_cache[app_id]
 
-        release = self.__release.get(full_release_hash_or_id, release_options)
-        self.__pine.patch(
-            {
-                "resource": "device",
-                "id": device["id"],
-                "body": {"is_pinned_on__release": release["id"]},
-            }
+        def _operation(devices: list, app_id: int) -> None:
+            release = _get_release(app_id)
+            device_filter = (
+                {"id": devices[0]["id"]} if len(devices) == 1 else {"id": {"$in": [d["id"] for d in devices]}}
+            )
+            self.__pine.patch(
+                {
+                    "resource": "device",
+                    "options": {"$filter": device_filter},
+                    "body": {"is_pinned_on__release": release["id"]},
+                }
+            )
+
+        self.__batch_device_operation(
+            uuid_or_id_or_ids,
+            _operation,
+            group_by_navigation_property="belongs_to__application",
         )
 
     def track_application_release(self, uuid_or_id_or_ids: Union[str, int, List[int]]) -> None:
@@ -1681,48 +1700,68 @@ class Device:
 
         self.__set(uuid_or_id_or_ids, {"is_pinned_on__release": None})
 
-    # TODO: enable device batching
     def pin_to_supervisor_release(
         self,
-        uuid_or_id: Union[str, int],
+        uuid_or_id_or_ids: Union[str, int, List[int], List[str]],
         supervisor_version_or_id: Union[str, int],
     ) -> None:
         """
         Set a specific device to run a particular supervisor release.
         Args:
-            uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+            uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (string) or id (int)
+                or array of uuids or ids
             supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
         Examples:
             >>> balena.models.device.pin_to_supervisor_release('f55dcdd9ada04b11b4d05c1f1c3b4e72', 'v13.0.0')
         """
-        device = self.get(
-            uuid_or_id,
-            {
-                "$select": ["id", "supervisor_version", "os_version"],
+        release_filter_prop = "id" if is_id(supervisor_version_or_id) else "raw_version"
+        release_cache = {}
+
+        def _get_release(cpu_arch_id: int):
+            if cpu_arch_id not in release_cache:
+                try:
+                    release = self.__device_os.get_supervisor_releases_for_cpu_architecture(
+                        cpu_arch_id,
+                        {
+                            "$top": 1,
+                            "$select": "id",
+                            "$filter": {release_filter_prop: supervisor_version_or_id},
+                        },
+                    )[0]
+                except IndexError:
+                    raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
+                release_cache[cpu_arch_id] = release
+            return release_cache[cpu_arch_id]
+
+        def _operation(devices: list) -> None:
+            for device in devices:
+                ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
+                ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
+
+            devices_by_arch = {}
+            for device in devices:
+                cpu_arch_id = device["is_of__device_type"][0]["is_of__cpu_architecture"]["__id"]
+                devices_by_arch.setdefault(cpu_arch_id, []).append(device)
+
+            for cpu_arch_id, arch_devices in devices_by_arch.items():
+                release = _get_release(cpu_arch_id)
+                ids = [d["id"] for d in arch_devices]
+                arch_filter = {"id": arch_devices[0]["id"]} if len(arch_devices) == 1 else {"id": {"$in": ids}}
+                self.__pine.patch(
+                    {
+                        "resource": "device",
+                        "options": {"$filter": arch_filter},
+                        "body": {"should_be_managed_by__release": release["id"]},
+                    }
+                )
+
+        self.__batch_device_operation(
+            uuid_or_id_or_ids,
+            _operation,
+            options={
+                "$select": ["supervisor_version", "os_version"],
                 "$expand": {"is_of__device_type": {"$select": "is_of__cpu_architecture"}},
             },
-        )
-        cpu_arch_id = device["is_of__device_type"][0]["is_of__cpu_architecture"]["__id"]
-
-        release_options = {
-            "$top": 1,
-            "$select": "id",
-            "$filter": {"id" if is_id(supervisor_version_or_id) else "raw_version": supervisor_version_or_id},
-        }
-
-        try:
-            release = self.__device_os.get_supervisor_releases_for_cpu_architecture(cpu_arch_id, release_options)[0]
-        except IndexError:
-            raise Exception(f"Supervisor release not found {supervisor_version_or_id}")
-
-        ensure_version_compatibility(device["supervisor_version"], MIN_SUPERVISOR_MC_API, "supervisor")
-        ensure_version_compatibility(device["os_version"], MIN_OS_MC, "host OS")
-        self.__pine.patch(
-            {
-                "resource": "device",
-                "id": device["id"],
-                "body": {"should_be_managed_by__release": release["id"]},
-            }
         )
 
     def start_os_update(
