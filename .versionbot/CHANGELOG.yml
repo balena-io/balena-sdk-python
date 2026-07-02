@@ -1,4 +1,15 @@
 - commits:
+    - subject: Add request batching for device and application operations
+      hash: eb0760245ede5941f63cc612c53e2042f2666f90
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+  version: 17.3.0
+  title: ""
+  date: 2026-07-02T11:18:00.890Z
+- commits:
     - subject: Add team-membership model
       hash: 65744d6040b5ab36a0acdeaf1bb919247f06d4f2
       body: ""
