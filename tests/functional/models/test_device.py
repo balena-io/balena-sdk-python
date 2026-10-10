@@ -394,10 +394,10 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.remove("")
 
-        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.remove("abc")
 
-        with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
             self.balena.models.device.remove(uuid[0:10])
 
         device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]
@@ -410,6 +410,117 @@ class TestDevice(unittest.TestCase):
         device_uuids = [device["uuid"] for device in self.balena.models.device.get_all()]
         self.assertNotIn(uuid, device_uuids)
         self.assertNotIn(uuid2, device_uuids)
+
+    def test_31_remove_not_found(self):
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound) as cm:
+            self.balena.models.device.remove("a2df0000025c4223b4efe2b66f3e370a")
+        self.assertIn("Device not found: a2df0000025c4223b4efe2b66f3e370a", cm.exception.message)
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound) as cm:
+            self.balena.models.device.remove(999999)
+        self.assertIn("Device not found: 999999", cm.exception.message)
+
+    def test_32_remove_by_id(self):
+        uuid = self.balena.models.device.generate_uuid()
+        device = self.balena.models.device.register(self.app["id"], uuid)
+        self.balena.models.device.remove(device["id"])
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.get(device["uuid"])
+
+    def test_33_remove_batch(self):
+        uuid1 = self.balena.models.device.generate_uuid()
+        uuid2 = self.balena.models.device.generate_uuid()
+        device1 = self.balena.models.device.register(self.app["id"], uuid1)
+        device2 = self.balena.models.device.register(self.app["id"], uuid2)
+
+        self.balena.models.device.remove([device1["id"], device2["id"]])
+
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.get(device1["uuid"])
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.get(device2["uuid"])
+
+        uuid3 = self.balena.models.device.generate_uuid()
+        device3 = self.balena.models.device.register(self.app["id"], uuid3)
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.remove([device3["id"], 999999])
+
+        self.assertIsNotNone(self.balena.models.device.get(device3["uuid"]))
+        self.balena.models.device.remove(device3["id"])
+
+    def test_34_pin_to_release_batch(self):
+        app_info = self.helper.create_multicontainer_app(app_name="FooBatchPin")
+        device2 = self.balena.models.device.register(
+            app_info["app"]["id"], self.balena.models.device.generate_uuid()
+        )
+        device1_id = app_info["device"]["id"]
+        device2_id = device2["id"]
+
+        self.balena.models.device.pin_to_release(
+            [device1_id, device2_id], app_info["old_release"]["commit"]
+        )
+        self.assertFalse(
+            self.balena.models.device.is_tracking_application_release(app_info["device"]["uuid"])
+        )
+        self.assertFalse(
+            self.balena.models.device.is_tracking_application_release(device2["uuid"])
+        )
+
+        self.balena.models.device.track_application_release([device1_id, device2_id])
+        self.assertTrue(
+            self.balena.models.device.is_tracking_application_release(app_info["device"]["uuid"])
+        )
+        self.assertTrue(
+            self.balena.models.device.is_tracking_application_release(device2["uuid"])
+        )
+
+        self.balena.models.device.pin_to_release(
+            [app_info["device"]["uuid"], device2["uuid"]], app_info["old_release"]["id"]
+        )
+        self.assertFalse(
+            self.balena.models.device.is_tracking_application_release(app_info["device"]["uuid"])
+        )
+        self.assertFalse(
+            self.balena.models.device.is_tracking_application_release(device2["uuid"])
+        )
+
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.pin_to_release(
+                [device1_id, 999999], app_info["current_release"]["commit"]
+            )
+        self.assertFalse(
+            self.balena.models.device.is_tracking_application_release(app_info["device"]["uuid"])
+        )
+
+    def test_35_pin_to_supervisor_release_batch(self):
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.pin_to_supervisor_release(999999, "v13.0.0")
+
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.pin_to_supervisor_release([999998, 999999], "v13.0.0")
+
+    def test_36_move_batch(self):
+        app_src = self.balena.models.application.create(
+            "FooBatchMoveSrc", "raspberry-pi2", self.helper.default_organization["id"]
+        )
+        app_dst = self.balena.models.application.create(
+            "FooBatchMoveDst", "raspberry-pi2", self.helper.default_organization["id"]
+        )
+        app_incompatible = self.balena.models.application.create(
+            "FooBatchMoveIncompat", "intel-nuc", self.helper.default_organization["id"]
+        )
+
+        device1 = self.balena.models.device.register(app_src["id"], self.balena.models.device.generate_uuid())
+        device2 = self.balena.models.device.register(app_src["id"], self.balena.models.device.generate_uuid())
+
+        self.balena.models.device.move([device1["id"], device2["id"]], app_dst["slug"])
+        self.assertEqual(self.balena.models.device.get_application_name(device1["uuid"]), app_dst["app_name"])
+        self.assertEqual(self.balena.models.device.get_application_name(device2["uuid"]), app_dst["app_name"])
+
+        with self.assertRaises(self.helper.balena_exceptions.IncompatibleApplication):
+            self.balena.models.device.move([device1["id"], device2["id"]], app_incompatible["slug"])
+
+        with self.assertRaises(self.helper.balena_exceptions.DeviceNotFound):
+            self.balena.models.device.move([device1["id"], 999999], app_dst["slug"])
 
 
 if __name__ == "__main__":

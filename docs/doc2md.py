@@ -51,9 +51,9 @@ INDENT = "    "
 NEW_LINE = ""
 
 # Level for each section in class
-CLASS_NAME = 2
-FUNCTION_NAME = 3
-SECTION_NAME = 4
+CLASS_NAME = 1
+FUNCTION_NAME = 2
+SECTION_NAME = 3
 
 doctrim = inspect.cleandoc
 
@@ -121,6 +121,8 @@ def get_heading(line):
 
 
 def make_heading(level, title):
+    if level == SECTION_NAME:
+        return "**" + title + "**"
     return "#" * max(level, 1) + " " + title
 
 
@@ -133,47 +135,6 @@ def find_sections(lines):
         if is_heading(line):
             sections.append(get_heading(line))
     return sections
-
-
-def make_toc(sections, model_hints=[]):
-    """
-    Generate table of contents for array of section names.
-    """
-
-    if not sections:
-        return []
-    refs = []
-    for sec, ind, ref in sections:
-        children = []
-        if ref is None:
-            ref = sec.lower()
-        else:
-            if isinstance(ref, str):
-                ref = ref.lower()
-            else:
-                children = get_funcs(ref)
-                ref = ref.__name__.lower().split(".")[-1]
-
-        ref = ref.replace(" ", "-")
-        ref = ref.replace("?", "")
-        refs.append(INDENT * (ind) + "- [%s](#%s)" % (sec, ref))
-
-        for child_name, child_hint, child_ref in children:
-            hint_ref = None
-            for model_hint in model_hints:
-                # if the child_hint includes the name of a type, create the reference for that type
-                # for example, when child_hint is List[AType] we want it to be able to navigate to AType ref
-                if model_hint in child_hint:
-                    hint_ref = model_hint.lower()
-
-            if hint_ref:
-                refs.append(
-                    INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ [<code>{child_hint}</code>](#{hint_ref})"
-                )
-            else:
-                refs.append(INDENT * (ind + 1) + f"- [{child_name}](#{child_ref}) ⇒ <code>{child_hint}</code>")
-
-    return "\n".join(refs)
 
 
 def get_funcs(baseclass):
@@ -201,7 +162,7 @@ def make_function_name(func, func_name):
         hint = simplify_type_hint(fully_qualified_hint)
     else:
         hint = "None"
-    return f"{func_name}({f_args})", hint
+    return func_name, f"({f_args})", hint
 
 
 def _get_class_intro(lines):
@@ -259,7 +220,7 @@ def _doc2md(lines):
     return md
 
 
-def doc2md(docstr, title, type=0):
+def doc2md(docstr, title, type=0, signature=None):
     # Type = 0 -> class, Type = 1 -> functions
     """
     Convert a docstring to a markdown text.
@@ -271,14 +232,19 @@ def doc2md(docstr, title, type=0):
         level = CLASS_NAME
     if type == 1:
         level = FUNCTION_NAME
-        title = "Function: {func_name}".format(func_name=title)
+        title = "{func_name}".format(func_name=title)
     md = [make_heading(level, title), NEW_LINE]
+
     md += intro
+
+    if signature:
+        md += [signature, NEW_LINE]
+
     md += _doc2md(contents)
     return "\n".join(md)
 
 
-def mod2md(module, title, title_api_section, toc=True):
+def mod2md(module, title, title_api_section):
     """
     Generate markdown document from module, including API section.
     """
@@ -302,7 +268,7 @@ def mod2md(module, title, title_api_section, toc=True):
             api_md += ["", ""]
             entry = module.__dict__[name]
             if entry.__doc__:
-                md, sec = doc2md(entry.__doc__, name, min_level=level + 2, more_info=True, toc=False)
+                md, sec = doc2md(entry.__doc__, name, min_level=level + 2, more_info=True)
                 api_sec += sec
                 api_md += md
 
@@ -310,10 +276,6 @@ def mod2md(module, title, title_api_section, toc=True):
 
     # headline
     md = [make_heading(level, title), "", lines.pop(0), ""]
-
-    # main sections
-    if toc:
-        md += make_toc(sections)
     md += _doc2md(lines)
 
     # API section
@@ -322,9 +284,6 @@ def mod2md(module, title, title_api_section, toc=True):
         "",
         make_heading(level + 1, title_api_section),
     ]
-    if toc:
-        md += [""]
-        md += make_toc(api_sec)
     md += api_md
 
     return "\n".join(md)
@@ -347,13 +306,6 @@ def main(args=None):
         help="Create an API section with the contents of module.__all__.",
     )
     parser.add_argument("-t", "--title", dest="title", help="Document title (default is module name)")
-    parser.add_argument(
-        "--no-toc",
-        dest="toc",
-        action="store_false",
-        default=True,
-        help="Do not automatically generate the TOC",
-    )
     args = parser.parse_args(args)
 
     import importlib
@@ -377,7 +329,7 @@ def main(args=None):
     module = importlib.import_module(mod_name)
 
     if args.all:
-        print(mod2md(module, title, "API", toc=args.toc))
+        print(mod2md(module, title, "API"))
 
     else:
         if args.entry:
@@ -385,7 +337,7 @@ def main(args=None):
         else:
             docstr = module.__doc__
 
-        print(doc2md(docstr, title, toc=args.toc))
+        print(doc2md(docstr, title))
 
 
 def typed_dict_to_dict(typed_dict_cls):
@@ -398,7 +350,7 @@ def get_python_dict_to_print(d):
 
 
 def print_types(types):
-    print("## Types")
+    print("# Types")
     members = inspect.getmembers(types)
 
     for type_tuple in members:
@@ -406,7 +358,7 @@ def print_types(types):
             # print(type_tuple)
             try:
                 prettyprint_dict = get_python_dict_to_print(typed_dict_to_dict(type_tuple[1]))
-                print("### " + type_tuple[0])
+                print("## " + type_tuple[0])
                 print("\n")
                 print("```python")
                 print(prettyprint_dict)

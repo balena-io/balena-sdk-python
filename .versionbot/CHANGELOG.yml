@@ -1,4 +1,62 @@
 - commits:
+    - subject: Add request batching for device and application operations
+      hash: eb0760245ede5941f63cc612c53e2042f2666f90
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+  version: 17.3.0
+  title: ""
+  date: 2026-07-02T11:18:00.890Z
+- commits:
+    - subject: Add team-membership model
+      hash: 65744d6040b5ab36a0acdeaf1bb919247f06d4f2
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+    - subject: Add team-application-access model
+      hash: 96939c10de9efa34c8023143f252617ed856447f
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+    - subject: Add team model
+      hash: 5412533d8aeafbc5d1de5e55630a3762a83ee3bd
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Andrea Rosci
+  version: 17.2.0
+  title: ""
+  date: 2026-06-22T10:17:53.290Z
+- commits:
+    - subject: Alphabetize documentation
+      hash: aebf69b47e0d7bcf798817f88d4fee971266d0f3
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Matthew Yarmolinsky
+  version: 17.1.3
+  title: ""
+  date: 2026-06-09T13:42:25.718Z
+- commits:
+    - subject: Clean up documentation for use in docs site
+      hash: 4e17e785765727233aa3ad38e8e8dd2e995916cd
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Matthew Yarmolinsky
+  version: 17.1.2
+  title: ""
+  date: 2026-06-01T15:43:18.274Z
+- commits:
     - subject: Rebuild documentation to include pin_to_os_release()
       hash: 61be12f97796ecc97c1d82e3ae56a337eeb1d8c1
       body: ""
