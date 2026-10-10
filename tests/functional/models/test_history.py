@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from tests.helper import TestHelper
 
@@ -81,16 +81,16 @@ class TestHistory(unittest.TestCase):
             # set time range to return device history entries
             device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
-                from_date=datetime.utcnow() + timedelta(days=-10),
-                to_date=datetime.utcnow() + timedelta(days=+1),
+                from_date=datetime.now(timezone.utc) + timedelta(days=-10),
+                to_date=datetime.now(timezone.utc) + timedelta(days=+1),
             )
             test_set["checker"](device_history)
 
             # set time range to return now data
             device_history = method_under_test(
                 app_info[test_set["by"]]["id"],
-                from_date=datetime.utcnow() + timedelta(days=-3000),
-                to_date=datetime.utcnow() + timedelta(days=-2000),
+                from_date=datetime.now(timezone.utc) + timedelta(days=-3000),
+                to_date=datetime.now(timezone.utc) + timedelta(days=-2000),
             )
             self.assertEqual(len(device_history), 0)
 

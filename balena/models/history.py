@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Union
 
 from .. import exceptions
@@ -47,7 +47,7 @@ class DeviceHistory:
     def get_all_by_device(
         self,
         uuid_or_id: Union[str, int],
-        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        from_date: datetime = datetime.now(timezone.utc) + timedelta(days=-7),
         to_date: Optional[datetime] = None,
         options: AnyObject = {},
     ) -> List[DeviceHistoryType]:
@@ -67,12 +67,12 @@ class DeviceHistory:
             >>> balena.models.device.history.get_all_by_device('6046335305c8142883a4466d30abe211')
             >>> balena.models.device.history.get_all_by_device(11196426)
             >>> balena.models.device.history.get_all_by_device(
-            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ...     11196426, from_date=datetime.now(timezone.utc) + timedelta(days=-5)
             ... )
             >>> balena.models.device.history.get_all_by_device(
             ...     11196426,
-            ...     from_date=datetime.utcnow() + timedelta(days=-10),
-            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ...     from_date=datetime.now(timezone.utc) + timedelta(days=-10),
+            ...     to_date=from_date = datetime.now(timezone.utc) + timedelta(days=-5))
             ... )
 
         """
@@ -89,7 +89,7 @@ class DeviceHistory:
     def get_all_by_application(
         self,
         slug_or_uuid_or_id: Union[str, int],
-        from_date: datetime = datetime.utcnow() + timedelta(days=-7),
+        from_date: datetime = datetime.now(timezone.utc) + timedelta(days=-7),
         to_date: Optional[datetime] = None,
         options: AnyObject = {},
     ) -> List[DeviceHistoryType]:
@@ -109,12 +109,12 @@ class DeviceHistory:
             >>> balena.models.device.history.get_all_by_application('myorg/myapp')
             >>> balena.models.device.history.get_all_by_application(11196426)
             >>> balena.models.device.history.get_all_by_application(
-            ...     11196426, from_date=datetime.utcnow() + timedelta(days=-5)
+            ...     11196426, from_date=datetime.now(timezone.utc) + timedelta(days=-5)
             ... )
             >>> balena.models.device.history.get_all_by_application(
             ...     11196426,
-            ...     from_date=datetime.utcnow() + timedelta(days=-10),
-            ...     to_date=from_date = datetime.utcnow() + timedelta(days=-5))
+            ...     from_date=datetime.now(timezone.utc) + timedelta(days=-10),
+            ...     to_date=from_date = datetime.now(timezone.utc) + timedelta(days=-5))
             ... )
         """
         app_id = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})["id"]

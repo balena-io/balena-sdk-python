@@ -1,7 +1,7 @@
 import configparser
 import os
 import os.path as Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 import jwt
 
@@ -126,7 +126,9 @@ class TestHelper:
                 self.balena.models.api_key.revoke(key["id"])
 
     def datetime_to_epoch_ms(self, dt):
-        return int((dt - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return int(dt.timestamp() * 1000)
 
     def create_device(self, app_name="FooBar", device_type="raspberry-pi2"):
         """
