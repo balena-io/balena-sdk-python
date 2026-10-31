@@ -419,7 +419,7 @@ Given an application slug or uuid or id, returns it numeric id.
 
 Get the hash of the current release for a specific application.
 
-**Signature:** `balena.models.application.get_target_release_hash(slug_or_uuid_or_id)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.application.get_target_release_hash(slug_or_uuid_or_id)` ⇒ <code>str | None</code>
 
 **Args:**
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
@@ -566,10 +566,11 @@ Reboots devices by application id
 
 Remove application.
 
-**Signature:** `balena.models.application.remove(slug_or_uuid_or_id)` ⇒ <code>None</code>
+**Signature:** `balena.models.application.remove(slug_or_uuid_or_id_or_ids)` ⇒ <code>None</code>
 
 **Args:**
-    slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
+    slug_or_uuid_or_id_or_ids (Union[str, int, List[int]]): application slug (string), uuid (string),
+        id (number) or ids (List[int]).
 
 **Examples:**
 ```python
@@ -675,7 +676,7 @@ This class implements application config variable model for balena python SDK.
 
 Get application config variable.
 
-**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>str | None</code>
 
 **Args:**
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
@@ -742,7 +743,7 @@ This class implements application environment variable model for balena python S
 
 Get application environment variable.
 
-**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>str | None</code>
 
 **Args:**
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
@@ -1090,7 +1091,7 @@ Get current logged in actor id.
 
 This function retrieves Auth Token.
 
-**Signature:** `balena.auth.get_token()` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.auth.get_token()` ⇒ <code>str | None</code>
 
 **Returns:**
     str: Auth Token.
@@ -1211,7 +1212,7 @@ This function is used for registering to balena.
 
 Return current logged in username.
 
-**Signature:** `balena.auth.whoami()` ⇒ <code>Union[UserKeyWhoAmIResponse, ApplicationKeyWhoAmIResponse, DeviceKeyWhoAmIResponse, None]</code>
+**Signature:** `balena.auth.whoami()` ⇒ <code>balena.auth.UserKeyWhoAmIResponse | balena.auth.ApplicationKeyWhoAmIResponse | balena.auth.DeviceKeyWhoAmIResponse | None</code>
 
 **Returns:**
     Optional[WhoamiResult]: current logged in information
@@ -1228,7 +1229,7 @@ This class implements build environment variable model for balena python SDK.
 
 Get build environment variable.
 
-**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.application.get(slug_or_uuid_or_id, env_var_name)` ⇒ <code>str | None</code>
 
 **Args:**
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number)
@@ -1873,10 +1874,11 @@ Get whether the device is configured to track the current application release.
 
 Move a device to another application.
 
-**Signature:** `balena.models.device.move(uuid_or_id, app_slug_or_uuid_or_id)` ⇒ <code>None</code>
+**Signature:** `balena.models.device.move(uuid_or_id_or_ids, app_slug_or_uuid_or_id)` ⇒ <code>None</code>
 
 **Args:**
-    uuid_or_id (Union[str, int]): device uuid (str) or id (int).
+    uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (str) or id (int)
+        or array of uuids or ids.
     app_slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
 
 **Examples:**
@@ -1908,10 +1910,11 @@ Mark a specific device to be updated to a particular OS release
 Configures the device to run a particular release
 and not get updated when the current application release changes.
 
-**Signature:** `balena.models.device.pin_to_release(uuid_or_id, full_release_hash_or_id)` ⇒ <code>None</code>
+**Signature:** `balena.models.device.pin_to_release(uuid_or_id_or_ids, full_release_hash_or_id)` ⇒ <code>None</code>
 
 **Args:**
-    uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+    uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (string) or id (int)
+        or array of uuids or ids
     full_release_hash_or_id (Union[str, int]) : the hash of a successful release (string) or id (number)
 
 **Examples:**
@@ -1922,10 +1925,11 @@ and not get updated when the current application release changes.
 ## pin_to_supervisor_release
 
 Set a specific device to run a particular supervisor release.
-**Signature:** `balena.models.device.pin_to_supervisor_release(uuid_or_id, supervisor_version_or_id)` ⇒ <code>None</code>
+**Signature:** `balena.models.device.pin_to_supervisor_release(uuid_or_id_or_ids, supervisor_version_or_id)` ⇒ <code>None</code>
 
 **Args:**
-    uuid_or_id (Union[str, int]): device uuid (string) or id (int)
+    uuid_or_id_or_ids (Union[str, int, List[int], List[str]]): device uuid (string) or id (int)
+        or array of uuids or ids
     supervisor_version_or_id (Union[str, int]): the version of a released supervisor (string) or id (number)
 **Examples:**
 ```python
@@ -2135,6 +2139,7 @@ This function requires supervisor v1.8 or higher.
 
 ## start_os_update
 
+***Deprecated***
 Start an OS update on a device.
 
 If using run_detached option, monitor progress with device.get() --
@@ -2258,7 +2263,7 @@ This class implements device config variable model for balena python SDK.
 
 Get a device config variable.
 
-**Signature:** `balena.models.device.get(uuid_or_id, env_var_name)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.device.get(uuid_or_id, env_var_name)` ⇒ <code>str | None</code>
 
 **Args:**
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
@@ -2343,7 +2348,7 @@ This class implements device environment variable model for balena python SDK.
 
 Get device environment variable.
 
-**Signature:** `balena.models.device.get(uuid_or_id, env_var_name)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.device.get(uuid_or_id, env_var_name)` ⇒ <code>str | None</code>
 
 **Args:**
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
@@ -2582,7 +2587,7 @@ Get OS download size estimate. Currently only the raw (uncompressed) size is rep
 
 Get OS download size estimate. Currently only the raw (uncompressed) size is reported.
 
-**Signature:** `balena.models.os.get_max_satisfying_version(device_type, version_or_range, os_type)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.os.get_max_satisfying_version(device_type, version_or_range, os_type)` ⇒ <code>str | None</code>
 
 **Args:**
     device_type (str): device type slug.
@@ -2667,7 +2672,7 @@ This class implements device service variable model for balena python SDK.
 
 Get the overriden value of a service variable on a device
 
-**Signature:** `balena.models.device.get(uuid_or_id, service_name_or_id, key)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.device.get(uuid_or_id, service_name_or_id, key)` ⇒ <code>str | None</code>
 
 **Args:**
     uuid_or_id (Union[str, int]): device uuid (string) or id (int)
@@ -2763,7 +2768,7 @@ Get a device tag (update tag value if it exists).
 ___Note___: Notice that when using the device ID rather than UUID,
 it will avoid one extra API roundtrip.
 
-**Signature:** `balena.models.device.get(uuid_or_id, tag_key)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.device.get(uuid_or_id, tag_key)` ⇒ <code>str | None</code>
 
 **Args:**
     uuid_or_id (Union[str, int]): device uuid or device id.
@@ -3280,7 +3285,7 @@ This class implements organization membership tag model for balena python SDK.
 
 Get an organization membership tag.
 
-**Signature:** `balena.models.organization.get(membership_id, tag_key)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.organization.get(membership_id, tag_key)` ⇒ <code>str | None</code>
 
 **Args:**
     membership_id: organization membership id.
@@ -3432,7 +3437,7 @@ Get all releases from an application.
 
 Get the latest successful release for an application.
 
-**Signature:** `balena.models.release.get_latest_by_application(slug_or_uuid_or_id, options)` ⇒ [<code>Optional[ReleaseType]</code>](#releasetype)
+**Signature:** `balena.models.release.get_latest_by_application(slug_or_uuid_or_id, options)` ⇒ [<code>balena.types.models.ReleaseType | None</code>](#releasetype)
 
 **Args:**
     slug_or_uuid_or_id (Union[str, int]): application slug (string), uuid (string) or id (number).
@@ -3505,7 +3510,7 @@ This class implements release tag model for balena python SDK.
 
 Get a single release tag.
 
-**Signature:** `balena.models.release.get(commit_or_id_or_raw_version, tag_key)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.release.get(commit_or_id_or_raw_version, tag_key)` ⇒ <code>str | None</code>
 
 **Args:**
     commit_or_id_or_raw_version(Union[str, int, ReleaseRawVersionApplicationPair]): release commit (string) or
@@ -3623,7 +3628,7 @@ This class implements Service environment variable model for balena python SDK.
 
 Get the value of a specific service variable
 
-**Signature:** `balena.models.service.get(service_id_or_natural_key, key)` ⇒ <code>Optional[str]</code>
+**Signature:** `balena.models.service.get(service_id_or_natural_key, key)` ⇒ <code>str | None</code>
 
 **Args:**
     service_id_or_natural_key (Union[int, ServiceNaturalKey]): service id (number) or appliation-service_name
@@ -3843,8 +3848,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "name": str,
-    "description": Optional[str],
-    "expiry_date": Optional[str]
+    "description": str | None,
+    "expiry_date": str | None
 }
 ```
 
@@ -3857,9 +3862,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "created_at": str,
     "name": str,
-    "description": Optional[str],
-    "expiry_date": Optional[str],
-    "is_of__actor": Union[List[ActorType], PineDeferred]
+    "description": str | None,
+    "expiry_date": str | None,
+    "is_of__actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -3870,11 +3875,11 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "is_of__user": Union[List[UserType], PineDeferred, None],
-    "is_of__application": Union[List[TypeApplication], PineDeferred, None],
-    "is_of__device": Union[List[TypeDevice], PineDeferred, None],
-    "is_of__public_device": Union[List[PublicDeviceType], PineDeferred, None],
-    "api_key": Union[List[APIKeyType], PineDeferred, None]
+    "is_of__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
+    "is_of__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred | None,
+    "is_of__device": typing.List[balena.types.models.TypeDevice] | balena.types.models.PineDeferred | None,
+    "is_of__public_device": typing.List[balena.types.models.PublicDeviceType] | balena.types.models.PineDeferred | None,
+    "api_key": typing.List[balena.types.models.APIKeyType] | balena.types.models.PineDeferred | None
 }
 ```
 
@@ -3884,8 +3889,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 
 ```python
 {
-    "application": Union[List[TypeApplication], PineDeferred],
-    "can_use__application_as_host": Union[List[TypeApplication], PineDeferred]
+    "application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "can_use__application_as_host": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred
 }
 ```
 
@@ -3899,9 +3904,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "message": str,
     "created_at": str,
     "invitationToken": str,
-    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred],
-    "invitee": Union[List[InviteeType], PineDeferred],
-    "is_invited_to__application": Union[List[ApplicationType], PineDeferred]
+    "application_membership_role": typing.List[balena.types.models.ApplicationMembershipRoleType] | balena.types.models.PineDeferred,
+    "invitee": typing.List[balena.types.models.InviteeType] | balena.types.models.PineDeferred,
+    "is_invited_to__application": typing.List[balena.types.models.ApplicationType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -3923,9 +3928,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "user": Union[List[UserType], PineDeferred],
-    "is_member_of__application": Union[List[TypeApplication], PineDeferred],
-    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred]
+    "user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred,
+    "is_member_of__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "application_membership_role": typing.List[balena.types.models.ApplicationMembershipRoleType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -3938,13 +3943,13 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "name": str,
     "slug": str,
-    "description": Optional[str],
+    "description": str | None,
     "supports_multicontainer": bool,
     "supports_web_url": bool,
     "is_legacy": bool,
     "requires_payment": bool,
-    "needs__os_version_range": Optional[str],
-    "maximum_device_count": Optional[int]
+    "needs__os_version_range": str | None,
+    "maximum_device_count": int | None
 }
 ```
 
@@ -3979,7 +3984,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "slug": str,
-    "is_supported_by__device_type": Optional[List[CpuArchitectureType]]
+    "is_supported_by__device_type": typing.List[balena.types.models.CpuArchitectureType] | None
 }
 ```
 
@@ -3991,15 +3996,15 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "created_at": str,
-    "is_created_by__user": Union[List[UserType], PineDeferred, None],
+    "is_created_by__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
     "original_quantity": float,
     "total_balance": float,
     "total_cost": float,
     "payment_status": Literal["processing", "paid", "failed", "complimentary", "cancelled", "refunded"],
-    "belongs_to__organization": Union[List[OrganizationType], PineDeferred],
+    "belongs_to__organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
     "is_for__feature": Any,
-    "is_associated_with__invoice_id": Optional[str],
-    "error_message": Optional[str]
+    "is_associated_with__invoice_id": str | None,
+    "error_message": str | None
 }
 ```
 
@@ -4014,7 +4019,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "slug": str,
     "name": str,
-    "is_manufactured_by__device_manufacturer": Union[List[DeviceManufacturerType], PineDeferred, None]
+    "is_manufactured_by__device_manufacturer": typing.List[balena.types.models.DeviceManufacturerType] | balena.types.models.PineDeferred | None
 }
 ```
 
@@ -4027,20 +4032,20 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "created_at": str,
     "id": int,
     "end_timestamp": str,
-    "is_created_by__actor": Union[List[ActorType], PineDeferred, None],
-    "is_ended_by__actor": Union[List[ActorType], PineDeferred, None],
-    "tracks__device": Union[List[TypeDevice], PineDeferred],
-    "tracks__actor": Union[List[ActorType], PineDeferred, None],
-    "uuid": Optional[str],
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
+    "is_created_by__actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred | None,
+    "is_ended_by__actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred | None,
+    "tracks__device": typing.List[balena.types.models.TypeDevice] | balena.types.models.PineDeferred,
+    "tracks__actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred | None,
+    "uuid": str | None,
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
     "is_active": bool,
-    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "os_version": Optional[str],
-    "os_variant": Optional[str],
-    "supervisor_version": Optional[str],
-    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred, None],
-    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None]
+    "is_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "should_be_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "os_version": str | None,
+    "os_variant": str | None,
+    "supervisor_version": str | None,
+    "is_of__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred | None,
+    "should_be_managed_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None
 }
 ```
 
@@ -4084,7 +4089,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "is_referenced_by__alias": str,
-    "references__device_type": Union[List[DeviceTypeType], PineDeferred]
+    "references__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4100,12 +4105,12 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_private": bool,
     "logo": str,
     "contract": Any,
-    "belongs_to__device_family": Union[List[DeviceFamilyType], PineDeferred, None],
-    "is_default_for__application": Optional[List[TypeApplication]],
-    "is_of__cpu_architecture": Union[List[CpuArchitectureType], PineDeferred],
-    "is_accessible_privately_by__organization": Optional[List[OrganizationType]],
-    "describes_device": Optional[List[TypeDevice]],
-    "device_type_alias": Optional[List[DeviceTypeAliasType]]
+    "belongs_to__device_family": typing.List[balena.types.models.DeviceFamilyType] | balena.types.models.PineDeferred | None,
+    "is_default_for__application": typing.List[balena.types.models.TypeApplication] | None,
+    "is_of__cpu_architecture": typing.List[balena.types.models.CpuArchitectureType] | balena.types.models.PineDeferred,
+    "is_accessible_privately_by__organization": typing.List[balena.types.models.OrganizationType] | None,
+    "describes_device": typing.List[balena.types.models.TypeDevice] | None,
+    "device_type_alias": typing.List[balena.types.models.DeviceTypeAliasType] | None
 }
 ```
 
@@ -4139,12 +4144,12 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "download_progress": Optional[float],
+    "download_progress": float | None,
     "status": str,
     "install_date": str,
-    "installs__image": Union[List[ImageType], PineDeferred],
-    "device": Union[List[TypeDevice], PineDeferred],
-    "is_provided_by__release": Union[List[ReleaseType], PineDeferred]
+    "installs__image": typing.List[balena.types.models.ImageType] | balena.types.models.PineDeferred,
+    "device": typing.List[balena.types.models.TypeDevice] | balena.types.models.PineDeferred,
+    "is_provided_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4168,8 +4173,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "image_size": str,
     "dockerfile": str,
     "error_message": str,
-    "is_a_build_of__service": Union[List[ServiceType], PineDeferred],
-    "release_image": Optional[List[ReleaseImageType]]
+    "is_a_build_of__service": typing.List[balena.types.models.ServiceType] | balena.types.models.PineDeferred,
+    "release_image": typing.List[balena.types.models.ReleaseImageType] | None
 }
 ```
 
@@ -4195,9 +4200,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "message": str,
     "created_at": str,
     "invitationToken": str,
-    "organization_membership_role": Union[List[OrganizationMembershipRoleType], PineDeferred],
-    "invitee": Union[List[InviteeType], PineDeferred],
-    "is_invited_to__organization": Union[List[OrganizationType], PineDeferred]
+    "organization_membership_role": typing.List[balena.types.models.OrganizationMembershipRoleType] | balena.types.models.PineDeferred,
+    "invitee": typing.List[balena.types.models.InviteeType] | balena.types.models.PineDeferred,
+    "is_invited_to__organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4218,7 +4223,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 
 ```python
 {
-    "organization_membership": Union[List[OrganizationMembershipType], PineDeferred]
+    "organization_membership": typing.List[balena.types.models.OrganizationMembershipType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4230,11 +4235,11 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "created_at": str,
-    "user": Union[List[UserType], PineDeferred],
-    "is_member_of__organization": Union[List[OrganizationType], PineDeferred],
-    "organization_membership_role": Union[List[OrganizationMembershipRoleType], PineDeferred],
+    "user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred,
+    "is_member_of__organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
+    "organization_membership_role": typing.List[balena.types.models.OrganizationMembershipRoleType] | balena.types.models.PineDeferred,
     "effective_seat_role": str,
-    "organization_membership_tag": Optional[List[OrganizationMembershipTagType]]
+    "organization_membership_tag": typing.List[balena.types.models.OrganizationMembershipTagType] | None
 }
 ```
 
@@ -4245,8 +4250,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "organization": Union[List[OrganizationType], PineDeferred],
-    "has_private_access_to__device_type": Union[List[TypeDevice], PineDeferred]
+    "organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
+    "has_private_access_to__device_type": typing.List[balena.types.models.TypeDevice] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4262,10 +4267,10 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "handle": str,
     "logo_image": WebResource,
     "has_past_due_invoice_since__date": str,
-    "application": Optional[List[TypeApplication]],
-    "organization_membership": Optional[List[OrganizationMembershipType]],
-    "owns__team": Optional[List[TeamType]],
-    "organization__has_private_access_to__device_type": Optional[List[OrganizationPrivateDeviceTypeAccess]]
+    "application": typing.List[balena.types.models.TypeApplication] | None,
+    "organization_membership": typing.List[balena.types.models.OrganizationMembershipType] | None,
+    "owns__team": typing.List[balena.types.models.TeamType] | None,
+    "organization__has_private_access_to__device_type": typing.List[balena.types.models.OrganizationPrivateDeviceTypeAccess] | None
 }
 ```
 
@@ -4287,8 +4292,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "latitude": str,
     "longitude": str,
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
-    "is_of__device_type": Union[List[TypeDevice], PineDeferred],
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "is_of__device_type": typing.List[balena.types.models.TypeDevice] | balena.types.models.PineDeferred,
     "was_recently_online": bool
 }
 ```
@@ -4313,8 +4318,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "created_at": str,
-    "image": Union[List[ImageType], PineDeferred],
-    "is_part_of__release": Union[List[ReleaseType], PineDeferred]
+    "image": typing.List[balena.types.models.ImageType] | balena.types.models.PineDeferred,
+    "is_part_of__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4352,15 +4357,15 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_finalized_at__date": str,
     "note": str,
     "invalidation_reason": str,
-    "is_created_by__user": Union[List[UserType], PineDeferred, None],
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
-    "release_image": Optional[List[ReleaseImageType]],
-    "should_be_running_on__application": Optional[List[TypeApplication]],
-    "is_running_on__device": Optional[List[TypeDevice]],
-    "is_pinned_to__device": Optional[List[TypeDevice]],
-    "should_operate__device": Optional[List[TypeDevice]],
-    "should_manage__device": Optional[List[TypeDevice]],
-    "release_tag": Optional[List[BaseTagType]]
+    "is_created_by__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "release_image": typing.List[balena.types.models.ReleaseImageType] | None,
+    "should_be_running_on__application": typing.List[balena.types.models.TypeApplication] | None,
+    "is_running_on__device": typing.List[balena.types.models.TypeDevice] | None,
+    "is_pinned_to__device": typing.List[balena.types.models.TypeDevice] | None,
+    "should_operate__device": typing.List[balena.types.models.TypeDevice] | None,
+    "should_manage__device": typing.List[balena.types.models.TypeDevice] | None,
+    "release_tag": typing.List[balena.types.models.BaseTagType] | None
 }
 ```
 
@@ -4376,7 +4381,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "patch": int,
     "version": str,
     "build": List[str],
-    "prerelease": List[Union[str, int]]
+    "prerelease": List[str | int]
 }
 ```
 
@@ -4414,15 +4419,15 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_finalized_at__date": str,
     "note": str,
     "invalidation_reason": str,
-    "is_created_by__user": Union[List[UserType], PineDeferred, None],
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
-    "release_image": Optional[List[ReleaseImageType]],
-    "should_be_running_on__application": Optional[List[TypeApplication]],
-    "is_running_on__device": Optional[List[TypeDevice]],
-    "is_pinned_to__device": Optional[List[TypeDevice]],
-    "should_operate__device": Optional[List[TypeDevice]],
-    "should_manage__device": Optional[List[TypeDevice]],
-    "release_tag": Optional[List[BaseTagType]],
+    "is_created_by__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "release_image": typing.List[balena.types.models.ReleaseImageType] | None,
+    "should_be_running_on__application": typing.List[balena.types.models.TypeApplication] | None,
+    "is_running_on__device": typing.List[balena.types.models.TypeDevice] | None,
+    "is_pinned_to__device": typing.List[balena.types.models.TypeDevice] | None,
+    "should_operate__device": typing.List[balena.types.models.TypeDevice] | None,
+    "should_manage__device": typing.List[balena.types.models.TypeDevice] | None,
+    "release_tag": typing.List[balena.types.models.BaseTagType] | None,
     "images": List[ImageBasicInfoType],
     "user": BasicUserInfoType
 }
@@ -4438,7 +4443,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "public_key": str,
     "id": int,
     "created_at": str,
-    "user": Union[List[UserType], PineDeferred]
+    "user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4465,10 +4470,10 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "created_at": str,
     "service_name": str,
-    "application": Union[List[TypeApplication], PineDeferred],
-    "is_built_by__image": Optional[List[ImageType]],
-    "service_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "device_service_environment_variable": Optional[List[EnvironmentVariableBase]]
+    "application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "is_built_by__image": typing.List[balena.types.models.ImageType] | None,
+    "service_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "device_service_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None
 }
 ```
 
@@ -4479,9 +4484,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "team": Union[List[TeamType], PineDeferred],
-    "grants_access_to__application": Union[List[TypeApplication], PineDeferred],
-    "application_membership_role": Union[List[ApplicationMembershipRoleType], PineDeferred]
+    "team": typing.List[balena.types.models.TeamType] | balena.types.models.PineDeferred,
+    "grants_access_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "application_membership_role": typing.List[balena.types.models.ApplicationMembershipRoleType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4493,8 +4498,8 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 {
     "id": int,
     "created_at": str,
-    "user": Union[List[UserType], PineDeferred],
-    "is_member_of__team": Union[List[TeamType], PineDeferred]
+    "user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred,
+    "is_member_of__team": typing.List[balena.types.models.TeamType] | balena.types.models.PineDeferred
 }
 ```
 
@@ -4507,9 +4512,9 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "created_at": str,
     "name": str,
-    "belongs_to__organization": Union[List[OrganizationType], PineDeferred],
-    "team_membership": Optional[List[TeamMembershipType]],
-    "team_application_access": Optional[List[TeamApplicationAccessType]]
+    "belongs_to__organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
+    "team_membership": typing.List[balena.types.models.TeamMembershipType] | None,
+    "team_application_access": typing.List[balena.types.models.TeamApplicationAccessType] | None
 }
 ```
 
@@ -4522,7 +4527,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], PineDeferred],
+    "actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred,
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4533,25 +4538,25 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_archived": bool,
     "is_discoverable": bool,
     "is_stored_at__repository_url": str,
-    "public_organization": Union[List[PublicOrganizationType], PineDeferred, None],
-    "application_type": Union[List[ApplicationType], PineDeferred],
-    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred],
-    "depends_on__application": Union[List[ApplicationType], PineDeferred, None],
-    "organization": Union[List[OrganizationType], PineDeferred],
-    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "application_config_variable": Optional[List[EnvironmentVariableBase]],
-    "application_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "build_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "application_tag": Optional[List[BaseTagType]],
-    "owns__device": Optional[List[TypeDevice]],
-    "owns__public_device": Optional[List[PublicDeviceType]],
-    "owns__release": Optional[List[ReleaseType]],
-    "service": Optional[List[ServiceType]],
-    "is_depended_on_by__application": Optional[List[ApplicationType]],
-    "is_directly_accessible_by__user": Optional[List[UserType]],
-    "user_application_membership": Optional[List[ApplicationMembershipType]],
-    "team_application_access": Optional[List[TeamApplicationAccessType]],
-    "can_use__application_as_host": Optional[List[ApplicationHostedOnApplication]]
+    "public_organization": typing.List[balena.types.models.PublicOrganizationType] | balena.types.models.PineDeferred | None,
+    "application_type": typing.List[balena.types.models.ApplicationType] | balena.types.models.PineDeferred,
+    "is_for__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred,
+    "depends_on__application": typing.List[balena.types.models.ApplicationType] | balena.types.models.PineDeferred | None,
+    "organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
+    "should_be_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "application_config_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "application_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "build_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "application_tag": typing.List[balena.types.models.BaseTagType] | None,
+    "owns__device": typing.List[balena.types.models.TypeDevice] | None,
+    "owns__public_device": typing.List[balena.types.models.PublicDeviceType] | None,
+    "owns__release": typing.List[balena.types.models.ReleaseType] | None,
+    "service": typing.List[balena.types.models.ServiceType] | None,
+    "is_depended_on_by__application": typing.List[balena.types.models.ApplicationType] | None,
+    "is_directly_accessible_by__user": typing.List[balena.types.models.UserType] | None,
+    "user_application_membership": typing.List[balena.types.models.ApplicationMembershipType] | None,
+    "team_application_access": typing.List[balena.types.models.TeamApplicationAccessType] | None,
+    "can_use__application_as_host": typing.List[balena.types.models.ApplicationHostedOnApplication] | None
 }
 ```
 
@@ -4564,7 +4569,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "id": int,
     "created_at": str,
     "app_name": str,
-    "actor": Union[List[ActorType], PineDeferred],
+    "actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred,
     "slug": str,
     "uuid": str,
     "is_accessible_by_support_until__date": str,
@@ -4575,25 +4580,25 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_archived": bool,
     "is_discoverable": bool,
     "is_stored_at__repository_url": str,
-    "public_organization": Union[List[PublicOrganizationType], PineDeferred, None],
-    "application_type": Union[List[ApplicationType], PineDeferred],
-    "is_for__device_type": Union[List[DeviceTypeType], PineDeferred],
-    "depends_on__application": Union[List[ApplicationType], PineDeferred, None],
-    "organization": Union[List[OrganizationType], PineDeferred],
-    "should_be_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "application_config_variable": Optional[List[EnvironmentVariableBase]],
-    "application_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "build_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "application_tag": Optional[List[BaseTagType]],
+    "public_organization": typing.List[balena.types.models.PublicOrganizationType] | balena.types.models.PineDeferred | None,
+    "application_type": typing.List[balena.types.models.ApplicationType] | balena.types.models.PineDeferred,
+    "is_for__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred,
+    "depends_on__application": typing.List[balena.types.models.ApplicationType] | balena.types.models.PineDeferred | None,
+    "organization": typing.List[balena.types.models.OrganizationType] | balena.types.models.PineDeferred,
+    "should_be_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "application_config_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "application_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "build_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "application_tag": typing.List[balena.types.models.BaseTagType] | None,
     "owns__device": List[TypeDeviceWithServices],
-    "owns__public_device": Optional[List[PublicDeviceType]],
-    "owns__release": Optional[List[ReleaseType]],
-    "service": Optional[List[ServiceType]],
-    "is_depended_on_by__application": Optional[List[ApplicationType]],
-    "is_directly_accessible_by__user": Optional[List[UserType]],
-    "user_application_membership": Optional[List[ApplicationMembershipType]],
-    "team_application_access": Optional[List[TeamApplicationAccessType]],
-    "can_use__application_as_host": Optional[List[ApplicationHostedOnApplication]]
+    "owns__public_device": typing.List[balena.types.models.PublicDeviceType] | None,
+    "owns__release": typing.List[balena.types.models.ReleaseType] | None,
+    "service": typing.List[balena.types.models.ServiceType] | None,
+    "is_depended_on_by__application": typing.List[balena.types.models.ApplicationType] | None,
+    "is_directly_accessible_by__user": typing.List[balena.types.models.UserType] | None,
+    "user_application_membership": typing.List[balena.types.models.ApplicationMembershipType] | None,
+    "team_application_access": typing.List[balena.types.models.TeamApplicationAccessType] | None,
+    "can_use__application_as_host": typing.List[balena.types.models.ApplicationHostedOnApplication] | None
 }
 ```
 
@@ -4619,7 +4624,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], PineDeferred],
+    "actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred,
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4662,19 +4667,19 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_undervolted": bool,
     "overall_status": Literal["configuring", "inactive", "post-provisioning", "updating", "operational", "disconnected", "reduced-functionality"],
     "overall_progress": int,
-    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
-    "belongs_to__user": Union[List[UserType], PineDeferred, None],
-    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
-    "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
-    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
-    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
-    "device_config_variable": Optional[List[EnvironmentVariableBase]],
-    "device_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "device_tag": Optional[List[BaseTagType]],
-    "service_install": Optional[List[ServiceInstanceType]],
-    "image_install": Optional[List[ImageInstallType]]
+    "is_of__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred,
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "belongs_to__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
+    "is_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "is_pinned_on__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "is_managed_by__service_instance": typing.List[balena.types.models.ServiceInstanceType] | balena.types.models.PineDeferred | None,
+    "should_be_operated_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "should_be_managed_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "device_config_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "device_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "device_tag": typing.List[balena.types.models.BaseTagType] | None,
+    "service_install": typing.List[balena.types.models.ServiceInstanceType] | None,
+    "image_install": typing.List[balena.types.models.ImageInstallType] | None
 }
 ```
 
@@ -4685,7 +4690,7 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], PineDeferred],
+    "actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred,
     "created_at": str,
     "modified_at": str,
     "custom_latitude": str,
@@ -4728,19 +4733,19 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
     "is_undervolted": bool,
     "overall_status": Literal["configuring", "inactive", "post-provisioning", "updating", "operational", "disconnected", "reduced-functionality"],
     "overall_progress": int,
-    "is_of__device_type": Union[List[DeviceTypeType], PineDeferred],
-    "belongs_to__application": Union[List[TypeApplication], PineDeferred],
-    "belongs_to__user": Union[List[UserType], PineDeferred, None],
-    "is_running__release": Union[List[ReleaseType], PineDeferred, None],
-    "is_pinned_on__release": Union[List[ReleaseType], PineDeferred, None],
-    "is_managed_by__service_instance": Union[List[ServiceInstanceType], PineDeferred, None],
-    "should_be_operated_by__release": Union[List[ReleaseType], PineDeferred, None],
-    "should_be_managed_by__release": Union[List[ReleaseType], PineDeferred, None],
-    "device_config_variable": Optional[List[EnvironmentVariableBase]],
-    "device_environment_variable": Optional[List[EnvironmentVariableBase]],
-    "device_tag": Optional[List[BaseTagType]],
-    "service_install": Optional[List[ServiceInstanceType]],
-    "image_install": Optional[List[ImageInstallType]],
+    "is_of__device_type": typing.List[balena.types.models.DeviceTypeType] | balena.types.models.PineDeferred,
+    "belongs_to__application": typing.List[balena.types.models.TypeApplication] | balena.types.models.PineDeferred,
+    "belongs_to__user": typing.List[balena.types.models.UserType] | balena.types.models.PineDeferred | None,
+    "is_running__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "is_pinned_on__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "is_managed_by__service_instance": typing.List[balena.types.models.ServiceInstanceType] | balena.types.models.PineDeferred | None,
+    "should_be_operated_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "should_be_managed_by__release": typing.List[balena.types.models.ReleaseType] | balena.types.models.PineDeferred | None,
+    "device_config_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "device_environment_variable": typing.List[balena.types.models.EnvironmentVariableBase] | None,
+    "device_tag": typing.List[balena.types.models.BaseTagType] | None,
+    "service_install": typing.List[balena.types.models.ServiceInstanceType] | None,
+    "image_install": typing.List[balena.types.models.ImageInstallType] | None,
     "current_services": Dict[str, List[TypeCurrentService]]
 }
 ```
@@ -4766,19 +4771,29 @@ You should use balena.twofactor_auth.challenge() when possible, as it takes care
 ```
 
 
+## Union
+
+
+```python
+{
+
+}
+```
+
+
 ## UserType
 
 
 ```python
 {
     "id": int,
-    "actor": Union[List[ActorType], PineDeferred],
+    "actor": typing.List[balena.types.models.ActorType] | balena.types.models.PineDeferred,
     "created_at": str,
     "username": str,
-    "organization_membership": Optional[List[OrganizationMembershipType]],
-    "user_application_membership": Optional[List[ApplicationMembershipType]],
-    "team_membership": Optional[List[TeamMembershipType]],
-    "has_direct_access_to__application": Optional[List[TypeApplication]]
+    "organization_membership": typing.List[balena.types.models.OrganizationMembershipType] | None,
+    "user_application_membership": typing.List[balena.types.models.ApplicationMembershipType] | None,
+    "team_membership": typing.List[balena.types.models.TeamMembershipType] | None,
+    "has_direct_access_to__application": typing.List[balena.types.models.TypeApplication] | None
 }
 ```
 
