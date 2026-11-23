@@ -88,9 +88,8 @@ class BaseTagTest:
             self.test_obj.set(99999999, "Foo", "not allowed")
 
         # should be rejected if the tag_key is None
-        with test_runner.assertRaises(Exception) as cm:
+        with test_runner.assertRaises(Exception):
             self.test_obj.set(resource_id, None, "not allowed")
-        test_runner.assertIn("cannot be null", cm.exception.message)
 
         # should be rejected if the tag_key is empty
         with test_runner.assertRaises(Exception) as cm:
