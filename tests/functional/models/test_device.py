@@ -379,6 +379,9 @@ class TestDevice(unittest.TestCase):
         )
 
         uuid = self.balena.models.device.generate_uuid()
+        # Swapping the last two chars only yields a different uuid if they differ
+        while uuid[-1] == uuid[-2]:
+            uuid = self.balena.models.device.generate_uuid()
         self.balena.models.device.register(self.app["id"], uuid)
         uuid2 = uuid[:-2] + uuid[-1] + uuid[-2]
 

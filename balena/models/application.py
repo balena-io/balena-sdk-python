@@ -1314,7 +1314,7 @@ class ApplicationInvite:
                 "options": {
                     "$top": 1,
                     "$select": "id",
-                    "$filter": {"name": role_name},
+                    "$filter": {"name": role_name, "belongs_to__organization": None},
                 },
             }
         )
@@ -1374,18 +1374,21 @@ class ApplicationMembership:
         self.RESOURCE = "user__is_member_of__application"
 
     def __get_role_id(self, role_name: str) -> Optional[int]:
-        role = self.__pine.get(
+        roles = self.__pine.get(
             {
                 "resource": "application_membership_role",
-                "id": {"name": role_name},
-                "options": {"$select": "id"},
+                "options": {
+                    "$top": 1,
+                    "$select": "id",
+                    "$filter": {"name": role_name, "belongs_to__organization": None},
+                },
             }
         )
 
-        if role is None:
+        if not roles:
             raise exceptions.BalenaApplicationMembershipRoleNotFound(role_name)
 
-        return role["id"]
+        return roles[0]["id"]
 
     def get_all(self, options: AnyObject = {}) -> List[ApplicationMembershipType]:
         """

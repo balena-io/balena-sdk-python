@@ -158,11 +158,14 @@ class TestTeam(unittest.TestCase):
 
     def test_23_application_access_update(self):
         self.balena.models.team.application_access.update(TestTeam.access2["id"], "observer")
-        role = self.balena.pine.get(
+        [role] = self.balena.pine.get(
             {
                 "resource": "application_membership_role",
-                "id": {"name": "observer"},
-                "options": {"$select": "id"},
+                "options": {
+                    "$top": 1,
+                    "$select": "id",
+                    "$filter": {"name": "observer", "belongs_to__organization": None},
+                },
             }
         )
         access = self.balena.models.team.application_access.get(TestTeam.access2["id"])
