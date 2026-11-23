@@ -116,7 +116,7 @@ class Device:
         self.history = DeviceHistory(pine, settings)
 
         self.__batch_device_operation = batch_resource_operation_factory(
-            get_all=self.get_all,
+            get_all=self.__get_all,
             not_found_error=exceptions.DeviceNotFound,
             ambiguous_error=exceptions.AmbiguousDevice,
         )
@@ -189,7 +189,7 @@ class Device:
         resource_filter = (
             {"id": uuid_or_id_or_ids} if is_id(uuid_or_id_or_ids) else {"uuid": uuid_or_id_or_ids}
         )
-        devices = self.get_all({"$select": "id", "$filter": resource_filter})
+        devices = self.__get_all({"$select": "id", "$filter": resource_filter})
         if not devices:
             raise exceptions.DeviceNotFound(str(uuid_or_id_or_ids))
         query: Any = {"resource": "device", "id": devices[0]["id"]}
@@ -281,7 +281,20 @@ class Device:
         dashboard_url = cast(str, self.__settings.get("api_endpoint")).replace("api", "dashboard")
         return urljoin(dashboard_url, f"/devices/{uuid}/summary")
 
+    def __get_all(self, options: AnyObject = {}) -> List[TypeDevice]:
+        return self.__pine.get(
+            {
+                "resource": "device",
+                "options": merge({"$orderby": "device_name asc"}, options),
+            }
+        )
+
     # TODO: DROP NEXT MAJOR
+    @deprecated(
+        "This will be removed in a future major release. "
+        "Use balena.models.device.get_all_by_organization() or "
+        "balena.models.device.get_all_by_application() instead."
+    )
     def get_all(self, options: AnyObject = {}) -> List[TypeDevice]:
         """
         ***Deprecated***
@@ -303,14 +316,7 @@ class Device:
         Examples:
             >>> balena.models.device.get_all()
         """
-        devices = self.__pine.get(
-            {
-                "resource": "device",
-                "options": merge({"$orderby": "device_name asc"}, options),
-            }
-        )
-
-        return devices
+        return self.__get_all(options)
 
     def get_all_by_application(self, slug_or_uuid_or_id: Union[str, int], options: AnyObject = {}) -> List[TypeDevice]:
         """
@@ -329,7 +335,7 @@ class Device:
 
         app = self.__application.get(slug_or_uuid_or_id, {"$select": "id"})
 
-        return self.get_all(
+        return self.__get_all(
             merge(
                 {"$filter": {"belongs_to__application": app["id"]}},
                 options,
@@ -352,7 +358,7 @@ class Device:
             >>> balena.models.device.get_all_by_organization(123)
         """
         org = self.__organization.get(handle_or_id, {"$select": "id"})
-        return self.get_all(
+        return self.__get_all(
             merge(
                 {
                     "$filter": {
@@ -453,7 +459,7 @@ class Device:
             >>> balena.models.device.get_by_name('floral-mountain')
         """
 
-        devices = self.get_all(merge({"$filter": {"device_name": name}}, options))
+        devices = self.__get_all(merge({"$filter": {"device_name": name}}, options))
 
         if len(devices) == 0:
             raise exceptions.DeviceNotFound(name)
