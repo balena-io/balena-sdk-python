@@ -1,4 +1,41 @@
 - commits:
+    - subject: "tests: Fix flaky device remove test"
+      hash: bdbb1d79742e7efb09fc79c17b138d9148d1a1bb
+      body: |
+        uuid2 is built by swapping the last two chars of uuid, which yields the
+        same uuid when those chars are equal (1 in 16 runs). Removing uuid then
+        also removes uuid2 and the second remove fails with DeviceNotFound.
+        Regenerate uuid until its last two chars differ.
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: "tests: Don't assert on the error message for a null tag key"
+      hash: c6430d56d888bc1170485fc9c2b5e560f16b53e9
+      body: |
+        The API no longer returns a "cannot be null" message when setting a tag
+        with a null key, only an empty error body. Only assert that the request
+        is rejected, matching the balena-sdk (JS) tests.
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+    - subject: Fix membership role lookup to only match default roles
+      hash: 060a133cc252ce82ea3906bc023cf1a5590b2811
+      body: |
+        The API now supports organization-specific application membership
+        roles, so a role name is no longer unique and can't be used as an
+        alternate key. Look roles up with a $filter that only matches the
+        default roles (ones that don't belong to an organization), matching
+        the balena-sdk (JS) fix.
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+  version: 17.3.1
+  title: ""
+  date: 2026-11-23T13:00:20.381Z
+- commits:
     - subject: Add request batching for device and application operations
       hash: eb0760245ede5941f63cc612c53e2042f2666f90
       body: ""
