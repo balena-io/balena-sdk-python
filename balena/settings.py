@@ -199,7 +199,7 @@ class FileStorageSettingsProvider(SettingsProviderInterface):
         return self._setting
 
     def set(self, key: str, value: Union[str, bool]) -> None:
-        self._setting[key] = str(value)
+        self._setting[key] = value if isinstance(value, bool) else str(value)
         self.__write_settings()
 
     def remove(self, key: str) -> bool:
@@ -238,7 +238,7 @@ class InMemorySettingsProvider(SettingsProviderInterface):
         return self._settings
 
     def set(self, key: str, value: Union[str, bool]) -> None:
-        self._settings[key] = str(value)
+        self._settings[key] = value if isinstance(value, bool) else str(value)
 
     def remove(self, key: str) -> bool:
         result = self._settings.pop(key, False)
