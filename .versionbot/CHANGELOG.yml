@@ -1,4 +1,22 @@
 - commits:
+    - subject: Add a deprecation warning to device.get_all()
+      hash: bb46afbd9f7204af1a151e3596bf4fbf9bce2ab1
+      body: |
+        Use device.get_all_by_organization() or device.get_all_by_application()
+        instead.
+
+        Internal callers now use a private helper, so they don't emit the
+        deprecation warning.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Otavio Jacobi <otaviojacobi@gmail.com>
+        signed-off-by: Otavio Jacobi <otaviojacobi@gmail.com>
+      author: Otavio Jacobi
+  version: 17.3.3
+  title: ""
+  date: 2026-11-23T22:06:04.612Z
+- commits:
     - subject: Mark device.get_all() as deprecated
       hash: 39eafdb76b99cc7e346d7486a7a55082e644d5c0
       body: |
