@@ -1,4 +1,20 @@
 - commits:
+    - subject: Mark device.get_all() as deprecated
+      hash: 39eafdb76b99cc7e346d7486a7a55082e644d5c0
+      body: |
+        Use device.get_all_by_organization() or device.get_all_by_application()
+        instead. This matches the balena-sdk (JS) which dropped device.getAll()
+        in favor of getAllByOrganization().
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Otavio Jacobi <otaviojacobi@gmail.com>
+        signed-off-by: Otavio Jacobi <otaviojacobi@gmail.com>
+      author: Otavio Jacobi
+  version: 17.3.2
+  title: ""
+  date: 2026-11-23T17:00:15.482Z
+- commits:
     - subject: "tests: Fix flaky device remove test"
       hash: bdbb1d79742e7efb09fc79c17b138d9148d1a1bb
       body: |
