@@ -281,8 +281,12 @@ class Device:
         dashboard_url = cast(str, self.__settings.get("api_endpoint")).replace("api", "dashboard")
         return urljoin(dashboard_url, f"/devices/{uuid}/summary")
 
+    # TODO: DROP NEXT MAJOR
     def get_all(self, options: AnyObject = {}) -> List[TypeDevice]:
         """
+        ***Deprecated***
+        Use balena.models.device.get_all_by_organization() or balena.models.device.get_all_by_application() instead.
+
         This method returns all devices that the current user can access.
         In order to have the following computed properties in the result
         you have to explicitly define them in a `$select` in the extra options:
