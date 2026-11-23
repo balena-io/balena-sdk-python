@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 
 from tests.helper import TestHelper
 
@@ -118,11 +118,11 @@ class TestApplication(unittest.TestCase):
 
     def test_16_grant_support_access(self):
         app = TestApplication.app
-        expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) - 10000)
+        expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.now(timezone.utc)) - 10000)
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.application.grant_support_access(app["id"], expiry_timestamp)
 
-        expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
+        expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.now(timezone.utc)) + 3600 * 1000)
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
 
         support_date = datetime.strptime(
@@ -133,7 +133,7 @@ class TestApplication(unittest.TestCase):
 
     def test_17_revoke_support_access(self):
         app = TestApplication.app
-        expiry_time = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000 + 3600 * 1000)
+        expiry_time = int(datetime.now(timezone.utc).timestamp() * 1000 + 3600 * 1000)
         self.balena.models.application.grant_support_access(app["id"], expiry_time)
         self.balena.models.application.revoke_support_access(app["id"])
 

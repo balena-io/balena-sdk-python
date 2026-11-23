@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch, Mock
 
 from balena.models.device import LocationType
@@ -198,12 +198,12 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(device["custom_longitude"], "")
 
     def test_21_grant_support_access(self):
-        expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) - 10000)
+        expiry_timestamp = int(self.helper.datetime_to_epoch_ms(datetime.now(timezone.utc)) - 10000)
 
         with self.assertRaises(self.helper.balena_exceptions.InvalidParameter):
             self.balena.models.device.grant_support_access(TestDevice.device["uuid"], expiry_timestamp)
 
-        expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.utcnow()) + 3600 * 1000)
+        expiry_time = int(self.helper.datetime_to_epoch_ms(datetime.now(timezone.utc)) + 3600 * 1000)
         self.balena.models.device.grant_support_access(TestDevice.device["uuid"], expiry_time)
         support_date = datetime.strptime(  # type: ignore
             self.balena.models.device.get(TestDevice.device["uuid"])["is_accessible_by_support_until__date"],

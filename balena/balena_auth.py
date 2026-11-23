@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 from urllib.parse import urljoin
 
@@ -31,8 +31,7 @@ def __should_update_token(token: str, interval: str) -> bool:
         token_data = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
         # dt will be the same as Date.now() in Javascript but converted to
         # milliseconds for consistency with js/sc sdk
-        dt = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
-        dt = dt * 1000
+        dt = datetime.now(timezone.utc).timestamp() * 1000
         age = dt - (int(token_data["iat"]) * 1000)
         return int(age) >= int(interval)
     except jwt.InvalidTokenError:
