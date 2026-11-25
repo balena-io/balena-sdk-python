@@ -1774,6 +1774,7 @@ class Device:
             },
         )
 
+    @deprecated("This will be removed in a future major release")
     def start_os_update(
         self,
         uuid_or_id: Union[str, int],
@@ -1782,6 +1783,9 @@ class Device:
         run_detached: Optional[bool] = True,
     ) -> HUPStatusResponse:
         """
+        ***Deprecated***
+        Use balena.models.device.pin_to_os_release() instead.
+
         Start an OS update on a device.
 
         If using run_detached option, monitor progress with device.get() --
